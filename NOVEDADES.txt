@@ -1,3 +1,9 @@
+v6.2.2 — Videos desde cero más coherentes
+- "Aprobar solo" ya no aprueba un video si el analista no pudo revisarlo, si la coherencia salió baja o si usó fotos de stock (Pixabay) en la mayoría de escenas: queda en "Revisar".
+- Si se acabó el cupo diario de imágenes con IA, el video espera (guarda el guion) y se termina cuando se renueve, en vez de rellenar con fotos que no coinciden.
+- La verificación del guion ya no falla por un JSON mal escrito por la IA (lo repara).
+- Corregido un error al guardar los textos de publicación.
+
 v6.2.1 - Arreglo: elegir voces
 - El boton "Reeditar con esto" ahora si toma las voces que elegiste (antes decia "Elige una voz para al menos un personaje" aunque ya las habias elegido).
 
