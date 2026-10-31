@@ -1,0 +1,1 @@
+Pon aqui archivos .mp3 con licencia que permita su uso (por ejemplo, de la Biblioteca de audio de YouTube). El sistema elige uno al azar y lo mezcla a volumen bajo. Respeta los creditos que pida cada licencia.

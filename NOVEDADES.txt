@@ -1,0 +1,4 @@
+v6.2.0 - Actualizaciones con un clic
+- Ajustes -> Actualizaciones: busca e instala las mejoras desde tu GitHub, sin descargar zips.
+- El boton "Reeditar con esto" ya no se queda bloqueado y muestra el motivo si algo falla.
+- Hasta 3 publicaciones al dia por canal y produccion automatica segun tus horarios.

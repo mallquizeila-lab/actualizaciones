@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShortForge</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<aside>
+  <div class="brand">Short<b>Forge</b></div>
+  <nav>
+    <button data-tab="hoy" class="on">Hoy</button>
+    <button data-tab="canales">Canales</button>
+    <button data-tab="crear">Crear videos</button>
+    <button data-tab="reeditar">Reeditar mis videos</button>
+    <button data-tab="desarmar">Desarmar video</button>
+    <button data-tab="videos">Videos <span id="badge"></span></button>
+    <button data-tab="calendario">Calendario</button>
+    <button data-tab="estadisticas">Estadísticas</button>
+    <button data-tab="comentarios">Comentarios <span id="cbadge"></span></button>
+    <button data-tab="voces">Voces</button>
+    <button data-tab="chat">Asistente IA</button>
+    <button data-tab="ajustes">Ajustes</button>
+  </nav>
+  <div id="worker" class="worker"></div>
+</aside>
+<main id="main"></main>
+<div id="modal" hidden><div class="modal-box" id="modalBox"></div></div>
+<div id="toast" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>

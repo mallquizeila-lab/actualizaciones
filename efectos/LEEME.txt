@@ -1,0 +1,11 @@
+EFECTOS DE SONIDO
+Pon aqui efectos con licencia que permita uso comercial, por ejemplo:
+  - Pixabay (pixabay.com/sound-effects) - gratis, sin atribucion
+  - Biblioteca de audio de YouTube (pestaña "Efectos de sonido")
+Organizalos en carpetas por tipo. El nombre del archivo sirve de etiqueta:
+  efectos/transicion/whoosh_rapido.mp3
+  efectos/impacto/golpe_grave.mp3
+  efectos/campana/ding_notificacion.mp3
+  efectos/suspenso/latido_corazon.mp3
+El sistema pone un "whoosh" al cambiar de escena, un "ding" en el cierre y los
+efectos que pida el guion (golpe, latido, pop...). Rota para no repetir.

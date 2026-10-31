@@ -1,0 +1,222 @@
+SHORTFORGE - Fabrica de videos para tus 10 canales (YouTube, TikTok y Facebook)
+================================================================================
+
+INSTALAR (una sola vez, en Windows)
+1. Abre PowerShell y escribe estas 3 lineas (una por una):
+     winget install OpenJS.NodeJS.LTS
+     winget install Gyan.FFmpeg
+     winget install Python.Python.3.12
+2. Cierra PowerShell.
+3. Doble clic en start.bat. Se abre el panel en el navegador.
+   La ventana negra "ShortForge - Servidor" debe quedar abierta.
+
+PRIMEROS PASOS EN EL PANEL
+1. Ajustes -> pega tu clave gratis de Gemini y la de Pexels. Guardar.
+2. Canales -> "Cargar mis 10 canales sugeridos". Quedan 3 activos para empezar:
+   La Huerta Habla, Leyendas de Mi Tierra y Plata Clara.
+3. En cada canal: sube tu logo (PNG cuadrado con fondo transparente) y escucha la voz.
+4. La Huerta Habla: sube las imagenes de cada personaje (boca cerrada y boca abierta).
+   En el editor del canal hay una guia para crearlas gratis.
+5. Hoy -> "Producir ahora los de hoy" para tu primera prueba.
+
+CADA DIA
+- Por la noche (02:00) se producen solos los videos. Deja la PC encendida.
+  Importante: Windows no debe suspenderse. Configuracion -> Sistema ->
+  Inicio/apagado -> "Suspender" en "Nunca" (cuando esta enchufada).
+- En la manana: Videos -> Por revisar. Mira cada video, revisa las frases marcadas y aprueba.
+- Copia titulo, descripcion y etiquetas con los botones "Copiar" y programa en:
+    YouTube Studio (video_youtube.mp4)
+    TikTok Studio en la web (video_tiktok_facebook.mp4)
+    Meta Business Suite (video_tiktok_facebook.mp4)
+- Marca "Ya lo programe" y luego "Ya se publico".
+
+DONDE QUEDAN LOS VIDEOS
+  data\videos\<nombre-del-video>\
+    video_youtube.mp4          cierre con "Suscribete"
+    video_tiktok_facebook.mp4  cierre con "Siguenos"
+    portada.jpg
+    subir_youtube.txt / subir_tiktok.txt / subir_facebook.txt
+
+TUS DATOS (desde la v4.2) - NO SE PIERDEN AL ACTUALIZAR
+  Tus claves, canales, logos, personajes, voces, videos, efectos y musica se guardan en:
+      C:\Users\<tu usuario>\ShortForge-datos
+  Esa carpeta NO esta dentro del programa: puedes borrar, mover o reemplazar la carpeta de
+  ShortForge y tus datos siguen ahi. La primera vez, la v4.2 busca sola tu copia anterior
+  (la que tenga mas claves y canales) y copia todo. Nada se borra de la copia vieja.
+  Respaldo: Ajustes -> "Hacer respaldo ahora" (queda en ShortForge-datos\respaldos).
+
+NOVEDADES v6.1 - HASTA 3 PUBLICACIONES AL DIA, AUTOMATICO SEGUN TUS HORARIOS
+  - Canales -> Editar -> "Publicaciones por dia" (1 a 3) y una hora para cada una en YouTube,
+    TikTok y Facebook. Se ordenan solas (la mas temprana primero).
+  - Ajustes -> Produccion -> "Producir segun los horarios": siempre deja listos los videos de hoy
+    y manana para cada hora de publicacion. "Calcular solo los videos por dia" suma las
+    publicaciones de tus canales activos.
+  - YouTube y Facebook se publican solos a su hora. TikTok no lo permite: te llega un aviso por
+    Telegram a la hora de cada video para que lo subas.
+
+NOVEDADES v6.0 - TU ELIGES ANTES DE CREAR
+  - Antes de reeditar y antes de crear un video desde cero, el sistema te muestra las imagenes
+    de los personajes que hablan con su lista de voces (y el sonido de fondo). Eliges y sigue.
+    Si no eliges en 12 horas, sigue solo con las sugeridas (la produccion no se detiene).
+    Se desactiva en Canales -> Editar -> "Antes de reeditar, preguntarme...".
+  - Sonido de fondo en cada video: mantener, subir/bajar el fondo original, quitarlo (solo voces)
+    o cambiarlo por musica/ambientes de tu biblioteca. Para quitar o ajustar el fondo de tus
+    videos con voz, ejecuta instalar_ia_local.bat otra vez (instala Demucs).
+  - El guion se ajusta al largo del video: limite de palabras, acorta con IA si hace falta y
+    acelera un poco la voz. El video ya NUNCA se repite para rellenar.
+  - Videos descargados con el nombre del titulo.
+  - Cada paso del registro muestra cuanto tardo (para encontrar lo lento).
+
+NOVEDADES v5.9 - SISTEMA QUE SE CUIDA SOLO (la calidad de los videos NO cambia)
+  - Menos gasto de IA: el doblaje usa una sola mirada al video (antes eran dos).
+  - Ritmo controlado: los pedidos a cada IA se espacian para no disparar sus limites.
+  - Revision de motores al iniciar y cada manana: Hoy -> Estado del sistema muestra cuales
+    pueden mirar imagenes; si ninguno puede, te avisa por Telegram.
+  - Si el servidor se cae, se vuelve a abrir solo (servidor.bat).
+  - Errores explicados en palabras simples con que hacer.
+  - Disco: aviso si quedan menos de 5 GB; limpieza automatica de temporales y de videos ya
+    publicados hace mas de 30 dias (se puede desactivar en Ajustes -> Mantenimiento).
+  - Aviso antes de que venzan tus claves (GitHub, NVIDIA).
+  - Ajustes -> Mantenimiento -> "Generar reporte": archivo con el estado y los errores, SIN claves,
+    para mandarselo a Claude.
+
+NOVEDADES v5.8 - PERSONAJES DE CADA VIDEO
+  - En cada video reeditado aparece "Personajes de este video": la foto de cada personaje que
+    habla o podria hablar, con su selector de voz (tipos, acentos o tus voces clonadas).
+  - "Darles voz con estas voces" (si el video no tenia voces) o "Cambiar sus voces por estas"
+    (si ya tenia): la IA escribe sus dialogos con esos personajes y quedan en el reparto.
+  - "Buscar voces para clonar" tambien en videos reeditados antes de la v5.7.
+  - Los nombres de archivo larguisimos se muestran legibles.
+
+NOVEDADES v5.6 - CLONAR VOCES DE TUS VIDEOS
+  - Videos -> en cada video reeditado: "Clonar voz de este video". Marcas las frases de UNA
+    persona (las escuchas con su boton), confirmas el permiso y se guarda en Mis voces.
+    Solo voces tuyas, con permiso o sinteticas que tu plan te deje usar (no imitaciones).
+  - TE PREGUNTA (recomendado): al terminar cada reedicion, el sistema detecta las voces del
+    video y en Reeditar (y en Videos) aparece "Quieres clonar estas voces?" con una muestra de
+    cada una. Las que se parecen a una que ya tienes vienen desmarcadas ("parecida a: Ajo").
+  - O AUTOMATICO: Canales -> Editar -> "Clonarlas automaticamente sin preguntar"
+    (+ la confirmacion de permiso); nunca clona voces repetidas. Cada video reeditado con voces se analiza: separa las voces
+    por tono (grave / media / aguda) y guarda cada una en Mis voces. Renombralas ahi (Ajo, Limon...).
+  - Las voces clonadas se pueden elegir para cada personaje en "Voces de este video" y en el
+    Reparto del canal.
+  - Hoy -> "Estado del sistema": motores activos, cuotas agotadas, Whisper, voces, respaldo.
+  - Videos en espera por cuota: boton "Intentar ahora".
+
+NOVEDADES v5.5 - VOCES POR VIDEO Y SIN INVENTOS
+  - Videos -> cada video muestra la imagen de cada personaje que habla (y del narrador) con
+    su selector de voz y boton Escuchar. "Rehacer con estas voces" rehace SOLO las voces:
+    mismo guion, mismas imagenes y mismo estilo. La voz elegida se guarda en el personaje.
+  - Si la IA no puede "ver" el video (cuota agotada), ya no inventa titulo ni narracion:
+    espera y lo reintenta solo cada 2 horas (hasta 4 veces).
+  - Voces multilingues de Microsoft (mas expresivas) para probar en Voces.
+  - Aviso claro si alguna vez se usa la voz de Windows (la que suena a robot).
+
+NOVEDADES v5.4 - MOTORES DE RESERVA
+  - 5 motores nuevos que rotan solos cuando otro se agota: Cerebras, GitHub Models, Mistral,
+    OpenRouter (solo modelos gratis) y Cloudflare AI. GitHub, Mistral y OpenRouter tambien
+    pueden mirar imagenes. "Probar" dice si cada motor ve imagenes o solo texto.
+  - Guia para sacar cada clave en GUIA_DESDE_CERO.txt (Paso 2-C).
+
+NOVEDADES v5.3 - CUOTA DE GEMINI
+  - Gemini se guarda para mirar imagenes y videos: guiones y textos van primero a Groq/NVIDIA.
+  - Si Gemini agota su cuota gratis del dia, las imagenes se miran con NVIDIA (modelo VL).
+  - Los modelos agotados se saltan solos hasta que se renueva la cuota.
+  - Desarmar video: si falla, boton "Reintentar" (no hace falta subirlo de nuevo).
+
+NOVEDADES v5.2 - DOBLAJE Y DESARMAR VIDEO
+  - Doblaje (Reeditar): la IA mira tu video, reconoce a los personajes, les escribe dialogos
+    sincronizados y les pone voz. Automatico si el video no tiene voces; si ya tiene voces,
+    elige el modo "Dar voz a los personajes" para cambiarlas por otras originales.
+  - Reparto del canal (Canales -> Editar): cada personaje reconocido queda guardado con su
+    voz y suena siempre igual. Puedes cambiarle el tipo de voz y escucharlo.
+  - 41 tipos de voz (personajes, acentos latinos, narradores, graciosos...).
+  - 11 looks de color (nuevos: vivo, atardecer, pastel, HDR).
+  - Desarmar video (pestana nueva): subes un video y la IA saca los prompts de cada escena,
+    personajes, estilo, dialogos, ritmo y como superarlo. Con un boton lo recrea desde cero
+    mejorado ("es mi video") o hace uno original con su tecnica ("es de otro creador").
+
+NOVEDADES v5.1 - TIPOS DE VOZ
+  - 20 tipos de voz originales: ninos, adolescentes, adultos, abuelos, narradores y graciosos
+    de dibujos (Voces -> Tipos de voz, con boton para escuchar cada uno).
+  - Por canal y por personaje: fija un tipo de voz o "Automatico segun el video" (la IA elige
+    voces graciosas para comedia, de misterio para historias, naturales para consejos...).
+  - "Voz natural" en todas las voces: menos sonido a robot (Ajustes -> Produccion).
+
+NOVEDADES v5 - SISTEMA COMPLETO (lee GUIA_DESDE_CERO.txt)
+  - Coherencia: director visual + revisor de imagenes (rehace las que no coinciden con lo que
+    se dice) + palabras clave grandes en pantalla cuando se nombran.
+  - Critico: mejora el guion antes de hacer el video si saca menos de 8/10.
+  - Revisor de politicas de YouTube (desinformacion medica) y temas sin repetir entre canales.
+  - Cerebro (pestana Estadisticas): estudia la competencia, mira los videos ganadores, mide tus
+    videos, aprende que funciona y detecta videos que despegan para hacer la parte 2.
+  - Camino a la monetizacion con barras de progreso y fecha estimada.
+  - Duracion "Viral 25-45 s", final en bucle, temporadas, frase de cierre y sello sonoro.
+  - YouTube: titulos y descripciones en ingles y portugues + playlists automaticas por serie.
+  - Avisos por Telegram, resumen diario, publicaciones de Comunidad (Facebook automatico) y
+    respaldo automatico diario. El Asistente IA ahora conoce tus numeros reales.
+
+NOVEDADES v4.7 - ANALISTA DE CALIDAD
+  - Despues de cada video, Gemini mira el video terminado junto con su guion y le pone nota
+    (coherencia, gancho, visual, guion), dice que fallo y como arreglarlo.
+  - Lo aprendido se guarda en el "Manual del canal" (Canales -> Editar) y se usa en los
+    siguientes guiones: cada video sale mejor que el anterior.
+  - Con "Aprobar solo", un video con nota baja (menos de 6) queda para que lo revises.
+
+NOVEDADES v4.3 a v4.6
+  - Comentarios (pestaña nueva): la IA lee los comentarios de YouTube y Facebook, propone respuestas
+    y en modo automatico responde sola de a poco. En Facebook tambien da "me gusta". Saca ideas de
+    videos de lo que pide la gente. Activalo en Canales -> Editar -> "Responder comentarios".
+    IMPORTANTE: desconecta y vuelve a conectar YouTube (y Facebook) para dar el permiso de responder.
+  - Reeditar: color distinto en cada video, otro encuadre, ritmo un poco mas agil y se tapan los
+    subtitulos que ya traia el video para poner los nuevos.
+  - Videos nuevos: un solo tema bien desarrollado, dialogos reales y duracion elegible por canal.
+  - NVIDIA: prueba varios modelos hasta encontrar uno que funcione con tu cuenta.
+
+NOVEDADES v4
+- REEDITAR MIS VIDEOS (menu nuevo): sube tus videos (o copialos a la carpeta
+  entrada\<Nombre del canal>\) y salen listos con calidad pro: vertical 9:16 con fondo
+  difuminado, subtitulos karaoke, gancho grande, CTAs en el momento justo, logo,
+  barra de progreso, efectos del director y sonidos, cierre y SEO. Se reparten 1 por dia.
+  Videos de mas de 75 s: la IA elige los mejores tramos y los corta en Shorts.
+- DIRECTOR DE EFECTOS: punch zoom, sacudida, destellos y glitch donde la narracion lo pide,
+  con un solo "shock" como climax. Efectos de sonido por palabra ("dinero" -> monedas).
+- AUDIO PRO: voz normalizada, la musica baja sola cuando habla la voz, volumen final -14 LUFS.
+- BIBLIOTECA DE SONIDOS: Ajustes -> "Descargar biblioteca" (Freesound, CC0, gratis).
+- TRANSCRIPCION: con tu clave de Groq (rapida, en la nube) o Whisper en tu PC.
+- PUBLICACION AUTOMATICA: YouTube y Facebook con las APIs oficiales (guias en Ajustes).
+  En cada canal: conectar YouTube, elegir pagina de Facebook y activar "Publicar solo".
+  YouTube: hasta que Google apruebe tu proyecto, los videos subidos quedan privados.
+- APROBAR SOLO por canal y PRODUCIR TODO EL DIA (Ajustes -> Produccion).
+
+NOVEDADES v3
+- Voces (menu Voces): 30 voces de Edge, 3 de Kokoro (sin internet) y "Mis voces":
+  graba TU voz (o la de alguien que te de permiso por escrito) y se clona con Chatterbox.
+- Subtitulos karaoke: la palabra que suena se resalta (Whisper mide cada palabra).
+- Las frutas conversan entre ellas, cada una con su voz.
+- CTAs repartidos: el video invita a comentar 2 veces durante el video y otra al final.
+- Imagenes con IA (Cloudflare, 1 cuenta gratis). Modo "mixto": IA en las 3 primeras escenas.
+  Si una imagen IA se ve realista, marca "contenido generado con IA" al subir el video.
+- Personajes con IA: en Canales -> Editar -> Personajes -> "Crear con IA".
+- Crear videos -> "Inspirarse en un viral": pega la transcripcion de un viral y sale un
+  video ORIGINAL con su misma tecnica (nunca copia frases ni la historia).
+- Efectos de sonido: ponlos en la carpeta "efectos" (ver efectos\LEEME.txt).
+
+INSTALAR LA IA LOCAL (opcional, recomendado)
+  Doble clic en instalar_ia_local.bat (una vez, ~3 GB, 20-40 min).
+  Instala Kokoro, Whisper y Chatterbox. En tu PC (sin tarjeta NVIDIA) la voz clonada
+  tarda varios minutos por video: usala en 1 o 2 canales al principio y mira en el
+  registro del video cuanto tardo.
+
+CLOUDFLARE (imagenes IA)
+  1. dash.cloudflare.com -> Workers AI: copia tu Account ID.
+  2. Mi perfil -> API Tokens -> Crear token -> plantilla "Workers AI". Copia el token.
+  3. Pegalos en Ajustes. Usa UNA sola cuenta (varias cuentas va contra sus reglas).
+
+MUSICA
+  Pon .mp3 con licencia (Biblioteca de audio de YouTube) en la carpeta "musica".
+
+SI ALGO FALLA
+- "Ningun motor de IA respondio": revisa la clave en Ajustes -> Probar. Agrega Groq o NVIDIA de respaldo.
+- La voz suena robotica: falta Python o edge-tts. Cierra todo y vuelve a abrir start.bat.
+- Haz copia de seguridad de la carpeta "data" de vez en cuando (ahi estan tus canales y videos).

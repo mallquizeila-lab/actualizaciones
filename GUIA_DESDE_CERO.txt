@@ -1,0 +1,221 @@
+================================================================
+  SHORTFORGE v5 - GUIA DESDE CERO (paso a paso)
+  Para Josefino el Fino
+================================================================
+
+Lee esto en orden. Cada paso se hace UNA sola vez, salvo la
+"RUTINA DIARIA" del final.
+
+----------------------------------------------------------------
+PASO 1 - INSTALAR Y ABRIR (5 minutos)
+----------------------------------------------------------------
+1. Clic derecho en shortforge-v5.zip -> "Extraer todo" -> elige
+   la carpeta "sistema para creacion de contenido 2027".
+2. Abre la carpeta nueva y haz doble clic en start.bat.
+3. Se abre el panel en el navegador: http://localhost:3200
+   Tus claves y canales se cargan solos (estan guardados en
+   C:\Users\jose\ShortForge-datos y no se pierden al actualizar).
+4. Deja la ventana negra ABIERTA mientras uses el sistema.
+   Si la cierras, el sistema deja de trabajar.
+
+----------------------------------------------------------------
+PASO 2 - CLAVES (Ajustes -> Claves)
+----------------------------------------------------------------
+Ya tienes: Gemini, Groq, NVIDIA, Cloudflare, Pixabay, Freesound
+y Google OAuth. Faltan estas (todas gratis):
+
+A) YouTube Data API (para que el Cerebro estudie a la competencia)
+   1. Entra a console.cloud.google.com, en el MISMO proyecto que
+      ya usas para YouTube.
+   2. APIs y servicios -> Credenciales -> Crear credenciales ->
+      Clave de API -> copiala.
+   3. Pegala en Ajustes -> "YouTube Data API" -> Guardar claves.
+   4. En "Biblioteca" busca "YouTube Analytics API" -> Habilitar.
+
+B) Telegram (avisos al celular)
+   1. En Telegram busca @BotFather -> escribe /newbot -> ponle un
+      nombre (ej. "Avisos Josefino") -> copia el token.
+   2. Pegalo en Ajustes -> "Telegram: token del bot" -> Guardar.
+   3. Abre tu bot nuevo en Telegram y escribele /start
+   4. En Ajustes -> "Avisos al celular" -> "Detectar mi chat".
+   5. Pulsa "Enviar prueba". Te debe llegar un mensaje.
+
+C) Motores de reserva (opcionales, gratis; 2-5 minutos cada uno).
+   Si Gemini, Groq o NVIDIA se agotan en el dia, el sistema usa
+   estos solos. Una cuenta por servicio (no crees varias cuentas).
+   - Cerebras: cloud.cerebras.ai -> registrate -> API Keys ->
+     copia -> Ajustes "Cerebras (reserva)".
+   - GitHub Models: github.com (crea cuenta si no tienes) ->
+     Settings -> Developer settings -> Personal access tokens ->
+     Fine-grained tokens -> Generate new token -> en "Permissions"
+     agrega "Models: Read-only" -> Generate -> copia -> Ajustes
+     "GitHub Models (reserva)". (Este tambien mira imagenes.)
+   - Mistral: console.mistral.ai -> registrate -> elige el plan
+     gratis "Experiment" -> API Keys -> Create -> copia -> Ajustes.
+   - OpenRouter: openrouter.ai -> Sign in -> Keys -> Create Key ->
+     copia -> Ajustes. (El sistema usa solo sus modelos gratis.)
+   - Cloudflare AI: no necesitas nada, usa tu clave de Cloudflare.
+   Despues: Ajustes -> Motores de IA -> "Probar" en cada uno.
+
+NUNCA mandes capturas donde se vean tus claves.
+
+----------------------------------------------------------------
+PASO 3 - INSTALAR LA IA LOCAL Y LOS SONIDOS
+----------------------------------------------------------------
+1. Cierra la ventana negra.
+2. Doble clic en instalar_ia_local.bat (descarga unos 3 GB, una
+   sola vez, tarda 20-40 minutos). Instala Whisper (subtitulos
+   exactos), Kokoro (voz sin internet) y Chatterbox (opcional).
+3. Abre de nuevo start.bat.
+4. Ajustes -> Herramientas en tu PC: Whisper debe salir en verde.
+5. Ajustes -> Biblioteca de sonidos -> "Descargar biblioteca"
+   (completa lo que falte).
+
+----------------------------------------------------------------
+PASO 4 - PREPARAR TUS CANALES (empieza con 3, no con 10)
+----------------------------------------------------------------
+Elige los 3 canales con nichos mas virales (ej. La Huerta Habla).
+En Canales, pon "Pausar" a los demas por ahora.
+En cada uno de los 3: Canales -> Editar:
+
+  - Nombre, nicho, tono y notas: claros y concretos.
+  - Logo: sube tu logo (PNG).
+  - Personajes: si es de frutas que hablan, crea sus personajes
+    con "Crear con IA" (siempre los mismos = identidad de marca).
+  - Voz: elige una y usa SIEMPRE la misma en ese canal.
+  - Tipo de voz del narrador: "Automatico segun el video" (o uno
+    fijo). Escucha todos en Voces -> Tipos de voz.
+  - Cada personaje: su Tipo de voz FIJO (ej. Limon = Fruta
+    traviesa, Ajo = Gruñon cascarrabias, Abuela Papa = Abuela
+    tierna). Asi la gente reconoce a cada personaje.
+  - Duracion de los videos nuevos: "Viral: 25-45 s" para la
+    mayoria de canales (mas vistas y repeticiones).
+  - Frase de cierre: la "firma" del canal (ej. "La naturaleza
+    te cuida!").
+  - Responder comentarios: "La IA propone y yo apruebo" (la
+    primera semana). Luego "Automatico".
+  - Publicacion de Comunidad: activala (cada 2 dias).
+  - Playlists automaticas: activado.
+  - Canal de Telegram del canal: opcional (si creas uno publico
+    para tus seguidores, pon su @ y el bot como administrador).
+  - "Aprobar solo": DESACTIVADO la primera semana.
+  - Guardar canal.
+
+----------------------------------------------------------------
+PASO 5 - CONECTAR YOUTUBE (y Facebook si quieres)
+----------------------------------------------------------------
+1. Canales -> Editar -> YouTube: si ya estaba conectado,
+   pulsa "Desconectar" y luego "Conectar YouTube" otra vez.
+   (Ahora pide permisos nuevos: responder comentarios,
+   estadisticas y playlists.)
+2. Inicia sesion con la cuenta de ESE canal y acepta todo.
+3. Marca "Publicar solo a la hora del canal".
+4. Ajustes -> Produccion -> "Max. subidas a YouTube por dia": pon 4
+   o 5 (la cuota gratis se comparte entre subir, responder
+   comentarios y estudiar a la competencia).
+5. MUY RECOMENDADO: pide la auditoria gratis de tu proyecto de
+   Google (formulario "YouTube API Services - Audit and Quota
+   Extension"). Asi tus videos salen PUBLICOS (sin auditoria
+   quedan privados) y te dan mas cuota. Pideme ayuda y te guio.
+6. Facebook (opcional): sigue la guia en Ajustes -> Publicacion
+   automatica -> Guia: Facebook, luego elige la pagina de cada
+   canal.
+
+----------------------------------------------------------------
+PASO 6 - PRODUCCION
+----------------------------------------------------------------
+Ajustes -> Produccion:
+  - Videos por dia: 3
+  - Producir automaticamente cada noche: SI (02:00)
+  - Verificar datos: SI
+  - Critico, Coherencia y Analista: SI (los 3)
+  - Nota minima para aprobar solo: 7
+Guardar.
+
+Como trabaja cada video nuevo (todo solo):
+  tema (usando lo que aprendio el Cerebro y las tendencias)
+  -> guion -> CRITICO (si saca menos de 8/10 lo mejora)
+  -> verificacion de datos y politicas de YouTube
+  -> DIRECTOR VISUAL (cada imagen = lo que se dice)
+  -> imagenes -> REVISOR DE IMAGENES (rehace las que no coinciden)
+  -> voces, subtitulos, palabras clave grandes, efectos, musica
+  -> ANALISTA (nota del video terminado + lecciones al Manual)
+
+----------------------------------------------------------------
+PASO 7 - PRIMER DIA (prueba)
+----------------------------------------------------------------
+1. Crear videos -> elige un canal -> deja el tema vacio ->
+   Cantidad 1 -> "Agregar a la cola".
+2. Mira el avance en "Videos". Al terminar veras "Calidad X/10".
+   Abre los detalles: que fallo y que aprendio.
+3. Si te gusta: "Aprobar". Si no: "Rehacer" (aprende del error).
+4. Estadisticas -> "Analizar todo ahora" (el Cerebro estudia a la
+   competencia; tarda unos minutos).
+
+----------------------------------------------------------------
+RUTINA DIARIA (tus 4 horas)
+----------------------------------------------------------------
+MANANA (30 min)
+  - Lee el resumen que te llega por Telegram a las 8:00.
+  - Videos -> revisa los 3 videos de la noche: Aprobar o Rehacer.
+TIKTOK (20 min)
+  - Sube a TikTok los videos aprobados (archivo
+    video_tiktok_facebook.mp4 y el texto de subir_tiktok.txt).
+    TikTok no permite publicar por API todavia.
+COMENTARIOS (30 min)
+  - Comentarios -> responde los delicados y las criticas.
+  - Ideas de video sacadas de comentarios -> "Crear video".
+COMUNIDAD (5 min)
+  - Estadisticas -> copia la publicacion de Comunidad y pegala en
+    YouTube (Crear -> Publicacion). En Facebook sale sola.
+REEDITAR (el resto)
+  - Reeditar mis videos -> sube tus videos hechos con tu otra IA.
+    Salen con otro color, encuadre, ritmo y subtitulos nuevos.
+  - Videos sin voces (como los de animales): el sistema les da voz
+    solo (doblaje). Revisa el Reparto del canal y ajusta las voces.
+  - Videos que ya tienen voces: elige el audio "Dar voz a los
+    personajes" para cambiarlas por voces nuevas.
+DESARMAR (cuando quieras ideas)
+  - Desarmar video -> sube tu mejor video (o uno viral como
+    referencia). Mira los prompts y "Como superarlo".
+  - "Crear video": "Es mi video" recrea la historia mejorada;
+    "Es de otro creador" usa solo su tecnica con otro tema.
+UNA VEZ POR SEMANA
+  - Estadisticas: mira el camino a la monetizacion, tus mejores
+    videos y lo que aprendio el Cerebro.
+  - Pregunta al Asistente IA: "por que este video funciono?"
+    (ahora conoce tus numeros reales).
+
+----------------------------------------------------------------
+SEMANA 2 EN ADELANTE
+----------------------------------------------------------------
+  - Canales con notas de 7 o mas: activa "Aprobar solo".
+  - Comentarios: pasa a "Automatico".
+  - Cuando un canal despegue, el sistema hace solo la "parte 2"
+    y te avisa por Telegram. Luego activa mas canales (hasta 10).
+
+----------------------------------------------------------------
+REGLAS DE ORO (para no perder el canal ni la monetizacion)
+----------------------------------------------------------------
+  - Nunca comprar vistas, suscriptores ni likes. Nada de "sub por
+    sub". YouTube lo detecta y niega la monetizacion.
+  - Nunca subir el MISMO video a dos canales de YouTube distintos.
+  - Cada canal con identidad propia: mismos personajes, voz,
+    colores y frase. Formatos variados.
+  - Salud: nada de "cura" ni dosis. El sistema ya lo revisa, pero
+    tu revision final manda.
+  - Deja marcado "contenido alterado o sintetico" en canales con
+    IA realista.
+
+----------------------------------------------------------------
+PROBLEMAS COMUNES
+----------------------------------------------------------------
+  - Una clave sale con error en "Probar": crea una nueva y pegala.
+  - "Falta permiso para responder/estadisticas": desconecta y
+    vuelve a conectar YouTube en ese canal.
+  - "Cuota de YouTube": baja las subidas por dia o pide la
+    auditoria. Al dia siguiente se renueva.
+  - Videos subidos quedan "privados": falta la auditoria de Google.
+  - Imagenes IA agotadas: el cupo de Cloudflare se renueva cada
+    dia; mientras tanto usa fotos de stock o reedita tus videos.
+  - Algo raro: mandame captura de la ventana negra (sin claves).
