@@ -869,7 +869,7 @@ function eligeBox(j) {
     <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px">${p.personajes.map(c => `<div style="width:170px;background:var(--soft,#f5f5f4);border-radius:12px;padding:8px">
       ${c.img ? `<img src="${esc(c.img)}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;background:#ddd" onerror="this.style.visibility='hidden'">` : `<div style="width:100%;height:150px;border-radius:8px;background:#e7e5e4;display:grid;place-items:center;font-size:48px">${c.nombre === 'Narrador' ? '🎙️' : '🎭'}</div>`}
       <b style="display:block;margin:6px 0 2px">${esc(c.nombre)}</b><small class="hint" style="display:block;min-height:30px">${esc(c.descripcion)}</small>
-      <select data-pre=""${j.id}" data-vn="${esc(c.nombre)}" style="width:100%">${presetOptions(c.sugerida, false, true).replace('<option value="" ', '<option value="hombre" ')}</select>
+      <select data-pre="${j.id}" data-vn="${esc(c.nombre)}" style="width:100%">${presetOptions(c.sugerida, false, true).replace('<option value="" ', '<option value="hombre" ')}</select>
       <button class="b ghost sm" style="margin-top:6px;width:100%" data-act="preePlay" data-job="${j.id}" data-vn="${esc(c.nombre)}">▶ Escuchar</button></div>`).join('')}</div>
     <details style="margin-top:8px"><summary><b>🎵 Sonido de fondo</b> <span class="hint">(opcional)</span></summary>${fondoOpciones(j.id, {}, p.audio)}</details>
     <p class="hint" id="pe-${j.id}" style="color:var(--bad);font-weight:600"></p>

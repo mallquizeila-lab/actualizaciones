@@ -1,3 +1,6 @@
+v6.2.1 - Arreglo: elegir voces
+- El boton "Reeditar con esto" ahora si toma las voces que elegiste (antes decia "Elige una voz para al menos un personaje" aunque ya las habias elegido).
+
 v6.2.0 - Actualizaciones con un clic
 - Ajustes -> Actualizaciones: busca e instala las mejoras desde tu GitHub, sin descargar zips.
 - El boton "Reeditar con esto" ya no se queda bloqueado y muestra el motivo si algo falla.
