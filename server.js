@@ -224,6 +224,19 @@ async function api(u, q, U, r) {
   if (u === '/api/state') return publicState();
   if (u === '/api/job') { const j = job(U.searchParams.get('id')); if (!j) throw new Error('No encontrado'); return j; }
   if (u === '/api/comments') return comments.list();
+  if (u === '/api/bluesky' && P) {
+    const o = await json(q), T = publish.tokens; T.bluesky = T.bluesky || {};
+    if (!o.handle) delete T.bluesky[o.channelId];
+    else {
+      const h = String(o.handle).trim().replace(/^@/, ''), pass = String(o.pass || '').trim();
+      // Se prueba antes de guardar (sesión oficial de Bluesky).
+      const r = await fetch('https://bsky.social/xrpc/com.atproto.server.createSession', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identifier: h, password: pass }) });
+      if (!r.ok) throw new Error('Bluesky no aceptó ese usuario y contraseña de app. Usa una "contraseña de app" (Configuración → Privacidad y seguridad → Contraseñas de app).');
+      T.bluesky[o.channelId] = { handle: h, pass };
+    }
+    publish.saveTokens(); return { ok: 1 };
+  }
+  if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
   if (u === '/api/kit' && P) { const o = await json(q), j = job(o.id); if (!j) throw new Error('Video no encontrado'); return require('./lib/crecer').kitGrupos(j); }
   if (u === '/api/seo/todos' && P) return require('./lib/seo').mejorarTodos();
   if (u === '/api/salud') return salud.estado();

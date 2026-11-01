@@ -1,3 +1,8 @@
+v6.6.0 — Más redes para atraer gente a YouTube, Facebook y TikTok
+- Instagram Reels automático (cuenta profesional vinculada a tu página de Facebook). Cada Reel termina con los enlaces a tus redes.
+- Bluesky automático, con el enlace a tu YouTube que se puede tocar.
+- Botones "Publicar" en cada video, también para Instagram y Bluesky.
+
 v6.5.0 — Crecer (sin arriesgar tus cuentas)
 - Facebook: al publicar cada Reel pone el PRIMER COMENTARIO con una pregunta y el enlace a tu YouTube.
 - Facebook: opción de publicar el Reel también como HISTORIA de la página.
