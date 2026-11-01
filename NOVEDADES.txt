@@ -1,3 +1,11 @@
+v6.3.0 — SEO con búsquedas reales
+- Cada video nuevo (desde cero y reeditado) revisa lo que la gente ESCRIBE en el buscador de YouTube (Perú/Latinoamérica) y, si tienes la clave de YouTube Data API, las etiquetas de los Shorts más vistos del mismo tema.
+- Con eso elige una palabra clave principal y reescribe título, descripción, 15 a 20 etiquetas, hashtags, TikTok y Facebook. Se acabaron etiquetas raras como "animales antropomórficos".
+- Etiquetas ordenadas (la principal primero), sin repetidos, aprovechando hasta 480 de los 500 caracteres. Hashtags: #Shorts + 2 o 3.
+- Puntaje SEO de 0 a 100 en cada video, con consejos y la lista de lo que la gente busca.
+- Botón "🔎 Mejorar SEO" en cada video: si ya está en YouTube, le cambia ahí mismo el título, la descripción y las etiquetas.
+- Ajustes → "🔎 Mejorar el SEO de todos mis videos" (también actualiza los que ya subiste).
+
 v6.2.3 — Hora y canal en cada video
 - En cada video ahora puedes elegir la HORA de publicación junto a la fecha. Siempre es hora de Perú, aunque el reloj de la PC esté en otra zona.
 - "(usar horario del canal)" vuelve a la hora automática del canal.

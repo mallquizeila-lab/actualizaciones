@@ -48,7 +48,7 @@ function publicState() {
     channels: db.channels,
     jobs: db.jobs.map(({ script, ...j }) => j),
     voices: tts.catalog(), voicePresets: require('./lib/voces').lista(),
-    myVoices: db.voices, salud: salud.estado(), act: actualizar.estado(), cuotas: ai.estadoCuotas(), activos: ai.active(), lastBackup: db.settings.lastBackup || null,
+    myVoices: db.voices, salud: salud.estado(), seoMasivo: require('./lib/seo').masivo, act: actualizar.estado(), cuotas: ai.estadoCuotas(), activos: ai.active(), lastBackup: db.settings.lastBackup || null,
     worker: worker.state,
     tools: tools && { ...tools, ...tts.local() },
     cf: imagenes.cupo(),
@@ -122,6 +122,7 @@ async function cloneVoice(q, U) {
 async function jobAction(o) {
   const j = job(o.id);
   if (!j) throw new Error('Video no encontrado');
+  if (o.action === 'seo') return require('./lib/seo').mejorar(j);
   const flow = { approve: 'aprobado', scheduled: 'programado', published: 'publicado', review: 'revisar' };
   if (flow[o.action]) j.status = flow[o.action];
   else if (o.action === 'revoice') {
@@ -222,6 +223,7 @@ async function api(u, q, U, r) {
   if (u === '/api/state') return publicState();
   if (u === '/api/job') { const j = job(U.searchParams.get('id')); if (!j) throw new Error('No encontrado'); return j; }
   if (u === '/api/comments') return comments.list();
+  if (u === '/api/seo/todos' && P) return require('./lib/seo').mejorarTodos();
   if (u === '/api/salud') return salud.estado();
   if (u === '/api/actualizar') return actualizar.estado();
   if (u === '/api/fondos') return { items: efectos.fondos().map(({ file, ...x }) => ({ ...x, id: Buffer.from(file).toString('base64url') })), demucs: !!tts.local().demucs };
@@ -256,7 +258,7 @@ async function api(u, q, U, r) {
     if (o.bufferDays !== undefined) db.settings.bufferDays = Math.max(0, Math.min(7, +o.bufferDays || 0));
     if (o.ytDailyMax !== undefined) db.settings.ytDailyMax = Math.max(1, Math.min(50, +o.ytDailyMax || 6));
     if (o.review !== undefined) db.settings.review = !!o.review;
-    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages']) if (o[k] !== undefined) db.settings[k] = !!o[k];
+    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages', 'seoPro']) if (o[k] !== undefined) db.settings[k] = !!o[k];
     if (o.minNota !== undefined) db.settings.minNota = Math.max(1, Math.min(10, +o.minNota || 6));
     saveAll.settings();
     return { ok: 1 };
