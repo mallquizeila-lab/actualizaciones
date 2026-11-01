@@ -65,7 +65,7 @@ function publicState() {
 function saveChannel(o) {
   let ch = o.id && channel(o.id);
   if (!ch) { ch = { id: uid(), active: true, style: 'fotos', characters: [], times: { ...DEFAULT_TIMES }, created: new Date().toISOString() }; db.channels.push(ch); }
-  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters'])
+  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks'])
     if (o[k] !== undefined) ch[k] = o[k];
   if (o.reparto !== undefined) ch.reparto = (Array.isArray(o.reparto) ? o.reparto : []).slice(0, 40).map(r => ({ id: String(r.id || uid()), nombre: String(r.nombre || 'Personaje').slice(0, 40), descripcion: String(r.descripcion || '').slice(0, 160), preset: String(r.voice || '').startsWith('clon:') ? '' : String(r.preset || 'hombre'), voice: String(r.voice || '') }));
   if (o.autoClone === true && o.autoCloneConsent === true) ch.autoCloneConsentAt = ch.autoCloneConsentAt || new Date().toISOString();
@@ -224,6 +224,7 @@ async function api(u, q, U, r) {
   if (u === '/api/state') return publicState();
   if (u === '/api/job') { const j = job(U.searchParams.get('id')); if (!j) throw new Error('No encontrado'); return j; }
   if (u === '/api/comments') return comments.list();
+  if (u === '/api/kit' && P) { const o = await json(q), j = job(o.id); if (!j) throw new Error('Video no encontrado'); return require('./lib/crecer').kitGrupos(j); }
   if (u === '/api/seo/todos' && P) return require('./lib/seo').mejorarTodos();
   if (u === '/api/salud') return salud.estado();
   if (u === '/api/actualizar') return actualizar.estado();
@@ -438,5 +439,6 @@ http.createServer(async (q, r) => {
   avisos.start();
   salud.start();
   actualizar.start();
+  require('./lib/crecer').start();
   ai.startRevision();
 });

@@ -1,3 +1,10 @@
+v6.5.0 — Crecer (sin arriesgar tus cuentas)
+- Facebook: al publicar cada Reel pone el PRIMER COMENTARIO con una pregunta y el enlace a tu YouTube.
+- Facebook: opción de publicar el Reel también como HISTORIA de la página.
+- Promoción cruzada: elige en el canal tus otras páginas del mismo tema; cada Reel se comparte allí (máx. 1 al día por página).
+- Enlaces a tus otras redes al final de cada descripción (usa los @ del canal).
+- "📣 Kit para compartir en grupos": 3 textos distintos, qué grupos buscar y consejos, para que lo compartas TÚ a mano.
+
 v6.4.0 — Botones para publicar
 - En cada video: "🚀 En las 3 redes" y también "Solo YouTube", "Solo Facebook" y "Solo TikTok". Solo aparecen las redes donde todavía no está.
 - Sirve para los videos que ya salieron en YouTube y ahora quieres en tu fan page.
