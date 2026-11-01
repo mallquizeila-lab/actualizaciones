@@ -1,3 +1,6 @@
+v6.3.1 — Facebook para apps nuevas
+- Nuevo campo en Ajustes: "Facebook: Identificador de configuración". Las apps nuevas de Meta ("Inicio de sesión con Facebook para empresas") lo usan para conectar la página.
+
 v6.3.0 — SEO con búsquedas reales
 - Cada video nuevo (desde cero y reeditado) revisa lo que la gente ESCRIBE en el buscador de YouTube (Perú/Latinoamérica) y, si tienes la clave de YouTube Data API, las etiquetas de los Shorts más vistos del mismo tema.
 - Con eso elige una palabra clave principal y reescribe título, descripción, 15 a 20 etiquetas, hashtags, TikTok y Facebook. Se acabaron etiquetas raras como "animales antropomórficos".

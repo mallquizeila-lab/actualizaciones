@@ -20,7 +20,7 @@ const freesound = require('./lib/freesound');
 const { chatSystem } = require('./lib/prompts');
 
 const PORT = E.PORT || 3200, PUB = path.join(ROOT, 'public');
-const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY'];
+const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY'];
 const MIME = { '.webm': 'audio/webm', '.html': 'text/html;charset=utf-8', '.js': 'text/javascript;charset=utf-8', '.css': 'text/css;charset=utf-8', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aiff': 'audio/aiff', '.png': 'image/png', '.jpg': 'image/jpeg', '.txt': 'text/plain;charset=utf-8', '.svg': 'image/svg+xml' };
 const DEFAULT_TIMES = { youtube: '18:00', tiktok: '20:00', facebook: '13:00' };
 

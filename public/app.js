@@ -326,6 +326,7 @@ const KEYINFO = [
   ['GOOGLE_CLIENT_SECRET', 'Google OAuth: Client Secret', 'Para publicar en YouTube', 'https://console.cloud.google.com/apis/credentials'],
   ['FB_APP_ID', 'Facebook: App ID', 'Para publicar en tus páginas (ver guía abajo)', 'https://developers.facebook.com/apps/'],
   ['FB_APP_SECRET', 'Facebook: App Secret', 'Para publicar en tus páginas', 'https://developers.facebook.com/apps/'],
+  ['FB_CONFIG_ID', 'Facebook: Identificador de configuración', 'Solo si Facebook lo pide (Inicio de sesión para empresas → Configuraciones)', 'https://developers.facebook.com/apps/'],
 ];
 VIEWS.ajustes = () => {
   const s = S.settings, eng = s.engines;
