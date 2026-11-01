@@ -292,7 +292,7 @@ async function api(u, q, U, r) {
     if (o.bufferDays !== undefined) db.settings.bufferDays = Math.max(0, Math.min(7, +o.bufferDays || 0));
     if (o.ytDailyMax !== undefined) db.settings.ytDailyMax = Math.max(1, Math.min(50, +o.ytDailyMax || 6));
     if (o.review !== undefined) db.settings.review = !!o.review;
-    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages', 'seoPro']) if (o[k] !== undefined) db.settings[k] = !!o[k];
+    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages', 'seoPro', 'cloneSlow']) if (o[k] !== undefined) db.settings[k] = !!o[k];
     if (o.minNota !== undefined) db.settings.minNota = Math.max(1, Math.min(10, +o.minNota || 6));
     saveAll.settings();
     return { ok: 1 };

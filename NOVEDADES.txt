@@ -1,3 +1,8 @@
+v6.8.2 — Videos mucho más rápidos
+- Las voces clonadas podían quedarse HORAS en una PC sin tarjeta NVIDIA (el límite era 3 horas). Ahora tienen tope (máx. 20 min por video); si se pasa, usa las frases que alcanzó a clonar y el resto con una voz normal parecida.
+- El sistema mide cuánto tarda tu PC por frase. Si tarda más de 45 s, usa voces normales parecidas automáticamente (el video sale en minutos). Puedes forzar las clonadas en Ajustes → "Usar voces clonadas aunque mi PC sea lenta".
+- La barra de la izquierda muestra cuántos minutos lleva el video que se está produciendo.
+
 v6.8.1 — Arreglo importante de coherencia
 - La verificación de datos trataba las historias de ficción (animales que hablan, magia, fábulas) como "desinformación" y reescribía todas las escenas: la historia dejaba de coincidir con las imágenes y las voces. Ahora reconoce la ficción y no la toca; solo revisa frases presentadas como hechos reales.
 - Protección extra: si quiere reescribir más de la mitad de las escenas, no cambia la historia, solo avisa.
