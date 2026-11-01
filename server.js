@@ -237,7 +237,7 @@ async function api(u, q, U, r) {
     const o = await json(q), ok = {};
     for (const k of KEYS) if (o[k] !== undefined) {
       const v = String(o[k]).trim();
-      if (v && !/^[A-Za-z0-9_\-.:]{16,}$/.test(v)) throw new Error('La clave ' + k + ' no parece válida. Cópiala completa, sin espacios.');
+      if (v && !(/^[A-Za-z0-9_\-.:]{16,}$/.test(v) || (/_ID$/.test(k) && /^\d{6,}$/.test(v)))) throw new Error('La clave ' + k + ' no parece válida. Cópiala completa, sin espacios.');
       ok[k] = v;
     }
     setKeys(ok);

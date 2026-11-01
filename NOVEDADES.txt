@@ -1,3 +1,6 @@
+v6.3.2 — Arreglo
+- Ya se puede guardar el Identificador de configuración de Facebook (antes lo rechazaba por ser corto).
+
 v6.3.1 — Facebook para apps nuevas
 - Nuevo campo en Ajustes: "Facebook: Identificador de configuración". Las apps nuevas de Meta ("Inicio de sesión con Facebook para empresas") lo usan para conectar la página.
 
