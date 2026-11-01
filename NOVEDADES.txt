@@ -1,3 +1,7 @@
+v6.9.0 — Reeditados con mejor retención
+- Encuadre: los videos cuadrados o casi verticales ahora LLENAN la pantalla (antes quedaban franjas borrosas arriba y abajo). Los horizontales salen más grandes, con franjas más finas. Se elige en Canales → Editar → Encuadre.
+- Final: ya no hay pantalla fija de "Suscríbete" (bajaba la retención). Ahora aparece un botón animado encima de los últimos segundos del video. Si prefieres la pantalla con voz, elígela en Canales → Editar → Final.
+
 v6.8.2 — Videos mucho más rápidos
 - Las voces clonadas podían quedarse HORAS en una PC sin tarjeta NVIDIA (el límite era 3 horas). Ahora tienen tope (máx. 20 min por video); si se pasa, usa las frases que alcanzó a clonar y el resto con una voz normal parecida.
 - El sistema mide cuánto tarda tu PC por frase. Si tarda más de 45 s, usa voces normales parecidas automáticamente (el video sale en minutos). Puedes forzar las clonadas en Ajustes → "Usar voces clonadas aunque mi PC sea lenta".
