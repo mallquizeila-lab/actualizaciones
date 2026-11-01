@@ -51,7 +51,9 @@ if (!q1('select id from polls limit 1')) run('insert into polls(question,options
 
 // ---------------- Utilidades ----------------
 const SIGNS = ['aries', 'tauro', 'geminis', 'cancer', 'leo', 'virgo', 'libra', 'escorpio', 'sagitario', 'capricornio', 'acuario', 'piscis'];
-const GAMES = ['horoscopo', 'compatibilidad', 'animal', 'ruleta', 'numerologia', 'encuesta'];
+// Catálogo de tests (el mismo que usa la página).
+const CATALOGO = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'tests.json'), 'utf8')).tests; } catch (e) { return []; } })();
+const GAMES = CATALOGO.map(t => t.id);
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clip = (s, n) => String(s ?? '').slice(0, n);
@@ -180,14 +182,7 @@ function send(res, code, body, type = 'application/json; charset=utf-8', extra =
 const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > 20000) { no(new Error('muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(new Error('JSON inválido')); } }); });
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
-const JUEGO = {
-  horoscopo: ['Tu horóscopo y tu alma gemela', 'Descubre qué dicen los astros hoy y quién es tu alma gemela.'],
-  compatibilidad: ['Test de compatibilidad', '¿Cuánto amor hay entre ustedes? Pon sus nombres y descúbrelo.'],
-  animal: ['¿Qué animal eres?', 'Responde 5 preguntas y descubre tu animal interior.'],
-  ruleta: ['La ruleta de la suerte', 'Gira la ruleta y mira qué te depara el día.'],
-  numerologia: ['Tu número del destino', 'Tu fecha de nacimiento esconde un número que dice mucho de ti.'],
-  encuesta: ['La encuesta del día', 'Vota y mira qué eligió todo el mundo.'],
-};
+const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
 async function api(req, res, u) {
   const ip = clientIp(req), P = req.method === 'POST';
@@ -344,7 +339,7 @@ http.createServer(async (req, res) => {
       return send(res, 302, '', 'text/plain', { location: to });
     }
     // Enlace para compartir: vista previa bonita en Facebook/WhatsApp y luego abre el juego.
-    m = /^\/r\/([a-z]+)$/.exec(u.pathname);
+    m = /^\/r\/([a-z0-9-]+)$/.exec(u.pathname);
     if (m && JUEGO[m[1]]) {
       const [t, d] = JUEGO[m[1]], txt = clip(u.searchParams.get('t') || '', 120), img = fs.existsSync(path.join(PUB, 'og', m[1] + '.png')) ? `${PUBLIC_URL}/og/${m[1]}.png` : `${PUBLIC_URL}/og/general.png`;
       const target = `/?g=${m[1]}&src=${encodeURIComponent(clip(u.searchParams.get('src') || 'compartido', 40))}`;

@@ -1,3 +1,11 @@
+v7.2.0 — Página viral: 32 tests y contenido más profesional
+- 26 tests nuevos (32 en total), por categorías y con buscador:
+  · 16 de personalidad: tipo de líder, lenguaje del amor (Chapman), introvertido/extrovertido, tipo de viajero, trabajo ideal (Holland), manejo del dinero, forma de aprender (VARK), tipo de amigo, plato peruano, comunicación, cronotipo, mascota ideal, superpoder, emprendedor, época, manejo del estrés y animal que te representa.
+  · 5 trivias con datos verificados y explicación de cada respuesta: Perú, animales, geografía de Latinoamérica, historia del fútbol y ciencia.
+  · 5 calculadoras exactas: edad en otros planetas, días vividos, generación, horóscopo chino y cuenta regresiva a tu cumpleaños.
+- Resultados con secciones: tu resultado, tus fortalezas y un consejo. Las trivias muestran puntaje y la revisión de cada pregunta.
+- El video destacado ya no repite "🎬 🎬" ni corta el título.
+
 v7.1.1 — Campañas más fáciles
 - Página viral → Campañas: botón "📷 Subir foto desde mi PC" para la imagen grande de la notificación, con vista previa (ya no hace falta un enlace).
 - Si pegas dos enlaces seguidos en "Enlace al tocar", se queda solo el último (antes quedaban pegados y el enlace no servía).

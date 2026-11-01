@@ -70,7 +70,8 @@ async function api(u, body) {
 }
 const flag = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 127397 + c.charCodeAt(0))) : '🌐';
 const SIGNOS = ['aries','tauro','geminis','cancer','leo','virgo','libra','escorpio','sagitario','capricornio','acuario','piscis'];
-const JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Test de amor', animal: 'Qué animal eres', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
+let JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Compatibilidad', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
+fetch('/tests.json').then(r => r.json()).then(d => { JUEGOS = Object.fromEntries(d.tests.map(t => [t.id, t.t])); }).catch(() => {});
 const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['ajustes', 'Ajustes']];
 let tab = 'resumen';
 function mostrarLogin() { $('#app').hidden = true; $('#login').hidden = false; $('#pw').focus(); }
