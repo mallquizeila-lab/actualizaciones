@@ -1,3 +1,7 @@
+v6.8.1 — Arreglo importante de coherencia
+- La verificación de datos trataba las historias de ficción (animales que hablan, magia, fábulas) como "desinformación" y reescribía todas las escenas: la historia dejaba de coincidir con las imágenes y las voces. Ahora reconoce la ficción y no la toca; solo revisa frases presentadas como hechos reales.
+- Protección extra: si quiere reescribir más de la mitad de las escenas, no cambia la historia, solo avisa.
+
 v6.8.0 — 📡 Radar de tendencias
 - Cada mañana, por canal, revisa dónde se mueve la gente HOY: comentarios de los Shorts más vistos de tu nicho (qué piden y preguntan), lo que escriben en el buscador de YouTube, lo más buscado en Google Perú y lo más leído en Wikipedia.
 - Propone 8 temas con puntaje de viralidad y el porqué ("muchos comentarios piden la parte 2", "tendencia #3 en Google Perú").
