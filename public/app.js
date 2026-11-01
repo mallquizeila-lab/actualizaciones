@@ -143,7 +143,7 @@ VIEWS.canales = () => {
   <div class="btns" style="margin:0 0 16px"><button class="b" data-act="editCh">+ Nuevo canal</button>${missing ? '<button class="b ghost" data-act="presets">Cargar mis 10 canales sugeridos</button>' : ''}</div>
   ${S.channels.length ? `<div class="grid">${S.channels.map(c => `<div class="card ${c.active ? '' : 'off'}" style="margin:0"><div class="ch">${logoHtml(c)}<div><h3>${esc(c.name)}</h3><div class="hint">${esc(c.niche)}</div></div></div>
     <p style="margin:10px 0 0">${c.active ? '<span class="chip st-aprobado">Activo</span>' : '<span class="chip">Pausado</span>'} <span class="chip">${c.style === 'personaje' ? 'Personajes que hablan' : 'Fotos + narración'}</span>${c.logo ? '' : ' <span class="chip st-error">Sin logo</span>'}</p>
-    <div class="times" style="margin-top:8px">YT ${esc(j.horas?.youtube || c.times?.youtube)} · TT ${esc(j.horas?.tiktok || c.times?.tiktok)} · FB ${esc(j.horas?.facebook || c.times?.facebook)}</div>
+    <div class="times" style="margin-top:8px">YT ${esc(c.times?.youtube)} · TT ${esc(c.times?.tiktok)} · FB ${esc(c.times?.facebook)}</div>
     <div class="btns"><button class="b sm" data-act="editCh" data-id="${c.id}">Editar</button><button class="b ghost sm" data-act="quickJob" data-id="${c.id}">Crear video</button><button class="b ghost sm" data-act="toggleCh" data-id="${c.id}">${c.active ? 'Pausar' : 'Activar'}</button></div></div>`).join('')}</div>`
     : '<div class="card empty">Todavía no tienes canales. Crea uno o carga los 10 sugeridos.</div>'}`;
 };

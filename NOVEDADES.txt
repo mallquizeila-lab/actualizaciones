@@ -1,3 +1,6 @@
+v6.3.3 — Arreglo
+- La pestaña Canales volvía a mostrar "j is not defined": corregido.
+
 v6.3.2 — Arreglo
 - Ya se puede guardar el Identificador de configuración de Facebook (antes lo rechazaba por ser corto).
 
