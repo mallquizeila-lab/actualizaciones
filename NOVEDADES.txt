@@ -1,3 +1,9 @@
+v6.4.0 — Botones para publicar
+- En cada video: "🚀 En las 3 redes" y también "Solo YouTube", "Solo Facebook" y "Solo TikTok". Solo aparecen las redes donde todavía no está.
+- Sirve para los videos que ya salieron en YouTube y ahora quieres en tu fan page.
+- Si la hora del video ya pasó, sale al momento; si no, queda programado para su hora (hora Perú).
+- TikTok: descarga el video, copia el texto con hashtags y abre TikTok para que lo subas; luego lo marca como subido.
+
 v6.3.4 — Actualizaciones al instante
 - "Buscar actualizaciones" ya ve las mejoras nuevas apenas se publican (antes podía tardar varios minutos).
 

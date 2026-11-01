@@ -123,6 +123,7 @@ async function jobAction(o) {
   const j = job(o.id);
   if (!j) throw new Error('Video no encontrado');
   if (o.action === 'seo') return require('./lib/seo').mejorar(j);
+  if (o.action === 'publicar') { const ps = (Array.isArray(o.plats) ? o.plats : []).filter(p => ['youtube', 'facebook', 'tiktok'].includes(p)); if (!ps.length) throw new Error('Elige una red'); return publish.publicarYa(j, ps); }
   const flow = { approve: 'aprobado', scheduled: 'programado', published: 'publicado', review: 'revisar' };
   if (flow[o.action]) j.status = flow[o.action];
   else if (o.action === 'revoice') {
