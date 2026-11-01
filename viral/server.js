@@ -171,7 +171,7 @@ async function reloj() {
 setInterval(() => reloj().catch(console.error), 30000).unref();
 
 // ---------------- Servidor ----------------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
+const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
 const PUB = path.join(__dirname, 'public');
 function send(res, code, body, type = 'application/json; charset=utf-8', extra = {}) {
   res.writeHead(code, { 'content-type': type, 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', ...extra });
@@ -279,12 +279,22 @@ async function api(req, res, u) {
       const page = Math.max(0, +F.p || 0);
       return send(res, 200, { total: q1(`select count(*) n from ${tabla} ${W}`, ...a).n, rows: q(`select ${cols} from ${tabla} ${W} order by id desc limit 100 offset ?`, ...a, page * 100) });
     }
+    if (r === 'imagen' && P) { // foto subida desde tu PC para la notificación
+      const buf = await new Promise((ok, no) => { const p = []; let n = 0; req.on('data', c => { n += c.length; if (n > 5e6) { no(new Error('La imagen pesa más de 5 MB')); req.destroy(); } else p.push(c); }); req.on('end', () => ok(Buffer.concat(p))); req.on('error', no); });
+      const ext = buf[0] === 0xff && buf[1] === 0xd8 ? 'jpg' : buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ? 'png' : buf.subarray(0, 4).toString() === 'RIFF' && buf.subarray(8, 12).toString() === 'WEBP' ? 'webp' : buf.subarray(0, 3).toString() === 'GIF' ? 'gif' : null;
+      if (!ext) return send(res, 400, { error: 'Sube una foto JPG, PNG, WEBP o GIF' });
+      const dir = path.join(DATA, 'media'); fs.mkdirSync(dir, { recursive: true });
+      const name = crypto.randomBytes(8).toString('hex') + '.' + ext; fs.writeFileSync(path.join(dir, name), buf);
+      return send(res, 200, { url: `${PUBLIC_URL}/m/${name}` });
+    }
     if (r === 'contar' && P) { const b = await json(req); const n = contar(b.filters || {}); return send(res, 200, { n, enviar: b.max > 0 ? Math.min(n, b.max) : n }); }
     if (r === 'campana' && P) {
       const b = await json(req);
       if (!E.VAPID_PUBLIC) return send(res, 400, { error: 'Faltan las llaves de notificaciones (VAPID). En ShortForge se crean solas al encender la página.' });
       const title = clip(b.title, 80).trim(), body = clip(b.body, 200).trim();
       if (!title || !body) return send(res, 400, { error: 'Escribe el título y el mensaje' });
+      const ultimo = s => { const m = String(s || '').match(/https?:\/\/[^\s]+?(?=https?:\/\/|\s|$)/g); return m ? m[m.length - 1] : String(s || '').trim(); };
+      b.url = ultimo(b.url); b.image = ultimo(b.image);
       const dest = b.url ? safeDest(b.url) : PUBLIC_URL + '/';
       if (!dest) return send(res, 400, { error: 'El enlace debe ser de tu página o un video de YouTube/Facebook/TikTok/Instagram' });
       const image = b.image ? (safeDest(b.image) || (/^https:\/\/[^\s"']+\.(jpg|jpeg|png|webp)(\?|$)/i.test(b.image) ? b.image : null)) : null;
@@ -343,6 +353,9 @@ http.createServer(async (req, res) => {
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="${esc(PUBLIC_URL + u.pathname)}">
 <meta name="twitter:card" content="summary_large_image"><meta http-equiv="refresh" content="0;url=${esc(target)}"></head><body><a href="${esc(target)}">Continuar</a></body></html>`, 'text/html; charset=utf-8');
     }
+    // Fotos subidas para las notificaciones.
+    m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
+    if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
     // Política de privacidad con tus datos (se completa en el panel → Ajustes; sobrevive a las actualizaciones).
     if (u.pathname === '/privacidad.html') {
       const pv = getS('priv', {}), x = (v, d) => esc(v || d);

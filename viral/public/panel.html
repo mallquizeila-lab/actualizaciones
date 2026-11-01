@@ -111,7 +111,11 @@ const V = {
       <label>Título (usa {signo} para personalizar)</label><input id="c-t" maxlength="80" placeholder="✨ {signo}, hoy es tu día">
       <label>Mensaje</label><textarea id="c-b" maxlength="200" placeholder="Mira lo que dicen los astros y el video de hoy 👉"></textarea>
       <label>Enlace al tocar (tu página o un video de YouTube/Facebook/TikTok/Instagram)</label><input id="c-u" placeholder="https://youtube.com/shorts/... o /?g=ruleta" value="${esc(aj.video?.url || '')}">
-      <label>Imagen grande (opcional, URL https .jpg/.png)</label><input id="c-img" placeholder="https://.../imagen.jpg">
+      <label>Imagen grande (opcional)</label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn alt" style="margin:0;cursor:pointer">📷 Subir foto desde mi PC<input type="file" id="c-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></label>
+        <img id="c-prev" alt="" style="max-height:70px;border-radius:8px" hidden><button class="btn alt" id="c-quitar" style="padding:4px 10px" hidden>Quitar</button><span class="hint" id="c-est"></span></div>
+      <p class="hint" style="margin-top:4px">Recomendado: foto horizontal (por ejemplo la portada de tu video), menos de 5 MB. Se ve grande en Android y Windows; en iPhone no se muestra.</p>
+      <details style="margin-top:4px"><summary class="hint">o pegar un enlace de imagen</summary><input id="c-img" placeholder="https://.../imagen.jpg"></details>
       <h3 style="margin-top:14px">A quién</h3><p class="hint">Si no marcas nada en un grupo, se envía a todos.</p>
       <label>Países</label>${chips('countries', o.paises, x => `${flag(x.cc)} ${esc(x.pais)} <span class="hint">${n(x.n)}</span>`, x => x.cc)}
       <label>Ciudades</label>${chips('cities', o.ciudades.slice(0, 40), x => `${esc(x.city)} <span class="hint">${n(x.n)}</span>`, x => x.city)}
@@ -135,6 +139,19 @@ const V = {
     $('#main').onchange = e => { if (e.target.closest('[data-f]') || e.target.id === 'c-max') recontar(); };
     const pv = () => { $('#pv-t').textContent = ($('#c-t').value || 'Título').replaceAll('{signo}', 'Leo'); $('#pv-b').textContent = ($('#c-b').value || 'Mensaje').replaceAll('{signo}', 'Leo'); };
     $('#c-t').oninput = $('#c-b').oninput = pv; recontar();
+    const verImg = () => { const u = $('#c-img').value.trim(); $('#c-prev').hidden = !u; $('#c-quitar').hidden = !u; if (u) $('#c-prev').src = u; const big = document.querySelector('.prev .big-img'); if (big) big.remove(); if (u) $('.prev').insertAdjacentHTML('afterend', `<img class="big-img" src="${esc(u)}" alt="" style="display:block;max-width:420px;width:100%;border-radius:0 0 10px 10px;margin-top:-2px">`); };
+    $('#c-img').oninput = verImg;
+    $('#c-quitar').onclick = () => { $('#c-img').value = ''; $('#c-est').textContent = ''; verImg(); };
+    $('#c-file').onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      if (f.size > 5e6) return alert('La imagen pesa más de 5 MB. Usa una más liviana (o una captura).');
+      $('#c-est').textContent = 'Subiendo…';
+      try { const r = await fetch('/api/admin/imagen', { method: 'POST', headers: { 'x-panel': '1' }, body: f }); const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Error'); $('#c-img').value = j.url; $('#c-est').textContent = '✓ Foto lista'; verImg(); }
+      catch (x) { $('#c-est').textContent = ''; alert(x.message); }
+      e.target.value = '';
+    };
+    // Si se pegan dos enlaces seguidos en "Enlace al tocar", se deja el último.
+    $('#c-u').addEventListener('paste', () => setTimeout(() => { const m = $('#c-u').value.match(/https?:\/\/\S+?(?=https?:\/\/|\s|$)/g); if (m && m.length > 1) $('#c-u').value = m[m.length - 1]; }, 0));
     $('#c-go').onclick = async () => {
       const when = $('#c-when').value;
       if (!confirm(when ? `¿Programar la campaña para el ${when.replace('T', ' ')} (hora Perú)?` : `¿Enviar ahora? ${$('#c-count').textContent}`)) return;

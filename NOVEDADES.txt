@@ -1,3 +1,7 @@
+v7.1.1 — Campañas más fáciles
+- Página viral → Campañas: botón "📷 Subir foto desde mi PC" para la imagen grande de la notificación, con vista previa (ya no hace falta un enlace).
+- Si pegas dos enlaces seguidos en "Enlace al tocar", se queda solo el último (antes quedaban pegados y el enlace no servía).
+
 v7.1.0 — Asistente IA con fotos y archivos
 - Botón 📎 en el Asistente IA: sube fotos, capturas, videos (mira 6 cuadros del video) y archivos de texto (txt, csv, json, srt…). También puedes pegar una captura con Ctrl+V o arrastrar los archivos.
 - Con imágenes usa una IA que puede ver (Gemini primero).
