@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Panel de la página viral</title>
+<style>
+:root{--bg:#f4f3f8;--card:#fff;--line:#e3e0ee;--text:#1d1a33;--muted:#6b6785;--brand:#4b3bbf;--brand2:#ece9ff;--ok:#16794a;--okbg:#e2f6ec;--bad:#b42318;--badbg:#fde8e6;--warn:#8a5a00;--warnbg:#fff3d6}
+@media (prefers-color-scheme:dark){:root{--bg:#14121f;--card:#1e1b2e;--line:#332f4a;--text:#efedf7;--muted:#a49fbf;--brand:#9b8cff;--brand2:#2b2550;--ok:#5ee0a0;--okbg:#14352a;--bad:#ff8a80;--badbg:#3d1d1b;--warn:#f4c46b;--warnbg:#3a2e14}}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header b{font-size:1.05rem}nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:0;padding:8px 12px;border-radius:8px;color:var(--muted);font:600 14px system-ui;cursor:pointer}
+nav button.on{background:var(--brand2);color:var(--brand)}
+main{max-width:1150px;margin:0 auto;padding:18px}
+h2{font-size:1.25rem;margin:0 0 12px}h3{font-size:1rem;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}.kpi b{display:block;font-size:1.7rem}.kpi span{color:var(--muted);font-size:.85rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.hb{display:flex;align-items:center;gap:8px}.hb i{display:block;height:10px;background:var(--brand);border-radius:5px;min-width:2px}
+.days{display:flex;align-items:flex-end;gap:4px;height:120px;margin-top:6px}.days div{flex:1;background:var(--brand);border-radius:4px 4px 0 0;position:relative;min-height:2px}.days div span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.65rem;color:var(--muted)}
+label{display:block;font-weight:600;font-size:.85rem;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+textarea{min-height:70px;resize:vertical}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.btn{display:inline-block;padding:9px 16px;border-radius:8px;border:1px solid var(--brand);background:var(--brand);color:#fff;font:600 14px system-ui;cursor:pointer;text-decoration:none}
+.btn.alt{background:transparent;color:var(--brand)}.btn:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow:auto;padding:4px 0}
+.chips label{display:flex;align-items:center;gap:6px;margin:0;font-weight:400;font-size:.85rem;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:4px 10px;cursor:pointer}
+.chips input{width:auto}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.78rem;font-weight:600;background:var(--brand2);color:var(--brand)}
+.tag.ok{background:var(--okbg);color:var(--ok)}.tag.bad{background:var(--badbg);color:var(--bad)}.tag.warn{background:var(--warnbg);color:var(--warn)}
+.hint{color:var(--muted);font-size:.85rem}
+.big{font-size:1.05rem;font-weight:700}
+.notice{background:var(--warnbg);color:var(--warn);padding:10px 12px;border-radius:8px;margin-bottom:14px}
+.prev{display:flex;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;max-width:420px}.prev img{width:40px;height:40px;border-radius:8px}
+#login{max-width:360px;margin:12vh auto}
+.pager{display:flex;gap:8px;align-items:center;margin-top:10px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="login" class="card" hidden>
+  <h2>🔐 Panel</h2>
+  <label for="pw">Contraseña</label><input id="pw" type="password" autocomplete="current-password">
+  <p class="hint" id="lerr" style="color:var(--bad);min-height:1.2em"></p>
+  <button class="btn" id="lgo" style="width:100%">Entrar</button>
+</div>
+<div id="app" hidden>
+  <header><b>📊 Página viral</b><nav id="nav"></nav><span style="flex:1"></span><a class="btn alt" href="/" target="_blank">Ver la página</a><button class="btn alt" id="out">Salir</button></header>
+  <main id="main"></main>
+</div>
+<script>
+// Dentro de ShortForge: mismos colores que el resto del programa.
+if (new URLSearchParams(location.search).get('tema') === 'sf') { const r = document.documentElement.style; r.setProperty('--brand', '#14532d'); r.setProperty('--brand2', '#e3f1e7'); document.addEventListener('DOMContentLoaded', () => { const h = document.querySelector('header'); if (h) h.style.position = 'static'; }); }
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const n = x => Number(x || 0).toLocaleString('es-PE');
+async function api(u, body) {
+  const r = await fetch('/api/admin/' + u, body !== undefined ? { method: 'POST', headers: { 'content-type': 'application/json', 'x-panel': '1' }, body: JSON.stringify(body) } : {});
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && u !== 'login') { mostrarLogin(); throw new Error('Inicia sesión'); }
+  if (!r.ok) throw new Error(j.error || 'Error ' + r.status);
+  return j;
+}
+const flag = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 127397 + c.charCodeAt(0))) : '🌐';
+const SIGNOS = ['aries','tauro','geminis','cancer','leo','virgo','libra','escorpio','sagitario','capricornio','acuario','piscis'];
+const JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Test de amor', animal: 'Qué animal eres', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
+const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['ajustes', 'Ajustes']];
+let tab = 'resumen';
+function mostrarLogin() { $('#app').hidden = true; $('#login').hidden = false; $('#pw').focus(); }
+$('#lgo').onclick = async () => { try { await api('login', { password: $('#pw').value }); $('#login').hidden = true; iniciar(); } catch (e) { $('#lerr').textContent = e.message; } };
+$('#pw').onkeydown = e => { if (e.key === 'Enter') $('#lgo').click(); };
+$('#out').onclick = async () => { await api('logout', {}).catch(() => {}); mostrarLogin(); };
+function iniciar() { $('#app').hidden = false; $('#nav').innerHTML = TABS.map(([k, l]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join(''); ir(tab); }
+$('#nav').onclick = e => { const b = e.target.closest('[data-t]'); if (b) ir(b.dataset.t); };
+function ir(t) { tab = t; $('#main').onclick = $('#main').onchange = null; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); V[t]().catch(e => $('#main').innerHTML = `<div class="card">${esc(e.message)}</div>`); }
+const barras = (rows, lab, val) => { const m = Math.max(1, ...rows.map(r => r[val])); return `<table>${rows.map(r => `<tr><td>${lab(r)}</td><td style="width:45%"><div class="hb"><i style="width:${Math.round(r[val] * 100 / m)}%"></i></div></td><td class="n">${n(r[val])}</td></tr>`).join('') || '<tr><td class="hint">Sin datos todavía</td></tr>'}</table>`; };
+
+const V = {
+  async resumen() {
+    const s = await api('stats');
+    const m = Math.max(1, ...s.dias.map(d => d.n));
+    $('#main').innerHTML = `${s.vapid ? '' : '<div class="notice">⚠ Faltan las llaves VAPID en el archivo .env: sin ellas no se pueden enviar notificaciones (ejecuta <b>npm run keys</b>).</div>'}
+    <div class="kpis">
+      <div class="kpi"><b>${n(s.visitas.hoy)}</b><span>Visitas hoy</span></div><div class="kpi"><b>${n(s.visitas.semana)}</b><span>Visitas 7 días</span></div>
+      <div class="kpi"><b>${n(s.visitas.unicos)}</b><span>Personas únicas</span></div><div class="kpi"><b>${n(s.subs.activos)}</b><span>Suscriptores activos (+${n(s.subs.hoy)} hoy)</span></div>
+      <div class="kpi"><b>${n(s.enviadas)}</b><span>Notificaciones enviadas</span></div><div class="kpi"><b>${s.enviadas ? (s.clics * 100 / s.enviadas).toFixed(1) : 0}%</b><span>Clics (${n(s.clics)})</span></div></div>
+    <div class="card"><h3>Visitas de los últimos 14 días</h3><div class="days">${s.dias.map(d => `<div style="height:${Math.round(d.n * 100 / m)}%" title="${d.d}: ${d.n}"><span>${d.d.slice(8)}</span></div>`).join('') || '<p class="hint">Sin datos todavía</p>'}</div><div style="height:18px"></div></div>
+    <div class="cols">
+      <div class="card"><h3>🌎 Por país</h3><table><tr><th>País</th><th class="n">Visitas</th><th class="n">Suscriptores</th></tr>${s.paises.map(p => `<tr><td>${flag(p.cc)} ${esc(p.pais)}</td><td class="n">${n(p.visitas)}</td><td class="n">${n(p.subs)}</td></tr>`).join('') || '<tr><td class="hint">Sin datos</td></tr>'}</table></div>
+      <div class="card"><h3>🏙️ Ciudades</h3>${barras(s.ciudades, r => `${esc(r.ciudad)} <span class="hint">${esc(r.pais)}</span>`, 'n')}</div>
+      <div class="card"><h3>🔗 De dónde llegan</h3><p class="hint">Usa enlaces con <b>?src=</b> (ej. <code>?src=fb-reel-gato</code>) para saber qué publicación trae más gente.</p>${barras(s.fuentes, r => esc(r.source), 'n')}</div>
+      <div class="card"><h3>🎮 Juegos más usados</h3>${barras(s.juegos, r => esc(JUEGOS[r.game] || r.game), 'n')}</div>
+      <div class="card"><h3>📱 Dispositivo y app</h3>${barras(s.dispositivos, r => `${esc(r.device)} · ${esc(r.browser)}`, 'n')}</div>
+      <div class="card"><h3>♈ Suscriptores por signo</h3>${barras(s.signos, r => esc(r.sign), 'n')}</div>
+    </div>`;
+  },
+  async visitantes() { return tabla('visitantes'); },
+  async suscriptores() { return tabla('suscriptores'); },
+  async campanas() {
+    const [o, list, aj] = await Promise.all([api('opciones'), api('campanas'), api('ajustes')]);
+    const chips = (name, arr, lab, val) => `<div class="chips" data-f="${name}">${arr.map(x => `<label><input type="checkbox" value="${esc(val(x))}">${lab(x)}</label>`).join('') || '<span class="hint">Aún no hay datos</span>'}</div>`;
+    $('#main').innerHTML = `<div class="cols">
+    <div class="card"><h2>📣 Nueva campaña</h2>
+      <label>Título (usa {signo} para personalizar)</label><input id="c-t" maxlength="80" placeholder="✨ {signo}, hoy es tu día">
+      <label>Mensaje</label><textarea id="c-b" maxlength="200" placeholder="Mira lo que dicen los astros y el video de hoy 👉"></textarea>
+      <label>Enlace al tocar (tu página o un video de YouTube/Facebook/TikTok/Instagram)</label><input id="c-u" placeholder="https://youtube.com/shorts/... o /?g=ruleta" value="${esc(aj.video?.url || '')}">
+      <label>Imagen grande (opcional, URL https .jpg/.png)</label><input id="c-img" placeholder="https://.../imagen.jpg">
+      <h3 style="margin-top:14px">A quién</h3><p class="hint">Si no marcas nada en un grupo, se envía a todos.</p>
+      <label>Países</label>${chips('countries', o.paises, x => `${flag(x.cc)} ${esc(x.pais)} <span class="hint">${n(x.n)}</span>`, x => x.cc)}
+      <label>Ciudades</label>${chips('cities', o.ciudades.slice(0, 40), x => `${esc(x.city)} <span class="hint">${n(x.n)}</span>`, x => x.city)}
+      <label>Signos</label>${chips('signs', SIGNOS.map(s => ({ s })), x => esc(x.s), x => x.s)}
+      <label>Juego con el que llegaron</label>${chips('games', Object.keys(JUEGOS).map(g => ({ g })), x => esc(JUEGOS[x.g]), x => x.g)}
+      <label>Fuente</label>${chips('sources', o.fuentes, x => `${esc(x.source)} <span class="hint">${n(x.n)}</span>`, x => x.source)}
+      <div class="row"><div><label>Cantidad máxima (0 = todos)</label><input id="c-max" type="number" min="0" value="0"></div>
+        <div><label>Enviar (vacío = ahora) · hora Perú</label><input id="c-when" type="datetime-local"></div></div>
+      <p class="big" id="c-count" style="margin-top:12px">…</p>
+      <p class="hint">Cada persona recibe como máximo <b>${aj.tope}</b> notificaciones al día (se cambia en Ajustes): más que eso hace que la gente las bloquee.</p>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="c-go">Enviar campaña</button></div>
+      <h3 style="margin-top:16px">Vista previa</h3><div class="prev"><img src="/icon.png" alt=""><div><b id="pv-t">Título</b><div class="hint" id="pv-b">Mensaje</div></div></div>
+    </div>
+    <div class="card"><h2>Historial</h2><div class="scroll"><table><tr><th>Campaña</th><th>Estado</th><th class="n">Enviadas</th><th class="n">Clics</th></tr>
+      ${list.map(c => `<tr><td><b>${esc(c.title)}</b>${c.auto ? ' <span class="tag">automática</span>' : ''}<div class="hint">${esc(c.hora)} · ${esc(resumenFiltros(c))}</div></td>
+        <td><span class="tag ${c.status === 'enviada' ? 'ok' : c.status === 'error' ? 'bad' : c.status === 'programada' ? 'warn' : ''}">${esc(c.status)}</span>${c.status === 'programada' ? ` <button class="btn alt" data-x="${c.id}" style="padding:2px 8px">Cancelar</button>` : ''}
+        ${c.removed || c.failed || c.skipped ? `<div class="hint">${c.removed ? n(c.removed) + ' dadas de baja · ' : ''}${c.failed ? n(c.failed) + ' fallidas · ' : ''}${c.skipped ? n(c.skipped) + ' por tope diario' : ''}</div>` : ''}</td>
+        <td class="n">${n(c.sent)}</td><td class="n">${n(c.clicks)}${c.sent ? `<div class="hint">${(c.clicks * 100 / c.sent).toFixed(1)}%</div>` : ''}</td></tr>`).join('') || '<tr><td class="hint">Aún no hay campañas</td></tr>'}</table></div></div></div>`;
+    const filtros = () => { const f = {}; document.querySelectorAll('[data-f]').forEach(d => { const v = [...d.querySelectorAll('input:checked')].map(i => i.value); if (v.length) f[d.dataset.f] = v; }); return f; };
+    const recontar = async () => { const r = await api('contar', { filters: filtros(), max: +$('#c-max').value || 0 }); $('#c-count').textContent = `Llegará a ${n(r.enviar)} de ${n(r.n)} suscriptores que cumplen el filtro`; };
+    $('#main').onchange = e => { if (e.target.closest('[data-f]') || e.target.id === 'c-max') recontar(); };
+    const pv = () => { $('#pv-t').textContent = ($('#c-t').value || 'Título').replaceAll('{signo}', 'Leo'); $('#pv-b').textContent = ($('#c-b').value || 'Mensaje').replaceAll('{signo}', 'Leo'); };
+    $('#c-t').oninput = $('#c-b').oninput = pv; recontar();
+    $('#c-go').onclick = async () => {
+      const when = $('#c-when').value;
+      if (!confirm(when ? `¿Programar la campaña para el ${when.replace('T', ' ')} (hora Perú)?` : `¿Enviar ahora? ${$('#c-count').textContent}`)) return;
+      $('#c-go').disabled = true;
+      try { await api('campana', { title: $('#c-t').value, body: $('#c-b').value, url: $('#c-u').value, image: $('#c-img').value, filters: filtros(), max: +$('#c-max').value || 0, cuando: when }); alert(when ? 'Campaña programada ✓' : 'Enviando… mira el historial en unos segundos ✓'); ir('campanas'); }
+      catch (e) { alert(e.message); $('#c-go').disabled = false; }
+    };
+    $('#main').onclick = async e => { const b = e.target.closest('[data-x]'); if (b && confirm('¿Cancelar esta campaña programada?')) { await api('cancelar', { id: +b.dataset.x }); ir('campanas'); } };
+  },
+  async ajustes() {
+    const a = await api('ajustes');
+    $('#main').innerHTML = `<div class="cols">
+    <div class="card"><h2>🎬 Video destacado</h2><p class="hint">Aparece en la página y después de cada resultado. Pon tu último Short o Reel.</p>
+      <label>Enlace del video</label><input id="v-u" value="${esc(a.video?.url || '')}" placeholder="https://youtube.com/shorts/...">
+      <label>Texto del botón</label><input id="v-t" value="${esc(a.video?.title || 'Mira el video de hoy')}" maxlength="80">
+      <p style="margin-top:10px"><button class="btn" id="v-go">Guardar</button></p></div>
+    <div class="card"><h2>☀️ Horóscopo diario automático</h2><p class="hint">Cada día a esta hora (Perú) se envía a todos los suscriptores, personalizado con su signo.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="d-on" style="width:auto" ${a.diario.on ? 'checked' : ''}> Activado</label>
+      <div class="row"><div><label>Hora</label><input id="d-h" type="time" value="${esc(a.diario.hora)}"></div></div>
+      <label>Título</label><input id="d-t" maxlength="80" value="${esc(a.diario.title)}"><label>Mensaje</label><textarea id="d-b" maxlength="200">${esc(a.diario.body)}</textarea>
+      <label>Enlace</label><input id="d-u" value="${esc(a.diario.url)}">
+      <p style="margin-top:10px"><button class="btn" id="d-go">Guardar</button></p></div>
+    <div class="card"><h2>📊 Encuesta del día</h2>${a.encuesta ? `<p class="hint">Actual: <b>${esc(a.encuesta.q)}</b></p><table>${a.encuesta.options.map((o, i) => `<tr><td>${esc(o)}</td><td class="n">${n(a.encuesta.votos[i])}</td></tr>`).join('')}</table>` : ''}
+      <label>Nueva pregunta</label><input id="p-q" maxlength="120" placeholder="¿Qué prefieres…?"><label>Opciones (una por línea, 2 a 6)</label><textarea id="p-o" placeholder="🍕 Pizza&#10;🍔 Hamburguesa"></textarea>
+      <p style="margin-top:10px"><button class="btn" id="p-go">Publicar encuesta nueva</button></p></div>
+    <div class="card"><h2>📄 Política de privacidad</h2><p class="hint">Obligatorio antes de compartir la página (Ley 29733). Se muestra en <a href="/privacidad.html" target="_blank">/privacidad.html</a>.</p>
+      <div class="row"><div><label>Responsable (tu nombre o empresa)</label><input id="pr-n" value="${esc(a.priv?.nombre || '')}"></div><div><label>Ciudad</label><input id="pr-c" value="${esc(a.priv?.ciudad || '')}" placeholder="Lima, Perú"></div></div>
+      <div class="row"><div><label>Correo de contacto</label><input id="pr-m" value="${esc(a.priv?.correo || '')}"></div><div><label>Cuánto tiempo guardas los datos</label><input id="pr-p" value="${esc(a.priv?.plazo || '24 meses')}"></div></div>
+      <label>Código de inscripción del banco de datos (Autoridad de Protección de Datos)</label><input id="pr-k" value="${esc(a.priv?.codigo || '')}" placeholder="en trámite">
+      <p style="margin-top:10px"><button class="btn" id="pr-go">Guardar</button></p></div>
+    <div class="card"><h2>🛡️ Tope diario</h2><p class="hint">Máximo de notificaciones por persona al día. Recomendado: 2 o 3.</p>
+      <input id="t-n" type="number" min="1" max="10" value="${a.tope}"><p style="margin-top:10px"><button class="btn" id="t-go">Guardar</button></p></div></div>`;
+    const ok = () => alert('Guardado ✓');
+    $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
+    $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
+    $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#pr-go').onclick = () => api('ajustes', { priv: { nombre: $('#pr-n').value, ciudad: $('#pr-c').value, correo: $('#pr-m').value, plazo: $('#pr-p').value, codigo: $('#pr-k').value } }).then(ok, e => alert(e.message));
+    $('#t-go').onclick = () => api('ajustes', { tope: +$('#t-n').value }).then(ok, e => alert(e.message));
+  },
+};
+function resumenFiltros(c) { try { const f = JSON.parse(c.filters || '{}'), p = []; for (const [k, v] of Object.entries(f)) p.push(v.join(', ')); return (p.join(' · ') || 'todos') + (c.max_n ? ` · máx ${c.max_n}` : ''); } catch (e) { return ''; } }
+let F = { p: 0 };
+async function tabla(tipo) {
+  const o = await api('opciones').catch(() => ({ paises: [], fuentes: [] }));
+  const qs = new URLSearchParams(Object.entries(F).filter(([, v]) => v !== '' && v != null)).toString();
+  const d = await api(tipo + '?' + qs), cols = d.rows[0] ? Object.keys(d.rows[0]) : [];
+  $('#main').innerHTML = `<div class="card"><h2>${tipo === 'visitantes' ? '👥 Visitantes' : '🔔 Suscriptores'} <span class="hint">(${n(d.total)})</span></h2>
+    <div class="row"><div><label>País</label><select id="f-pais"><option value="">Todos</option>${o.paises.map(p => `<option value="${esc(p.cc)}" ${F.pais === p.cc ? 'selected' : ''}>${flag(p.cc)} ${esc(p.pais)}</option>`).join('')}</select></div>
+      <div><label>Juego</label><select id="f-juego"><option value="">Todos</option>${Object.entries(JUEGOS).map(([k, l]) => `<option value="${k}" ${F.juego === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div><label>Signo</label><select id="f-signo"><option value="">Todos</option>${SIGNOS.map(s => `<option ${F.signo === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      <div><label>Fuente</label><input id="f-fuente" value="${esc(F.fuente || '')}" placeholder="fb-post1"></div>
+      <div><label>Desde</label><input id="f-desde" type="date" value="${esc(F.desde || '')}"></div><div><label>Hasta</label><input id="f-hasta" type="date" value="${esc(F.hasta || '')}"></div></div>
+    <p style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="f-go">Filtrar</button><button class="btn alt" id="f-clear">Limpiar</button>
+      <a class="btn alt" href="/api/admin/export?tipo=${tipo}&${qs}">⬇ Descargar Excel (CSV)</a></p></div>
+    <div class="card scroll"><table><tr>${cols.map(c => `<th>${esc(c.replace(/_/g, ' '))}</th>`).join('')}</tr>${d.rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('') || '<tr><td class="hint">Sin resultados</td></tr>'}</table>
+    <div class="pager"><button class="btn alt" id="pg-a" ${F.p > 0 ? '' : 'disabled'}>← Anterior</button><span class="hint">Página ${F.p + 1} de ${Math.max(1, Math.ceil(d.total / 100))}</span><button class="btn alt" id="pg-b" ${(F.p + 1) * 100 < d.total ? '' : 'disabled'}>Siguiente →</button></div></div>`;
+  $('#f-go').onclick = () => { F = { p: 0, pais: $('#f-pais').value, juego: $('#f-juego').value, signo: $('#f-signo').value, fuente: $('#f-fuente').value.trim(), desde: $('#f-desde').value, hasta: $('#f-hasta').value }; tabla(tipo); };
+  $('#f-clear').onclick = () => { F = { p: 0 }; tabla(tipo); };
+  $('#pg-a').onclick = () => { F.p--; tabla(tipo); }; $('#pg-b').onclick = () => { F.p++; tabla(tipo); };
+}
+api('stats').then(iniciar, () => {});
+</script>
+</body>
+</html>

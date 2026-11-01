@@ -255,6 +255,14 @@ async function api(u, q, U, r) {
     publish.saveTokens(); return { ok: 1 };
   }
   if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
+  if (u.startsWith('/api/viral')) {
+    const V = require('./lib/viral'), o = P ? await json(q) : {};
+    if (u === '/api/viral') return V.estado();
+    if (u === '/api/viral/encender' && P) { await V.encender(); return V.estado(); }
+    if (u === '/api/viral/apagar' && P) { V.apagar(); return V.estado(); }
+    if (u === '/api/viral/config' && P) { V.configurar(o); return V.estado(); }
+    if (u === '/api/viral/ajustes' && P) { V.ajustes(o); if (o.destacado) V.destacar().catch(() => {}); return V.estado(); }
+  }
   if (u === '/api/radar' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); return require('./lib/radar').escanear(ch); }
   if (u === '/api/kit' && P) { const o = await json(q), j = job(o.id); if (!j) throw new Error('Video no encontrado'); return require('./lib/crecer').kitGrupos(j); }
   if (u === '/api/seo/todos' && P) return require('./lib/seo').mejorarTodos();
@@ -473,5 +481,6 @@ http.createServer(async (q, r) => {
   actualizar.start();
   require('./lib/crecer').start();
   require('./lib/radar').start();
+  require('./lib/viral').start();
   ai.startRevision();
 });

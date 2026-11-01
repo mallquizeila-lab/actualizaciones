@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tests y juegos virales: horóscopo, amor, suerte</title>
+<meta name="description" content="Tu horóscopo y alma gemela, test de amor, qué animal eres, ruleta de la suerte y más. Gratis.">
+<meta property="og:title" content="¿Te atreves? Horóscopo, test de amor y ruleta de la suerte">
+<meta property="og:description" content="Juegos gratis para descubrir tu signo, tu alma gemela y tu suerte de hoy.">
+<meta property="og:image" content="/og/general.png">
+<meta name="theme-color" content="#1a1640">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1640;--surface:#26205a;--surface2:#30296b;--line:#3d3580;--text:#f4eefd;--muted:#bdb3e3;--gold:#f4b942;--pink:#ff7aa8;--violet:#9b87f5;--ok:#5ee0a0;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:radial-gradient(1000px 600px at 50% -10%,#3a2f86 0%,var(--bg) 60%) fixed,var(--bg);color:var(--text);font:400 17px/1.55 Figtree,system-ui,sans-serif;overflow-x:hidden}
+main{position:relative;max-width:520px;margin:0 auto;padding:22px 16px 60px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.15}
+h1{font-size:2rem;font-weight:800;text-align:center;margin:8px 0 6px}
+h2{font-size:1.5rem;margin-bottom:12px}
+h3{font-size:1.15rem;margin-bottom:6px}
+.sub{color:var(--muted);text-align:center;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 12px;text-align:center;cursor:pointer;color:var(--text);font:inherit;transition:transform .15s}
+.game:hover,.game:focus-visible{transform:translateY(-2px);border-color:var(--gold)}
+.game .e{font-size:2.4rem;display:block}.game b{display:block;margin-top:6px;font-size:1rem}.game small{color:var(--muted);font-size:.8rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text],input[type=date],select{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit}
+input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{display:block;width:100%;padding:14px 16px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#241a00;font:700 1rem Figtree,sans-serif;cursor:pointer;text-align:center;text-decoration:none;margin-top:12px}
+.btn.alt{background:transparent;color:var(--text);border-color:var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.opt{display:block;width:100%;text-align:left;padding:14px 16px;margin-top:10px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--violet)}
+.back{background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;padding:6px 0;margin-bottom:6px}
+.big{font-size:4.5rem;line-height:1;text-align:center;margin:6px 0}
+.res h2{text-align:center}.res p{color:var(--muted)}.res .sec{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.res .sec b{color:var(--text)}
+.pct{font:800 3.6rem Fraunces,serif;text-align:center;color:var(--pink)}
+.bar{height:12px;background:var(--surface2);border-radius:6px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--gold));width:0;transition:width 1.2s}
+.share{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.share a,.share button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);color:var(--text);font:600 .78rem Figtree,sans-serif;text-decoration:none;cursor:pointer}
+.share span{font-size:1.5rem}
+.wheel-wrap{position:relative;width:290px;height:290px;margin:10px auto}
+.wheel{width:100%;height:100%;border-radius:50%;border:6px solid var(--gold);transition:transform 4.2s cubic-bezier(.17,.67,.12,1)}
+.pin{position:absolute;top:-12px;left:50%;margin-left:-14px;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid var(--text);z-index:2}
+.poll-o{position:relative;overflow:hidden}.poll-o i{position:absolute;inset:0 auto 0 0;background:rgba(244,185,66,.22);width:0;transition:width .8s}.poll-o span{position:relative}
+.modal{position:fixed;inset:0;background:rgba(10,8,30,.82);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal .card{max-width:440px;width:100%;margin:0}
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-weight:400;font-size:.92rem;color:var(--muted)}
+.check input{margin-top:3px;width:20px;height:20px;accent-color:var(--gold);flex:none}
+.check a{color:var(--text)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;max-width:90vw}
+.small{font-size:.8rem;color:var(--muted);text-align:center;margin-top:24px}.small a{color:var(--muted)}
+.err{color:#ffb4a8;font-size:.9rem;margin-top:8px;min-height:1.1em}
+.video{display:flex;gap:12px;align-items:center}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.wheel,.bar i,.game{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <section id="home">
+    <h1>✨ ¿Te atreves a descubrirlo?</h1>
+    <p class="sub">Juegos gratis de 1 minuto. Compártelos con tus amigos.</p>
+    <div class="grid" id="games"></div>
+    <div class="card" id="pollCard" hidden></div>
+    <div class="card" id="videoCard" hidden></div>
+  </section>
+
+  <section id="play" hidden>
+    <button class="back" id="back">← Más juegos</button>
+    <div id="stage"></div>
+  </section>
+
+  <p class="small">Contenido solo de entretenimiento. <a href="/privacidad.html">Privacidad</a> · <a href="#" id="unsub">No quiero más notificaciones</a></p>
+</main>
+
+<div class="modal" id="gate" hidden>
+  <div class="card">
+    <h2>Antes de empezar</h2>
+    <label class="check"><input type="checkbox" id="g-adult"><span>Tengo <b>18 años o más</b>.</span></label>
+    <label class="check"><input type="checkbox" id="g-ok"><span>Acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>: se guarda mi país, ciudad aproximada y tipo de dispositivo para mejorar la página y mostrarme contenido.</span></label>
+    <button class="btn" id="g-go" disabled>Continuar</button>
+    <button class="btn alt" id="g-no">No, gracias</button>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), P = new URLSearchParams(location.search);
+const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json());
+const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const toast = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 3200); };
+const SRC = (P.get('src') || LS.get('src') || 'directo').slice(0, 60); LS.set('src', SRC);
+let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) + Date.now().toString(36); LS.set('vid', VID); }
+let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); }).catch(() => {});
+const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const pick = (a, h) => a[h % a.length];
+const hoy = () => new Date().toISOString().slice(0, 10);
+
+// ---------- Permiso (una vez) ----------
+let consent = LS.get('consent') === '2';
+function pedirPermiso() {
+  return new Promise(ok => {
+    if (consent) return ok(true);
+    const g = $('#gate'); g.hidden = false;
+    const upd = () => $('#g-go').disabled = !($('#g-adult').checked && $('#g-ok').checked);
+    $('#g-adult').onchange = $('#g-ok').onchange = upd;
+    $('#g-go').onclick = () => { consent = true; LS.set('consent', '2'); g.hidden = true; pixel(); ok(true); };
+    $('#g-no').onclick = () => { g.hidden = true; ok(false); };
+  });
+}
+function pixel() {
+  if (!consent || !cfg.pixel || window.fbq) return;
+  !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s) }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', cfg.pixel); fbq('track', 'PageView');
+}
+async function registrar(game, sign) { // una vez por juego y día
+  const k = 'v:' + game + ':' + hoy(); if (LS.get(k)) return; LS.set(k, 1);
+  post('/api/visit', { consent: true, adult: true, vid: VID, src: SRC, game, sign }).catch(() => {});
+  if (window.fbq) fbq('trackCustom', 'Juego', { juego: game });
+}
+
+// ---------- Datos ----------
+const SIGNS = [['capricornio','Capricornio','♑','tierra'],['acuario','Acuario','♒','aire'],['piscis','Piscis','♓','agua'],['aries','Aries','♈','fuego'],['tauro','Tauro','♉','tierra'],['geminis','Géminis','♊','aire'],['cancer','Cáncer','♋','agua'],['leo','Leo','♌','fuego'],['virgo','Virgo','♍','tierra'],['libra','Libra','♎','aire'],['escorpio','Escorpio','♏','agua'],['sagitario','Sagitario','♐','fuego']];
+const STARTS = [[1,20,1],[2,19,2],[3,21,3],[4,20,4],[5,21,5],[6,21,6],[7,23,7],[8,23,8],[9,23,9],[10,23,10],[11,22,11]];
+function signOf(bd) { const [, m, d] = bd.split('-').map(Number); let k = 0; STARTS.forEach(([sm, sd, i]) => { if (m > sm || (m === sm && d >= sd)) k = i; }); if (m === 12 && d >= 22) k = 0; return SIGNS[k]; }
+const edad = bd => { const b = new Date(bd + 'T12:00'), n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
+const TODAY = ['Un mensaje que esperabas llega hoy. Respóndelo con calma.','Es buen día para cerrar un asunto pendiente. Te sentirás más ligero.','Alguien cercano necesita tu opinión. Tu consejo cuenta más de lo que crees.','La suerte aparece en lo pequeño: fíjate en las coincidencias de la tarde.','Evita decidir con prisa. Esta noche verás la respuesta con más claridad.','Una conversación reabre una puerta que creías cerrada.','Tu energía está alta. Úsala en lo que llevas postergando.','El dinero pide orden hoy. Revisa un gasto que puedes recortar.','Alguien te piensa más de lo que imaginas. Un gesto tuyo puede cambiarlo todo.','Hoy brillas en lo social: acepta esa invitación.','Una idea que tuviste hace tiempo vuelve con fuerza. Escríbela.','Cuida tu descanso: mañana necesitarás toda tu claridad.'];
+const COLORS = ['dorado','azul','verde','rojo','violeta','blanco','naranja','rosado'];
+const COMPLEMENT = { fuego: 'aire', aire: 'fuego', tierra: 'agua', agua: 'tierra' };
+const Q1 = [['Calma y estabilidad','alguien tranquilo que te da seguridad'],['Aventura','alguien espontáneo que te saca de la rutina'],['Pasión intensa','alguien apasionado que te mira de frente'],['Complicidad y risas','alguien con quien todo se vuelve una broma compartida']];
+const Q2 = [['Al amanecer','en una mañana tranquila, sin planearlo'],['A media tarde','en medio de un plan cotidiano'],['De noche','de noche, en una conversación que no querrán terminar']];
+const ANIMALES = { leon: ['🦁','León','Naciste para liderar. Tu energía contagia y la gente te sigue sin que lo pidas.'], delfin: ['🐬','Delfín','Alegre, sociable e inteligente. Donde llegas, sube el ánimo.'], lobo: ['🐺','Lobo','Leal hasta el final. Tu grupo es sagrado y lo proteges con todo.'], buho: ['🦉','Búho','Observador y sabio. Ves lo que otros no ven y das los mejores consejos.'], gato: ['🐱','Gato','Independiente y misterioso. Haces las cosas a tu manera y con estilo.'], perro: ['🐶','Perro','Puro corazón. Tu cariño es sincero y siempre estás cuando te necesitan.'], mariposa: ['🦋','Mariposa','Creativo y libre. Te reinventas una y otra vez y siempre sales más bonito.'], aguila: ['🦅','Águila','Ambicioso y visionario. Cuando te pones una meta, nadie te detiene.'] };
+const QA = [
+  ['Un sábado perfecto es…', [['Organizar un plan con todos','leon'],['Playa o piscina con amigos','delfin'],['Una salida con mis de siempre','lobo'],['Leer o ver documentales','buho']]],
+  ['¿Qué dicen de ti tus amigos?', [['Que mando un poco 😅','leon'],['Que soy el alma de la fiesta','delfin'],['Que soy muy fiel','perro'],['Que soy un misterio','gato']]],
+  ['Elige un lugar', [['La cima de una montaña','aguila'],['Un bosque de noche','lobo'],['Un jardín lleno de flores','mariposa'],['Una biblioteca antigua','buho']]],
+  ['Ante un problema tú…', [['Lo enfrento de frente','leon'],['Lo pienso con calma','buho'],['Pido ayuda a mi gente','perro'],['Busco una salida creativa','mariposa']]],
+  ['Tu frase favorita', [['"Si lo sueñas, lo logras"','aguila'],['"La vida es una fiesta"','delfin'],['"A mi manera"','gato'],['"Juntos somos más"','lobo']]],
+];
+const RULETA = [['💰','Dinero inesperado','Hoy algo de dinero llega por donde no esperabas. Mantén los ojos abiertos.'],['❤️','Amor a la vista','Alguien piensa en ti. Un mensaje tuyo hoy puede encender algo bonito.'],['🍀','Suerte total','Todo te sale mejor de lo normal. Es el día para intentarlo.'],['✈️','Un viaje','Se acerca una salida o viaje que te va a encantar.'],['🎁','Una sorpresa','Te espera una sorpresa agradable antes de que acabe la semana.'],['💪','Energía al máximo','Tienes la fuerza para terminar eso que dejaste a medias.'],['🤝','Nueva amistad','Conocerás a alguien que se volverá importante para ti.'],['⭐','Reconocimiento','Alguien va a valorar públicamente algo que hiciste.']];
+const NUM = { 1:'Líder nato. Abres caminos y te gusta ser el primero.', 2:'Diplomático y sensible. Unes a las personas.', 3:'Creativo y comunicador. Tu alegría ilumina.', 4:'Trabajador y constante. Construyes cosas que duran.', 5:'Libre y aventurero. Necesitas cambio y movimiento.', 6:'Protector y familiar. Cuidas a los tuyos con amor.', 7:'Pensador y espiritual. Buscas la verdad de las cosas.', 8:'Ambicioso y poderoso. Naciste para el éxito material.', 9:'Generoso y humanitario. Tu misión es ayudar.', 11:'Número maestro: intuición fuera de lo común.', 22:'Número maestro: puedes hacer realidad grandes sueños.', 33:'Número maestro: amor y servicio sin límites.' };
+const GAMES = [['horoscopo','🔮','Horóscopo y alma gemela','Tu lectura de hoy'],['compatibilidad','💘','Test de amor','¿Cuánto se quieren?'],['animal','🐾','¿Qué animal eres?','5 preguntas'],['ruleta','🎡','Ruleta de la suerte','Gira y descubre'],['numerologia','🔢','Tu número del destino','Según tu fecha'],['encuesta','📊','Encuesta del día','Vota y mira']];
+
+// ---------- Navegación ----------
+$('#games').innerHTML = GAMES.map(([id, e, t, s]) => `<button class="game" data-g="${id}"><span class="e">${e}</span><b>${t}</b><small>${s}</small></button>`).join('');
+$('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
+$('#back').onclick = () => { history.replaceState(null, '', location.pathname); show('home'); };
+function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); }
+async function abrir(g) {
+  if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
+  history.replaceState(null, '', '?g=' + g + (SRC !== 'directo' ? '&src=' + encodeURIComponent(SRC) : ''));
+  show('play'); JUEGO[g]();
+}
+const stage = h => { $('#stage').innerHTML = h; };
+
+// ---------- Juegos ----------
+const JUEGO = {
+  horoscopo() {
+    stage(`<div class="card"><h2>🔮 Tu signo y tu alma gemela</h2>
+      <label for="n">Tu nombre</label><input id="n" type="text" maxlength="30" autocomplete="given-name">
+      <label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10)}">
+      <p class="err" id="err"></p><button class="btn" id="go">Ver mi lectura</button></div>`);
+    $('#go').onclick = () => {
+      const n = $('#n').value.trim(), bd = $('#bd').value;
+      if (!n || !bd) return $('#err').textContent = 'Escribe tu nombre y tu fecha';
+      if (edad(bd) < 18) return $('#err').textContent = 'Este juego es solo para mayores de 18 años';
+      preguntas(Q1, '¿Qué buscas en el amor?', a1 => preguntas(Q2, '¿Cuándo sientes más energía?', a2 => {
+        const sg = signOf(bd), hn = hash(n.toLowerCase() + bd), hd = hash(n.toLowerCase() + bd + hoy());
+        const same = SIGNS.filter(x => x[3] === sg[3] && x[0] !== sg[0]), comp = SIGNS.filter(x => x[3] === COMPLEMENT[sg[3]]);
+        const a = pick(same, hn), b = pick(comp, hn >>> 3), letra = 'ABCDEFGHIJLMNPRSTVY'[hn % 19];
+        registrar('horoscopo', sg[0]); LS.set('sign', sg[0]);
+        resultado({ g: 'horoscopo', emoji: sg[2], titulo: `${n}, eres ${sg[1]}`, sub: `Signo de ${sg[3]}`,
+          bloques: [['Tu horóscopo de hoy', `${pick(TODAY, hd)} Número de la suerte: <b>${hd % 90 + 1}</b>. Color: <b>${pick(COLORS, hd >>> 4)}</b>.`],
+                    ['Tu alma gemela', `Probablemente es <b>${a[1]}</b> o <b>${b[1]}</b>. Su nombre empieza con <b>${letra}</b>. Es ${Q1[a1][1]}. Se conocerán ${Q2[a2][1]}.`]],
+          compartir: `Soy ${sg[1]} ${sg[2]} y ya sé quién es mi alma gemela. ¿Y tú?`, sign: sg[0] });
+      }));
+    };
+  },
+  compatibilidad() {
+    stage(`<div class="card"><h2>💘 Test de amor</h2><label for="a">Tu nombre</label><input id="a" type="text" maxlength="30">
+      <label for="b">El nombre de esa persona</label><input id="b" type="text" maxlength="30"><p class="err" id="err"></p><button class="btn" id="go">Calcular amor</button></div>`);
+    $('#go').onclick = () => {
+      const a = $('#a').value.trim(), b = $('#b').value.trim();
+      if (!a || !b) return $('#err').textContent = 'Escribe los dos nombres';
+      const k = [a.toLowerCase(), b.toLowerCase()].sort().join('+'), p = 35 + hash(k) % 66;
+      const msg = p >= 90 ? '¡Almas gemelas! Esto es amor del bueno 🔥' : p >= 75 ? 'Hay química de verdad. No lo dejes pasar 😍' : p >= 55 ? 'Buena base: con paciencia puede crecer mucho 💞' : 'Mejor como amigos… ¡o sorpréndannos! 😅';
+      registrar('compatibilidad');
+      resultado({ g: 'compatibilidad', emoji: '💘', titulo: `${a} + ${b}`, pct: p, bloques: [['Resultado', msg]], compartir: `${a} y ${b}: ${p}% de amor 💘 ¿Cuánto te sale a ti?` });
+    };
+  },
+  animal() {
+    const votos = {}; let i = 0;
+    const paso = () => {
+      if (i === QA.length) {
+        const top = Object.entries(votos).sort((x, y) => y[1] - x[1])[0][0], [e, nom, txt] = ANIMALES[top];
+        registrar('animal');
+        return resultado({ g: 'animal', emoji: e, titulo: `Eres un ${nom}`, bloques: [['Tu animal interior', txt]], compartir: `Mi animal interior es ${nom} ${e}. ¿Cuál es el tuyo?` });
+      }
+      const [preg, ops] = QA[i];
+      stage(`<div class="card"><p class="sub" style="text-align:left;margin:0">Pregunta ${i + 1} de ${QA.length}</p><h2>${preg}</h2>${ops.map(([t], k) => `<button class="opt" data-k="${k}">${t}</button>`).join('')}</div>`);
+      $('#stage').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; $('#stage').onclick = null; const a = ops[+b.dataset.k][1]; votos[a] = (votos[a] || 0) + 1; i++; paso(); };
+    };
+    paso();
+  },
+  ruleta() {
+    const cols = ['#f4b942','#ff7aa8','#9b87f5','#5ee0a0','#f4b942','#ff7aa8','#9b87f5','#5ee0a0'];
+    const grad = 'conic-gradient(' + RULETA.map((_, k) => `${cols[k]} ${k * 45}deg ${(k + 1) * 45}deg`).join(',') + ')';
+    stage(`<div class="card" style="text-align:center"><h2>🎡 La ruleta de la suerte</h2><p class="sub">Un giro por día. ¿Qué te toca hoy?</p>
+      <div class="wheel-wrap"><div class="pin"></div><div class="wheel" id="w" style="background:${grad}"></div></div><button class="btn" id="go">¡Girar!</button></div>`);
+    const ya = LS.get('ruleta:' + hoy());
+    $('#go').onclick = () => {
+      $('#go').disabled = true;
+      const k = ya !== null ? +ya : Math.floor(Math.random() * RULETA.length); LS.set('ruleta:' + hoy(), k);
+      $('#w').style.transform = `rotate(${360 * 6 + (360 - (k * 45 + 22.5))}deg)`;
+      setTimeout(() => { const [e, t, d] = RULETA[k]; registrar('ruleta'); resultado({ g: 'ruleta', emoji: e, titulo: t, bloques: [['Tu suerte de hoy', d]], compartir: `La ruleta de la suerte me dio: ${t} ${e}. ¡Gira la tuya!` }); }, ya !== null ? 300 : 4400);
+    };
+  },
+  numerologia() {
+    stage(`<div class="card"><h2>🔢 Tu número del destino</h2><label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10)}"><p class="err" id="err"></p><button class="btn" id="go">Calcular</button></div>`);
+    $('#go').onclick = () => {
+      const bd = $('#bd').value; if (!bd) return $('#err').textContent = 'Elige tu fecha';
+      if (edad(bd) < 18) return $('#err').textContent = 'Este juego es solo para mayores de 18 años';
+      let n = bd.replace(/\D/g, '').split('').reduce((a, x) => a + +x, 0);
+      while (n > 9 && ![11, 22, 33].includes(n)) n = String(n).split('').reduce((a, x) => a + +x, 0);
+      registrar('numerologia', signOf(bd)[0]);
+      resultado({ g: 'numerologia', emoji: '🔢', titulo: `Tu número es el ${n}`, bloques: [['Lo que dice de ti', NUM[n]]], compartir: `Mi número del destino es el ${n} 🔢 ¿Cuál es el tuyo?` });
+    };
+  },
+  async encuesta() {
+    await cfgP; const p = cfg.poll;
+    if (!p) return stage('<div class="card"><p>No hay encuesta activa ahora.</p></div>');
+    stage(`<div class="card"><h2>📊 ${escH(p.q)}</h2><div id="ops">${p.options.map((o, k) => `<button class="opt poll-o" data-k="${k}"><i></i><span>${escH(o)}</span></button>`).join('')}</div><p class="sub" id="tot"></p></div>`);
+    const votado = LS.get('poll:' + p.id);
+    const ver = r => { const ops = [...document.querySelectorAll('.poll-o')]; ops.forEach((b, k) => { const pc = r.total ? Math.round(r.votes[k] * 100 / r.total) : 0; b.querySelector('i').style.width = pc + '%'; b.querySelector('span').textContent = `${p.options[k]} — ${pc}%`; b.disabled = true; }); $('#tot').textContent = `${r.total} votos`; };
+    const votar = async k => { const r = await post('/api/vote', { poll: p.id, option: k, vid: VID }); LS.set('poll:' + p.id, k); ver(r); registrar('encuesta'); compartirBox({ g: 'encuesta', titulo: p.q, compartir: `Ya voté: ${p.q} ¿Tú qué eliges?` }); };
+    if (votado !== null) votar(+votado); else $('#ops').onclick = e => { const b = e.target.closest('[data-k]'); if (b) { $('#ops').onclick = null; votar(+b.dataset.k); } };
+  },
+};
+function preguntas(ops, titulo, cb) {
+  stage(`<div class="card"><h2>${titulo}</h2>${ops.map(([t], k) => `<button class="opt" data-k="${k}">${t}</button>`).join('')}</div>`);
+  $('#stage').onclick = e => { const b = e.target.closest('[data-k]'); if (b) { $('#stage').onclick = null; cb(+b.dataset.k); } };
+}
+
+// ---------- Resultado + compartir + alertas + video ----------
+let ultimo = null;
+function resultado(r) {
+  ultimo = r;
+  stage(`<div class="card res"><div class="big">${r.emoji}</div><h2>${escH(r.titulo)}</h2>${r.sub ? `<p style="text-align:center">${escH(r.sub)}</p>` : ''}
+    ${r.pct != null ? `<div class="pct">${r.pct}%</div><div class="bar"><i id="pb"></i></div>` : ''}
+    ${r.bloques.map(([h, t]) => `<div class="sec"><h3>${escH(h)}</h3><p>${t}</p></div>`).join('')}</div>
+    <div id="shareBox"></div><div id="pushBox"></div><div id="vBox"></div>
+    <button class="btn alt" onclick="document.getElementById('back').click()">🎮 Jugar otro test</button>`);
+  if (r.pct != null) requestAnimationFrame(() => setTimeout(() => $('#pb').style.width = r.pct + '%', 60));
+  compartirBox(r); alertasBox(r); videoBox();
+}
+function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido&t=${encodeURIComponent(r.compartir.slice(0, 110))}`; }
+function compartirBox(r) {
+  const url = enlace(r), txt = r.compartir, e = encodeURIComponent;
+  const box = document.createElement('div'); box.className = 'card';
+  box.innerHTML = `<h3>📣 Compártelo y reta a tus amigos</h3><div class="share">
+    <a href="https://www.facebook.com/sharer/sharer.php?u=${e(url)}" target="_blank" rel="noopener"><span>📘</span>Facebook</a>
+    <a href="https://wa.me/?text=${e(txt + ' ' + url)}" target="_blank" rel="noopener"><span>💬</span>WhatsApp</a>
+    <button data-s="story"><span>📸</span>Instagram</button>
+    <button data-s="story"><span>🎵</span>TikTok</button>
+    <a href="https://t.me/share/url?url=${e(url)}&text=${e(txt)}" target="_blank" rel="noopener"><span>✈️</span>Telegram</a>
+    <a href="https://twitter.com/intent/tweet?text=${e(txt)}&url=${e(url)}" target="_blank" rel="noopener"><span>✖️</span>X</a>
+    <a href="fb-messenger://share?link=${e(url)}"><span>📨</span>Messenger</a>
+    <button data-s="native"><span>📤</span>Más</button><button data-s="copy"><span>🔗</span>Copiar</button></div>
+    <p class="sub" style="margin:10px 0 0;font-size:.82rem">Instagram y TikTok: te damos una imagen lista para tu Historia o video.</p>`;
+  const tgt = r.g === 'encuesta' ? $('#stage') : $('#shareBox'); tgt.append(box);
+  box.onclick = async ev => {
+    const b = ev.target.closest('[data-s]'); if (!b) return;
+    if (b.dataset.s === 'copy') { try { await navigator.clipboard.writeText(txt + ' ' + url); toast('¡Enlace copiado!'); } catch (x) { prompt('Copia el enlace:', url); } }
+    if (b.dataset.s === 'native') { if (navigator.share) navigator.share({ title: r.titulo, text: txt, url }).catch(() => {}); else { try { await navigator.clipboard.writeText(txt + ' ' + url); toast('¡Enlace copiado!'); } catch (x) {} } }
+    if (b.dataset.s === 'story') historia(r, url);
+  };
+}
+// Imagen vertical 1080x1920 del resultado para Historias de Instagram/TikTok/WhatsApp.
+async function historia(r, url) {
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#3a2f86'); g.addColorStop(1, '#1a1640'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+  x.textAlign = 'center'; x.fillStyle = '#f4b942'; x.font = '260px serif'; x.fillText(r.emoji || '📊', 540, 560);
+  x.fillStyle = '#f4eefd'; x.font = 'bold 84px Georgia, serif'; lineas(x, r.titulo, 920).forEach((l, i) => x.fillText(l, 540, 760 + i * 100));
+  let y = 1000; if (r.pct != null) { x.fillStyle = '#ff7aa8'; x.font = 'bold 200px Georgia, serif'; x.fillText(r.pct + '%', 540, 1080); y = 1180; }
+  x.fillStyle = '#d9d0f5'; x.font = '52px sans-serif'; const tx = (r.bloques?.length ? r.bloques[r.bloques.length - 1][1] : r.compartir || '').replace(/<[^>]+>/g, ''); lineas(x, tx, 900).slice(0, 6).forEach((l, i) => x.fillText(l, 540, y + i * 70));
+  x.fillStyle = '#f4b942'; x.font = 'bold 56px sans-serif'; x.fillText('¿Y tú? Haz el test 👇', 540, 1700); x.fillStyle = '#f4eefd'; x.font = '44px sans-serif'; x.fillText(location.host, 540, 1780);
+  const blob = await new Promise(ok => c.toBlob(ok, 'image/png')), file = new File([blob], 'mi-resultado.png', { type: 'image/png' });
+  if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], text: r.compartir + ' ' + url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mi-resultado.png'; a.click();
+  try { await navigator.clipboard.writeText(url); } catch (e) {}
+  toast('Imagen descargada y enlace copiado: súbela a tu Historia y pega el enlace 🔗');
+}
+function lineas(x, t, w) { const out = []; let l = ''; for (const p of String(t).split(' ')) { const n = l ? l + ' ' + p : p; if (x.measureText(n).width > w && l) { out.push(l); l = p; } else l = n; } if (l) out.push(l); return out; }
+
+// Notificaciones (iPhone: solo si la página está instalada en la pantalla de inicio).
+const ios = /iPhone|iPad/.test(navigator.userAgent), instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+function alertasBox(r) {
+  if (LS.get('push') === '1') return;
+  const box = $('#pushBox'), puede = 'serviceWorker' in navigator && 'PushManager' in window;
+  if (ios && !instalada) { box.innerHTML = `<div class="card"><h3>🔔 ¿Quieres tu horóscopo cada mañana?</h3><p class="sub" style="text-align:left;margin:0">En iPhone: toca <b>Compartir</b> <span aria-hidden="true">⬆️</span> y luego <b>"Agregar a inicio"</b>. Abre la página desde ese ícono y activa las alertas.</p></div>`; return; }
+  if (!puede) return;
+  box.innerHTML = `<div class="card"><h3>🔔 Recibe tu horóscopo y tu suerte cada mañana</h3><p class="sub" style="text-align:left;margin:0">Gratis. Puedes quitarlas cuando quieras.</p><button class="btn" id="pushGo">Sí, avísame</button></div>`;
+  $('#pushGo').onclick = async () => {
+    await cfgP;
+    if (!cfg.vapid) return toast('Las alertas aún no están activas');
+    try {
+      if (await Notification.requestPermission() !== 'granted') return toast('No se activaron las alertas');
+      const reg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready;
+      const b64 = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(cfg.vapid) });
+      await post('/api/subscribe', { subscription: sub.toJSON(), sign: r.sign || LS.get('sign'), game: r.g, src: SRC, vid: VID });
+      LS.set('push', '1'); box.innerHTML = '<div class="card"><h3>✅ ¡Listo! Mañana te llega tu primera alerta.</h3></div>';
+      if (window.fbq) fbq('track', 'Lead');
+    } catch (e) { toast('No se pudieron activar las alertas'); }
+  };
+}
+$('#unsub').onclick = async e => {
+  e.preventDefault();
+  try { const reg = await navigator.serviceWorker?.getRegistration(), sub = await reg?.pushManager.getSubscription(); if (sub) { await post('/api/unsubscribe', { endpoint: sub.endpoint }); await sub.unsubscribe(); } } catch (x) {}
+  LS.set('push', '0'); toast('Listo: ya no recibirás notificaciones');
+};
+function videoBox() {
+  if (!cfg.video?.url) return;
+  $('#vBox').innerHTML = `<div class="card"><h3>🎬 ${escH(cfg.video.title)}</h3><a class="btn" href="${escH(cfg.video.url)}" target="_blank" rel="noopener" id="vBtn">▶ Ver el video</a></div>`;
+}
+function pintarExtras() {
+  pixel();
+  if (cfg.video?.url) { const v = $('#videoCard'); v.hidden = false; v.innerHTML = `<h3>🎬 ${escH(cfg.video.title)}</h3><a class="btn" href="${escH(cfg.video.url)}" target="_blank" rel="noopener">▶ Ver el video</a>`; }
+  if (cfg.poll) { const p = $('#pollCard'); p.hidden = false; p.innerHTML = `<h3>📊 Encuesta del día</h3><p class="sub" style="text-align:left;margin:4px 0 0">${escH(cfg.poll.q)}</p><button class="btn alt" data-g="encuesta">Votar</button>`; p.onclick = e => { if (e.target.closest('[data-g]')) abrir('encuesta'); }; }
+}
+// Abre directo el juego del enlace compartido.
+if (P.get('g') && JUEGO[P.get('g')]) abrir(P.get('g'));
+</script>
+</body>
+</html>

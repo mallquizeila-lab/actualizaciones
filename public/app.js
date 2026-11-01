@@ -70,6 +70,7 @@ async function refresh(force) {
   sig = s2;
   if (tab === 'desarmar' && Date.now() - DSt > 5000 && (DS || []).some(d => !['listo', 'error'].includes(d.estado))) loadDS().catch(() => {});
   if (tab === 'estadisticas' && Date.now() - BRt > 30000) loadBrain(true).catch(() => {});
+  if (tab === 'viral' && Date.now() - VSt > 5000 && document.activeElement?.tagName !== 'INPUT') loadViral().catch(() => {});
   if (Date.now() - CMt > (tab === 'comentarios' ? 15000 : 120000)) loadComments().catch(() => {});
   document.querySelectorAll('[data-log]').forEach(el => { const j = S.jobs.find(x => x.id === el.dataset.log); if (j) { el.innerHTML = j.log.map(esc).join('<br>'); el.scrollTop = 1e6; } });
 }
@@ -261,6 +262,55 @@ VIEWS.calendario = () => {
 };
 
 let chatMsgs = store.get('chat', []), chatBusy = false;
+// ---------- 📣 Página viral ----------
+let VS = null, VSt = 0;
+async function loadViral() {
+  VS = await api('/api/viral'); VSt = Date.now();
+  if (tab !== 'viral') return;
+  const conPanel = !!(VS.on && VS.panel && VS.estado === 'encendida'), top = $('#vf-top');
+  // El panel incrustado solo se vuelve a dibujar si aparece o desaparece (así no se recarga mientras lo usas).
+  if (!top || conPanel !== !!$('#vf-frame')) render(); else top.innerHTML = viralTop();
+}
+function viralTop() {
+  const v = VS; if (!v) return '<p class="hint">Cargando…</p>';
+  const dot = ok => `<span class="chip ${ok ? 'st-aprobado' : ''}">${ok ? '●' : '○'}</span>`;
+  const enLinea = v.on && v.estado === 'encendida' && v.tunel === 'conectado' && v.url;
+  return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      ${v.on ? `<button class="b ghost sm" data-act="vfOff">Apagar la página</button>` : `<button class="b sm" data-act="vfOn">Encender la página</button>`}
+      ${dot(v.estado === 'encendida')} <span class="hint">Página: ${esc(v.estado)}</span>
+      ${dot(v.tunel === 'conectado')} <span class="hint">Internet: ${v.descargando ? 'descargando cloudflared…' : esc(v.tunel)}${v.fijo ? ' (dirección fija)' : v.on ? ' (dirección temporal)' : ''}</span></div>
+    ${enLinea ? `<p style="margin:10px 0 0"><b>Tu página en internet:</b> <a href="${esc(v.url)}" target="_blank">${esc(v.url)}</a>
+      <button class="b ghost sm" data-act="vfCopy" data-u="${esc(v.url)}">Copiar</button> <a class="b ghost sm" href="${esc(v.url)}/panel" target="_blank" style="text-decoration:none">Panel desde el celular</a></p>
+      ${v.temporal ? '<p class="hint" style="color:#b45309">⚠ Es una dirección <b>temporal</b>: cambia cada vez que se reinicia ShortForge y entonces los enlaces que compartiste y las notificaciones dejan de servir. Para usarla de verdad, pon una dirección fija (abajo).</p>' : ''}` : v.on ? '<p class="hint" style="margin-top:8px">Conectando… (la primera vez descarga cloudflared, 1 o 2 minutos)</p>' : '<p class="hint" style="margin-top:8px">Enciéndela para que la gente pueda entrar desde internet. Tu PC tiene que estar prendida.</p>'}
+    ${v.password ? `<p class="hint" style="margin-top:6px">Contraseña del panel (para entrar desde el celular): <code>${esc(v.password)}</code></p>` : ''}
+    <label style="margin-top:8px"><input type="checkbox" id="vf-dest" ${v.destacado ? 'checked' : ''}> 🎬 Poner automáticamente mi último video publicado (YouTube o Facebook) como "video destacado" de la página</label>
+    ${v.error ? `<p class="hint" style="color:#b91c1c">${esc(v.error)}</p>` : ''}
+    <details style="margin-top:8px"><summary class="hint">Registro</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:180px;overflow:auto">${esc((v.log || []).join('\n'))}</pre></details>`;
+}
+VIEWS.viral = () => {
+  if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
+  const v = VS || {};
+  return `<h1>📣 Página viral</h1><p class="sub">Juegos para compartir (horóscopo, test de amor, ruleta…) que llevan gente a tus videos y juntan suscriptores para tus notificaciones.</p>
+  <div class="card" id="vf-top">${viralTop()}</div>
+  <details class="card" ${v.fijo ? '' : 'open'}><summary><b>🔗 Dirección fija (tu dominio) — recomendado</b></summary>
+    <ol class="steps" style="margin-top:8px">
+      <li>Compra un dominio barato (ej. en Cloudflare, Namecheap o Porkbun, ~10 dólares al año) y agrégalo a tu cuenta de <b>Cloudflare</b> (la misma de las imágenes).</li>
+      <li>En <a href="https://one.dash.cloudflare.com/" target="_blank">one.dash.cloudflare.com</a> → <b>Redes → Túneles</b> (Networks → Tunnels) → <b>Crear un túnel</b> → tipo <b>Cloudflared</b> → nombre "pagina-viral".</li>
+      <li>En "Instalar y ejecutar un conector" copia el comando de Windows: tiene un texto largo que empieza con <code>eyJ</code>. Pégalo aquí (puedes pegar el comando entero).</li>
+      <li>En <b>Nombres de host públicos</b>: subdominio (ej. <code>suerte</code>), tu dominio, Tipo <b>HTTP</b>, URL <b>localhost:3300</b>. Guarda.</li>
+      <li>Escribe aquí esa dirección (ej. <code>https://suerte.tudominio.com</code>) y guarda.</li>
+      <li>Opcional (para ver la ciudad de cada visitante): en Cloudflare → tu dominio → <b>Reglas → Transformaciones administradas</b> → activa <b>"Add visitor location headers"</b>.</li></ol>
+    <div class="row"><label>Token del túnel<input id="vf-tok" type="password" placeholder="${v.fijo ? '✓ guardado (pega otro para cambiarlo)' : 'eyJ...'}"></label>
+      <label>Dirección de tu página<input id="vf-url" value="${esc(v.urlFija || '')}" placeholder="https://suerte.tudominio.com"></label>
+      <label>Tu correo (lo piden las notificaciones)<input id="vf-mail" value="${esc(v.email || '')}" placeholder="tu@correo.com"></label></div>
+    <div class="btns"><button class="b sm" data-act="vfSave">Guardar</button>${v.fijo ? '<button class="b ghost sm" data-act="vfTemp">Volver a dirección temporal</button>' : ''}</div></details>
+  ${v.on && v.panel && v.estado === 'encendida' ? `<div class="card" style="padding:0;overflow:hidden"><iframe id="vf-frame" src="${esc(v.panel)}" style="width:100%;height:1400px;border:0;display:block" title="Panel de la página viral"></iframe></div>`
+    : '<div class="card"><p class="hint">Cuando la página esté encendida, aquí verás el panel: visitantes por país y ciudad, suscriptores, campañas de notificaciones, encuesta del día y más.</p></div>'}
+  <div class="card"><h3>Antes de compartirla</h3><ul class="hint" style="margin:0 0 0 18px"><li>Completa la <b>política de privacidad</b> en el panel de abajo → <b>Ajustes</b> (tu nombre y correo).</li>
+    <li>Ley 29733 (Perú): inscribe tu banco de datos en la Autoridad Nacional de Protección de Datos Personales (gratis).</li>
+    <li>En Facebook pon el enlace en el primer comentario o en una Historia (con enlace en el texto llega a menos gente). Usa <code>?src=</code> para saber qué publicación trae más gente, ej. <code>/?g=ruleta&src=fb-reel-1</code>.</li></ul></div>`;
+};
+
 VIEWS.chat = () => {
   const c = S.channels.find(x => x.active) || S.channels[0];
   const quick = [
@@ -771,6 +821,11 @@ const ACT = {
   redOn: guard(async el => { readChannel(); await api('/api/channel', edit); const red = el.dataset.red; await api('/api/red', red === 'mastodon' ? { red, channelId: el.dataset.id, server: $('#e-mast-s').value, token: $('#e-mast-t').value } : { red, channelId: el.dataset.id, url: $('#e-disc-u').value }); toast((red === 'mastodon' ? 'Mastodon' : 'Discord') + ' conectado ✓'); await refresh(); edit = JSON.parse(JSON.stringify(S.channels.find(c => c.id === edit.id))); drawChannel(); }),
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
+  vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
+  vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),
+  vfCopy: el => navigator.clipboard.writeText(el.dataset.u).then(() => toast('Dirección copiada')),
+  vfSave: guard(async () => { const o = { url: $('#vf-url').value, email: $('#vf-mail').value }; if ($('#vf-tok').value.trim()) o.tokenTunel = $('#vf-tok').value; VS = await api('/api/viral/config', o); toast('Guardado ✓'); render(); }),
+  vfTemp: guard(async () => { if (!confirm('¿Quitar la dirección fija y usar una temporal?')) return; VS = await api('/api/viral/config', { tokenTunel: '', url: '' }); render(); }),
   radarScan: guard(async el => { el.disabled = true; el.textContent = '📡 Buscando… (1 o 2 minutos)'; try { await api('/api/radar', { channelId: el.dataset.id }); toast('Radar actualizado'); } finally { await refresh(true); } }),
   radarJob: guard(async el => { await api('/api/jobs', { channelId: el.dataset.id, topics: el.dataset.t }); toast('Video agregado a la cola ✓'); await refresh(true); }),
   kit: guard(async el => {
@@ -1033,6 +1088,7 @@ document.addEventListener('change', guard(async e => {
   if (t.dataset.actChange === 'reCh') { store.set('reCh', t.value); render(); return; }
   if (t.id === 're-files' && t.files.length) { await uploadVideos([...t.files]); return; }
   if (t.id === 'ds-files' && t.files.length) { await uploadDS([...t.files]); return; }
+  if (t.id === 'vf-dest') { VS = await api('/api/viral/ajustes', { destacado: t.checked }); toast(t.checked ? 'Tu último video será el destacado' : 'Desactivado'); return; }
   if (t.dataset.actChange === 'radarCh') { store.set('radarCh', t.value); render(); return; }
   if (t.dataset.actChange === 'hora') { await api('/api/job/action', { id: t.dataset.id, action: 'hora', hora: t.value }); toast('Hora cambiada (hora Perú)'); await refresh(true); return; }
   if (t.dataset.actChange === 'canal') {
