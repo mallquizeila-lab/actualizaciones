@@ -1,3 +1,9 @@
+v6.8.0 — 📡 Radar de tendencias
+- Cada mañana, por canal, revisa dónde se mueve la gente HOY: comentarios de los Shorts más vistos de tu nicho (qué piden y preguntan), lo que escriben en el buscador de YouTube, lo más buscado en Google Perú y lo más leído en Wikipedia.
+- Propone 8 temas con puntaje de viralidad y el porqué ("muchos comentarios piden la parte 2", "tendencia #3 en Google Perú").
+- Las ideas de 7/10 o más pasan solas a la fila de temas del canal; las demás puedes crearlas con un clic en Hoy.
+- Solo fuentes públicas u oficiales y solo temas: nunca guarda nombres ni perfiles de personas.
+
 v6.7.0 — Más lugares propios que llevan gente a tus redes
 - Blogger: cada video se vuelve un artículo en tu blog gratis con el Short incrustado (Google lo muestra en búsquedas).
 - Mastodon: publica el video con enlaces a YouTube y Facebook.

@@ -65,7 +65,7 @@ function publicState() {
 function saveChannel(o) {
   let ch = o.id && channel(o.id);
   if (!ch) { ch = { id: uid(), active: true, style: 'fotos', characters: [], times: { ...DEFAULT_TIMES }, created: new Date().toISOString() }; db.channels.push(ch); }
-  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId'])
+  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId', 'radarOn', 'radarAuto'])
     if (o[k] !== undefined) ch[k] = o[k];
   if (o.reparto !== undefined) ch.reparto = (Array.isArray(o.reparto) ? o.reparto : []).slice(0, 40).map(r => ({ id: String(r.id || uid()), nombre: String(r.nombre || 'Personaje').slice(0, 40), descripcion: String(r.descripcion || '').slice(0, 160), preset: String(r.voice || '').startsWith('clon:') ? '' : String(r.preset || 'hombre'), voice: String(r.voice || '') }));
   if (o.autoClone === true && o.autoCloneConsent === true) ch.autoCloneConsentAt = ch.autoCloneConsentAt || new Date().toISOString();
@@ -255,6 +255,7 @@ async function api(u, q, U, r) {
     publish.saveTokens(); return { ok: 1 };
   }
   if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
+  if (u === '/api/radar' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); return require('./lib/radar').escanear(ch); }
   if (u === '/api/kit' && P) { const o = await json(q), j = job(o.id); if (!j) throw new Error('Video no encontrado'); return require('./lib/crecer').kitGrupos(j); }
   if (u === '/api/seo/todos' && P) return require('./lib/seo').mejorarTodos();
   if (u === '/api/salud') return salud.estado();
@@ -471,5 +472,6 @@ http.createServer(async (q, r) => {
   salud.start();
   actualizar.start();
   require('./lib/crecer').start();
+  require('./lib/radar').start();
   ai.startRevision();
 });

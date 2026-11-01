@@ -100,6 +100,7 @@ VIEWS.hoy = () => {
   return `<h1>Hola, Josefino 👋</h1><p class="sub">${esc(fmtDay(t))}. Esto es lo que toca hoy.</p>
   ${done ? '' : `<div class="card"><h3>Para dejar todo listo</h3><ul class="check" style="list-style:none;padding:0">${setup.map(([ok, l]) => `<li class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'} ${l}</li>`).join('')}</ul>
     <div class="btns"><button class="b" data-act="go" data-tab="ajustes">Ir a Ajustes</button><button class="b ghost" data-act="go" data-tab="canales">Ir a Canales</button></div></div>`}
+  ${radarCard()}
   <div class="stats">
     <div class="stat"><b>${n('revisar')}</b><span>Por revisar</span></div>
     <div class="stat"><b>${n('aprobado')}</b><span>Aprobados, falta programar</span></div>
@@ -166,6 +167,20 @@ VIEWS.crear = () => {
 };
 
 function copyBox(k, v) { if (!v) return ''; return `<div class="copy"><span class="k">${k}</span>${esc(v)}<button class="b ghost sm" data-act="copy">Copiar</button></div>`; }
+// 📡 Radar de tendencias (en Hoy)
+function radarCard() {
+  const chs = S.channels.filter(c => c.active);
+  if (!chs.length) return '';
+  const sel = chs.find(c => c.id === store.get('radarCh')) || chs[0], R = sel.radar;
+  const F = { comentarios: '💬 comentarios', buscador: '🔎 buscador', google: '📈 Google', wikipedia: '📚 Wikipedia', cerebro: '🧠 cerebro' };
+  return `<div class="card"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3 style="margin:0">📡 Radar de tendencias</h3>
+    <select data-act-change="radarCh" style="width:auto;padding:2px 6px">${chs.map(c => `<option value="${c.id}" ${c.id === sel.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
+    <button class="b ghost sm" data-act="radarScan" data-id="${sel.id}">Buscar ahora</button>
+    <span class="hint">${R ? 'Actualizado ' + esc(new Date(R.at).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' })) + ` · leyó ${R.fuentes.comentarios} comentarios, ${R.fuentes.buscador} búsquedas, ${R.fuentes.google} tendencias de Google y ${R.fuentes.wikipedia} de Wikipedia` : 'Se actualiza solo cada mañana.'}</span></div>
+    ${R?.ideas?.length ? `<div style="margin-top:8px">${R.ideas.map(i => `<div class="item"><div><b>${esc(i.tema)}</b> <span class="chip ${i.puntaje >= 8 ? 'st-aprobado' : ''}">🔥 ${i.puntaje}/10</span> <span class="chip">${F[i.fuente] || esc(i.fuente)}</span>
+      <div class="hint">${esc(i.porque)}${i.gancho ? ' · Gancho: «' + esc(i.gancho) + '»' : ''}</div></div><div><button class="b sm" data-act="radarJob" data-id="${sel.id}" data-t="${esc(i.tema)}">Crear video</button></div></div>`).join('')}</div>
+      <p class="hint">Las ideas de 7/10 o más pasan solas a la fila de temas del canal.</p>` : ''}</div>`;
+}
 const RED = { youtube: 'YouTube', facebook: 'Facebook', tiktok: 'TikTok', instagram: 'Instagram', bluesky: 'Bluesky', mastodon: 'Mastodon', discord: 'Discord', blogger: 'Blogger' };
 const tagLine = a => (a || []).map(t => '#' + String(t).replace(/^#/, '').replace(/\s+/g, '')).join(' ');
 
@@ -755,6 +770,8 @@ const ACT = {
   redOn: guard(async el => { readChannel(); await api('/api/channel', edit); const red = el.dataset.red; await api('/api/red', red === 'mastodon' ? { red, channelId: el.dataset.id, server: $('#e-mast-s').value, token: $('#e-mast-t').value } : { red, channelId: el.dataset.id, url: $('#e-disc-u').value }); toast((red === 'mastodon' ? 'Mastodon' : 'Discord') + ' conectado ✓'); await refresh(); edit = JSON.parse(JSON.stringify(S.channels.find(c => c.id === edit.id))); drawChannel(); }),
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
+  radarScan: guard(async el => { el.disabled = true; el.textContent = '📡 Buscando… (1 o 2 minutos)'; try { await api('/api/radar', { channelId: el.dataset.id }); toast('Radar actualizado'); } finally { await refresh(true); } }),
+  radarJob: guard(async el => { await api('/api/jobs', { channelId: el.dataset.id, topics: el.dataset.t }); toast('Video agregado a la cola ✓'); await refresh(true); }),
   kit: guard(async el => {
     const j = S.jobs.find(x => x.id === el.dataset.id), box = $('#modalBox'); $('#modal').hidden = false;
     box.innerHTML = '<h2>📣 Kit para compartir en grupos</h2><p>Preparando textos…</p>';
@@ -1015,6 +1032,7 @@ document.addEventListener('change', guard(async e => {
   if (t.dataset.actChange === 'reCh') { store.set('reCh', t.value); render(); return; }
   if (t.id === 're-files' && t.files.length) { await uploadVideos([...t.files]); return; }
   if (t.id === 'ds-files' && t.files.length) { await uploadDS([...t.files]); return; }
+  if (t.dataset.actChange === 'radarCh') { store.set('radarCh', t.value); render(); return; }
   if (t.dataset.actChange === 'hora') { await api('/api/job/action', { id: t.dataset.id, action: 'hora', hora: t.value }); toast('Hora cambiada (hora Perú)'); await refresh(true); return; }
   if (t.dataset.actChange === 'canal') {
     const j = S.jobs.find(x => x.id === t.dataset.id), destino = t.options[t.selectedIndex].text;
