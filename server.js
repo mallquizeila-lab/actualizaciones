@@ -65,7 +65,7 @@ function publicState() {
 function saveChannel(o) {
   let ch = o.id && channel(o.id);
   if (!ch) { ch = { id: uid(), active: true, style: 'fotos', characters: [], times: { ...DEFAULT_TIMES }, created: new Date().toISOString() }; db.channels.push(ch); }
-  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks'])
+  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId'])
     if (o[k] !== undefined) ch[k] = o[k];
   if (o.reparto !== undefined) ch.reparto = (Array.isArray(o.reparto) ? o.reparto : []).slice(0, 40).map(r => ({ id: String(r.id || uid()), nombre: String(r.nombre || 'Personaje').slice(0, 40), descripcion: String(r.descripcion || '').slice(0, 160), preset: String(r.voice || '').startsWith('clon:') ? '' : String(r.preset || 'hombre'), voice: String(r.voice || '') }));
   if (o.autoClone === true && o.autoCloneConsent === true) ch.autoCloneConsentAt = ch.autoCloneConsentAt || new Date().toISOString();
@@ -233,6 +233,24 @@ async function api(u, q, U, r) {
       const r = await fetch('https://bsky.social/xrpc/com.atproto.server.createSession', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identifier: h, password: pass }) });
       if (!r.ok) throw new Error('Bluesky no aceptó ese usuario y contraseña de app. Usa una "contraseña de app" (Configuración → Privacidad y seguridad → Contraseñas de app).');
       T.bluesky[o.channelId] = { handle: h, pass };
+    }
+    publish.saveTokens(); return { ok: 1 };
+  }
+  if (u === '/api/red' && P) { // Mastodon y Discord: datos de conexión de cada canal (se prueban antes de guardar)
+    const o = await json(q), T = publish.tokens, red = o.red;
+    if (!['mastodon', 'discord'].includes(red)) throw new Error('Red no válida');
+    T[red] = T[red] || {};
+    if (o.borrar) delete T[red][o.channelId];
+    else if (red === 'mastodon') {
+      const server = /^https?:\/\//.test(o.server) ? String(o.server).trim().replace(/\/+$/, '') : 'https://' + String(o.server || '').trim().replace(/\/+$/, '');
+      const r = await fetch(server + '/api/v1/accounts/verify_credentials', { headers: { authorization: 'Bearer ' + String(o.token || '').trim() } });
+      if (!r.ok) throw new Error('Mastodon no aceptó ese servidor y token. En tu cuenta: Preferencias → Desarrollo → Nueva aplicación (permisos write:media y write:statuses) y copia "Tu token de acceso".');
+      T.mastodon[o.channelId] = { server, token: String(o.token).trim() };
+    } else {
+      const url = String(o.url || '').trim();
+      if (!/^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\//.test(url)) throw new Error('Pega el webhook completo de Discord (empieza con https://discord.com/api/webhooks/)');
+      const r = await fetch(url); if (!r.ok) throw new Error('Discord no reconoce ese webhook');
+      T.discord[o.channelId] = { url };
     }
     publish.saveTokens(); return { ok: 1 };
   }

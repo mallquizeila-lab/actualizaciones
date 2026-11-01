@@ -1,3 +1,10 @@
+v6.7.0 — Más lugares propios que llevan gente a tus redes
+- Blogger: cada video se vuelve un artículo en tu blog gratis con el Short incrustado (Google lo muestra en búsquedas).
+- Mastodon: publica el video con enlaces a YouTube y Facebook.
+- Discord: avisa cada video nuevo en tu servidor de fans.
+- Nuevo archivo GUIA_REDES.txt: dónde se puede publicar automático sin problemas y dónde no.
+- Para Blogger: pulsa "Reconectar" en YouTube (Canales → Editar) para dar el permiso nuevo.
+
 v6.6.0 — Más redes para atraer gente a YouTube, Facebook y TikTok
 - Instagram Reels automático (cuenta profesional vinculada a tu página de Facebook). Cada Reel termina con los enlaces a tus redes.
 - Bluesky automático, con el enlace a tu YouTube que se puede tocar.

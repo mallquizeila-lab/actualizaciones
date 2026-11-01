@@ -1,0 +1,35 @@
+SHORTFORGE — DÓNDE SE PUEDE PUBLICAR AUTOMÁTICO SIN PROBLEMAS (revisado: noviembre 2026)
+Objetivo: atraer gente a tus redes principales (YouTube, Facebook y TikTok).
+
+REGLA DE ORO
+- Publicar automático en ESPACIOS PROPIOS (tu página, tu cuenta, tu blog, tu servidor, tu canal) = permitido.
+- Publicar automático en ESPACIOS AJENOS (grupos, foros, subreddits, comentarios de otros) = spam.
+  Las plataformas lo detectan y castigan a la cuenta que publica Y a la página que se promociona.
+
+YA AUTOMÁTICO EN SHORTFORGE
+1. YouTube Shorts ............ oficial (API de YouTube)
+2. Facebook Reels ............ oficial (API de Meta) + primer comentario + Historia + promoción cruzada entre TUS páginas
+3. Instagram Reels ........... oficial (misma app de Meta). Cuenta profesional vinculada a la página.
+4. Bluesky ................... oficial y gratis. Contraseña de app. Enlace a tu YouTube que se puede tocar.
+5. Mastodon .................. oficial y gratis. Tu cuenta en un servidor; marca la cuenta como "bot" si el servidor lo pide.
+6. Discord ................... tu propio servidor de fans (webhook). Avisa cada video nuevo.
+7. Blogger (Google) .......... tu blog gratis: cada video se vuelve un artículo con el Short incrustado;
+                               Google lo muestra en búsquedas y la gente llega a tu YouTube.
+8. Telegram .................. tu canal de Telegram (ya existía).
+
+SEMIAUTOMÁTICO (el programa deja todo listo, tú pulsas publicar)
+- TikTok: su API exige aprobación de la app. Botón "Solo TikTok": descarga + texto copiado + abre TikTok.
+- Grupos de Facebook: "Kit para compartir en grupos" (3 textos distintos, qué grupos buscar, consejos).
+- Kwai, Snapchat Spotlight, Likee, canales de WhatsApp: no tienen API pública para publicar. Se sube a mano
+  con el mismo video "para TikTok/Facebook".
+
+POSIBLES MÁS ADELANTE
+- Threads (Meta): API oficial; necesita su propia conexión. Próximo paso recomendado.
+- Pinterest: API oficial, pero hasta que Pinterest revise tu app (video demo) los pines solo los ves tú.
+- Tumblr: API oficial (cuenta propia).
+
+NO RECOMENDADO
+- X (Twitter): desde febrero 2026 no hay plan gratis; se paga por publicación.
+- Reddit: desde nov. 2025 exige aprobación para cualquier acceso y prohíbe publicar contenido parecido en varios
+  subreddits; las solicitudes nuevas cerraron el 31/10/2026.
+- Foros, grupos y comentarios en videos ajenos con bots: prohibido en todas las plataformas.
