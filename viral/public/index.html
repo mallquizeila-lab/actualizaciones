@@ -98,6 +98,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
     <h2>Antes de empezar</h2>
     <label class="check"><input type="checkbox" id="g-adult"><span>Tengo <b>18 años o más</b>.</span></label>
     <label class="check"><input type="checkbox" id="g-ok"><span>Acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>: se guarda mi país, ciudad aproximada y tipo de dispositivo para mejorar la página y mostrarme contenido.</span></label>
+    <p class="sub" style="text-align:left;font-size:.85rem;margin:4px 0 0">🔔 Al ver tu resultado, tu navegador te preguntará si quieres recibir tu lectura diaria. Puedes aceptar o no, y quitarlas cuando quieras.</p>
     <button class="btn" id="g-go" disabled>Continuar</button>
     <button class="btn alt" id="g-no">No, gracias</button>
   </div>
@@ -240,7 +241,7 @@ const JUEGO = {
     stage(`<div class="card"><h2>📊 ${escH(p.q)}</h2><div id="ops">${p.options.map((o, k) => `<button class="opt poll-o" data-k="${k}"><i></i><span>${escH(o)}</span></button>`).join('')}</div><p class="sub" id="tot"></p></div>`);
     const votado = LS.get('poll:' + p.id);
     const ver = r => { const ops = [...document.querySelectorAll('.poll-o')]; ops.forEach((b, k) => { const pc = r.total ? Math.round(r.votes[k] * 100 / r.total) : 0; b.querySelector('i').style.width = pc + '%'; b.querySelector('span').textContent = `${p.options[k]} — ${pc}%`; b.disabled = true; }); $('#tot').textContent = `${r.total} votos`; };
-    const votar = async k => { const r = await post('/api/vote', { poll: p.id, option: k, vid: VID }); LS.set('poll:' + p.id, k); ver(r); registrar('encuesta'); compartirBox({ g: 'encuesta', titulo: p.q, compartir: `Ya voté: ${p.q} ¿Tú qué eliges?` }); };
+    const votar = async k => { pedirAlertasAuto({ g: 'encuesta' }); const r = await post('/api/vote', { poll: p.id, option: k, vid: VID }); LS.set('poll:' + p.id, k); ver(r); registrar('encuesta'); compartirBox({ g: 'encuesta', titulo: p.q, compartir: `Ya voté: ${p.q} ¿Tú qué eliges?` }); };
     if (votado !== null) votar(+votado); else $('#ops').onclick = e => { const b = e.target.closest('[data-k]'); if (b) { $('#ops').onclick = null; votar(+b.dataset.k); } };
   },
 };
@@ -339,6 +340,7 @@ function resultado(r) {
     <button class="btn alt" onclick="document.getElementById('back').click()">🎮 Jugar otro test</button>`);
   if (r.pct != null) requestAnimationFrame(() => setTimeout(() => $('#pb').style.width = r.pct + '%', 60));
   compartirBox(r); alertasBox(r); videoBox();
+  pedirAlertasAuto(r);
 }
 function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido&t=${encodeURIComponent(r.compartir.slice(0, 110))}`; }
 function compartirBox(r) {
@@ -381,23 +383,55 @@ function lineas(x, t, w) { const out = []; let l = ''; for (const p of String(t)
 
 // Notificaciones (iPhone: solo si la página está instalada en la pantalla de inicio).
 const ios = /iPhone|iPad/.test(navigator.userAgent), instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+// Suscribe este navegador (la ventana "Permitir/Bloquear" la muestra el propio navegador).
+async function suscribir(r) {
+  await cfgP;
+  if (!cfg.vapid || !('serviceWorker' in navigator && 'PushManager' in window)) return 'no';
+  const perm = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+  if (perm !== 'granted') return perm;
+  const reg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready;
+  const b64 = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(cfg.vapid) });
+  await post('/api/subscribe', { subscription: sub.toJSON(), sign: r.sign || LS.get('sign'), game: r.g, src: SRC, vid: VID });
+  LS.set('push', '1'); if (window.fbq) fbq('track', 'Lead');
+  const box = $('#pushBox');
+  if (box && cfg.intereses?.length) {
+    box.innerHTML = `<div class="card"><h3>✅ ¡Alertas activadas!</h3><p class="sub" style="text-align:left;margin:4px 0 8px">¿Sobre qué quieres recibir avisos? Elige los que quieras.</p>
+      <div class="cats" style="flex-wrap:wrap" id="ints">${cfg.intereses.map(([k, l]) => `<button data-i="${k}" class="${['horoscopo', 'videos'].includes(k) ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <button class="btn" id="intGo">Guardar mis preferencias</button></div>`;
+    $('#ints').onclick = e => { const b = e.target.closest('[data-i]'); if (b) b.classList.toggle('on'); };
+    $('#intGo').onclick = async () => { await post('/api/intereses', { endpoint: sub.endpoint, intereses: [...document.querySelectorAll('#ints .on')].map(b => b.dataset.i) }).catch(() => {}); box.innerHTML = '<div class="card"><h3>✅ ¡Listo! Te avisaremos solo de lo que elegiste.</h3></div>'; };
+  } else if (box) box.innerHTML = '<div class="card"><h3>✅ Alertas activadas. Mañana te llega tu primera lectura.</h3></div>';
+  return 'granted';
+}
+// Al ver el primer resultado (justo después de un clic) se muestra sola la ventana del navegador, una sola vez.
+function pedirAlertasAuto(r) {
+  if (LS.get('push') === '1' || LS.get('pushAuto') || !('Notification' in window) || Notification.permission !== 'default') return;
+  if (ios && !instalada) return; // en iPhone solo funciona con la página agregada a la pantalla de inicio
+  LS.set('pushAuto', '1');
+  suscribir(r).then(x => { if (x === 'granted') toast('🔔 ¡Listo! Te avisaremos cada mañana'); }).catch(() => {});
+}
 function alertasBox(r) {
   if (LS.get('push') === '1') return;
   const box = $('#pushBox'), puede = 'serviceWorker' in navigator && 'PushManager' in window;
-  if (ios && !instalada) { box.innerHTML = `<div class="card"><h3>🔔 ¿Quieres tu horóscopo cada mañana?</h3><p class="sub" style="text-align:left;margin:0">En iPhone: toca <b>Compartir</b> <span aria-hidden="true">⬆️</span> y luego <b>"Agregar a inicio"</b>. Abre la página desde ese ícono y activa las alertas.</p></div>`; return; }
+  const prueba = cfg.suscriptores ? `<p class="sub" style="text-align:left;margin:6px 0 0;font-size:.85rem">👥 ${Number(cfg.suscriptores).toLocaleString('es-PE')} personas ya reciben su lectura diaria.</p>` : '';
+  if (ios && !instalada) {
+    box.innerHTML = `<div class="card"><h3>🔔 Recibe tu lectura diaria en tu iPhone</h3><p class="sub" style="text-align:left;margin:4px 0 8px">En iPhone las alertas funcionan si agregas la página a tu pantalla de inicio (10 segundos):</p>
+      <ol style="margin:0 0 0 20px;color:var(--muted);line-height:1.8"><li>Toca <b style="color:var(--text)">Compartir</b> <span aria-hidden="true">⬆️</span> (abajo en Safari)</li><li>Elige <b style="color:var(--text)">"Agregar a inicio"</b> ➕</li><li>Abre la página desde el nuevo ícono y toca <b style="color:var(--text)">"Sí, avísame"</b></li></ol>${prueba}
+      <p class="sub" style="text-align:left;margin:8px 0 0;font-size:.8rem">Si abriste esto desde Facebook o Instagram, primero toca ⋯ y elige "Abrir en Safari".</p></div>`;
+    return;
+  }
   if (!puede) return;
-  box.innerHTML = `<div class="card"><h3>🔔 Recibe tu horóscopo y tu suerte cada mañana</h3><p class="sub" style="text-align:left;margin:0">Gratis. Puedes quitarlas cuando quieras.</p><button class="btn" id="pushGo">Sí, avísame</button></div>`;
+  if ('Notification' in window && Notification.permission === 'denied') {
+    box.innerHTML = `<div class="card"><h3>🔕 Las alertas están bloqueadas</h3><p class="sub" style="text-align:left;margin:0">Si cambias de opinión: toca el candado 🔒 junto a la dirección de la página → <b>Notificaciones</b> → <b>Permitir</b>, y recarga.</p></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="card"><h3>🔔 ${r.sign ? 'Tu lectura diaria de ' + escH(SIGNS.find(x => x[0] === r.sign)?.[1] || '') : 'Tu lectura y tests nuevos cada mañana'}</h3><p class="sub" style="text-align:left;margin:0">Gratis, una vez al día. Puedes quitarlas cuando quieras.</p>${prueba}<button class="btn" id="pushGo">Sí, avísame</button></div>`;
   $('#pushGo').onclick = async () => {
-    await cfgP;
-    if (!cfg.vapid) return toast('Las alertas aún no están activas');
     try {
-      if (await Notification.requestPermission() !== 'granted') return toast('No se activaron las alertas');
-      const reg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready;
-      const b64 = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
-      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(cfg.vapid) });
-      await post('/api/subscribe', { subscription: sub.toJSON(), sign: r.sign || LS.get('sign'), game: r.g, src: SRC, vid: VID });
-      LS.set('push', '1'); box.innerHTML = '<div class="card"><h3>✅ ¡Listo! Mañana te llega tu primera alerta.</h3></div>';
-      if (window.fbq) fbq('track', 'Lead');
+      const x = await suscribir(r);
+      if (x === 'denied') toast('Las alertas están bloqueadas: actívalas en el candado 🔒 junto a la dirección de la página');
+      else if (x !== 'granted') toast('No se activaron las alertas');
     } catch (e) { toast('No se pudieron activar las alertas'); }
   };
 }

@@ -1,3 +1,11 @@
+v7.3.0 — Página viral: captar más suscriptores
+- La ventana del navegador "Permitir notificaciones" aparece sola al ver el primer resultado (una sola vez), sin tener que buscar el botón. El aviso de permiso inicial lo explica.
+- Notificación de bienvenida apenas alguien acepta (se edita en Panel → Ajustes).
+- Después de aceptar, la persona elige sus intereses (horóscopo, tests, trivias, videos nuevos, amor, dinero). En Campañas puedes filtrar por interés.
+- Contador real de suscriptores en la página (aparece cuando hay 50 o más).
+- iPhone: guía paso a paso para agregar la página a la pantalla de inicio (sin eso iPhone no deja recibir alertas).
+- Si alguien bloqueó las alertas, se le explica cómo activarlas.
+
 v7.2.0 — Página viral: 32 tests y contenido más profesional
 - 26 tests nuevos (32 en total), por categorías y con buscador:
   · 16 de personalidad: tipo de líder, lenguaje del amor (Chapman), introvertido/extrovertido, tipo de viajero, trabajo ideal (Holland), manejo del dinero, forma de aprender (VARK), tipo de amigo, plato peruano, comunicación, cronotipo, mascota ideal, superpoder, emprendedor, época, manejo del estrés y animal que te representa.

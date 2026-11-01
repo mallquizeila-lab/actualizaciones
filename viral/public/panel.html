@@ -120,6 +120,7 @@ const V = {
       <h3 style="margin-top:14px">A quién</h3><p class="hint">Si no marcas nada en un grupo, se envía a todos.</p>
       <label>Países</label>${chips('countries', o.paises, x => `${flag(x.cc)} ${esc(x.pais)} <span class="hint">${n(x.n)}</span>`, x => x.cc)}
       <label>Ciudades</label>${chips('cities', o.ciudades.slice(0, 40), x => `${esc(x.city)} <span class="hint">${n(x.n)}</span>`, x => x.city)}
+      <label>Intereses que eligieron</label>${chips('intereses', o.intereses || [], x => `${esc(x.l)} <span class="hint">${n(x.n)}</span>`, x => x.k)}
       <label>Signos</label>${chips('signs', SIGNOS.map(s => ({ s })), x => esc(x.s), x => x.s)}
       <label>Juego con el que llegaron</label>${chips('games', Object.keys(JUEGOS).map(g => ({ g })), x => esc(JUEGOS[x.g]), x => x.g)}
       <label>Fuente</label>${chips('sources', o.fuentes, x => `${esc(x.source)} <span class="hint">${n(x.n)}</span>`, x => x.source)}
@@ -178,6 +179,10 @@ const V = {
     <div class="card"><h2>📊 Encuesta del día</h2>${a.encuesta ? `<p class="hint">Actual: <b>${esc(a.encuesta.q)}</b></p><table>${a.encuesta.options.map((o, i) => `<tr><td>${esc(o)}</td><td class="n">${n(a.encuesta.votos[i])}</td></tr>`).join('')}</table>` : ''}
       <label>Nueva pregunta</label><input id="p-q" maxlength="120" placeholder="¿Qué prefieres…?"><label>Opciones (una por línea, 2 a 6)</label><textarea id="p-o" placeholder="🍕 Pizza&#10;🍔 Hamburguesa"></textarea>
       <p style="margin-top:10px"><button class="btn" id="p-go">Publicar encuesta nueva</button></p></div>
+    <div class="card"><h2>👋 Notificación de bienvenida</h2><p class="hint">Se envía una sola vez, apenas alguien activa las alertas: así ve al instante cómo serán.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="b-on" style="width:auto" ${a.bienvenida?.on !== false ? 'checked' : ''}> Activada</label>
+      <label>Título</label><input id="b-t" maxlength="80" value="${esc(a.bienvenida?.title || '')}"><label>Mensaje</label><textarea id="b-b" maxlength="200">${esc(a.bienvenida?.body || '')}</textarea>
+      <p style="margin-top:10px"><button class="btn" id="b-go">Guardar</button></p></div>
     <div class="card"><h2>📄 Política de privacidad</h2><p class="hint">Obligatorio antes de compartir la página (Ley 29733). Se muestra en <a href="/privacidad.html" target="_blank">/privacidad.html</a>.</p>
       <div class="row"><div><label>Responsable (tu nombre o empresa)</label><input id="pr-n" value="${esc(a.priv?.nombre || '')}"></div><div><label>Ciudad</label><input id="pr-c" value="${esc(a.priv?.ciudad || '')}" placeholder="Lima, Perú"></div></div>
       <div class="row"><div><label>Correo de contacto</label><input id="pr-m" value="${esc(a.priv?.correo || '')}"></div><div><label>Cuánto tiempo guardas los datos</label><input id="pr-p" value="${esc(a.priv?.plazo || '24 meses')}"></div></div>
@@ -189,6 +194,7 @@ const V = {
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#b-go').onclick = () => api('ajustes', { bienvenida: { on: $('#b-on').checked, title: $('#b-t').value, body: $('#b-b').value } }).then(ok, e => alert(e.message));
     $('#pr-go').onclick = () => api('ajustes', { priv: { nombre: $('#pr-n').value, ciudad: $('#pr-c').value, correo: $('#pr-m').value, plazo: $('#pr-p').value, codigo: $('#pr-k').value } }).then(ok, e => alert(e.message));
     $('#t-go').onclick = () => api('ajustes', { tope: +$('#t-n').value }).then(ok, e => alert(e.message));
   },

@@ -44,6 +44,7 @@ create table if not exists campaigns (id integer primary key, created_at text de
 create table if not exists polls (id integer primary key, created_at text default (datetime('now')), question text, options text, active integer default 1);
 create table if not exists votes (poll_id integer, option integer, voter text, created_at text default (datetime('now')), primary key (poll_id, voter));
 create table if not exists settings (k text primary key, v text);`);
+try { db.exec('alter table subscribers add column intereses text'); } catch (e) {} // agrega la columna si falta
 const q = (sql, ...a) => db.prepare(sql).all(...a), q1 = (sql, ...a) => db.prepare(sql).get(...a), run = (sql, ...a) => db.prepare(sql).run(...a);
 const getS = (k, d) => { const r = q1('select v from settings where k=?', k); return r ? JSON.parse(r.v) : d; };
 const setS = (k, v) => run('insert into settings(k,v) values(?,?) on conflict(k) do update set v=excluded.v', k, JSON.stringify(v));
@@ -51,6 +52,7 @@ if (!q1('select id from polls limit 1')) run('insert into polls(question,options
 
 // ---------------- Utilidades ----------------
 const SIGNS = ['aries', 'tauro', 'geminis', 'cancer', 'leo', 'virgo', 'libra', 'escorpio', 'sagitario', 'capricornio', 'acuario', 'piscis'];
+const INTERESES = [['horoscopo', '🔮 Horóscopo diario'], ['tests', '🧠 Tests nuevos'], ['trivias', '🏆 Trivias y retos'], ['videos', '🎬 Videos nuevos'], ['amor', '💘 Amor y relaciones'], ['dinero', '💰 Dinero y trabajo']];
 // Catálogo de tests (el mismo que usa la página).
 const CATALOGO = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'tests.json'), 'utf8')).tests; } catch (e) { return []; } })();
 const GAMES = CATALOGO.map(t => t.id);
@@ -119,6 +121,8 @@ function filtroSQL(f = {}) {
   const lista = (col, arr) => { arr = (arr || []).filter(Boolean).slice(0, 300); if (arr.length) { w.push(`${col} in (${arr.map(() => '?').join(',')})`); a.push(...arr.map(String)); } };
   lista('country_code', f.countries); lista('sign', f.signs); lista('game', f.games); lista('source', f.sources); lista('device', f.devices);
   if (f.cities?.length) lista('city', f.cities);
+  const ints = (f.intereses || []).filter(x => INTERESES.some(i => i[0] === x)).slice(0, 10);
+  if (ints.length) { w.push('(' + ints.map(() => "(',' || coalesce(intereses,'') || ',') like ?").join(' or ') + ')'); a.push(...ints.map(x => '%,' + x + ',%')); }
   return { where: w.join(' and '), args: a };
 }
 function contar(f) { const { where, args } = filtroSQL(f); return q1(`select count(*) n from subscribers where ${where}`, ...args).n; }
@@ -191,7 +195,8 @@ async function api(req, res, u) {
   // ---- público ----
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
-    return send(res, 200, { vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    const subs = q1('select count(*) n from subscribers where active=1').n;
+    return send(res, 200, { intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/visit' && P) {
     const b = await json(req);
@@ -209,6 +214,16 @@ async function api(req, res, u) {
       on conflict(endpoint) do update set sub=excluded.sub, active=1, sign=coalesce(excluded.sign, sign), game=coalesce(excluded.game, game)`,
       s.endpoint, JSON.stringify({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth } }), clip(b.vid, 40), g.country_code, g.country, g.city,
       SIGNS.includes(b.sign) ? b.sign : null, GAMES.includes(b.game) ? b.game : null, clip(b.src || 'directo', 60), d.device);
+    const row = q1('select id, sent from subscribers where endpoint=?', s.endpoint);
+    // Notificación de bienvenida (solo la primera vez): la persona ve al instante cómo serán las alertas.
+    const bv = getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' });
+    if (VAPID && bv.on && row && !row.sent) webpush.sendNotification({ endpoint: s.endpoint, keys: s.keys }, JSON.stringify({ title: bv.title, body: bv.body, url: `${PUBLIC_URL}/?src=bienvenida`, tag: 'bienvenida' }), { vapid: VAPID, TTL: 3600 })
+      .then(() => run("update subscribers set sent=sent+1, last_at=datetime('now') where id=?", row.id)).catch(() => {});
+    return send(res, 200, { ok: 1, id: row?.id });
+  }
+  if (u.pathname === '/api/intereses' && P) {
+    const b = await json(req), ints = (Array.isArray(b.intereses) ? b.intereses : []).filter(x => INTERESES.some(i => i[0] === x));
+    run('update subscribers set intereses=? where endpoint=?', ints.length ? ',' + ints.join(',') + ',' : null, String(b.endpoint || ''));
     return send(res, 200, { ok: 1 });
   }
   if (u.pathname === '/api/unsubscribe' && P) {
@@ -256,6 +271,7 @@ async function api(req, res, u) {
       paises: q(`select country_code cc, coalesce(country,country_code) pais, count(*) n from subscribers where active=1 and country_code is not null group by country_code order by n desc`),
       fuentes: q(`select source, count(*) n from subscribers where active=1 group by source order by n desc limit 50`),
       ciudades: q(`select city, country_code cc, count(*) n from subscribers where active=1 and city is not null group by city, country_code order by n desc limit 100`),
+      intereses: INTERESES.map(([k, l]) => ({ k, l, n: q1("select count(*) n from subscribers where active=1 and intereses like ?", '%,' + k + ',%').n })),
     });
     if (r === 'visitantes' || r === 'suscriptores' || r === 'export') {
       const tabla = (r === 'suscriptores' || F.tipo === 'suscriptores') ? 'subscribers' : 'visitors', w = [], a = [];
@@ -269,7 +285,7 @@ async function api(req, res, u) {
       if (tabla === 'subscribers' && F.activos !== '0') w.push('active=1');
       const W = w.length ? 'where ' + w.join(' and ') : '';
       const cols = tabla === 'visitors' ? `id, datetime(created_at,'-5 hours') fecha, country pais, region, city ciudad, device dispositivo, browser app, source fuente, game juego, sign signo, ip ip_recortada`
-        : `id, datetime(created_at,'-5 hours') fecha, country pais, city ciudad, device dispositivo, source fuente, game juego, sign signo, active activo, sent recibidas, clicks clics`;
+        : `id, datetime(created_at,'-5 hours') fecha, country pais, city ciudad, device dispositivo, source fuente, game juego, sign signo, trim(intereses, ',') intereses, active activo, sent recibidas, clicks clics`;
       if (r === 'export') return send(res, 200, csv(q(`select ${cols} from ${tabla} ${W} order by id desc limit 200000`, ...a)), 'text/csv; charset=utf-8', { 'content-disposition': `attachment; filename="${tabla === 'visitors' ? 'visitantes' : 'suscriptores'}-${hoyPeru()}.csv"` });
       const page = Math.max(0, +F.p || 0);
       return send(res, 200, { total: q1(`select count(*) n from ${tabla} ${W}`, ...a).n, rows: q(`select ${cols} from ${tabla} ${W} order by id desc limit 100 offset ?`, ...a, page * 100) });
@@ -307,6 +323,7 @@ async function api(req, res, u) {
         const b = await json(req);
         if (b.video !== undefined) { const v = b.video?.url ? safeDest(b.video.url) : null; if (b.video?.url && !v) return send(res, 400, { error: 'El video debe ser de YouTube, Facebook, TikTok o Instagram' }); setS('video', v ? { url: v, title: clip(b.video.title, 80) || 'Mira el video' } : null); }
         if (b.priv) setS('priv', Object.fromEntries(['nombre', 'ciudad', 'correo', 'plazo', 'codigo'].map(k => [k, clip(b.priv[k], 120).trim()])));
+        if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
@@ -317,7 +334,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
