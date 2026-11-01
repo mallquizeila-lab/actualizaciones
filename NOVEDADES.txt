@@ -1,3 +1,8 @@
+v6.2.3 — Hora y canal en cada video
+- En cada video ahora puedes elegir la HORA de publicación junto a la fecha. Siempre es hora de Perú, aunque el reloj de la PC esté en otra zona.
+- "(usar horario del canal)" vuelve a la hora automática del canal.
+- Lista de canales en cada video: si aún no se publicó, lo pasa al otro canal; si ya se publicó, hace una COPIA para el otro canal (queda en Revisar).
+
 v6.2.2 — Videos desde cero más coherentes
 - "Aprobar solo" ya no aprueba un video si el analista no pudo revisarlo, si la coherencia salió baja o si usó fotos de stock (Pixabay) en la mayoría de escenas: queda en "Revisar".
 - Si se acabó el cupo diario de imágenes con IA, el video espera (guarda el guion) y se termina cuando se renueve, en vez de rellenar con fotos que no coinciden.

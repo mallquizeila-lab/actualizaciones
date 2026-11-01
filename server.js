@@ -181,7 +181,35 @@ async function jobAction(o) {
     if (j.status === 'produciendo') throw new Error('Espera a que termine de producirse');
     if (j.result?.dir) fs.rmSync(path.join(DATA, 'videos', j.result.dir), { recursive: true, force: true });
     db.jobs.splice(db.jobs.indexOf(j), 1);
-  } else if (o.action === 'date') j.publishDate = o.date;
+  } else if (o.action === 'date' || o.action === 'hora') {
+    const ya = Object.entries(j.pub || {}).filter(([, p]) => p.ok).map(([k]) => k === 'youtube' ? 'YouTube' : 'Facebook');
+    if (ya.length) throw new Error(`Ya se subió a ${ya.join(' y ')}: cambia la hora allí (YouTube Studio / Meta Business Suite)`);
+    if (o.action === 'date') j.publishDate = o.date; else j.horaFija = /^\d\d:\d\d$/.test(o.hora || '') ? o.hora : undefined;
+    const ch = db.channels.find(c => c.id === j.channelId);
+    if (ch && j.result) j.horas = Object.fromEntries(['youtube', 'tiktok', 'facebook'].map(p => [p, publish.horaDe(j, ch, p)]));
+  } else if (o.action === 'canal') {
+    const ch = db.channels.find(c => c.id === o.channelId);
+    if (!ch) throw new Error('Canal no encontrado');
+    if (ch.id === j.channelId) return { ok: 1 };
+    if (j.status === 'produciendo') throw new Error('Espera a que termine de producirse');
+    const subido = Object.values(j.pub || {}).some(p => p.ok);
+    if (!subido) { // aún no salió en ningún lado: se pasa al otro canal
+      j.channelId = ch.id; j.pub = undefined; j.avisoTT = false;
+      j.log.push(`Pasado al canal ${ch.name}.`);
+      if (j.result) j.horas = Object.fromEntries(['youtube', 'tiktok', 'facebook'].map(p => [p, publish.horaDe(j, ch, p)]));
+      saveAll.jobs(); return { ok: 1, movido: 1 };
+    }
+    // Ya se publicó en este canal: se hace una copia para el otro (con sus propios archivos).
+    const c = JSON.parse(JSON.stringify(j));
+    Object.assign(c, { id: require('./lib/util').uid(), channelId: ch.id, pub: undefined, avisoTT: false, tgPending: false, stats: undefined, status: j.result ? 'revisar' : 'cola', created: new Date().toISOString(), log: [`Copia del video publicado en ${db.channels.find(x => x.id === j.channelId)?.name || 'otro canal'}.`] });
+    if (j.result?.dir) {
+      const nd = j.result.dir + '-' + c.id;
+      fs.cpSync(path.join(DATA, 'videos', j.result.dir), path.join(DATA, 'videos', nd), { recursive: true });
+      c.result.dir = nd;
+      c.horas = Object.fromEntries(['youtube', 'tiktok', 'facebook'].map(p => [p, publish.horaDe(c, ch, p)]));
+    }
+    db.jobs.push(c); saveAll.jobs(); return { ok: 1, copia: 1 };
+  }
   else if (o.action === 'retryPublish') { for (const p of Object.keys(j.pub || {})) if (!j.pub[p].ok) delete j.pub[p]; if (j.status === 'publicado') j.status = 'aprobado'; publish.tick(); }
   saveAll.jobs();
   return { ok: 1 };

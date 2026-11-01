@@ -174,7 +174,7 @@ function videoCard(j) {
   const cred = r?.credits?.length ? '\n\nImágenes: ' + r.credits.join(', ') : '';
   const media = r?.borrado ? `<div class="ph" style="display:grid;place-items:center;text-align:center;padding:10px">🗑 Archivo borrado para liberar espacio (ya estaba publicado)</div>` : r ? `<video src="${base}${r.files.youtube}" ${r.files.cover ? `poster="${base}${r.files.cover}"` : ''} controls preload="none"></video>` : `<div class="cover" style="width:200px;aspect-ratio:9/16;border-radius:10px;background:${esc(c.color || '#14532d')};display:grid;place-items:center;color:#fff;padding:12px;text-align:center">${STATUS[j.status]}</div>`;
   return `<div class="card"><div class="vid">${media}<div style="min-width:0">
-    <div class="hint">${esc(c.name)} · publicar el <input type="date" value="${esc(j.publishDate)}" data-act-change="date" data-id="${j.id}" style="width:auto;padding:2px 6px"></div>
+    <div class="hint"><select data-act-change="canal" data-id="${j.id}" title="Pasar o copiar este video a otro canal" style="width:auto;padding:2px 6px">${S.channels.map(x => `<option value="${x.id}" ${x.id === j.channelId ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select> · publicar el <input type="date" value="${esc(j.publishDate)}" data-act-change="date" data-id="${j.id}" style="width:auto;padding:2px 6px"> a las <input type="time" value="${esc(j.horaFija || j.horas?.youtube || '')}" data-act-change="hora" data-id="${j.id}" style="width:auto;padding:2px 6px"> <b>hora Perú</b>${j.horaFija ? ' <a href="#" data-act-hora="auto" data-id="' + j.id + '" class="hint">(usar horario del canal)</a>' : ''}</div>
     <h3 style="margin-top:6px">${esc(nice(j.title || j.topic || 'Tema automático'))}</h3>${status(j.status)}${j.character ? ` <span class="chip">${esc(j.character)}</span>` : ''}
     ${['cola', 'produciendo', 'error'].includes(j.status) ? `<div class="log" data-log="${j.id}">${j.log.map(esc).join('<br>')}</div>` : ''}
     ${j.status === 'error' ? `<div class="issues" style="border-left-color:var(--bad)"><b>¿Qué pasó?</b> ${esc(ayuda(j.error))}</div>` : ''}
@@ -205,9 +205,9 @@ function videoCard(j) {
       <p class="hint">${esc(j.review.resumen)}</p>${j.review.problemas.length ? '<ul>' + j.review.problemas.map(p => `<li><b>${esc(p.momento)}</b> ${esc(p.problema)} → <i>${esc(p.solucion)}</i></li>`).join('') + '</ul>' : ''}
       ${j.review.lecciones.length ? `<p class="hint">📘 Aprendido: ${j.review.lecciones.map(esc).join(' · ')}</p>` : ''}</details>` : ''}
     ${j.pub && Object.keys(j.pub).length ? `<div style="margin-top:8px">${Object.entries(j.pub).map(([p, x]) => x.ok ? `<a class="chip st-aprobado" href="${esc(x.url)}" target="_blank">${p === 'youtube' ? 'YouTube' : 'Facebook'}: ${x.scheduled ? 'programado ' + esc(new Date(x.when).toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' })) : 'publicado'}${x.privacy === 'private' && !x.scheduled ? ' (privado)' : ''} ↗</a>` : `<span class="chip st-error" title="${esc(x.error)}">${p}: error</span>`).join(' ')}${Object.values(j.pub).some(x => !x.ok) ? ` <button class="b ghost sm" data-act="job" data-a="retryPublish" data-id="${j.id}">Reintentar publicación</button>` : ''}</div>` : ''}
-    ${r ? `<details class="seo" open><summary>YouTube</summary>${copyBox('Título', y.title)}${(y.alt_titles || []).map((t, i) => copyBox('Título alternativo ' + (i + 1), t)).join('')}${copyBox('Descripción', (y.description || '') + '\n\n' + tagLine(y.hashtags) + cred)}${copyBox('Etiquetas', (y.tags || []).join(', '))}${copyBox('Palabras clave', (y.keywords || []).join(', '))}${copyBox('Comentario fijado', y.pinned_comment)}<div class="times">Hora sugerida: ${esc(c.times?.youtube)}</div></details>
-    <details class="seo"><summary>TikTok</summary>${copyBox('Texto', (tt.caption || '') + '\n\n' + tagLine(tt.hashtags))}<div class="times">Hora sugerida: ${esc(c.times?.tiktok)}</div></details>
-    <details class="seo"><summary>Facebook</summary>${copyBox('Texto', (fb.caption || '') + '\n\n' + tagLine(fb.hashtags) + cred)}<div class="times">Hora sugerida: ${esc(j.horas?.facebook || c.times?.facebook)}</div></details>
+    ${r ? `<details class="seo" open><summary>YouTube</summary>${copyBox('Título', y.title)}${(y.alt_titles || []).map((t, i) => copyBox('Título alternativo ' + (i + 1), t)).join('')}${copyBox('Descripción', (y.description || '') + '\n\n' + tagLine(y.hashtags) + cred)}${copyBox('Etiquetas', (y.tags || []).join(', '))}${copyBox('Palabras clave', (y.keywords || []).join(', '))}${copyBox('Comentario fijado', y.pinned_comment)}<div class="times">Hora: ${esc(j.horas?.youtube || c.times?.youtube)} (hora Perú)</div></details>
+    <details class="seo"><summary>TikTok</summary>${copyBox('Texto', (tt.caption || '') + '\n\n' + tagLine(tt.hashtags))}<div class="times">Hora: ${esc(j.horas?.tiktok || c.times?.tiktok)} (hora Perú)</div></details>
+    <details class="seo"><summary>Facebook</summary>${copyBox('Texto', (fb.caption || '') + '\n\n' + tagLine(fb.hashtags) + cred)}<div class="times">Hora: ${esc(j.horas?.facebook || c.times?.facebook)} (hora Perú)</div></details>
     <div class="btns">${r.borrado ? '' : `<a class="b sm" href="${base}${r.files.youtube}" download="${esc(fname(j, 'youtube'))}" style="text-decoration:none">⬇ Descargar para YouTube</a><a class="b sm" href="${base}${r.files.social}" download="${esc(fname(j, 'tiktok-facebook'))}" style="text-decoration:none">⬇ Descargar para TikTok/Facebook</a>`}${r.files.cover ? `<a class="b ghost sm" href="${base}${r.files.cover}" download style="text-decoration:none">⬇ Portada</a>` : ''}</div>` : ''}
     <div class="btns">
       ${j.status === 'revisar' ? `<button class="b sm" data-act="job" data-a="approve" data-id="${j.id}">✓ Aprobar</button>` : ''}
@@ -950,6 +950,7 @@ Object.assign(ACT, {
 
 document.addEventListener('click', e => {
   const n = e.target.closest('nav button'); if (n) { tab = n.dataset.tab; store.set('tab', tab); render(); return; }
+  const ha = e.target.closest('[data-act-hora]'); if (ha) { e.preventDefault(); api('/api/job/action', { id: ha.dataset.id, action: 'hora', hora: '' }).then(() => { toast('Usará el horario del canal'); refresh(true); }); return; }
   const b = e.target.closest('[data-act]'); if (b && ACT[b.dataset.act]) { e.preventDefault(); ACT[b.dataset.act](b); }
   if (e.target.id === 'modal') { $('#modal').hidden = true; edit = null; }
 });
@@ -958,6 +959,14 @@ document.addEventListener('change', guard(async e => {
   if (t.dataset.actChange === 'reCh') { store.set('reCh', t.value); render(); return; }
   if (t.id === 're-files' && t.files.length) { await uploadVideos([...t.files]); return; }
   if (t.id === 'ds-files' && t.files.length) { await uploadDS([...t.files]); return; }
+  if (t.dataset.actChange === 'hora') { await api('/api/job/action', { id: t.dataset.id, action: 'hora', hora: t.value }); toast('Hora cambiada (hora Perú)'); await refresh(true); return; }
+  if (t.dataset.actChange === 'canal') {
+    const j = S.jobs.find(x => x.id === t.dataset.id), destino = t.options[t.selectedIndex].text;
+    const pub = Object.values(j?.pub || {}).some(p => p.ok);
+    if (!confirm(pub ? `Este video ya se publicó. ¿Hago una COPIA para "${destino}"? (el original se queda donde está)` : `¿Pasar este video al canal "${destino}"?\nOjo: el logo y la marca dentro del video son del canal anterior; si quieres los del nuevo, luego pulsa Rehacer.`)) { t.value = j.channelId; return; }
+    const r = await api('/api/job/action', { id: t.dataset.id, action: 'canal', channelId: t.value });
+    toast(r.copia ? 'Copia creada en ' + destino + ' (queda para Revisar)' : 'Video pasado a ' + destino); await refresh(true); return;
+  }
   if (t.dataset.actChange === 'date') { await api('/api/job/action', { id: t.dataset.id, action: 'date', date: t.value }); toast('Fecha cambiada'); await refresh(true); }
   if (t.dataset.cup) { readChannel(); await api('/api/channel', edit); await uploadFile(t.files[0], { kind: t.dataset.cup, channel: edit.id, char: t.dataset.cid }); await refresh(); edit = JSON.parse(JSON.stringify(S.channels.find(c => c.id === edit.id))); drawChannel(); toast('Imagen subida'); }
 }));
