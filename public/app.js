@@ -45,8 +45,18 @@ const logoHtml = c => c.logo ? `<img class="logo" src="/files/logos/${c.id}.png?
 // Markdown sencillo para las respuestas del asistente: títulos, negritas, listas y separadores.
 function md(t) {
   const inline = x => esc(x).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g, '$1<i>$2</i>').replace(/`([^`]+)`/g, '<code>$1</code>');
-  let html = '', list = false;
+  let html = '', list = false, code = null, tabla = [];
+  const cerrarTabla = () => {
+    if (!tabla.length) return;
+    const filas = tabla.filter(r => !/^\s*\|?\s*:?-{2,}/.test(r)).map(r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+    html += '<div class="mdt"><table>' + filas.map((f, i) => '<tr>' + f.map(c => i ? `<td>${inline(c)}</td>` : `<th>${inline(c)}</th>`).join('') + '</tr>').join('') + '</table></div>';
+    tabla = [];
+  };
   for (const raw of String(t || '').split('\n')) {
+    if (/^\s*```/.test(raw)) { if (code === null) { if (list) { html += '</ul>'; list = false; } cerrarTabla(); code = []; } else { html += `<pre class="mdc">${esc(code.join('\n'))}</pre>`; code = null; } continue; }
+    if (code !== null) { code.push(raw); continue; }
+    if (/^\s*\|.*\|\s*$/.test(raw)) { if (list) { html += '</ul>'; list = false; } tabla.push(raw); continue; }
+    cerrarTabla();
     const l = raw.trimEnd(), li = l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
     if (li) { if (!list) { html += '<ul>'; list = true; } html += '<li>' + inline(li[1]) + '</li>'; continue; }
     if (list) { html += '</ul>'; list = false; }
@@ -55,6 +65,8 @@ function md(t) {
     else if (/^\s*(-{3,}|\*{3,})\s*$/.test(l)) html += '<hr>';
     else if (l.trim()) html += '<p>' + inline(l) + '</p>';
   }
+  cerrarTabla();
+  if (code !== null) html += `<pre class="mdc">${esc(code.join('\n'))}</pre>`;
   return html + (list ? '</ul>' : '');
 }
 
@@ -311,6 +323,32 @@ VIEWS.viral = () => {
     <li>En Facebook pon el enlace en el primer comentario o en una Historia (con enlace en el texto llega a menos gente). Usa <code>?src=</code> para saber qué publicación trae más gente, ej. <code>/?g=ruleta&src=fb-reel-1</code>.</li></ul></div>`;
 };
 
+// ---------- Archivos en el asistente ----------
+let chatAdj = [];
+const ADJ_ICO = { imagen: '🖼️', video: '🎬', texto: '📄' };
+function adjHtml(adj) {
+  if (!adj?.length) return '';
+  return '<div class="adjs">' + adj.map(a => a.tipo === 'imagen' ? `<img src="/api/chat/adjunto?id=${encodeURIComponent(a.id)}" alt="${esc(a.nombre)}" title="${esc(a.nombre)}">`
+    : a.tipo === 'video' ? `<span class="adjc">🎬 ${esc(a.nombre)}</span>${(a.frames || []).slice(0, 3).map(f => `<img src="/api/chat/adjunto?id=${encodeURIComponent(f)}" alt="">`).join('')}`
+    : `<span class="adjc">📄 ${esc(a.nombre)}</span>`).join('') + '</div>';
+}
+function adjPend() { return chatAdj.map((a, i) => `<span class="adjc">${a.subiendo ? '⏳' : ADJ_ICO[a.tipo] || '📎'} ${esc(a.nombre)} <button class="adjx" data-act="adjDel" data-i="${i}" title="Quitar">✕</button></span>`).join(''); }
+async function subirAdj(files) {
+  for (const f of [...files].slice(0, 8)) {
+    if (f.size > 60e6) { toast(f.name + ': muy pesado (máx. 60 MB)'); continue; }
+    const a = { nombre: f.name || 'captura.png', subiendo: true }; chatAdj.push(a); $('#adjBox') && ($('#adjBox').innerHTML = adjPend());
+    try {
+      const r = await fetch('/api/chat/adjunto', { method: 'POST', headers: { 'x-sf': '1', 'x-name': encodeURIComponent(a.nombre) }, body: f });
+      const j = await r.json(); if (!r.ok || j.error) throw new Error(j.error || 'Error ' + r.status);
+      Object.assign(a, j, { subiendo: false });
+    } catch (e) { chatAdj.splice(chatAdj.indexOf(a), 1); toast(e.message); }
+    if ($('#adjBox')) $('#adjBox').innerHTML = adjPend();
+  }
+}
+document.addEventListener('paste', e => { if (tab !== 'chat') return; const fs2 = [...(e.clipboardData?.files || [])]; if (fs2.length) { e.preventDefault(); subirAdj(fs2); } });
+document.addEventListener('dragover', e => { if (tab === 'chat' && e.target.closest?.('.chat')) e.preventDefault(); });
+document.addEventListener('drop', e => { if (tab !== 'chat' || !e.target.closest?.('.chat')) return; e.preventDefault(); if (e.dataTransfer?.files?.length) subirAdj(e.dataTransfer.files); });
+
 VIEWS.chat = () => {
   const c = S.channels.find(x => x.active) || S.channels[0];
   const quick = [
@@ -321,9 +359,11 @@ VIEWS.chat = () => {
     'Escribe respuestas cortas y amables para estos comentarios:',
   ].filter(Boolean);
   return `<h1>Asistente IA</h1><p class="sub">Conoce tus canales. Pídele ideas, nichos, análisis de competencia, ganchos o estrategia.</p>
-  <div class="chat"><div class="msgs">${chatMsgs.length ? chatMsgs.map((m, i) => m.role === 'assistant' && !m.content ? '' : `<div class="msg ${m.role}${chatBusy && i === chatMsgs.length - 1 && m.role === 'assistant' ? ' live' : ''}">${m.role === 'assistant' ? md(m.content) || '…' : esc(m.content)}</div>`).join('') : '<div class="empty">Escribe tu pregunta o usa un atajo.</div>'}${chatBusy && (chatMsgs.at(-1)?.role === 'user' || !chatMsgs.at(-1)?.content) ? '<div class="msg assistant" id="thinking">Pensando…</div>' : ''}</div>
+  <div class="chat"><div class="msgs">${chatMsgs.length ? chatMsgs.map((m, i) => m.role === 'assistant' && !m.content ? '' : `<div class="msg ${m.role}${chatBusy && i === chatMsgs.length - 1 && m.role === 'assistant' ? ' live' : ''}">${m.role === 'assistant' ? md(m.content) || '…' : adjHtml(m.adj) + esc(m.content)}</div>`).join('') : '<div class="empty">Escribe tu pregunta o usa un atajo.</div>'}${chatBusy && (chatMsgs.at(-1)?.role === 'user' || !chatMsgs.at(-1)?.content) ? '<div class="msg assistant" id="thinking">Pensando…</div>' : ''}</div>
   <div class="quick">${quick.map(q => `<button class="b ghost sm" data-act="quick" data-q="${esc(q)}">${esc(q.length > 60 ? q.slice(0, 58) + '…' : q)}</button>`).join('')}<button class="b ghost sm" data-act="clearChat">Borrar chat</button></div>
-  <div class="chatin"><textarea id="chatIn" placeholder="Escribe aquí… (Enter para enviar, Shift+Enter para nueva línea)"></textarea><button class="b" data-act="send" ${chatBusy ? 'disabled' : ''}>Enviar</button></div></div>`;
+  <div id="adjBox" class="adjbox">${adjPend()}</div>
+  <div class="chatin"><label class="b ghost" title="Adjuntar fotos, capturas, videos o archivos de texto" style="display:flex;align-items:center;cursor:pointer;font-size:20px;padding:0 12px">📎<input type="file" id="chatFile" multiple accept="image/*,video/*,.txt,.csv,.tsv,.md,.json,.srt,.vtt,.log,.html,.xml" hidden></label>
+    <textarea id="chatIn" placeholder="Escribe aquí… o pega una captura (Ctrl+V), arrastra archivos o usa 📎. Enter para enviar."></textarea><button class="b" data-act="send" ${chatBusy ? 'disabled' : ''}>Enviar</button></div></div>`;
 };
 
 let rec = null;
@@ -821,6 +861,7 @@ const ACT = {
   redOn: guard(async el => { readChannel(); await api('/api/channel', edit); const red = el.dataset.red; await api('/api/red', red === 'mastodon' ? { red, channelId: el.dataset.id, server: $('#e-mast-s').value, token: $('#e-mast-t').value } : { red, channelId: el.dataset.id, url: $('#e-disc-u').value }); toast((red === 'mastodon' ? 'Mastodon' : 'Discord') + ' conectado ✓'); await refresh(); edit = JSON.parse(JSON.stringify(S.channels.find(c => c.id === edit.id))); drawChannel(); }),
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
+  adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
   vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),
   vfCopy: el => navigator.clipboard.writeText(el.dataset.u).then(() => toast('Dirección copiada')),
@@ -866,8 +907,12 @@ const ACT = {
   quick: el => { $('#chatIn').value = el.dataset.q + (el.dataset.q.endsWith(':') ? '\n' : ''); $('#chatIn').focus(); },
   clearChat: () => { chatMsgs = []; store.set('chat', chatMsgs); render(); },
   send: guard(async () => {
-    const t = $('#chatIn').value.trim(); if (!t || chatBusy) return;
-    chatMsgs.push({ role: 'user', content: t }); chatBusy = true; render();
+    let t = $('#chatIn').value.trim(); if (chatBusy) return;
+    if (chatAdj.some(a => a.subiendo)) return toast('Espera a que terminen de subir los archivos');
+    if (!t && !chatAdj.length) return;
+    const adj = chatAdj.map(({ subiendo, ...a }) => a); chatAdj = [];
+    if (!t) t = adj.some(a => a.tipo !== 'texto') ? 'Analiza esto y dime qué ves y cómo lo puedo aprovechar para mis canales.' : 'Analiza este archivo.';
+    chatMsgs.push({ role: 'user', content: t, ...(adj.length ? { adj } : {}) }); chatBusy = true; render();
     const m = { role: 'assistant', content: '' };
     const t0 = Date.now(), tick = setInterval(() => { const el = $('#thinking'); if (el) el.textContent = `Pensando… ${Math.round((Date.now() - t0) / 1000)} s`; }, 1000);
     try {
@@ -1088,6 +1133,7 @@ document.addEventListener('change', guard(async e => {
   if (t.dataset.actChange === 'reCh') { store.set('reCh', t.value); render(); return; }
   if (t.id === 're-files' && t.files.length) { await uploadVideos([...t.files]); return; }
   if (t.id === 'ds-files' && t.files.length) { await uploadDS([...t.files]); return; }
+  if (t.id === 'chatFile' && t.files.length) { await subirAdj(t.files); t.value = ''; return; }
   if (t.id === 'vf-dest') { VS = await api('/api/viral/ajustes', { destacado: t.checked }); toast(t.checked ? 'Tu último video será el destacado' : 'Desactivado'); return; }
   if (t.dataset.actChange === 'radarCh') { store.set('radarCh', t.value); render(); return; }
   if (t.dataset.actChange === 'hora') { await api('/api/job/action', { id: t.dataset.id, action: 'hora', hora: t.value }); toast('Hora cambiada (hora Perú)'); await refresh(true); return; }

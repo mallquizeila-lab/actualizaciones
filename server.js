@@ -272,6 +272,8 @@ async function api(u, q, U, r) {
   if (u === '/api/desarmados') return { items: desarmar.list() };
   if (u === '/api/cuotas') return { agotados: ai.estadoCuotas(), uso: db.usage };
   if (u === '/api/brain') return { canales: cerebro.resumen(), state: cerebro.state, telegram: { bot: !!E.TELEGRAM_BOT_TOKEN, chat: !!E.TELEGRAM_CHAT_ID }, lastBackup: db.settings.lastBackup || null };
+  // Miniaturas de los archivos del asistente (se piden con <img>).
+  if (u === '/api/chat/adjunto' && !P) { const f = require('./lib/adjuntos').imagen(U.searchParams.get('id')); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': 'image/jpeg', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (!P) return null;
   if (!q.headers['x-sf']) throw Object.assign(new Error('Prohibido'), { code: 403 });
 
@@ -413,13 +415,22 @@ async function api(u, q, U, r) {
   }
   if (u === '/api/plan') { const o = await json(q); const n = worker.plan(o.date); worker.loop(); return { ok: 1, n }; }
   if (u === '/api/worker/start') { worker.loop(); return { ok: 1 }; }
+  if (u === '/api/chat/adjunto' && P) { // fotos, videos y textos para el asistente
+    const nombre = decodeURIComponent(q.headers['x-name'] || 'archivo').slice(0, 120);
+    return require('./lib/adjuntos').guardar(nombre, await body(q, 60e6));
+  }
   if (u === '/api/chat') {
     const o = await json(q);
-    const msgs = [{ role: 'system', content: chatSystem(db) }, ...(o.messages || []).slice(-20).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content).slice(0, 12000) }))];
+    const hist = (o.messages || []).slice(-20).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || ''), adj: m.adj }));
+    const { mensajes, imagenes } = require('./lib/adjuntos').armar(hist);
+    const msgs = [{ role: 'system', content: chatSystem(db) + (imagenes ? '\nEl usuario te mandó imágenes (fotos, capturas o cuadros de un video): míralas con atención y responde sobre lo que ves.' : '') }, ...mensajes];
     // Respuesta en vivo: se envía el texto a medida que llega.
     r.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-cache', 'x-accel-buffering': 'no' });
     r.flushHeaders();
-    try { await ai.askStream(msgs, d => r.write(d), { max: 4000 }); }
+    try {
+      if (imagenes) { r.write(''); const a = await ai.ask(msgs, { vision: true, max: 4000 }); r.write(a.text || ''); } // con imágenes: una IA que puede ver
+      else await ai.askStream(msgs, d => r.write(d), { max: 4000 });
+    }
     catch (e) { r.write('\n\n⚠ ' + e.message); }
     r.end();
     return STREAMED;

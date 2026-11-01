@@ -1,3 +1,8 @@
+v7.1.0 — Asistente IA con fotos y archivos
+- Botón 📎 en el Asistente IA: sube fotos, capturas, videos (mira 6 cuadros del video) y archivos de texto (txt, csv, json, srt…). También puedes pegar una captura con Ctrl+V o arrastrar los archivos.
+- Con imágenes usa una IA que puede ver (Gemini primero).
+- Las tablas y los bloques para copiar ahora se ven bien en las respuestas (antes salían con rayas "|").
+
 v7.0.0 — 📣 Página viral dentro de ShortForge
 - Nueva pestaña "📣 Página viral": juegos para compartir (horóscopo y alma gemela, test de amor, qué animal eres, ruleta de la suerte, número del destino, encuesta del día) con botones para Facebook, WhatsApp, Instagram, TikTok, Telegram, X y Messenger.
 - ShortForge la enciende sola y la publica en internet con Cloudflare Tunnel (gratis, con HTTPS). Para usarla de verdad pon una dirección fija con tu dominio (guía en la pestaña).
