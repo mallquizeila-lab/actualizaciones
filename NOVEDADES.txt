@@ -1,3 +1,12 @@
+v7.14.0 — Música gamer, voces y escenarios nuevos en Huerto Defensor
+- Música de fondo propia generada en vivo (sin archivos): un tema para cada juego, música de jefa cuando aparece la rata y más intensidad en la gran oleada y en los retos.
+- Las plagas hablan con voz y globos de diálogo: "¡Ahí voy a comerte!", "¡Tengo un hambre!", "¡Me las pagarás!", "¡Volveré!"... Cada una con su propio tono; los defensores también responden.
+- Huerto Defensor con 3 escenarios: Chacra soleada (mariposas, maizal y sol), Jardín de noche (luna, luciérnagas y hongos que brillan) y Andenes de los Andes (montañas nevadas, muros de piedra y cóndor). Casita con techo de tejas al fondo.
+- Mapa de niveles nuevo: camino ilustrado por zonas con decoración animada y marcador de dónde te quedaste.
+- Sorpresas: gotas doradas (+75), monedas que sueltan las plagas, "¡DOBLE!" y "¡TRIPLE!" al eliminar varias seguidas, y explosiones con "¡BUM!".
+- Sonidos nuevos en todos los juegos (moneda, explosión, salto, combo, nivel superado) y voces en Joyas, el Mundo 3D y al terminar cualquier juego.
+- Botones 🎵 y 🗣️ para apagar la música o las voces.
+
 v7.13.0 — Nuevo: Islas Portal 3D (multijugador)
 - Mundo 3D propio: Plaza de los Portales con cristal flotante y 5 portales a mundos (Desierto de las Dunas, Bosque Encantado, Picos Nevados, Isla Volcán con lava y Estación Lunar con baja gravedad).
 - Personaje animado que corre y salta (doble salto); en celular con joystick y botón de salto, en computadora con teclado y mouse.

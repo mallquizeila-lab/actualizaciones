@@ -34,7 +34,7 @@
   function nivel(t, n) {
     salir(); scrollTo(0, 0);
     const C = cfg(n), W = cuadro(), S = W / N;
-    stage(`<div class="card" style="padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><button class="btn alt" id="vm" style="width:auto;margin:0;padding:4px 10px;font-size:.8rem">🗺️ Mapa</button><b>Nivel ${n}</b><span>🪙 <b id="mon">${PERFIL.datos.monedas}</b></span></div>
+    stage(`<div class="card" style="padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><button class="btn alt" id="vm" style="width:auto;margin:0;padding:4px 10px;font-size:.8rem">🗺️ Mapa</button><b>Nivel ${n}</b><span style="display:flex;align-items:center;gap:2px">${FX.botones ? FX.botones() : ""}</span><span>🪙 <b id="mon">${PERFIL.datos.monedas}</b></span></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px"><div style="text-align:center;background:rgba(255,255,255,.08);border-radius:12px;padding:6px 12px"><small class="sub" style="margin:0">Movimientos</small><div id="mv" style="font:900 1.6rem Figtree,sans-serif">${C.movs}</div></div>
       <div id="obj" style="flex:1;text-align:center;background:rgba(255,255,255,.08);border-radius:12px;padding:6px"></div></div>
       <div class="prog" style="margin:8px 0"><i id="pb" style="width:0%"></i></div>
@@ -106,7 +106,7 @@
         const cx = (i % N) * S + S / 2, cy = Math.floor(i / N) * S + S / 2; for (let q = 0; q < 5; q++) parts.push({ x: cx, y: cy, vx: (Math.random() - .5) * 6, vy: (Math.random() - .7) * 6, v: 30, r: 3 + Math.random() * 3, c: COL[p.t][0] }); }
       const ganado = n * 60 * combo; pts += ganado; FX.son(combo > 1 ? 'ganar' : 'punto'); FX.vibrar(combo > 1 ? 25 : 10);
       const ii = [...set][0]; textos.push({ x: (ii % N) * S + S / 2, y: Math.floor(ii / N) * S + S / 2, txt: '+' + ganado, tam: 18 + combo * 3, v: 40 });
-      if (combo >= 3) textos.push({ x: W / 2, y: W / 2, txt: combo >= 5 ? '¡INCREÍBLE!' : combo >= 4 ? '¡GENIAL!' : '¡BIEN!', tam: 38, v: 50 });
+      if (combo >= 3) { const tx = combo >= 5 ? '¡INCREÍBLE!' : combo >= 4 ? '¡GENIAL!' : '¡BIEN!'; textos.push({ x: W / 2, y: W / 2, txt: tx, tam: 38, v: 50 }); FX.son('combo'); FX.voz?.(tx.toLowerCase(), { tono: 1.3, vel: 1.15 }); }
       await anima(170, p => { for (const i of set) if (g[i]) g[i].sc = 1 - p; });
       for (const i of set) g[i] = null;
       for (const [i, s] of Object.entries(nuevos)) { g[i] = { ...s, oy: 0, ox: 0, sc: 1, id: ++uid }; }
@@ -158,13 +158,13 @@
       vivo = false; ocupado = true;
       // movimientos sobrantes = bonus
       const bonus = movs * 80; pts += bonus;
-      const e = pts >= C.e3 ? 3 : pts >= C.e2 ? 2 : 1; PERFIL.partida('joyas', pts); PERFIL.joyasNivel(n, e); FX.confeti();
+      const e = pts >= C.e3 ? 3 : pts >= C.e2 ? 2 : 1; PERFIL.partida('joyas', pts); PERFIL.joyasNivel(n, e); FX.confeti(); FX.son('nivel'); FX.voz?.(['¡Nivel superado!', '¡Brillante!', '¡Eres una máquina!'][e - 1] || '¡Nivel superado!', { forzar: true, cortar: true, tono: 1.2 });
       post('/api/arcade/puntaje', { juego: 'joyas', puntos: Math.min(100000, pts), nombre: LS.get('chatNom') || 'Jugador', avatar: LS.get('chatAv') || 'a01', uid: VID }).catch(() => {});
       cerrar(`<div style="font-size:3rem;letter-spacing:6px">${'⭐'.repeat(e)}<span style="opacity:.25">${'⭐'.repeat(3 - e)}</span></div><h2>¡Nivel ${n} superado!</h2><p class="sub">${pts.toLocaleString('es-PE')} puntos${bonus ? ` (incluye +${bonus} por ${movs} movimientos sobrantes)` : ''} · +${e * 5} 🪙</p>
         ${n < TOTAL ? `<button class="btn" id="sig">▶ Nivel ${n + 1}</button>` : '<p>🏆 ¡Completaste los 100 niveles!</p>'}<button class="btn alt" id="map">🗺️ Ver el mapa</button><button class="btn alt" id="comp">📣 Compartir</button>`);
     }
     function perder() {
-      ocupado = true; if (!perdio) { perdio = true; PERFIL.partida('joyas', pts); }
+      ocupado = true; FX.son('perder'); FX.voz?.('¡Uy! Te quedaste sin movimientos', { forzar: true }); if (!perdio) { perdio = true; PERFIL.partida('joyas', pts); }
       cerrar(`<div style="font-size:3rem">😮</div><h2>¡Te quedaste sin movimientos!</h2><p class="sub">${objetivo().replace(/<[^>]+>/g, ' ')}</p><button class="btn" id="mas">➕5 movimientos · 40 🪙</button><button class="btn alt" id="rei">🔁 Reintentar</button><button class="btn alt" id="map">🗺️ Mapa</button>`);
     }
     function cerrar(html) {

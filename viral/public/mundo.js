@@ -68,7 +68,7 @@
     const ov = document.createElement('div'); ov.id = 'm3d';
     ov.innerHTML = `<canvas id="m3c"></canvas>
       <div id="m3info" class="m3g"><b id="m3n"></b><div>🪙 <b id="m3m"></b> <span id="m3mm" style="opacity:.85"></span></div><div id="m3mis" style="font-size:.78rem;opacity:.92;margin-top:3px"></div></div>
-      <div id="m3top"><button class="m3b" id="m3est">🎨 Estilo</button><button class="m3b" id="m3pz">🏛️</button><button class="m3b" id="m3son">${LS.get('arcSonido') === '0' ? '🔇' : '🔊'}</button><button class="m3b" id="m3x">✖</button><span class="m3b" id="m3on" style="cursor:default">👥 1</span></div>
+      <div id="m3top"><button class="m3b" id="m3est">🎨 Estilo</button><button class="m3b" id="m3pz">🏛️</button><button class="m3b" id="m3son">${LS.get('arcSonido') === '0' ? '🔇' : '🔊'}</button>${FX.botones ? `<span class="m3b" style="padding:4px 6px">${FX.botones()}</span>` : ''}<button class="m3b" id="m3x">✖</button><span class="m3b" id="m3on" style="cursor:default">👥 1</span></div>
       <div id="m3reto" class="m3g"></div><div id="m3msg"></div><div id="m3joy"><i></i></div>
       <div id="m3ayuda" class="m3g">${matchMedia('(pointer:coarse)').matches ? '👈 Mueve con el dedo a la izquierda · Gira la cámara arrastrando a la derecha 👉' : 'Muévete con WASD o flechas · Espacio para saltar · Arrastra para girar la cámara'}</div>
       <button class="m3b" id="m3emo">😀</button><button class="m3b" id="m3salto">⤒</button>
@@ -242,7 +242,7 @@
     const suelta = e => { if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; $m('#m3joy').style.display = 'none'; $m('#m3joy i').style.transform = ''; } if (e.pointerId === giro.id) giro.id = null; };
     cv.addEventListener('pointerup', suelta); cv.addEventListener('pointercancel', suelta);
     cv.addEventListener('wheel', e => { dist = Math.max(4, Math.min(16, dist + e.deltaY * .01)); }, { passive: true });
-    function saltar() { const g = MUNDOS[mundo].grav || 1; if (enSuelo) { vel.y = 10.5; enSuelo = false; saltos = 1; FX.son('swish'); } else if (saltos < 2) { vel.y = 9; saltos = 2; FX.son('swish'); } void g; }
+    function saltar() { const g = MUNDOS[mundo].grav || 1; if (enSuelo) { vel.y = 10.5; enSuelo = false; saltos = 1; FX.son('salto'); } else if (saltos < 2) { vel.y = 9; saltos = 2; FX.son('salto'); } void g; }
     $m('#m3salto').addEventListener('pointerdown', e => { e.preventDefault(); saltar(); });
 
     // ---------- HUD ----------
@@ -265,17 +265,18 @@
         try { PERFIL.mision('vivo1'); } catch (e) {}
         J.pos = { mundo, x: pos.x, z: pos.z }; PERFIL.guardar(); hud(); otrosLimpiar();
         f.style.opacity = 0; viajando = false;
+        FX.musica?.(mundo === 'luna' ? 'espacio' : 'mundo'); FX.voz?.(mundo === 'plaza' ? 'De vuelta en la plaza' : `¡Bienvenido a ${MUNDOS[mundo].n}!`, { forzar: true, cortar: true, tono: 1.1 });
         if (aviso) msg(`${MUNDOS[mundo].e} ${MUNDOS[mundo].n}`, mundo === 'plaza' ? 'Entra a un portal para viajar' : 'Recoge las monedas · Toca el orbe morado para el reto');
       }, 380);
     }
     function terminarReto(ok) {
-      if (!reto) return; const r = reto; reto = null; $m('#m3reto').style.display = 'none'; gemas.forEach(g => grupo.remove(g.me)); gemas = [];
+      if (!reto) return; const r = reto; reto = null; FX.intensidad?.(1); $m('#m3reto').style.display = 'none'; gemas.forEach(g => grupo.remove(g.me)); gemas = [];
       if (!ok) return;
       const e = r.t > 30 ? 3 : r.t > 15 ? 2 : 1, antes = J.estrellas[mundo] || 0, premio = e > antes ? (e - antes) * 15 : 3;
       J.estrellas[mundo] = Math.max(antes, e); PERFIL.ganar(premio); FX.confeti();
       const pts = Math.round(r.t * 100); try { PERFIL.partida('mundo', pts); } catch (er) {}
       post('/api/arcade/puntaje', { juego: 'mundo', puntos: pts, nombre: LS.get('chatNom') || 'Jugador', avatar: LS.get('chatAv') || 'a01', uid: VID }).catch(() => {});
-      msg(`${'⭐'.repeat(e)} ¡Reto superado!`, `Te sobraron ${Math.round(r.t)} s · +${premio} 🪙`, 3500);
+      FX.son('nivel'); FX.voz?.('¡Reto superado! ¡Qué rápido eres!', { forzar: true, cortar: true }); msg(`${'⭐'.repeat(e)} ¡Reto superado!`, `Te sobraron ${Math.round(r.t)} s · +${premio} 🪙`, 3500);
       if (orbe) { grupo.remove(orbe.userData.et); const et = etiqueta(`⏱️ Reto ${'⭐'.repeat(J.estrellas[mundo])}`, '#fff', 'rgba(150,20,160,.75)', 3.6); et.position.set(orbe.position.x, orbe.position.y + 1.6, orbe.position.z); grupo.add(et); orbe.userData.et = et; }
       hud();
     }
@@ -283,7 +284,7 @@
       if (reto) return; const r = rng(Date.now() & 0xffff), cG = new THREE.Color(MUNDOS[mundo].col);
       for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 + r() * .4, d = 12 + r() * 22, x = orbe.position.x + Math.cos(a) * d, z = orbe.position.z + Math.sin(a) * d, y = alt(mundo, x, z) + 1.2 + (i % 3 === 2 ? 1.8 : 0);
         const me = malla(new THREE.OctahedronGeometry(.55, 0), mat(cG, { emissive: cG, emissiveIntensity: .9, roughness: .1, metalness: .3 }), x, y, z, false); grupo.add(me); gemas.push({ me, x, y, z }); }
-      reto = { t: 60, n: 0 }; $m('#m3reto').style.display = 'block'; FX.son('ganar'); msg('⏱️ ¡Reto contrarreloj!', 'Recoge las 10 gemas brillantes antes de 60 segundos', 3000);
+      reto = { t: 60, n: 0 }; $m('#m3reto').style.display = 'block'; FX.son('sirena'); FX.voz?.('¡Corre! Tienes sesenta segundos', { forzar: true, cortar: true }); FX.intensidad?.(2); msg('⏱️ ¡Reto contrarreloj!', 'Recoge las 10 gemas brillantes antes de 60 segundos', 3000);
     }
 
     // ---------- Otros jugadores ----------
@@ -347,12 +348,12 @@
       for (const [cx, cz, cr] of colis) { const dx = pos.x - cx, dz = pos.z - cz, d = Math.hypot(dx, dz), m = cr + .45; if (d < m && d > 0 && pos.y < alt(mundo, cx, cz) + 6) { pos.x = cx + dx / d * m; pos.z = cz + dz / d * m; } }
       const dc = Math.hypot(pos.x, pos.z); if (dc > 104) { pos.x *= 104 / dc; pos.z *= 104 / dc; }
       if (pos.y <= piso) { pos.y = piso; if (vel.y < -14) FX.vibrar(15); vel.y = 0; enSuelo = true; saltos = 0; } else if (pos.y > piso + .15) enSuelo = false;
-      if (lava && pos.y < -.9) { FX.son('perder'); FX.vibrar(120); msg('🔥 ¡Cuidado con la lava!', 'Vuelves al portal'); pos.set(0, alt(mundo, 0, 0) + .5, 0); vel.set(0, 0, 0); }
+      if (lava && pos.y < -.9) { FX.son('perder'); FX.voz?.('¡Quema, quema!', { tono: 1.6, vel: 1.3 }); FX.vibrar(120); msg('🔥 ¡Cuidado con la lava!', 'Vuelves al portal'); pos.set(0, alt(mundo, 0, 0) + .5, 0); vel.set(0, 0, 0); }
       if (pos.y < -30) { pos.set(0, alt(mundo, 0, 0) + 2, 0); vel.set(0, 0, 0); }
       // monedas
       for (let i = monedas.length - 1; i >= 0; i--) { const c = monedas[i]; if (Math.hypot(pos.x - c.x, pos.z - c.z) < (c.val > 1 ? 1.8 : 1.3) && Math.abs(pos.y + 1 - c.y) < 2) {
         grupo.remove(c.me); monedas.splice(i, 1); (J.mon.por[mundo] = J.mon.por[mundo] || []).push(c.i); PERFIL.ganar(c.val); monSes += c.val; try { PERFIL.mision('mundo10', c.val > 1 ? 3 : 1); } catch (e) {}
-        FX.son('punto'); FX.vibrar(10); if (c.val > 1) { FX.confeti(); msg('🌟 ¡Gran moneda!', '+10 🪙'); } if (!monedas.some(m => m.val === 1) && c.val === 1) msg('🎉 ¡Recogiste todas las monedas de hoy!', 'Mañana aparecen nuevas'); hud(); } }
+        FX.son('moneda'); FX.vibrar(10); if (c.val > 1) { FX.confeti(); msg('🌟 ¡Gran moneda!', '+10 🪙'); } if (!monedas.some(m => m.val === 1) && c.val === 1) msg('🎉 ¡Recogiste todas las monedas de hoy!', 'Mañana aparecen nuevas'); hud(); } }
       // gemas del reto
       if (reto) { reto.t -= dt; for (let i = gemas.length - 1; i >= 0; i--) { const g = gemas[i]; if (Math.hypot(pos.x - g.x, pos.z - g.z) < 1.4 && Math.abs(pos.y + 1 - g.y) < 2) { grupo.remove(g.me); gemas.splice(i, 1); reto.n++; FX.son('punto'); FX.vibrar(12); } }
         $m('#m3reto').textContent = `⏱️ ${Math.ceil(reto.t)} s · 💎 ${reto.n}/10`; if (reto.n >= 10) terminarReto(true); else if (reto.t <= 0) { terminarReto(false); FX.son('perder'); msg('⏱️ ¡Se acabó el tiempo!', 'Toca el orbe para intentarlo otra vez'); } }
