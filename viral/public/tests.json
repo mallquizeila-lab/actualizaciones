@@ -99,6 +99,16 @@
    "tipo": "mesa"
   },
   {
+   "id": "arcade-joyas",
+   "juego": "joyas",
+   "cat": "juegos",
+   "e": "💎",
+   "t": "Joyas: 100 niveles",
+   "d": "Combina 3 o más joyas, crea rayos, bombas y arcoíris. Tu progreso se guarda: sigue donde te quedaste.",
+   "min": 5,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-bloques",
    "juego": "bloques",
    "cat": "juegos",

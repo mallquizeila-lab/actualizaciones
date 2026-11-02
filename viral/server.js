@@ -44,6 +44,7 @@ create table if not exists campaigns (id integer primary key, created_at text de
 create table if not exists polls (id integer primary key, created_at text default (datetime('now')), question text, options text, active integer default 1);
 create table if not exists votes (poll_id integer, option integer, voter text, created_at text default (datetime('now')), primary key (poll_id, voter));
 create table if not exists settings (k text primary key, v text);
+create table if not exists perfiles (id text primary key, codigo text unique, data text, updated_at text default (datetime('now')));
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists resultados (id integer primary key, test text, clave text, created_at text default (datetime('now')));
@@ -246,7 +247,7 @@ async function api(req, res, u) {
   }
   // Ranking del día de los juegos arcade.
   if (u.pathname === '/api/arcade/puntaje' && P) {
-    const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200, bloques: 200000, frutas: 200000, colores: 2000, torre: 1000, palabra: 600, sudoku: 1000, ladrillos: 50000, vuela: 2000, corredor: 200000, flechas: 5000, ahorcado: 5000, sopa: 1000, ppt: 200, reflejos: 1000, tuberias: 1000, penales: 500, calculo: 3000, simon: 2000, topos: 2000, color: 2000 };
+    const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200, bloques: 200000, frutas: 200000, colores: 2000, torre: 1000, palabra: 600, sudoku: 1000, ladrillos: 50000, vuela: 2000, corredor: 200000, flechas: 5000, joyas: 100000, ahorcado: 5000, sopa: 1000, ppt: 200, reflejos: 1000, tuberias: 1000, penales: 500, calculo: 3000, simon: 2000, topos: 2000, color: 2000 };
     const b = await json(req), jg = String(b.juego || ''), pts = Math.round(+b.puntos || 0);
     if (!TOPE[jg] || pts < 0 || pts > TOPE[jg]) return send(res, 400, { error: 'Puntaje no válido' });
     if (limite(ip, 'arc', 30)) return send(res, 429, { error: 'Más despacio' });
@@ -257,6 +258,28 @@ async function api(req, res, u) {
     const mio = q1(`select max(puntos) p from arcade where juego=? and uid=? and date(created_at,'-5 hours')=?`, jg, uidh, hoy).p;
     const puesto = q1(`select count(*) n from (select uid, max(puntos) p from arcade where juego=? and date(created_at,'-5 hours')=? group by uid) where p > ?`, jg, hoy, mio).n + 1;
     return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto });
+  }
+  // Progreso del jugador (nivel, monedas, niveles de Joyas…): se guarda por navegador y se recupera con un código.
+  if (u.pathname === '/api/perfil' && P) {
+    const b = await json(req), id = crypto.createHash('sha256').update('perfil:' + String(b.uid || '')).digest('hex').slice(0, 24);
+    if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
+    let fila = q1('select codigo, data from perfiles where id=?', id);
+    if (b.data && typeof b.data === 'object') {
+      const d = JSON.stringify(b.data); if (d.length > 30000) return send(res, 400, { error: 'Demasiados datos' });
+      if (limite(ip, 'perfil', 40)) return send(res, 429, { error: 'Más despacio' });
+      if (!fila) { let cod; do { cod = crypto.randomBytes(4).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase(); } while (cod.length < 6 || q1('select 1 from perfiles where codigo=?', cod)); run('insert into perfiles(id, codigo, data) values(?,?,?)', id, cod, d); fila = { codigo: cod }; }
+      else run("update perfiles set data=?, updated_at=datetime('now') where id=?", d, id);
+      return send(res, 200, { ok: 1, codigo: fila.codigo });
+    }
+    return send(res, 200, fila ? { codigo: fila.codigo, data: JSON.parse(fila.data) } : {});
+  }
+  if (u.pathname === '/api/perfil/recuperar' && P) {
+    if (limite(ip, 'recup', 10, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera 15 minutos.' });
+    const b = await json(req), f = q1('select data from perfiles where codigo=?', String(b.codigo || '').trim().toUpperCase());
+    if (!f) return send(res, 404, { error: 'Ese código no existe' });
+    const id = crypto.createHash('sha256').update('perfil:' + String(b.uid || '')).digest('hex').slice(0, 24);
+    run('insert into perfiles(id, codigo, data) values(?,?,?) on conflict(id) do update set data=excluded.data', id, crypto.randomBytes(5).toString('hex').toUpperCase().slice(0, 8), f.data);
+    return send(res, 200, { data: JSON.parse(f.data) });
   }
   if (u.pathname === '/api/populares') {
     if (!populares.t || Date.now() - populares.t > 10 * 60000) { populares.lista = q(`select game, count(*) n from visitors where game is not null and created_at>=datetime('now','-7 days') group by game order by n desc limit 6`).filter(x => x.n >= 3).map(x => x.game); populares.t = Date.now(); }

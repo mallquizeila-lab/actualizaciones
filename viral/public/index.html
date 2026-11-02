@@ -108,6 +108,12 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .dato{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.dato b{color:var(--gold);font-variant-numeric:tabular-nums;text-align:right}
 .ok{color:var(--ok)}.bad{color:#ff9a8a}
 @media (prefers-reduced-motion:reduce){.wheel,.bar i,.game{transition:none}}
+.hub{padding:14px}.hubtop{display:flex;align-items:center;gap:12px}.hubtop img{border:3px solid var(--gold);border-radius:50%}.lvl{font:900 .8rem Figtree,sans-serif;background:linear-gradient(90deg,#ffd166,#ff7aa8);color:#241a00;border-radius:999px;padding:2px 10px}
+.xpbar{height:8px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden;margin-top:6px}.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#7b2ff7,#ff5fa2,#ffd166);border-radius:5px;transition:width .6s}
+.chips{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.chips span{background:rgba(255,255,255,.08);border-radius:999px;padding:4px 10px;font-weight:800;font-size:.85rem}
+.cont{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory}.cont button{flex:0 0 132px;scroll-snap-align:start;border:0;border-radius:18px;padding:12px 8px;color:#fff;cursor:pointer;background:linear-gradient(160deg,rgba(123,47,247,.75),rgba(255,95,162,.6));text-align:center;font:inherit;box-shadow:0 8px 20px rgba(0,0,0,.25)}.cont button span{font-size:2rem;display:block}.cont button b{display:block;font-size:.85rem;margin-top:4px}.cont button small{opacity:.85;font-size:.72rem}
+.mis{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.88rem}.mis .xpbar{flex:1;margin:0}.mis.ok{opacity:.6}
+.joyban{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:22px;padding:14px;margin:10px 0 4px;cursor:pointer;color:#fff;text-align:left;font:inherit;background:linear-gradient(120deg,#7b2ff7,#ff5fa2 55%,#ffb36b);box-shadow:0 10px 30px rgba(255,95,162,.35);position:relative;overflow:hidden}.joyban:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);animation:brillo 3s infinite}@keyframes brillo{from{transform:translateX(-100%)}to{transform:translateX(100%)}}.joyban span{font-size:2.6rem}.joyban b{font-size:1.15rem;display:block}.joyban small{opacity:.9}
 </style>
 </head>
 <body>
@@ -124,6 +130,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
   <section id="home">
     <h1>Descubre algo nuevo de ti</h1>
     <p class="sub">Tests de personalidad, trivias y calculadoras. Gratis, en 1 a 3 minutos.</p>
+    <div id="hub"></div>
     <div class="card vivo" id="vivoCard" hidden></div>
     <div class="card" id="videoCard" hidden></div>
     <input id="buscar" type="search" placeholder="🔎 Buscar un test…" aria-label="Buscar un test" style="margin-bottom:10px">
@@ -214,7 +221,7 @@ function pintarVivo() {
 }
 pintarVivo(); setInterval(() => { if (!$('#home').hidden) pintarVivo(); }, 30000);
 fetch('/api/populares').then(r => r.json()).then(d => { POP = d.populares || []; if (TESTS.length) pintarHome(); }).catch(() => {});
-const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
+const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); window.pintarHub?.(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
 const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const TIPO = { perfil: 'Personalidad', trivia: 'Trivia', calc: 'Calculadora', especial: 'Interactivo', sala: 'En vivo', mesa: 'Multijugador', arcade: 'Juego' };
 function pintarHome() {
@@ -226,7 +233,7 @@ $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
 $('#back').onclick = () => { if (window.ARCADE) ARCADE.salir(); if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
-function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); }
+function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); if (id === 'home') window.pintarHub?.(); }
 async function abrir(g) {
   if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
   history.replaceState(null, '', '?g=' + g + (SRC !== 'directo' ? '&src=' + encodeURIComponent(SRC) : ''));
@@ -364,7 +371,7 @@ function perfilChat(t, cb) {
 }
 function sala(t) {
   perfilChat(t, (nom, av) => {
-    registrar(t.id);
+    registrar(t.id); try { PERFIL.evento('vivo', t.id); } catch (e) {}
     stage(`<div class="chatbox"><div class="chathead"><div><b>${escH(t.t)}</b><br><small class="sub" id="online" style="margin:0">Conectando…</small></div><button class="btn alt" id="cambiar" style="width:auto;margin:0;padding:6px 10px;font-size:.8rem"><span style="display:inline-flex;align-items:center;gap:6px">${avImg(av, 22)} ${escH(nom)} ✎</span></button></div>
       <div class="gbox" id="gbox" hidden></div><div class="msgsv" id="msgs"></div>
       <div class="emojis" id="emo" hidden>${['😂', '😍', '🥰', '😎', '🔥', '👏', '🙌', '❤️', '😮', '😢', '🤔', '👍', '🎉', '🇵🇪', '⚽', '🙏'].map(e => `<button>${e}</button>`).join('')}</div>
@@ -417,7 +424,7 @@ function mesa(t) {
     const entrar = async (r, o) => { const d = await api2(r, o); if (d.error) return toast(d.error); abrirMesa(d.id); };
     const pid = P.get('mesa');
     if (pid && P.get('g') === t.id) { history.replaceState(null, '', '?g=' + t.id); return entrar('unir', { id: pid }); }
-    registrar(t.id);
+    registrar(t.id); try { PERFIL.evento('vivo', t.id); } catch (e) {}
     stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">${escH(t.d)}</p>
       <button class="btn" id="ya">⚡ Jugar ya</button><button class="btn alt" id="priv">🔒 Mesa privada para jugar con amigos</button>
       <h3 style="margin-top:16px">Mesas esperando jugadores</h3><div id="lista"><p class="sub" style="text-align:left">Buscando…</p></div></div>`);
@@ -490,7 +497,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=3'; sc.onload = () => { const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=1'; s3.onload = s3.onerror = ir2; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=4'; sc.onload = () => { const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=1'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=1'; s4.onload = s4.onerror = ir2; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
@@ -546,6 +553,7 @@ function resultado(r) {
   // Suspenso corto antes de mostrar (sin pasar de ~1 s para no perder el permiso del clic).
   if (!r._listo && r.g !== 'encuesta') { stage(`<div class="card cargando"><div class="sp"></div><p>Analizando tus respuestas…</p></div>`); pedirAlertasAuto(r); return setTimeout(() => resultado({ ...r, _listo: true }), 900); }
   ultimo = r;
+  try { const tt = TESTS.find(x => x.id === r.g); if (tt && tt.tipo !== 'arcade' && !r._evento) { r._evento = 1; PERFIL.evento(tt.tipo === 'trivia' ? 'trivia' : 'test', tt.id); } } catch (e) {}
   stage(`<div class="card res"><div class="big">${r.emoji}</div><h2>${escH(r.titulo)}</h2>${r.sub ? `<p style="text-align:center">${escH(r.sub)}</p>` : ''}
     ${r.pct != null ? `<div class="pct">${r.pct}%</div><div class="bar"><i id="pb"></i></div>` : ''}
     ${r.bloques.map(([h, t]) => `<div class="sec"><h3>${escH(h)}</h3><div>${t}</div></div>`).join('')}
@@ -689,6 +697,28 @@ function pintarExtras() {
 }
 // Abre directo el juego del enlace compartido.
 testsP.then(() => { if (P.get('g') && (JUEGO[P.get('g')] || TESTS.some(t => t.id === P.get('g')))) abrir(P.get('g')); });
+
+// ---------- Mi progreso: nivel, monedas, racha, "Continuar jugando", misiones y logros ----------
+window.pintarHub = function () {
+  const h = $('#hub'); if (!h || !window.PERFIL) return;
+  const D = PERFIL.datos, nv = PERFIL.nivelDe(D.xp), a = PERFIL.xpPara(nv), b = PERFIL.xpPara(nv + 1), pct = Math.round((D.xp - a) * 100 / (b - a));
+  const av = LS.get('chatAv'), nom = LS.get('chatNom') || 'Jugador', jn = D.juegos.joyas?.nivel || 1;
+  const rec = PERFIL.recientes(6).map(j => { const t = TESTS.find(x => x.juego === j.juego || x.id === j.juego); if (!t) return ''; return `<button data-g="${t.id}"><span>${t.e}</span><b>${escH(t.t.split(':')[0])}</b><small>${j.juego === 'joyas' ? 'Nivel ' + (j.nivel || 1) : j.record ? 'Récord ' + j.record : 'Seguir'}</small></button>`; }).join('');
+  const mis = PERFIL.misiones(), lg = PERFIL.logros(), hechos = lg.filter(x => x.ok).length;
+  h.innerHTML = `<button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
+  <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
+  <div class="chips"><span>🪙 ${D.monedas}</span><span>🔥 ${D.racha.n || 0} ${D.racha.n === 1 ? 'día' : 'días'}</span><span>🎮 ${D.partidas} ${D.partidas === 1 ? 'partida' : 'partidas'}</span><span>🏅 ${hechos}/${lg.length}</span></div>
+  ${rec ? `<h3 style="margin:14px 0 6px">▶ Continuar jugando</h3><div class="cont">${rec}</div>` : ''}
+  <h3 style="margin:12px 0 4px">🎯 Misiones de hoy</h3>${mis.map(m => `<div class="mis ${m.hecho ? 'ok' : ''}"><span style="flex:0 0 46%">${m.hecho ? '✅' : '⬜'} ${escH(m.txt)}</span><div class="xpbar"><i style="width:${m.prog * 100 / m.meta}%"></i></div><small>${m.prog}/${m.meta} · ${m.premio}🪙</small></div>`).join('')}
+  <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:800">🏅 Logros y ☁️ guardar progreso</summary>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">${lg.map(x => `<span style="padding:4px 10px;border-radius:999px;font-size:.8rem;background:${x.ok ? 'linear-gradient(90deg,#ffd166,#ff7aa8)' : 'rgba(255,255,255,.07)'};color:${x.ok ? '#241a00' : 'inherit'};opacity:${x.ok ? 1 : .55}">${escH(x.txt)}</span>`).join('')}</div>
+  <p class="sub" style="text-align:left;font-size:.85rem">Tu progreso se guarda solo en este navegador y en la nube. ${PERFIL.codigo ? `Tu código para seguir en otro celular: <b style="letter-spacing:2px;color:var(--gold)">${PERFIL.codigo}</b> (guárdalo, no lo compartas).` : 'Juega una partida para obtener tu código de respaldo.'}</p>
+  <div style="display:flex;gap:6px"><input id="codRec" maxlength="8" placeholder="¿Tienes un código? Escríbelo" style="flex:1;margin:0;text-transform:uppercase"><button class="btn" id="btnRec" style="width:auto;margin:0;padding:8px 14px">Recuperar</button></div></details></div>`;
+  h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g);
+    if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
+};
 </script>
+<script src="/perfil.js?v=1"></script>
+<script>window.pintarHub?.();</script>
 </body>
 </html>

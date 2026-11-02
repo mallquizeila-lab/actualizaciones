@@ -1,3 +1,10 @@
+v7.11.0 — Juego "Joyas" de 100 niveles y progreso del jugador
+- Nuevo juego insignia 💎 Joyas: combina 3 o más, crea rayos (4 en línea), bombas (en L o T) y arcoíris (5 en línea). Mapa de 100 niveles con estrellas, objetivos de puntos, recoger colores y romper hielo, y potenciadores con monedas (martillo, mezclar, +5 movimientos).
+- Progreso del jugador: nivel y experiencia, monedas, racha diaria, 3 misiones al día y 11 logros.
+- En la portada: "Continuar jugando" para volver al juego donde se quedó.
+- El progreso se guarda en el navegador y en el servidor, con un código para seguir en otro celular.
+- Todos los juegos dan experiencia y avisan cuando bates tu récord personal.
+
 v7.10.1 — Página viral con fondo llamativo
 - Fondo con auroras de colores en movimiento e íconos flotando (🎮🔮💘🏆🎲⚽…) que anuncian el contenido; en computadora llenan los costados.
 - Tarjetas tipo vidrio con brillo y título con degradado dorado y rosa.

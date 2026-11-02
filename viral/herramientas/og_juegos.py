@@ -15,7 +15,9 @@ def wrap(d,txt,font,w):
     out.append(line); return out
 PAL=[((255,77,109),(60,10,40)),((131,56,236),(25,10,60)),((6,214,160),(5,50,45)),((58,134,255),(10,25,80)),((255,183,3),(90,40,0)),((255,0,110),(55,0,30)),((0,245,212),(0,50,60)),((251,86,7),(70,20,0))]
 tests=[t for t in json.load(open(os.path.join(BASE,'tests.json')))['tests'] if t['tipo']=='arcade']
+SOLO=sys.argv[1:]
 for idx,t in enumerate(tests):
+    if SOLO and t['id'] not in SOLO: continue
     c1,c2=PAL[idx%len(PAL)]; im=Image.new('RGB',(1200,630)); d=ImageDraw.Draw(im)
     for y in range(630):
         k=y/630; d.line([(0,y),(1200,y)],fill=tuple(int(c1[i]*(1-k)*.85+c2[i]*k) for i in range(3)))

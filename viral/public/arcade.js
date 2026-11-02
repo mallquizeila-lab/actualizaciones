@@ -30,6 +30,8 @@
     const nom = LS.get('chatNom') || 'Jugador', av = LS.get('chatAv') || 'a01';
     let d = { hoy: [] };
     try { d = await post('/api/arcade/puntaje', { juego: t.juego, puntos: Math.round(puntos), nombre: nom, avatar: av, uid: VID }); } catch (e) {}
+    let pr = {}; try { pr = PERFIL.partida(t.juego, Math.round(puntos)); } catch (e) {}
+    if (pr.record) texto = '🏅 ¡Nuevo récord personal! ' + (texto || '');
     const reto = +P.get('reto'), vs = P.get('reto') !== null && P.get('g') === t.id ? (puntos > reto ? ` ¡Superaste a tu amigo (${reto})! 🏆` : ` Tu amigo hizo ${reto}: ¡revancha!`) : '';
     const tabla = (d.hoy || []).map((x, i) => `<div class="dato"><span style="display:flex;gap:6px;align-items:center">${['🥇', '🥈', '🥉'][i] || (i + 1) + '.'} ${avImg(x.avatar, 22)} ${escH(x.nombre)}</span><b>${x.puntos}</b></div>`).join('') || '<p class="sub">¡Sé el primero del día!</p>';
     resultado({ _listo: true, g: t.id, reto: Math.round(puntos), emoji: t.e, titulo: `${Math.round(puntos)} puntos`, sub: (texto || '') + vs,
