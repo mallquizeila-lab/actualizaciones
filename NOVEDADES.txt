@@ -1,3 +1,8 @@
+v7.21.0 — GLORY BROWN: batalla a pantalla completa con cámara cercana
+- 📱 La batalla ahora ocupa toda la pantalla del celular, sin marcos ni menús de la página.
+- 🎥 Cámara ajustada sola a cada pantalla: se acerca lo máximo posible para que la arena llene la pantalla de arriba abajo, viendo siempre las dos torres del rey.
+- 🧍 Personajes de batalla más grandes y visibles.
+
 v7.20.0 — GLORY BROWN: los personajes de las ilustraciones pelean en la batalla
 - ⚔️ Ahora en la arena pelea el mismo personaje de su ilustración (misma cara, armadura y colores), de cuerpo entero y sin fondo, en lugar de los muñequitos hechos con código. Salta al caminar, respira quieto, se lanza al atacar, mira hacia donde va y tiene sombra.
 - 🎨 El botón de ShortForge "🎨 Completar ilustraciones y personajes de batalla" crea esos personajes a partir de cada ilustración ya hecha (90 tropas). Usa el cupo gratis de Cloudflare: si se acaba, sigue sola al día siguiente. Mientras falte alguno, esa carta usa su modelo 3D.

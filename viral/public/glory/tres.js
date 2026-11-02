@@ -189,7 +189,11 @@
     const escena = new THREE.Scene(), CIELO = [0x87b8e8, 0x2f6a3a, 0xf5c27a, 0xbfe3ff, 0x1a1530, 0xdbeafe, 0x3a1410][mundoI] || 0x87b8e8;
     escena.background = new THREE.Color(CIELO); escena.fog = new THREE.Fog(CIELO, 45, 90);
     const cam = new THREE.PerspectiveCamera(30, W / H, .5, 200), dir = voltear ? -1 : 1;
-    cam.position.set(0, 46, 25 * dir); cam.lookAt(0, 0, 1.6 * dir);
+    // Cámara ajustada: la arena llena la pantalla de borde a borde (se acerca todo lo posible sin cortar las torres)
+    { const via = new THREE.Vector3(0, 46, 23.8 * dir).normalize(), pts = [[-8.6, 0, -15.4 * dir], [8.6, 0, -15.4 * dir], [-8.6, 0, 10 * dir], [8.6, 0, 10 * dir], [0, 0, 15.6 * dir], [0, 5.2, -14.5 * dir]].map(p => new THREE.Vector3(...p)), q = new THREE.Vector3(), obj = new THREE.Vector3();
+      const cabe = d => { cam.position.copy(obj).addScaledVector(via, d); cam.lookAt(obj); cam.updateMatrixWorld(); return !pts.some(p => { q.copy(p).project(cam); return Math.abs(q.x) > 1 || Math.abs(q.y) > .985; }); };
+      let mejor = [70, 1.2]; for (let oz = -3; oz <= 4; oz += .25) { obj.set(0, 0, oz * dir); let d = 70; while (d > 15 && cabe(d - .25)) d -= .25; if (d < mejor[0]) mejor = [d, oz]; }
+      obj.set(0, 0, mejor[1] * dir); cabe(mejor[0]); escena.fog.near = mejor[0] + 8; escena.fog.far = mejor[0] + 70; }
     escena.add(new THREE.HemisphereLight(0xffffff, 0x445533, .75));
     const sol = new THREE.DirectionalLight(0xfff4e0, 1.05); sol.position.set(-12, 30, 14); sol.castShadow = calidad > 0; sol.shadow.mapSize.set(2048, 2048); Object.assign(sol.shadow.camera, { left: -14, right: 14, top: 20, bottom: -20, near: 1, far: 80 }); sol.shadow.bias = -.0006; escena.add(sol);
     // suelo pintado (caminos, césped, río) + borde
@@ -239,7 +243,7 @@
     const sombraMat = new THREE.MeshBasicMaterial({ map: sombraTex, transparent: true, depthWrite: false }), texSp = new Map();
     function matSprite(cid, img, flip) { const k = cid + (flip ? '|f' : ''); let m = texSp.get(k); if (!m) { const t = new THREE.CanvasTexture(img); t.anisotropy = 4; if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding; if (flip) { t.wrapS = THREE.RepeatWrapping; t.repeat.x = -1; } m = new THREE.SpriteMaterial({ map: t, transparent: true, alphaTest: .08 }); texSp.set(k, m); } return m; }
     function modeloSprite(e, img) {
-      const g = new THREE.Group(), alto = Math.max(1.1, e.r * 2.1) * (e.card.tipo === 'estructura' ? 1.5 : 1.55) * (e.card.arq === 'reina' ? 1.15 : 1), sp = new THREE.Sprite(matSprite(e.cid, img, false));
+      const g = new THREE.Group(), alto = Math.max(1.25, e.r * 2.3) * (e.card.tipo === 'estructura' ? 1.5 : 1.75) * (e.card.arq === 'reina' ? 1.15 : 1), sp = new THREE.Sprite(matSprite(e.cid, img, false));
       sp.center.set(.5, .04); sp.scale.set(alto * img.width / img.height, alto, 1); sp.name = 'sp'; g.add(sp);
       const sh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), sombraMat); sh.rotation.x = -Math.PI / 2; sh.position.y = .03; sh.scale.set(alto * .75, alto * .4, 1); sh.name = 'sombra'; g.add(sh);
       g.userData.fam = 'sprite'; g.__img = img; g.__alto = alto; g.__sw = alto * img.width / img.height; return g; }
