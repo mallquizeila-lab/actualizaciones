@@ -1,3 +1,9 @@
+v7.9.0 — Juegos modernos + 10 juegos nuevos (tanda 1)
+- Billar arreglado: las troneras ahora están abiertas de verdad (antes las bandas no dejaban entrar las bolas). Mesa, bolas y taco con look nuevo.
+- Estilo moderno en todos los juegos: colores neón, brillos, partículas, confeti al ganar, sonidos y vibración en el celular (botón 🔊/🔇 en cada juego).
+- 10 juegos nuevos: 🧱 Bloques 8x8, 🍉 Fusiona frutas, 🧪 Ordena colores, 🏗️ Apila la torre, 🔤 Palabra del día (una nueva cada día, para compartir el resultado), 🔢 Sudoku, 🧱 Rompe ladrillos, 🐤 Vuela, 🏃 Corredor y 🎯 Lanza flechas.
+- Todos con ranking del día, reto para amigos e imagen para compartir.
+
 v7.8.0 — 🎮 7 juegos nuevos en la página viral
 - Nueva categoría "🎮 Juegos": 🐍 Gusanito, 🎲 Ludo rápido (tú contra 3 rivales de la máquina), 🎱 Billar (mete todas las bolas con pocos tiros), 🧩 Rompecabezas, 🧠 Memoria (con los avatares), 💣 Buscaminas y 🔢 2048.
 - Funcionan con el dedo (deslizar, tocar, arrastrar) y con el teclado.

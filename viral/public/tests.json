@@ -99,6 +99,106 @@
    "tipo": "mesa"
   },
   {
+   "id": "arcade-bloques",
+   "juego": "bloques",
+   "cat": "juegos",
+   "e": "🧱",
+   "t": "Bloques 8x8",
+   "d": "Encaja las piezas y llena filas y columnas para borrarlas. ¡Combos!",
+   "min": 4,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-frutas",
+   "juego": "frutas",
+   "cat": "juegos",
+   "e": "🍉",
+   "t": "Fusiona frutas",
+   "d": "Junta frutas iguales para crear una más grande. ¿Llegas a la sandía?",
+   "min": 4,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-colores",
+   "juego": "colores",
+   "cat": "juegos",
+   "e": "🧪",
+   "t": "Ordena colores",
+   "d": "Pasa los colores de tubo en tubo hasta que cada uno tenga un solo color.",
+   "min": 4,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-torre",
+   "juego": "torre",
+   "cat": "juegos",
+   "e": "🏗️",
+   "t": "Apila la torre",
+   "d": "Suelta cada bloque en el momento justo y construye la torre más alta.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-palabra",
+   "juego": "palabra",
+   "cat": "juegos",
+   "e": "🔤",
+   "t": "Palabra del día",
+   "d": "Adivina la palabra de 5 letras en 6 intentos. Una nueva cada día.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-sudoku",
+   "juego": "sudoku",
+   "cat": "juegos",
+   "e": "🔢",
+   "t": "Sudoku",
+   "d": "El clásico de números del 1 al 9. Relajante y adictivo.",
+   "min": 8,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-ladrillos",
+   "juego": "ladrillos",
+   "cat": "juegos",
+   "e": "🧱",
+   "t": "Rompe ladrillos",
+   "d": "Mueve la barra y rompe todos los ladrillos de neón.",
+   "min": 4,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-vuela",
+   "juego": "vuela",
+   "cat": "juegos",
+   "e": "🐤",
+   "t": "Vuela",
+   "d": "Toca para aletear y pasa entre los pilares sin chocar.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-corredor",
+   "juego": "corredor",
+   "cat": "juegos",
+   "e": "🏃",
+   "t": "Corredor",
+   "d": "Salta cactus, rocas y fuego. Cada vez más rápido.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-flechas",
+   "juego": "flechas",
+   "cat": "juegos",
+   "e": "🎯",
+   "t": "Lanza flechas",
+   "d": "Clava flechas en el blanco que gira sin tocar las demás.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-gusanito",
    "juego": "gusanito",
    "cat": "juegos",

@@ -465,7 +465,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=1'; sc.onload = ir2; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=3'; sc.onload = () => { const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = ir2; s2.onerror = ir2; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
