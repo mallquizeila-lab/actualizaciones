@@ -171,7 +171,7 @@
     const tabs = [['batalla', '⚔️', 'Batalla'], ['cartas', '🃏', 'Cartas'], ['mundos', '🗺️', 'Mundos'], ['ranking', '🏆', 'Ranking'], ['cofres', '🎁', 'Cofres'], ['clan', '🛡️', 'Clan']];
     const cuerpo = { batalla: tabBatalla, cartas: tabCartas, mundos: tabMundos, cofres: tabCofres, ranking: tabRanking }[TAB] || tabBatalla;
     stage(`<div class="gb">${cuerpo(J)}<nav class="gb-tabs">${tabs.map(([k, e, n]) => `<button data-tab="${k}" class="${TAB === k ? 'on' : ''}"><span>${e}</span>${n}${k === 'cofres' && (J.cofres.length || cofreGratisListo(J)) ? ' 🔴' : ''}</button>`).join('')}</nav></div>`);
-    pintarRetratos(); if (TAB === 'ranking') cargarRanking();
+    pintarRetratos(); if (TAB === 'ranking') cargarRanking(); if (TAB === 'batalla') cardTorneo();
     $('#stage').onclick = e => {
       const tb = e.target.closest('[data-tab]'); if (tb) { if (tb.dataset.tab === 'clan') return clanes(t); return lobby(t, tb.dataset.tab); }
       const cid = e.target.closest('[data-carta]')?.dataset.carta; if (cid) return clicCarta(t, cid);
@@ -183,6 +183,8 @@
       if (id === 'm_amigo') return amigo(t);
       if (id === 'reinaVer') return presentacion('glory_brown');
       if (id === 'instalar') return instalarApp();
+      if (id === 'verPase') return verPase(t);
+      if (id === 'reclamarT') { e.target.disabled = true; return post('/api/glory/torneo/reclamar', datosJugador()).then(r => { if (r.error) { toast(r.error); return lobby(t); } FX.confeti(); abrirCofre(r.cofre, () => lobby(t)); }); }
       const rk = e.target.closest('[data-rk]'); if (rk) { RK = rk.dataset.rk; return cargarRanking(); }
       const ca = e.target.closest('[data-camp]'); if (ca) return batalla(t, { modo: '1v1', campana: +ca.dataset.camp });
       const co = e.target.closest('[data-cofre]'); if (co) { const i = +co.dataset.cofre; const tipo = J.cofres[i]; J.cofres.splice(i, 1); PERFIL.guardar(); return abrirCofre(tipo, () => lobby(t)); }
@@ -200,6 +202,7 @@
     return `<div class="gb-logo"><b>GLORY BROWN</b><small>EL CHOQUE DE LOS REINOS</small></div>
       <div class="gb-panel" style="display:flex;gap:8px;justify-content:space-between;align-items:center;padding:8px 12px"><span class="gb-chip">🏆 ${J.trofeos}</span><span class="gb-chip">🪙 ${PERFIL.datos.monedas}</span><span class="gb-chip">👑 ${J.coronas}</span>${PERFIL.usuario ? `<span class="gb-chip">👤 ${escH(PERFIL.usuario)}</span>` : '<button class="gb-btn chico azul" id="cuenta" style="width:auto;margin:0;padding:5px 10px;font-size:.75rem">👤 Crear usuario</button>'}</div>
       ${misionReina}
+      ${cardPase()}<div id="torneoBox"></div>
       <div class="gb-panel gb-shine" style="text-align:center;background:linear-gradient(180deg,${M.pal[2]},#0f0c29);border-color:${M.pal[0]}"><small style="letter-spacing:2px;color:${M.pal[1]}">ARENA ${ai + 1} DE 21 · ${M.e} ${escH(M.n).toUpperCase()}</small><h2 style="margin:4px 0;font:900 1.5rem 'Fraunces',Georgia,serif;color:#fff">${escH(Ar.n)}</h2>
         <div class="prog" style="margin:8px 0 2px"><i style="width:${pct}%;background:linear-gradient(90deg,${M.pal[0]},#fff)"></i></div><small>${sig ? `${sig.trofeos - J.trofeos} 🏆 para ${escH(sig.n)}` : '¡Llegaste a la arena legendaria!'}</small>
         <button class="gb-btn gb-shine" id="m_1v1" style="font-size:1.45rem;margin-top:12px">⚔️ BATALLA EN LÍNEA</button>
@@ -207,6 +210,42 @@
       <div class="gb-panel"><b>🃏 Tu mazo</b> <small style="opacity:.8">· coste medio 💜 ${(J.mazo.reduce((a, k) => a + CARTA[k].c, 0) / 8).toFixed(1)}</small><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">${J.mazo.map(k => cartaHTML(CARTA[k])).join('')}</div></div>
       ${matchMedia('(display-mode: standalone)').matches ? '' : '<button class="gb-btn azul gb-shine" id="instalar">📲 Instalar GLORY BROWN en mi celular</button>'}
       <p class="sub" style="text-align:center">${J.victorias} victorias · ${J.derrotas} derrotas</p>`;
+  }
+  // ---------- Pase Real (pase de temporada gratis) ----------
+  const PASE_N = 30, PASE_XP = 200, MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const temporada = () => new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 7);
+  function pase() { const J = D(); if (!J.pase || J.pase.temp !== temporada()) J.pase = { temp: temporada(), xp: 0, rec: [] }; return J.pase; }
+  const premioPase = i => i % 10 === 0 ? { cofre: i === PASE_N ? 'real' : 'magico' } : i % 5 === 0 ? { cofre: 'oro' } : i % 3 === 0 ? { frag: 15 + i } : { mon: 40 + i * 8 };
+  const iconoPase = r => r.cofre ? COFRES[r.cofre].e : r.frag ? '🧩' : '🪙', textoPase = r => r.cofre ? COFRES[r.cofre].n : r.frag ? `${r.frag} fragmentos` : `${r.mon} monedas`;
+  function nombreTemporada() { const [a, m] = temporada().split('-').map(Number); return `Temporada de ${MESES[m - 1]} · ${G.mundos[(a * 12 + m) % 7].n}`; }
+  function cardPase() { const P2 = pase(), nv = Math.min(PASE_N, Math.floor(P2.xp / PASE_XP)), pend = [...Array(nv).keys()].filter(i => !P2.rec.includes(i + 1)).length, fr = P2.xp % PASE_XP;
+    return `<div class="gb-panel gb-shine" style="border-color:#c084fc;background:linear-gradient(170deg,#4c1d95,#1e1b4b)"><div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#f5d0fe">🎫 Pase Real · gratis</b><small>${escH(nombreTemporada())}</small></div>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0"><span class="gb-chip">Nivel ${nv}/${PASE_N}</span><div class="prog" style="flex:1;margin:0"><i style="width:${nv >= PASE_N ? 100 : fr * 100 / PASE_XP}%;background:linear-gradient(90deg,#c084fc,#fde047)"></i></div><small>${nv >= PASE_N ? '¡Completo!' : `${fr}/${PASE_XP} XP`}</small></div>
+      <button class="gb-btn chico ${pend ? '' : 'azul'}" id="verPase" style="margin:0">${pend ? `🎁 ¡Tienes ${pend} recompensa${pend > 1 ? 's' : ''} por reclamar!` : '🎫 Ver las 30 recompensas'}</button></div>`; }
+  function verPase(t) {
+    const P2 = pase(), nv = Math.min(PASE_N, Math.floor(P2.xp / PASE_XP)), d = document.createElement('div'); d.className = 'gb-modal gb';
+    const pinta = () => { d.innerHTML = `<div class="box"><div class="gb-panel"><div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#f5d0fe;font-size:1.2rem">🎫 Pase Real</b><button class="gb-btn chico azul" id="pcerr" style="width:auto;margin:0;padding:6px 12px">✖</button></div><p class="sub" style="margin:4px 0 10px">${escH(nombreTemporada())}. Ganas XP en cada batalla (más si ganas, más coronas y en línea). Se reinicia cada mes. ¡Es gratis!</p>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">${[...Array(PASE_N).keys()].map(i => { const n = i + 1, r = premioPase(n), hecho = P2.rec.includes(n), listo = n <= nv && !hecho;
+        return `<button data-pase="${n}" style="border:0;border-radius:12px;padding:6px 2px;color:#fff;font:800 .62rem Figtree,sans-serif;cursor:${listo ? 'pointer' : 'default'};background:${hecho ? 'rgba(34,197,94,.25)' : listo ? 'linear-gradient(180deg,#fde047,#f59e0b)' : 'rgba(255,255,255,.07)'};${listo ? 'color:#3b1d00;box-shadow:0 0 12px #fde047' : ''};${n > nv ? 'opacity:.55' : ''}"><span style="display:block;font-size:1.4rem">${iconoPase(r)}</span>${n}${hecho ? ' ✅' : n > nv ? ' 🔒' : ''}</button>`; }).join('')}</div></div></div>`; };
+    pinta(); document.body.append(d);
+    d.onclick = e => { if (e.target.id === 'pcerr' || e.target === d) { d.remove(); return lobby(t); } const b = e.target.closest('[data-pase]'); if (!b) return; const n = +b.dataset.pase; if (n > nv || P2.rec.includes(n)) return;
+      const r = premioPase(n), J = D(); P2.rec.push(n); PERFIL.guardar();
+      if (r.cofre) { d.remove(); return abrirCofre(r.cofre, () => verPase(t)); }
+      if (r.mon) { PERFIL.ganar(r.mon); FX.son('moneda'); toast(`+${r.mon} 🪙`); }
+      if (r.frag) { const pool = Object.keys(J.cartas).map(k => CARTA[k]).filter(c => ORD_R.indexOf(c.rareza) >= 2); const c = (pool.length ? pool : Object.keys(J.cartas).map(k => CARTA[k]))[Math.floor(Math.random() * (pool.length || Object.keys(J.cartas).length))]; J.cartas[c.id].frag = (J.cartas[c.id].frag || 0) + r.frag; PERFIL.guardar(); FX.son('combo'); toast(`🧩 +${r.frag} fragmentos de ${c.n}`); }
+      pinta(); };
+  }
+  // ---------- Torneo semanal ----------
+  let TORNEO = null;
+  async function cardTorneo() {
+    const box = $('#torneoBox'); if (!box) return;
+    try { TORNEO = await fetch('/api/glory/torneo').then(r => r.json()); const yo2 = await post('/api/glory/torneo/yo', datosJugador());
+      const resta = Math.max(0, TORNEO.termina - Date.now()), dd = Math.floor(resta / 864e5), hh = Math.floor(resta % 864e5 / 3600000);
+      box.innerHTML = `<div class="gb-panel" style="border-color:#f97316;background:linear-gradient(170deg,#7c2d12,#1e1b4b)"><div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#fed7aa">🏟️ ${escH(TORNEO.evento)}</b><small>⏳ ${dd}d ${hh}h</small></div>
+        <p class="sub" style="margin:6px 0;text-align:left;font-size:.82rem">Suma puntos en batallas en línea esta semana: victoria +3, empate +2, derrota +1 y +1 por cada corona. Premios: 🥇 Cofre Real · 🥈🥉 Mágico · Top 10 Oro · Top 50 Plata.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="gb-chip">Tus puntos: ${yo2.puntos || 0}</span><span class="gb-chip">${yo2.puesto ? 'Puesto #' + yo2.puesto : 'Aún sin puesto'}</span></div>
+        ${yo2.premio ? `<button class="gb-btn gb-shine" id="reclamarT" style="margin-top:8px">🎁 ¡Quedaste #${yo2.premio.puesto} la semana pasada! Reclamar ${COFRES[yo2.premio.cofre].n}</button>` : ''}</div>`;
+    } catch (e) { box.innerHTML = ''; }
   }
   // ---------- App instalable ----------
   async function instalarApp() {
@@ -222,7 +261,7 @@
   function tabRanking() {
     return `<div class="gb-logo"><b style="font-size:1.6rem">RANKING</b><small>BATALLAS EN LÍNEA</small></div>
       <div class="gb-panel" id="rkYo" style="text-align:center"><small>Cargando tu puesto…</small></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">${[['mundial', '🌎 Mundial'], ['pais', '🏳️ Mi país'], ['clanes', '🛡️ Clanes']].map(([k, n]) => `<button class="gb-btn chico ${RK === k ? '' : 'azul'}" data-rk="${k}" style="margin:0">${n}</button>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">${[['mundial', '🌎 Mundial'], ['pais', '🏳️ País'], ['torneo', '🏟️ Torneo'], ['clanes', '🛡️ Clanes']].map(([k, n]) => `<button class="gb-btn chico ${RK === k ? '' : 'azul'}" data-rk="${k}" style="margin:0">${n}</button>`).join('')}</div>
       <div class="gb-panel" id="rkLista"><p class="sub">Cargando…</p></div>
       <p class="sub" style="text-align:center;font-size:.8rem">Los puntos de ranking solo se ganan en batallas en línea y los calcula el servidor: nadie puede hacer trampa. En línea todas las cartas juegan al nivel de torneo 9.</p>`;
   }
@@ -231,6 +270,7 @@
     document.querySelectorAll('[data-rk]').forEach(b => b.classList.toggle('azul', b.dataset.rk !== RK));
     try { MIO = await post('/api/glory/yo', datosJugador()); } catch (e) { MIO = {}; }
     const yo2 = $('#rkYo'); if (yo2) yo2.innerHTML = MIO.puesto ? `<b style="font-size:1.4rem;color:#fde68a">#${MIO.puesto}</b> mundial ${MIO.puestoPais ? `· <b>#${MIO.puestoPais}</b> en ${BANDERA(MIO.pais)}` : ''}<br><small>${MIO.puntos} puntos · ${MIO.victorias} victorias</small>` : '<small>Juega una batalla en línea para entrar al ranking 🏆</small>';
+    if (RK === 'torneo') { const tr = await fetch('/api/glory/torneo').then(r => r.json()).catch(() => ({ top: [] })), bx = $('#rkLista'); if (bx) bx.innerHTML = `<p style="margin:0 0 8px;text-align:center"><b style="color:#fed7aa">🏟️ ${escH(tr.evento || 'Torneo semanal')}</b></p>` + (tr.top.length ? tr.top.map((x, i) => `<div class="dato"><span>${['🥇', '🥈', '🥉'][i] || `<b style="display:inline-block;width:26px">${i + 1}</b>`} ${BANDERA(x.pais)} ${escH(x.nombre)}</span><b>⭐ ${x.puntos}</b></div>`).join('') : '<p class="sub">Nadie ha jugado esta semana. ¡Sé el primero!</p>'); return; }
     const pais = RK === 'pais' ? (MIO.pais || 'PE') : '', d = await fetch(`/api/glory/ranking?tipo=${RK === 'clanes' ? 'clanes' : 'jugadores'}${pais ? '&pais=' + pais : ''}`).then(r => r.json()).catch(() => ({ lista: [] }));
     const box = $('#rkLista'); if (!box) return;
     box.innerHTML = d.lista.length ? d.lista.map((x, i) => `<div class="dato" style="${i < 3 ? 'background:rgba(252,211,77,.1);border-radius:10px;padding:6px' : ''}"><span>${['🥇', '🥈', '🥉'][i] || `<b style="display:inline-block;width:26px">${i + 1}</b>`} ${RK === 'clanes' ? `${x.insignia} ${escH(x.nombre)} <small style="opacity:.7">· ${x.miembros} 👥</small>` : `${BANDERA(x.pais)} ${escH(x.nombre)}`}</span><b>🏆 ${x.puntos}</b></div>`).join('') : '<p class="sub">Todavía no hay nadie aquí. ¡Sé el primero!</p>';
@@ -454,6 +494,45 @@
         ev: { efecto: recibirEfecto, son: t2 => FX.son(t2), texto: recibirTexto, habla: recibirHabla, voz: recibirVoz, emote: (a, e) => emote(a, e), fin: g => terminar(g) } });
       M.S.asientos.forEach((s, i) => { const c = asientos[i].ctrl; Object.assign(asientos[i], s, { ctrl: s.ctrl === 'ia' ? 'ia' : c }); M.S.asientos[i] = asientos[i]; });
     }
+    // Grabación del video de la batalla (para compartir en TikTok, Reels y Facebook)
+    let grab = null, trozos = [], grabTipo = '', grabT0 = performance.now();
+    let conAudio = false; try { if (window.MediaRecorder && cv.captureStream) { const flujo = cv.captureStream(30), au = FX.flujoAudio?.(); if (au) au.getAudioTracks().forEach(tr => { flujo.addTrack(tr); conAudio = true; }); grabTipo = [...(conAudio ? ['video/mp4;codecs=avc1,mp4a.40.2', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus'] : []), 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || ''; if (grabTipo && !/opus|mp4a/.test(grabTipo)) { flujo.getAudioTracks().forEach(tr => flujo.removeTrack(tr)); conAudio = false; } if (grabTipo) { grab = new MediaRecorder(flujo, { mimeType: grabTipo, videoBitsPerSecond: 2500000, audioBitsPerSecond: 96000 }); grab.ondataavailable = e => { if (e.data.size) trozos.push(e.data); }; grab.start(1000); } } } catch (e) { grab = null; }
+    const pararGrab = () => new Promise(ok => { if (!grab || grab.state === 'inactive') return ok(); grab.onstop = () => ok(); try { grab.stop(); } catch (e) { ok(); } });
+    // Portadas del video (1080x1920): intro con la Reina y cierre con el resultado
+    async function portadaVideo(tipo) {
+      const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d'), M2 = G.mundos[mundoI];
+      const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#0b0820'); g.addColorStop(.5, M2.pal[2]); g.addColorStop(1, '#0b0820'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+      for (let i = 0; i < 220; i++) { x.fillStyle = `rgba(253,230,138,${Math.random() * .8})`; x.beginPath(); x.arc(Math.random() * 1080, Math.random() * 1920, Math.random() * 3.5, 0, 7); x.fill(); }
+      const im = new Image(); im.src = '/glory/reina_carta.webp'; await new Promise(r => { im.onload = r; im.onerror = r; });
+      const dorado = y0 => { const tg = x.createLinearGradient(0, y0 - 120, 0, y0); tg.addColorStop(0, '#fff7c2'); tg.addColorStop(.5, '#fcd34d'); tg.addColorStop(1, '#b45309'); return tg; };
+      x.textAlign = 'center'; x.shadowColor = 'rgba(0,0,0,.7)'; x.shadowBlur = 20;
+      if (tipo === 'intro') {
+        if (im.width) { x.save(); x.shadowColor = '#fcd34d'; x.shadowBlur = 60; x.drawImage(im, 140, 330, 800, 800 * im.height / im.width); x.restore(); x.strokeStyle = '#fcd34d'; x.lineWidth = 10; x.strokeRect(140, 330, 800, 800 * im.height / im.width); }
+        x.fillStyle = dorado(250); x.font = '900 150px Georgia,serif'; x.fillText('GLORY BROWN', 540, 250, 980); x.fillStyle = '#fde68a'; x.font = '800 46px Figtree,sans-serif'; x.fillText('EL CHOQUE DE LOS REINOS', 540, 315);
+        const eq = tm => asientos.filter(a => a.team === tm).map(a => a.nombre).join(' + ');
+        x.fillStyle = '#93c5fd'; x.font = '900 78px Figtree,sans-serif'; x.fillText(eq(miEquipo), 540, 1470); x.fillStyle = '#fde047'; x.font = '900 96px Figtree,sans-serif'; x.fillText('⚔️ VS ⚔️', 540, 1590); x.fillStyle = '#fca5a5'; x.font = '900 78px Figtree,sans-serif'; x.fillText(eq(1 - miEquipo), 540, 1710);
+        x.fillStyle = '#e9d5ff'; x.font = '700 42px Figtree,sans-serif'; x.fillText(`${M2.e} ${arena.n}`, 540, 1810);
+      } else {
+        const gano2 = coronas[miEquipo] > coronas[1 - miEquipo] ? true : coronas[miEquipo] < coronas[1 - miEquipo] ? false : null;
+        x.fillStyle = gano2 === false ? '#fca5a5' : dorado(420); x.font = '900 170px Georgia,serif'; x.fillText(gano2 ? '¡VICTORIA!' : gano2 === null ? '¡EMPATE!' : 'DERROTA', 540, 420, 1000);
+        x.font = '140px serif'; x.fillText('👑'.repeat(Math.min(3, coronas[miEquipo])) + '🤍'.repeat(3 - Math.min(3, coronas[miEquipo])), 540, 620);
+        if (im.width) { x.save(); x.beginPath(); x.arc(540, 960, 260, 0, 7); x.clip(); x.drawImage(im, 280, 700, 520, 520 * im.height / im.width); x.restore(); x.strokeStyle = '#fcd34d'; x.lineWidth = 12; x.beginPath(); x.arc(540, 960, 260, 0, 7); x.stroke(); }
+        x.fillStyle = '#fff'; x.font = '900 70px Figtree,sans-serif'; x.fillText('¿TÚ ME GANAS?', 540, 1380); x.fillStyle = '#fde68a'; x.font = '800 56px Figtree,sans-serif'; x.fillText('Juega gratis en', 540, 1490);
+        x.fillStyle = '#fff'; x.font = '900 64px Figtree,sans-serif'; x.fillText(location.host + '/glory', 540, 1590, 1000); x.fillStyle = '#c4b5fd'; x.font = '700 40px Figtree,sans-serif'; x.fillText('127 cartas · 7 mundos · batallas en vivo', 540, 1700);
+      }
+      return await new Promise(r => c.toBlob(r, 'image/png'));
+    }
+    async function compartirVideo(btn) {
+      if (!trozos.length) return toast('Este celular no permite grabar el video 😕');
+      btn.disabled = true; btn.textContent = '⏳ Preparando tu video…'; const dur = Math.round((performance.now() - grabT0) / 1000), crudo = new Blob(trozos, { type: grabTipo.split(';')[0] });
+      let blob = crudo, ext = grabTipo.includes('mp4') ? 'mp4' : 'webm';
+      try { const [ini, cie] = await Promise.all([portadaVideo('intro'), portadaVideo('cierre')]); btn.textContent = '🎬 Montando el video (intro, batalla y final)…';
+        const r = await fetch(`/api/glory/video?dur=${dur}&i=${ini.size}&o=${cie.size}&a=${conAudio ? 1 : 0}`, { method: 'POST', headers: { 'content-type': grabTipo.split(';')[0] }, body: new Blob([ini, cie, crudo]) }).then(r => r.json()); if (r.url) { blob = await fetch(r.url).then(x => x.blob()); ext = 'mp4'; } } catch (e) {}
+      const f = new File([blob], `glory-brown-batalla.${ext}`, { type: ext === 'mp4' ? 'video/mp4' : 'video/webm' }), txt = `👑 ¡Mira mi batalla en GLORY BROWN! Juega gratis: ${location.origin}/glory`;
+      btn.disabled = false; btn.textContent = '🎬 Compartir video de la batalla';
+      if (navigator.canShare?.({ files: [f] })) { try { await navigator.share({ files: [f], text: txt }); return; } catch (e) {} }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name; a.click(); navigator.clipboard?.writeText(txt).catch(() => {}); toast('🎬 Video descargado. ¡Súbelo a TikTok, Reels o Facebook!');
+    }
     const sincronizar = () => { ents = M.S.ents; proys = M.S.proys; zonas = M.S.zonas; tiempo = M.S.tiempo; extra = M.S.extra; coronas = M.S.coronas; };
     if (M) sincronizar();
     function emote(asiento, e, enviarRed) { efectos.push({ tipo: 'emote', team: equipoDe(asiento), e, v: 2.5, max: 2.5, x: 0, y: 0 }); FX.son('pop'); if (ON && enviarRed) post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'emote', datos: { e, a: asiento } }).catch(() => {}); }
@@ -574,6 +653,7 @@
       const cE = coronas[1 - miEquipo], cY = coronas[miEquipo];
       X.font = `900 ${k * .8}px Figtree,sans-serif`; X.textAlign = 'left'; X.fillStyle = '#fff'; X.lineWidth = 4; X.strokeStyle = 'rgba(0,0,0,.6)';
       X.strokeText(`👑 ${cE}`, k * .5, (RIO0 - .4) * k); X.fillText(`👑 ${cE}`, k * .5, (RIO0 - .4) * k); X.strokeText(`👑 ${cY}`, k * .5, (RIO1 + 1.2) * k); X.fillText(`👑 ${cY}`, k * .5, (RIO1 + 1.2) * k);
+      X.save(); X.font = `800 ${k * .42}px Figtree,sans-serif`; X.textAlign = 'center'; X.fillStyle = 'rgba(255,255,255,.6)'; X.fillText('👑 GLORY BROWN · ' + location.host, W / 2, k * .7); X.restore();
       X.font = `800 ${k * .5}px Figtree,sans-serif`; X.textAlign = 'right'; const nom = tm => asientos.filter(a => a.team === tm).map(a => a.nombre).join(' + ');
       X.strokeText(nom(1 - miEquipo), W - k * .5, (RIO0 - .5) * k); X.fillText(nom(1 - miEquipo), W - k * .5, (RIO0 - .5) * k); X.strokeText(nom(miEquipo), W - k * .5, (RIO1 + 1.1) * k); X.fillText(nom(miEquipo), W - k * .5, (RIO1 + 1.1) * k);
       X.restore();
@@ -606,13 +686,14 @@
     $('#rend').onclick = () => { if (!fin && confirm('¿Rendirte? Perderás trofeos.')) { if (ON) { post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'rendirse' }).catch(() => {}); if (!n4) return setTimeout(() => { if (!fin) { coronas[1 - miEquipo] = 3; terminar(1 - miEquipo); } }, 3000); } if (M) { M.S.coronas[1 - miEquipo] = 3; M.terminar(1 - miEquipo); } else { coronas[1 - miEquipo] = 3; terminar(1 - miEquipo); } } };
     // ---------- Final y recompensas ----------
     function terminar(ganador, rank) {
-      if (fin) return; fin = true;
+      if (fin) return; fin = true; pararGrab();
       const gano = ganador === null ? null : ganador === miEquipo, misC = Math.min(3, coronas[miEquipo]);
       const camp = cfg.campana != null, dTr = camp || gano === null ? 0 : gano ? Math.round((28 + Math.floor(Math.random() * 6)) * (ON ? 1.2 : 1)) : -Math.min(J.trofeos, 18 + Math.floor(Math.random() * 5)), arenaAntes = arenaDe(J.trofeos);
       J.trofeos += dTr; if (gano) J.victorias++; else if (gano === false) J.derrotas++; J.coronas += misC;
       const monedas = gano ? 15 + misC * 5 + (ON ? 5 : 0) : gano === null ? 6 : 3; PERFIL.ganar(monedas);
       let cofre = null; if (gano && J.cofres.length < 4) { cofre = sortearCofre(); J.cofres.push(cofre); }
       if (camp && gano) { J.campana = J.campana || {}; J.campana[cfg.campana] = Math.max(J.campana[cfg.campana] || 0, Math.max(1, misC)); }
+      const xpPase = Math.round(((gano ? 100 : gano === null ? 60 : 40) + misC * 20) * (ON ? 1.5 : 1)); pase().xp += xpPase;
       let reinaNueva = false; if (!J.reina && J.victorias >= 3) { J.reina = 1; reinaNueva = true; }
       const pts = misC * 1000 + Math.max(0, Math.round(tiempo)) * 5 + (gano ? 2000 : 0); try { PERFIL.partida('batalla', pts); } catch (e) {}
       post('/api/arcade/puntaje', { juego: 'batalla', puntos: pts, nombre: LS.get('chatNom') || 'Jugador', avatar: LS.get('chatAv') || 'a01', uid: VID }).catch(() => {});
@@ -622,14 +703,14 @@
       setTimeout(() => { cerrarES(); const d = document.createElement('div'); d.className = 'gb-modal gb'; const nuevas = subio ? G.cartas.filter(c => c.arena === arenaAhora) : [];
         d.innerHTML = `<div class="box"><div class="gb-panel" style="text-align:center"><div style="font-size:3rem">${gano ? '🏆' : gano === null ? '🤝' : '💔'}</div><h2 style="font:900 2rem 'Fraunces',Georgia,serif;color:${gano ? '#fde68a' : '#fca5a5'};margin:0">${gano ? '¡VICTORIA!' : gano === null ? '¡EMPATE!' : 'DERROTA'}</h2>
           <div style="font-size:2rem;letter-spacing:4px">${'👑'.repeat(misC)}<span style="opacity:.25">${'👑'.repeat(3 - misC)}</span></div>
-          ${rank != null ? `<p class="gb-chip" style="color:#fde68a">🌎 Ranking en línea: ${rank} puntos</p>` : ''}<p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑</p>
+          ${rank != null ? `<p class="gb-chip" style="color:#fde68a">🌎 Ranking en línea: ${rank} puntos</p>` : ''}<p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑 · +${xpPase} XP 🎫</p>
           ${cofre ? `<div class="gb-panel gb-shine" style="display:inline-block;padding:8px 18px"><span style="font-size:2.4rem">${COFRES[cofre].e}</span><br><b>¡Ganaste un ${COFRES[cofre].n}!</b></div>` : gano && J.cofres.length >= 4 ? '<p class="sub">Tus 4 espacios de cofres están llenos: ábrelos para ganar más.</p>' : ''}
           ${subio ? `<div class="gb-panel" style="border-color:#fde047"><b style="color:#fde68a">🗺️ ¡Nueva arena: ${escH(G.arenas[arenaAhora].n)}!</b><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">${nuevas.map(c => cartaHTML(c)).join('')}</div></div>` : ''}
           ${reinaNueva ? `<div class="gb-panel gb-shine" style="border-color:#fde047"><img src="/glory/reina_mini.webp" style="width:80px;border-radius:50%;border:3px solid #fde047"><br><b style="color:#fde68a">👑 ¡Desbloqueaste a Glory Brown, la Reina de la Victoria!</b></div>` : ''}
           ${!PERFIL.usuario ? '<button class="gb-btn chico azul" id="crearU">👤 Crea tu usuario para guardar tu progreso</button>' : ''}
-          <button class="gb-btn gb-shine" id="otra">⚔️ OTRA BATALLA</button><button class="gb-btn chico azul" id="lob">🏰 Volver al reino</button><button class="gb-btn chico azul" id="comp">📣 Retar a un amigo</button></div></div>`; document.body.append(d); pintarRetratos(d);
+          ${grab ? '<button class="gb-btn azul gb-shine" id="vid">🎬 Compartir video de la batalla</button>' : ''}<button class="gb-btn gb-shine" id="otra">⚔️ OTRA BATALLA</button><button class="gb-btn chico azul" id="lob">🏰 Volver al reino</button><button class="gb-btn chico azul" id="comp">📣 Retar a un amigo</button></div></div>`; document.body.append(d); pintarRetratos(d);
         if (reinaNueva) setTimeout(() => presentacion('glory_brown'), 600);
-        d.onclick = e => { const id = e.target.id; if (id === 'crearU') cuentaModal('crear'); if (id === 'otra') { d.remove(); FX.musica?.('batalla'); if (ON) buscar(t, cfg.modo, 'buscar'); else batalla(t, { modo: cfg.modo, campana: cfg.campana }); } if (id === 'lob') { d.remove(); lobby(t, 'batalla'); } if (id === 'comp') { d.remove(); amigo(t); } }; }, 1300);
+        d.onclick = e => { const id = e.target.id; if (id === 'vid') return pararGrab().then(() => compartirVideo(e.target)); if (id === 'crearU') cuentaModal('crear'); if (id === 'otra') { d.remove(); FX.musica?.('batalla'); if (ON) buscar(t, cfg.modo, 'buscar'); else batalla(t, { modo: cfg.modo, campana: cfg.campana }); } if (id === 'lob') { d.remove(); lobby(t, 'batalla'); } if (id === 'comp') { d.remove(); amigo(t); } }; }, 1300);
     }
     let errores = 0;
     const bucleInt = dt => {
@@ -639,7 +720,7 @@
     const bucle = now => { if (!vivo) return; raf = requestAnimationFrame(bucle); const dt = Math.min(.05, (now - last) / 1000); last = now; try { bucleInt(dt); } catch (er) { if (++errores < 5) console.warn('GLORY BROWN:', er); } };
     texto(ON ? `⚔️ ${cfg.modo === '2v2' ? '2 vs 2' : '1 vs 1'} · nivel de torneo` : cfg.campana != null ? `🗺️ Campaña · ${arena.n}` : '⚔️ ¡A la batalla!', W / 2, H / 2, k * 1.1, 1.8); FX.musica?.('batalla'); FX.voz?.('¡Que empiece la batalla!', { forzar: true, cortar: true });
     raf = requestAnimationFrame(bucle);
-    setParar(() => { vivo = false; cancelAnimationFrame(raf); if (ON && !fin) post('/api/duelo/salir', { sala: ON.sala, tok: ON.tok }).catch(() => {}); cerrarES(); document.querySelectorAll('.gb-modal').forEach(m => m.remove()); });
+    setParar(() => { vivo = false; cancelAnimationFrame(raf); try { if (grab && grab.state !== 'inactive') grab.stop(); } catch (e) {} if (ON && !fin) post('/api/duelo/salir', { sala: ON.sala, tok: ON.tok }).catch(() => {}); cerrarES(); document.querySelectorAll('.gb-modal').forEach(m => m.remove()); });
     window.__batalla = { estado: () => ({ tiempo, mana: asientos.map(a => a.mana), coronas: [...coronas], ents: ents.filter(e => e.hp > 0 && !e.torre).length, torres: ents.filter(e => e.torre).map(e => [e.team, Math.round(e.hp)]), fin, anfitrion, miAsiento, ctrl: asientos.map(a => a.ctrl) }), mana: v => { yo.mana = v; }, jugar: (c, x, y) => { sel = c; const r = cv.getBoundingClientRect(); cv.dispatchEvent(new PointerEvent('pointerdown', { clientX: r.left + x / AN * r.width, clientY: r.top + y / AL * r.height, bubbles: true })); }, mano: () => [...yo.mano], tiempo: v => { if (M) M.S.tiempo = v; }, poner: (tm, c, x, y) => M.desplegar(asientos.findIndex(a => a.team === tm), c, x, y) };
   }
   JUEGOS.batalla = t => lobby(t);

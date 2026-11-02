@@ -193,7 +193,7 @@ const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { 
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
 const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
-const online = require('./juego_online').crear({ db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
+const online = require('./juego_online').crear({ datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
@@ -451,6 +451,8 @@ http.createServer(async (req, res) => {
 <meta name="twitter:card" content="summary_large_image"><meta http-equiv="refresh" content="0;url=${esc(target)}"></head><body><a href="${esc(target)}">Continuar</a></body></html>`, 'text/html; charset=utf-8');
     }
     // Fotos subidas para las notificaciones.
+    m = /^\/videos\/([a-f0-9]{16}\.mp4)$/.exec(u.pathname);
+    if (m) { const f = path.join(DATA, 'videos', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'Este video ya expiró', 'text/plain'); return send(res, 200, fs.readFileSync(f), 'video/mp4', { 'content-disposition': `attachment; filename="glory-brown-${m[1]}"` }); }
     m = /^\/voces\/glory\/([a-z0-9_]{3,80}\.mp3|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'voces_glory', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);

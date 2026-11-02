@@ -1,3 +1,8 @@
+v7.18.0 — GLORY BROWN: Pase Real, torneo semanal y video de la batalla
+- 🎬 Video de la batalla para compartir: al terminar, el botón "Compartir video de la batalla" arma un video vertical 1080x1920 (formato TikTok, Reels y Facebook) con intro de la Reina y el "Jugador vs Rival", la batalla con sus sonidos y música (acelerada si fue larga) y un cierre con el resultado y la invitación "¿Tú me ganas? Juega gratis". Con marca de agua de tu página.
+- 🎫 Pase Real (gratis): 30 niveles de recompensas por temporada (monedas, fragmentos y cofres; el nivel 30 da el Cofre Real). Ganas XP en cada batalla. Se reinicia cada mes.
+- 🏟️ Torneo semanal: suma puntos en batallas en línea (victoria +3, empate +2, derrota +1 y +1 por corona). Premios de lunes a domingo: 1.º Cofre Real, 2.º y 3.º Mágico, top 10 Oro, top 50 Plata. Los puntos y premios los controla el servidor.
+
 v7.17.0 — GLORY BROWN: servidor a prueba de trampas, ranking y app instalable
 - Las partidas en línea ahora las calcula el SERVIDOR con el mismo motor del juego: valida mazo, elixir, cartas en la mano y lado del río. Nadie puede hacer trampa modificando su navegador.
 - En línea todas las cartas juegan al nivel de torneo 9: gana quien mejor juega, no quien tiene más mejoras.

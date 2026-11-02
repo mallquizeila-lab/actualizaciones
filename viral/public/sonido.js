@@ -2,19 +2,21 @@
 // efectos de sonido sintetizados y voces de personajes con la voz del propio navegador. Todo respeta el botón de silencio.
 (() => {
   const FX = window.FX; if (!FX) return;
-  let AC = null, ruido = null, ultSon = {};
+  let AC = null, ruido = null, ultSon = {}, SAL = null, GRAB = null;
   const mute = () => LS.get('arcSonido') === '0', sinMusica = () => LS.get('arcMusica') === '0', sinVoz = () => LS.get('arcVoz') === '0';
-  const ctx = () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) { return null; } return AC; };
+  const ctx = () => { try { if (!AC) { AC = new (window.AudioContext || window.webkitAudioContext)(); SAL = AC.createGain(); SAL.connect(AC.destination); } if (AC.state === 'suspended') AC.resume(); } catch (e) { return null; } return AC; };
+  // Salida general: permite grabar el sonido del juego en los videos de las batallas
+  FX.flujoAudio = () => { if (!ctx()) return null; try { if (!GRAB) { GRAB = AC.createMediaStreamDestination(); SAL.connect(GRAB); } return GRAB.stream; } catch (e) { return null; } };
   const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
   function bufRuido() { if (ruido) return ruido; const n = AC.sampleRate; ruido = AC.createBuffer(1, n, AC.sampleRate); const d = ruido.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return ruido; }
   function tono(f, t, dur, tipo = 'square', vol = .1, dest, f2, ataque = .005) {
     const o = AC.createOscillator(), g = AC.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + ataque); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g); g.connect(dest || AC.destination); o.start(t); o.stop(t + dur + .03);
+    o.connect(g); g.connect(dest || SAL); o.start(t); o.stop(t + dur + .03);
   }
   function soplo(t, dur, vol, dest, filtro = 'highpass', fq = 6000, fq2) {
     const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = bufRuido(); f.type = filtro; f.frequency.setValueAtTime(fq, t); if (fq2) f.frequency.exponentialRampToValueAtTime(fq2, t + dur);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.connect(f); f.connect(g); g.connect(dest || AC.destination); s.start(t, Math.random() * .5); s.stop(t + dur + .02);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.connect(f); f.connect(g); g.connect(dest || SAL); s.start(t, Math.random() * .5); s.stop(t + dur + .02);
   }
   const bombo = (t, vol, dest) => tono(150, t, .18, 'sine', vol, dest, 40, .002);
 
@@ -85,7 +87,7 @@
   FX.musica = function (tema) {
     if (mute() || sinMusica() || !TEMAS[tema] || !ctx()) return;
     if (M && M.tema === tema) return; FX.pararMusica();
-    const out = AC.createGain(); out.gain.setValueAtTime(.0001, AC.currentTime); out.gain.exponentialRampToValueAtTime(.55, AC.currentTime + 1.2); out.connect(AC.destination);
+    const out = AC.createGain(); out.gain.setValueAtTime(.0001, AC.currentTime); out.gain.exponentialRampToValueAtTime(.55, AC.currentTime + 1.2); out.connect(SAL);
     const T = TEMAS[tema]; M = { tema, T, p: 0, t: AC.currentTime + .1, out, int: 1, mel: [melodia(T, 1), melodia(T, 2)] }; M.timer = setInterval(programar, 30); programar();
   };
   FX.pararMusica = function () { if (!M) return; const m = M; M = null; clearInterval(m.timer); try { m.out.gain.cancelScheduledValues(AC.currentTime); m.out.gain.setValueAtTime(m.out.gain.value, AC.currentTime); m.out.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + .4); setTimeout(() => m.out.disconnect(), 600); } catch (e) {} };

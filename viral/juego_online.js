@@ -9,8 +9,11 @@ function cargarGlory() {
   return { G, CARTA, Motor: require('./public/glory/motor.js') };
 }
 
-function crear({ db, q, q1, run, revisar, apodo }) {
+function crear({ db, q, q1, run, revisar, apodo, datos }) {
+  const VIDEOS = path.join(datos || __dirname, 'videos'); let G_MUNDOS = ['Reino del Alba', 'Bosque Esmeralda', 'Imperio de las Arenas', 'Islas Celestiales', 'Reino de las Sombras', 'Dominio de Hielo', 'Reino del Dragón'];
   db.exec(`
+    create table if not exists glory_semana (semana text, jugador text, nombre text, pais text, puntos integer default 0, victorias integer default 0, partidas integer default 0, primary key (semana, jugador));
+    create table if not exists glory_premios (semana text, jugador text, cofre text, created_at text default (datetime('now')), primary key (semana, jugador));
     create table if not exists glory_rank (jugador text primary key, nombre text, pais text, puntos integer default 0, victorias integer default 0, derrotas integer default 0, updated_at text default (datetime('now')));
     create index if not exists i_glory_rank on glory_rank(puntos desc);
     create table if not exists cuentas (id integer primary key, usuario text unique collate nocase, sal text, hash text, perfil_id text, created_at text default (datetime('now')));
@@ -64,13 +67,19 @@ function crear({ db, q, q1, run, revisar, apodo }) {
       s.activo = Date.now(); if (Date.now() - s.inicio > 6 * 60000) s.motor.terminar();
     }, 50);
   }
+  // Semana del torneo (lunes a domingo, hora de Perú)
+  const lunes = (desfase = 0) => { const d = new Date(Date.now() - 5 * 3600000); const dia = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - dia - desfase * 7); return d.toISOString().slice(0, 10); };
+  const finSemana = () => { const l = new Date(lunes() + 'T05:00:00Z'); return l.getTime() + 7 * 864e5; };
+  const PREMIO = p => p === 1 ? 'real' : p <= 3 ? 'magico' : p <= 10 ? 'oro' : p <= 50 ? 'plata' : null;
   function finSala(s, g) {
     clearInterval(s.reloj); const d = s.motor.foto(s.nuevos); emitir(s, 'estado', d);
     const n4 = s.modo === '2v2', equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a, rank = {};
     for (const j of s.jugadores) { if (j.bot || !j.jid) continue; const eq = equipoDe(j.asiento), rival = s.jugadores.filter(x => equipoDe(x.asiento) !== eq), contraBots = rival.every(x => x.bot);
       const delta = g === null ? 0 : g === eq ? (contraBots ? 10 : 30) : (contraBots ? -5 : -20), fila = q1('select puntos from glory_rank where jugador=?', j.jid), pts = Math.max(0, (fila?.puntos || 0) + delta);
       run(`insert into glory_rank(jugador, nombre, pais, puntos, victorias, derrotas) values(?,?,?,?,?,?) on conflict(jugador) do update set nombre=excluded.nombre, pais=coalesce(excluded.pais, pais), puntos=excluded.puntos, victorias=victorias+excluded.victorias, derrotas=derrotas+excluded.derrotas, updated_at=datetime('now')`, j.jid, j.nombre, j.pais || null, pts, g === eq ? 1 : 0, g !== null && g !== eq ? 1 : 0);
-      rank[j.asiento] = pts; }
+      rank[j.asiento] = pts;
+      const pt = (g === null ? 2 : g === eq ? 3 : 1) + (contraBots ? 0 : (s.motor.S.coronas[eq] || 0)) - (contraBots && g !== eq ? 1 : 0);
+      run(`insert into glory_semana(semana, jugador, nombre, pais, puntos, victorias, partidas) values(?,?,?,?,?,?,1) on conflict(semana, jugador) do update set nombre=excluded.nombre, pais=coalesce(excluded.pais, pais), puntos=puntos+excluded.puntos, victorias=victorias+excluded.victorias, partidas=partidas+1`, lunes(), j.jid, j.nombre, j.pais || null, Math.max(0, pt), g === eq ? 1 : 0); }
     emitir(s, 'fin', { g, c: s.motor.S.coronas, rank }); s.estado = 'terminada'; setTimeout(() => { salas.delete(s.id); subs.delete(s.id); }, 20000);
   }
   setInterval(() => { const ahora = Date.now(); for (const [id, s] of salas) if (ahora - s.activo > (s.estado === 'jugando' ? 90000 : 10 * 60000)) { emitir(s, 'cerrada', {}); salas.delete(id); subs.delete(id); } for (const m in cola) cola[m] = cola[m].filter(x => salas.has(x) && salas.get(x).estado === 'esperando'); }, 15000).unref();
@@ -160,6 +169,48 @@ function crear({ db, q, q1, run, revisar, apodo }) {
       const tipo = u.searchParams.get('tipo') === 'clanes' ? 'clanes' : 'jugadores', pais = String(u.searchParams.get('pais') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
       if (tipo === 'clanes') return send(res, 200, { lista: q(`select c.nombre, c.insignia, count(*) miembros, coalesce(sum(r.puntos),0) puntos from clanes c join clan_miembros m on m.clan_id=c.id left join glory_rank r on r.jugador=m.jugador group by c.id order by puntos desc limit 50`) });
       return send(res, 200, { lista: q(`select nombre, pais, puntos, victorias, derrotas from glory_rank ${pais ? 'where pais=?' : ''} order by puntos desc, victorias desc limit 50`, ...(pais ? [pais] : [])) });
+    }
+    if (r === '/api/glory/torneo') {
+      const sem = lunes(), mi = G_MUNDOS[Math.floor(new Date(sem).getTime() / (7 * 864e5)) % 7];
+      return send(res, 200, { semana: sem, termina: finSemana(), evento: `Torneo del ${mi}`, top: q('select nombre, pais, puntos, victorias, partidas from glory_semana where semana=? order by puntos desc, victorias desc limit 30', sem), premios: [['🥇 1.º', 'Cofre Real de Glory'], ['🥈 2.º y 3.º', 'Cofre Mágico'], ['🏅 4.º al 10.º', 'Cofre de Oro'], ['🎖️ 11.º al 50.º', 'Cofre de Plata']] });
+    }
+    if (r === '/api/glory/torneo/yo' && P) {
+      const b = await json(req), jid = jugadorId(b), sem = lunes(), f = q1('select puntos, victorias, partidas from glory_semana where semana=? and jugador=?', sem, jid);
+      const puesto = f ? q1('select count(*) n from glory_semana where semana=? and puntos > ?', sem, f.puntos).n + 1 : null;
+      const ant = lunes(1), fa = q1('select puntos from glory_semana where semana=? and jugador=?', ant, jid), pa = fa ? q1('select count(*) n from glory_semana where semana=? and puntos > ?', ant, fa.puntos).n + 1 : null;
+      const premio = pa && PREMIO(pa) && !q1('select 1 from glory_premios where semana=? and jugador=?', ant, jid) ? { puesto: pa, cofre: PREMIO(pa) } : null;
+      return send(res, 200, { ...(f || { puntos: 0, victorias: 0, partidas: 0 }), puesto, premio });
+    }
+    if (r === '/api/glory/torneo/reclamar' && P) {
+      const b = await json(req), jid = jugadorId(b), ant = lunes(1), fa = q1('select puntos from glory_semana where semana=? and jugador=?', ant, jid); if (!fa) return send(res, 400, { error: 'No participaste en el torneo pasado' });
+      const pa = q1('select count(*) n from glory_semana where semana=? and puntos > ?', ant, fa.puntos).n + 1, cofre = PREMIO(pa); if (!cofre) return send(res, 400, { error: 'Esta vez no alcanzaste premio. ¡La próxima!' });
+      try { run('insert into glory_premios(semana, jugador, cofre) values(?,?,?)', ant, jid, cofre); } catch (e) { return send(res, 409, { error: 'Ya reclamaste este premio' }); }
+      return send(res, 200, { cofre, puesto: pa });
+    }
+    // Video de la batalla: lo convierte a MP4 vertical (1080x1920) para TikTok, Reels y Facebook.
+    if (r === '/api/glory/video' && P) {
+      if (limite(ip, 'video', 6, 3600000)) return send(res, 429, { error: 'Ya hiciste muchos videos esta hora 🙂' });
+      const chunks = []; let tam2 = 0; for await (const c of req) { tam2 += c.length; if (tam2 > 45 * 1024 * 1024) return send(res, 413, { error: 'Video muy grande' }); chunks.push(c); }
+      const dir = path.join(VIDEOS), id = crypto.randomBytes(8).toString('hex'), todo = Buffer.concat(chunks), li = Math.max(0, +u.searchParams.get('i') || 0), lo = Math.max(0, +u.searchParams.get('o') || 0);
+      if (li + lo >= todo.length) return send(res, 400, { error: 'Video vacío' });
+      fs.mkdirSync(dir, { recursive: true });
+      const ent = path.join(dir, id + (String(req.headers['content-type']).includes('mp4') ? '.in.mp4' : '.in.webm')), pIni = path.join(dir, id + '.ini.png'), pFin = path.join(dir, id + '.fin.png'), sal = path.join(dir, id + '.mp4');
+      fs.writeFileSync(ent, todo.subarray(li + lo)); if (li) fs.writeFileSync(pIni, todo.subarray(0, li)); if (lo) fs.writeFileSync(pFin, todo.subarray(li, li + lo));
+      const dur = Math.max(1, +u.searchParams.get('dur') || 60), vel = dur > 60 ? Math.min(3, dur / 55) : 1, audio = u.searchParams.get('a') === '1';
+      const atempo = vel > 2 ? `atempo=2,atempo=${(vel / 2).toFixed(3)}` : `atempo=${vel.toFixed(3)}`;
+      const vb = `setpts=PTS/${vel.toFixed(3)},scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x1e1b4b,setsar=1,fps=30,format=yuv420p`;
+      const ejecutar = args => new Promise(fin => { const p2 = require('child_process').spawn('ffmpeg', ['-y', '-v', 'error', ...args], { windowsHide: true }); p2.on('error', () => fin(false)); p2.on('close', c => fin(c === 0)); setTimeout(() => { try { p2.kill(); } catch (e) {} fin(false); }, 180000); });
+      let ok = false;
+      if (li && lo) { // intro (2,2 s) + batalla + cierre (3 s), con fundidos y el sonido del juego
+        const fc = `[0:v]scale=1080:1920,setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=0.4,fade=t=out:st=1.8:d=0.4[v0];[1:v]${vb}[v1];[2:v]scale=1080:1920,setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=0.5[v2];` +
+          (audio ? `[3:a]asplit[s0][s1];[s0]atrim=duration=2.2[a0];[s1]atrim=duration=3[a2];[1:a]${atempo},aresample=44100[a1];[v0][a0][v1][a1][v2][a2]concat=n=3:v=1:a=1[v][a]` : `[v0][v1][v2]concat=n=3:v=1:a=0[v]`);
+        ok = await ejecutar(['-loop', '1', '-t', '2.2', '-i', pIni, '-i', ent, '-loop', '1', '-t', '3', '-i', pFin, ...(audio ? ['-f', 'lavfi', '-t', '6', '-i', 'anullsrc=r=44100:cl=stereo'] : []), '-filter_complex', fc, '-map', '[v]', ...(audio ? ['-map', '[a]', '-c:a', 'aac', '-b:a', '128k'] : ['-an']), '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', sal]);
+      }
+      if (!ok) ok = await ejecutar(['-i', ent, '-vf', vb, ...(audio ? ['-af', atempo, '-c:a', 'aac'] : ['-an']), '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '24', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', sal]);
+      for (const f of [pIni, pFin]) try { fs.unlinkSync(f); } catch (e) {}
+      try { fs.unlinkSync(ent); } catch (e) {}
+      for (const f of fs.readdirSync(dir)) try { if (Date.now() - fs.statSync(path.join(dir, f)).mtimeMs > 864e5) fs.unlinkSync(path.join(dir, f)); } catch (e) {}
+      return ok ? send(res, 200, { url: `/videos/${id}.mp4` }) : send(res, 500, { error: 'No se pudo preparar el video' });
     }
     if (r === '/api/glory/yo' && P) {
       const b = await json(req), jid = jugadorId(b), f = q1('select puntos, pais, victorias, derrotas from glory_rank where jugador=?', jid); if (!f) return send(res, 200, { puntos: 0, puesto: null });
