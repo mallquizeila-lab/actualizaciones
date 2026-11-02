@@ -99,6 +99,16 @@
    "tipo": "mesa"
   },
   {
+   "id": "arcade-mundo",
+   "juego": "mundo",
+   "cat": "juegos",
+   "e": "🌍",
+   "t": "Islas Portal 3D",
+   "d": "Explora un mundo 3D con portales, recoge monedas, supera retos y juega con gente en vivo.",
+   "min": 8,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-joyas",
    "juego": "joyas",
    "cat": "juegos",

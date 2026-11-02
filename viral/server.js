@@ -103,6 +103,7 @@ function safeDest(raw) {
 }
 // Límite simple de peticiones por IP.
 const hits = new Map();
+const MUNDO_POS = new Map(), MUNDO_ID = new Map(), MUNDOS3D = ['plaza', 'desierto', 'bosque', 'nieve', 'volcan', 'luna'], EMOTES3D = ['👋', '😂', '❤️', '🔥', '👏', '😮', '🎉', '💃'];
 function limite(ip, key, max, ms = 60000) {
   const k = key + ip, now = Date.now(), h = (hits.get(k) || []).filter(t => now - t < ms);
   h.push(now); hits.set(k, h); return h.length > max;
@@ -260,6 +261,26 @@ async function api(req, res, u) {
     return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto });
   }
   // Progreso del jugador (nivel, monedas, niveles de Joyas…): se guarda por navegador y se recupera con un código.
+  if (u.pathname === '/api/mundo/mov' && P) { // Mundo 3D: posición de cada jugador (en memoria) y la de los demás del mismo mundo
+    if (limite(ip, 'mundoip', 6000)) return send(res, 429, { error: 'Más despacio' });
+    const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
+    const uidh = crypto.createHash('sha256').update('mundo:' + b.uid).digest('hex').slice(0, 16);
+    if (limite(uidh, 'mundo', 420)) return send(res, 429, { error: 'Más despacio' });
+    let pid = MUNDO_ID.get(uidh); if (!pid) { pid = crypto.randomBytes(5).toString('hex'); MUNDO_ID.set(uidh, pid); }
+    const num = (v, m) => Math.round(Math.max(-m, Math.min(m, +v || 0)) * 100) / 100, prev = MUNDO_POS.get(pid) || {}, ahora = Date.now();
+    const e = { mundo: MUNDOS3D.includes(b.mundo) ? b.mundo : 'plaza', x: num(b.x, 400), y: num(b.y, 400), z: num(b.z, 400), ry: num(b.ry, 7), a: ['q', 'c', 's'].includes(b.a) ? b.a : 'q',
+      nn: String(b.nombre || '').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : '#7c5cff', gorro: ['', 'gorra', 'gato', 'vaquero', 'copa', 'corona'].includes(b.gorro) ? b.gorro : '', emote: prev.emote, et: prev.et, t: ahora, uidh };
+    e.nombre = prev.nn === e.nn && prev.nombre ? prev.nombre : (require('./chat').apodo(e.nn) || 'Jugador');
+    if (EMOTES3D.includes(b.emote) && ahora - (prev.et || 0) > 1500) { e.emote = b.emote; e.et = ahora; }
+    MUNDO_POS.set(pid, e);
+    const otros = [], cuenta = {};
+    for (const [k, o] of MUNDO_POS) {
+      if (ahora - o.t > 8000) { MUNDO_POS.delete(k); MUNDO_ID.delete(o.uidh); continue; }
+      cuenta[o.mundo] = (cuenta[o.mundo] || 0) + 1;
+      if (k !== pid && o.mundo === e.mundo && otros.length < 40) otros.push({ id: k, x: o.x, y: o.y, z: o.z, ry: o.ry, a: o.a, nombre: o.nombre, color: o.color, gorro: o.gorro, emote: ahora - (o.et || 0) < 3500 ? o.emote : null });
+    }
+    return send(res, 200, { otros, cuenta });
+  }
   if (u.pathname === '/api/perfil' && P) {
     const b = await json(req), id = crypto.createHash('sha256').update('perfil:' + String(b.uid || '')).digest('hex').slice(0, 24);
     if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });

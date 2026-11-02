@@ -1,3 +1,12 @@
+v7.13.0 — Nuevo: Islas Portal 3D (multijugador)
+- Mundo 3D propio: Plaza de los Portales con cristal flotante y 5 portales a mundos (Desierto de las Dunas, Bosque Encantado, Picos Nevados, Isla Volcán con lava y Estación Lunar con baja gravedad).
+- Personaje animado que corre y salta (doble salto); en celular con joystick y botón de salto, en computadora con teclado y mouse.
+- 26 monedas por mundo que reaparecen cada día, una torre de plataformas con la gran moneda y un reto contrarreloj con estrellas en cada mundo.
+- Se ve a los demás jugadores en tiempo real, con su apodo, y se pueden enviar emojis (sin chat de texto).
+- Personalización: 10 colores y gorros que se compran con las monedas (gorra, orejas de gato, vaquero, copa y corona).
+- Se sigue en el mismo mundo y lugar donde te quedaste. Calidad automática para celulares sencillos.
+- Usa la librería Three.js (licencia MIT), guardada en tu propio servidor.
+
 v7.12.0 — Nuevo juego "Huerto Defensor"
 - Juego de defensa por carriles con personajes propios: Hongo Rocío (da agua), Choclo Lanzagranos, Coco Muralla, Ají Explosivo, Limón Helado (frena), Piña Bomba y Palta Doble.
 - Plagas con su propio comportamiento: gusano, caracol blindado, langosta que salta, escarabajo tanque y la rata jefa.

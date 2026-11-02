@@ -8,7 +8,7 @@
   const nivelDe = xp => Math.floor(Math.sqrt(xp / 60)) + 1, xpPara = n => 60 * (n - 1) * (n - 1);
   const MISIONES = [
     ['jugar3', 'Juega 3 partidas', 3, 30], ['joyas2', 'Supera 2 niveles de Joyas', 2, 50], ['test1', 'Haz 1 test de personalidad', 1, 20],
-    ['trivia1', 'Termina una trivia', 1, 25], ['huerto1', 'Supera 1 nivel de Huerto Defensor', 1, 40], ['record1', 'Bate uno de tus récords', 1, 40], ['vivo1', 'Entra a una sala en vivo', 1, 20], ['juegos2', 'Prueba 2 juegos distintos', 2, 30],
+    ['trivia1', 'Termina una trivia', 1, 25], ['huerto1', 'Supera 1 nivel de Huerto Defensor', 1, 40], ['mundo10', 'Recoge 10 monedas en el Mundo 3D', 10, 30], ['record1', 'Bate uno de tus récords', 1, 40], ['vivo1', 'Entra a una sala en vivo', 1, 20], ['juegos2', 'Prueba 2 juegos distintos', 2, 30],
   ];
   const LOGROS = [['primera', '🎮 Primera partida', d => d.partidas >= 1], ['diez', '🔟 10 partidas', d => d.partidas >= 10], ['cien', '💯 100 partidas', d => d.partidas >= 100],
     ['racha3', '🔥 Racha de 3 días', d => d.racha.max >= 3], ['racha7', '🔥 Racha de 7 días', d => d.racha.max >= 7], ['nivel5', '⭐ Nivel 5', d => nivelDe(d.xp) >= 5], ['nivel10', '🌟 Nivel 10', d => nivelDe(d.xp) >= 10],
@@ -54,6 +54,9 @@
     evento(tipo, juego) { racha(); if (tipo === 'test') { avanzar('test1'); sumarXp(8); } if (tipo === 'trivia') { avanzar('trivia1'); sumarXp(12); } if (tipo === 'vivo') { avanzar('vivo1'); sumarXp(5); } if (juego) { const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 }; J.ultimo = Date.now(); } logros(); guardar(); },
     nivelJuego(juego, n, estrellas) { const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 }; J.estrellas = J.estrellas || {}; J.estrellas[n] = Math.max(J.estrellas[n] || 0, estrellas); J.nivel = Math.max(J.nivel || 1, n + 1); J.ultimo = Date.now(); if (juego === 'joyas') avanzar('joyas2'); if (juego === 'huerto') avanzar('huerto1'); sumarXp(15 + estrellas * 5); D.monedas += estrellas * 5; logros(); guardar(); },
     joyasNivel(n, estrellas) { return PERFIL.nivelJuego('joyas', n, estrellas); },
+    ganar(n) { D.monedas += n; logros(); guardar(); },
+    mision(id, n = 1) { avanzar(id, n); guardar(); },
+    guardar() { guardar(); },
     gastar(n) { if (D.monedas < n) return false; D.monedas -= n; guardar(); return true; },
     recientes(nMax = 4) { return Object.entries(D.juegos).filter(([, j]) => j.ultimo).sort((a, b) => b[1].ultimo - a[1].ultimo).slice(0, nMax).map(([id, j]) => ({ juego: id, ...j })); },
     misiones: misionesHoy, logros: () => LOGROS.map(([id, txt]) => ({ id, txt, ok: D.logros.includes(id) })),
