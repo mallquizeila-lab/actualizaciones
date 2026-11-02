@@ -13,7 +13,7 @@
 <style>
 :root{--bg:#1a1640;--surface:#26205a;--surface2:#30296b;--line:#3d3580;--text:#f4eefd;--muted:#bdb3e3;--gold:#f4b942;--pink:#ff7aa8;--violet:#9b87f5;--ok:#5ee0a0;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
-body{min-height:100vh;background:radial-gradient(1000px 600px at 50% -10%,#3a2f86 0%,var(--bg) 60%) fixed,var(--bg);color:var(--text);font:400 17px/1.55 Figtree,system-ui,sans-serif;overflow-x:hidden}
+body{min-height:100vh;background:#120d33;color:var(--text);font:400 17px/1.55 Figtree,system-ui,sans-serif;overflow-x:hidden}
 main{position:relative;max-width:520px;margin:0 auto;padding:22px 16px 60px}
 h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.15}
 h1{font-size:2rem;font-weight:800;text-align:center;margin:8px 0 6px}
@@ -24,7 +24,22 @@ h3{font-size:1.15rem;margin-bottom:6px}
 .game{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 12px;text-align:center;cursor:pointer;color:var(--text);font:inherit;transition:transform .15s}
 .game:hover,.game:focus-visible{transform:translateY(-2px);border-color:var(--gold)}
 .game .e{font-size:2.4rem;display:block}.game b{display:block;margin-top:6px;font-size:1rem}.game small{color:var(--muted);font-size:.8rem}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}
+.card{background:rgba(38,32,90,.72);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 10px 40px rgba(5,2,25,.45),inset 0 1px 0 rgba(255,255,255,.08)}
+.game{background:rgba(38,32,90,.7)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 6px 24px rgba(5,2,25,.4)}
+.game:hover{box-shadow:0 10px 30px rgba(244,185,66,.25)}
+/* Fondo con gancho: auroras, íconos flotando y textura */
+#fondo{position:fixed;inset:0;z-index:-1;overflow:hidden;background:radial-gradient(1200px 700px at 50% -10%,#3b2a91 0%,#1a1250 45%,#0d0a2a 100%)}
+#fondo .au{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;mix-blend-mode:screen;animation:flota 22s ease-in-out infinite alternate}
+#fondo .a1{width:60vmax;height:60vmax;left:-20vmax;top:-15vmax;background:#7b2ff7}
+#fondo .a2{width:50vmax;height:50vmax;right:-18vmax;top:10vh;background:#ff2d8a;animation-duration:26s;animation-delay:-6s}
+#fondo .a3{width:45vmax;height:45vmax;left:20vw;bottom:-25vmax;background:#00c2ff;opacity:.4;animation-duration:30s;animation-delay:-12s}
+#fondo .a4{width:30vmax;height:30vmax;right:10vw;bottom:5vh;background:#ffb703;opacity:.28;animation-duration:24s;animation-delay:-3s}
+@keyframes flota{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.12)}100%{transform:translate(-4vw,8vh) scale(.95)}}
+#fondo .grano{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:26px 26px;mask-image:linear-gradient(to bottom,#000,transparent 85%);-webkit-mask-image:linear-gradient(to bottom,#000,transparent 85%)}
+#fondo .ic{position:absolute;bottom:-12vh;font-size:var(--t);opacity:var(--o);filter:drop-shadow(0 0 12px rgba(255,255,255,.25));animation:sube var(--d) linear infinite;animation-delay:var(--r)}
+@keyframes sube{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-125vh) rotate(var(--g))}}
+@media (min-width:900px){#fondo .ic{font-size:calc(var(--t) * 1.6)}}
+@media (prefers-reduced-motion:reduce){#fondo .au,#fondo .ic{animation:none}#fondo .ic{bottom:auto;top:var(--y)}}
 label{display:block;font-weight:600;margin:14px 0 6px}
 input[type=text],input[type=date],input[type=search],select{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit}
 input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
@@ -56,6 +71,8 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .err{color:#ffb4a8;font-size:.9rem;margin-top:8px;min-height:1.1em}
 .video{display:flex;gap:12px;align-items:center}
 [hidden]{display:none!important}
+#home>h1{background:linear-gradient(90deg,#ffd166,#ff7aa8 45%,#c9b6ff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 18px rgba(255,122,168,.35));font-size:2.3rem}
+#buscar{margin-top:14px;background:rgba(38,32,90,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14)}
 .jug{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.jug span{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:3px 10px 3px 3px;font-size:.82rem}.jug span.t{border-color:var(--gold);box-shadow:0 0 0 2px rgba(244,185,66,.3)}.jug span.off{opacity:.45}
 .t3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:10px auto}.t3 button{aspect-ratio:1;border-radius:14px;border:0;background:var(--surface2);font:800 3rem Figtree,sans-serif;cursor:pointer;color:#ff5a5f}.t3 button.o{color:var(--gold)}.t3 button.w{background:#2f6b4f}
 .c4{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;background:#1e46b4;padding:8px;border-radius:16px;max-width:380px;margin:10px auto}.c4 i{aspect-ratio:1;border-radius:50%;background:#141d4a;display:block}.c4 i.R{background:#ff505a}.c4 i.A{background:#ffd646}.c4 i.w{box-shadow:0 0 0 3px #fff}
@@ -94,6 +111,14 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 </style>
 </head>
 <body>
+<div id="fondo" aria-hidden="true"><div class="au a1"></div><div class="au a2"></div><div class="au a3"></div><div class="au a4"></div><div class="grano"></div></div>
+<script>
+// Íconos flotando en el fondo (anuncian lo que hay en la página). Más grandes y a los costados en computadora.
+(() => { const f = document.getElementById('fondo'), E = ['🎮', '🔮', '💘', '🏆', '🎲', '⚽', '🪐', '🍉', '🧠', '🎯', '⭐', '🐍', '💎', '🎱', '🧩', '✨', '🎈', '🌙', '🃏', '🔥'], ancho = innerWidth > 900;
+  for (let i = 0; i < (ancho ? 26 : 14); i++) { const d = document.createElement('span'); d.className = 'ic'; d.textContent = E[i % E.length];
+    const lado = ancho ? (i % 2 ? 2 + Math.random() * 24 : 74 + Math.random() * 24) : Math.random() * 96;
+    d.style.cssText = `left:${lado}vw;--t:${18 + Math.random() * 22}px;--o:${ancho ? .22 + Math.random() * .25 : .12 + Math.random() * .14};--d:${18 + Math.random() * 22}s;--r:-${Math.random() * 40}s;--g:${(Math.random() - .5) * 120}deg;--y:${Math.random() * 90}vh`; f.append(d); } })();
+</script>
 <main>
   <header class="marca" id="marca" hidden></header>
   <section id="home">
