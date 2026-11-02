@@ -72,8 +72,8 @@ const flag = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUppe
 const SIGNOS = ['aries','tauro','geminis','cancer','leo','virgo','libra','escorpio','sagitario','capricornio','acuario','piscis'];
 let JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Compatibilidad', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
 fetch('/tests.json').then(r => r.json()).then(d => { JUEGOS = Object.fromEntries(d.tests.map(t => [t.id, t.t])); }).catch(() => {});
-const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['ajustes', 'Ajustes']];
-let tab = 'resumen';
+const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['chat', '💬 Chat'], ['ajustes', 'Ajustes']];
+let tab = 'resumen'; const CH = { rep: false };
 function mostrarLogin() { $('#app').hidden = true; $('#login').hidden = false; $('#pw').focus(); }
 $('#lgo').onclick = async () => { try { await api('login', { password: $('#pw').value }); $('#login').hidden = true; iniciar(); } catch (e) { $('#lerr').textContent = e.message; } };
 $('#pw').onkeydown = e => { if (e.key === 'Enter') $('#lgo').click(); };
@@ -162,6 +162,25 @@ const V = {
       catch (e) { alert(e.message); $('#c-go').disabled = false; }
     };
     $('#main').onclick = async e => { const b = e.target.closest('[data-x]'); if (b && confirm('¿Cancelar esta campaña programada?')) { await api('cancelar', { id: +b.dataset.x }); ir('campanas'); } };
+  },
+  async chat() {
+    const d = await api('chat' + (CH.rep ? '?rep=1' : ''));
+    $('#main').innerHTML = `<div class="card"><h2>💬 Chat en vivo</h2>
+      <p>${d.activo ? '<span class="tag ok">Abierto</span>' : '<span class="tag bad">Cerrado</span>'} ${Object.entries(d.enLinea).map(([k, v]) => `<span class="tag">${esc(d.salas[k].nombre)}: ${v} en línea</span>`).join(' ')}</p>
+      <p style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${d.activo ? 'alt' : ''}" id="ch-on">${d.activo ? 'Cerrar el chat' : 'Abrir el chat'}</button>
+        <button class="btn alt" id="ch-rep">${CH.rep ? 'Ver todos los mensajes' : 'Ver solo reportados'}</button><button class="btn alt" id="ch-unb">Quitar bloqueos (${d.bloqueados})</button></p>
+      <p class="hint">Se bloquean solos: enlaces, correos, teléfonos, cuentas de otras redes y groserías. Un mensaje con 3 reportes se oculta solo. Los mensajes se borran a los 7 días.</p></div>
+      <div class="card scroll"><table><tr><th>Hora</th><th>Sala</th><th>Quién</th><th>Mensaje</th><th></th></tr>
+      ${d.mensajes.map(m => `<tr style="${m.borrado ? 'opacity:.45' : ''}"><td class="hint">${esc(m.hora)}</td><td>${esc(m.sala)}</td><td>${esc(m.avatar)} ${esc(m.nombre)}</td><td>${esc(m.texto)}${m.reportes ? ` <span class="tag warn">⚑ ${m.reportes}</span>` : ''}${m.borrado ? ' <span class="tag">borrado</span>' : ''}</td>
+        <td style="white-space:nowrap">${m.borrado ? '' : `<button class="btn alt" data-del="${m.id}" style="padding:2px 8px">Borrar</button>`} <button class="btn alt" data-ban="${m.id}" style="padding:2px 8px">Bloquear</button></td></tr>`).join('') || '<tr><td class="hint">Sin mensajes</td></tr>'}</table></div>`;
+    $('#ch-on').onclick = async () => { if (d.activo && !confirm('¿Cerrar el chat para todos?')) return; await api('chat/activo', { on: !d.activo }); ir('chat'); };
+    $('#ch-rep').onclick = () => { CH.rep = !CH.rep; ir('chat'); };
+    $('#ch-unb').onclick = async () => { if (confirm('¿Quitar todos los bloqueos?')) { await api('chat/desbloquear', {}); ir('chat'); } };
+    $('#main').onclick = async e => {
+      const del = e.target.closest('[data-del]'), ban = e.target.closest('[data-ban]');
+      if (del) { await api('chat/borrar', { id: +del.dataset.del }); ir('chat'); }
+      if (ban) { const h = prompt('¿Por cuántas horas bloquear a esta persona? (0 = para siempre)', '24'); if (h === null) return; await api('chat/bloquear', { id: +ban.dataset.ban, horas: +h || 0 }); ir('chat'); }
+    };
   },
   async ajustes() {
     const a = await api('ajustes');

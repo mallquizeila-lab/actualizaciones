@@ -56,6 +56,18 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .err{color:#ffb4a8;font-size:.9rem;margin-top:8px;min-height:1.1em}
 .video{display:flex;gap:12px;align-items:center}
 [hidden]{display:none!important}
+.vivo{background:linear-gradient(135deg,#c8284a,#5a1236);border:0}.vivo h3{display:flex;align-items:center;gap:8px}.dot{width:10px;height:10px;border-radius:50%;background:#ff5a5f;box-shadow:0 0 0 0 #ff5a5f;animation:late 1.6s infinite}@keyframes late{70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.salas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.salas button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:10px 6px;color:#fff;font:600 .8rem Figtree,sans-serif;cursor:pointer}.salas button span{display:block;font-size:1.5rem}.salas small{display:block;opacity:.8;font-weight:400}
+.chatbox{display:flex;flex-direction:column;height:calc(100vh - 120px);min-height:460px}
+.chathead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.chathead b{font:800 1.05rem Fraunces,serif}
+.gbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;text-align:center}.gbox .big{font-size:3rem;margin:2px 0}.gbox .ops{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.gbox .ops button{padding:9px 6px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font:600 .85rem Figtree,sans-serif;cursor:pointer;text-align:left}
+.reloj{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:8px}.reloj i{display:block;height:100%;background:var(--gold);transition:width 1s linear}
+.tabla{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:6px}
+.msgsv{flex:1;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.m{display:flex;gap:8px;margin:7px 0;align-items:flex-start}.m .av{font-size:1.4rem;line-height:1}.m .tx{background:var(--surface2);border-radius:4px 12px 12px 12px;padding:6px 10px;max-width:85%;word-wrap:break-word}.m .tx b{display:block;font-size:.75rem;color:var(--gold)}.m.yo{flex-direction:row-reverse}.m.yo .tx{background:#4b3bbf;border-radius:12px 4px 12px 12px}.m.bot .tx{background:#1f5c4a}.m .rep{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.75rem;align-self:center}
+.envio{display:flex;gap:6px;margin-top:8px}.envio input{flex:1}.envio button{padding:0 14px;border-radius:10px;border:0;background:var(--gold);color:#241a00;font:700 1rem Figtree,sans-serif;cursor:pointer}
+.emojis{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.emojis button{background:none;border:0;font-size:1.3rem;cursor:pointer;padding:2px}
+.avs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px}.avs button{font-size:1.5rem;background:var(--surface2);border:2px solid transparent;border-radius:10px;padding:4px;cursor:pointer}.avs button.on{border-color:var(--gold)}
 .marca{display:flex;align-items:center;gap:10px;padding:2px 0 10px;border-bottom:1px solid var(--line);margin-bottom:12px}.marca b{font:800 1.15rem Fraunces,serif}.marca span{color:var(--muted);font-size:.8rem}
 .badge{display:inline-block;background:#ff5a5f;color:#fff;font:700 .68rem Figtree,sans-serif;padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle}
 .cargando{text-align:center;padding:50px 10px}.cargando .sp{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--gold);margin:0 auto 14px;animation:gira .8s linear infinite}@keyframes gira{to{transform:rotate(360deg)}}
@@ -81,6 +93,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
   <section id="home">
     <h1>Descubre algo nuevo de ti</h1>
     <p class="sub">Tests de personalidad, trivias y calculadoras. Gratis, en 1 a 3 minutos.</p>
+    <div class="card vivo" id="vivoCard" hidden></div>
     <div class="card" id="videoCard" hidden></div>
     <input id="buscar" type="search" placeholder="🔎 Buscar un test…" aria-label="Buscar un test" style="margin-bottom:10px">
     <div class="cats" id="cats"></div>
@@ -158,7 +171,17 @@ const NUM = { 1:'Líder nato. Abres caminos y te gusta ser el primero.', 2:'Dipl
 
 // ---------- Navegación ----------
 // ---------- Catálogo de tests (public/tests.json) ----------
-let TESTS = [], CATS = [], cat = 'todos', POP = [];
+let TESTS = [], CATS = [], cat = 'todos', POP = [], SALAS = null;
+function pintarVivo() {
+  fetch('/api/chat/salas').then(r => r.json()).then(d => {
+    SALAS = d; const v = $('#vivoCard'); if (!d.activo) { v.hidden = true; return; }
+    const tot = d.salas.reduce((a, x) => a + x.enLinea, 0); v.hidden = false;
+    v.innerHTML = `<h3><span class="dot"></span> En vivo ahora ${tot ? `<small style="font-weight:400;opacity:.85">· ${tot} conectados</small>` : ''}</h3><p style="margin:2px 0 0;opacity:.9;font-size:.9rem">Chatea y juega con gente real en este momento.</p>
+      <div class="salas">${d.salas.map(x => `<button data-g="sala-${x.id}"><span>${x.nombre.split(' ')[0]}</span>${escH(x.nombre.split(' ').slice(1).join(' '))}<small>${x.enLinea ? x.enLinea + ' en línea' : '¡Sé el primero!'}</small></button>`).join('')}</div>`;
+    v.onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
+  }).catch(() => {});
+}
+pintarVivo(); setInterval(() => { if (!$('#home').hidden) pintarVivo(); }, 30000);
 fetch('/api/populares').then(r => r.json()).then(d => { POP = d.populares || []; if (TESTS.length) pintarHome(); }).catch(() => {});
 const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
 const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -171,7 +194,7 @@ function pintarHome() {
 $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; pintarHome(); } };
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
-$('#back').onclick = () => { history.replaceState(null, '', location.pathname); show('home'); };
+$('#back').onclick = () => { if (window.ES) { ES.close(); ES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
 function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); }
 async function abrir(g) {
   if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
@@ -287,7 +310,74 @@ const CALC = {
     return { titulo: falta ? `Faltan ${falta} días para tu cumpleaños` : '¡Hoy es tu cumpleaños! 🎉', bloques: [['Tu próximo cumpleaños', `Cumplirás <b>${años} años</b> el <b>${c.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</b>.`]], compartir: falta ? `Faltan ${falta} días para mi cumpleaños 🎂` : '¡Hoy es mi cumpleaños! 🎂' };
   },
 };
+// ---------- 💬 Salas en vivo ----------
+let ES = null;
+function perfilChat(t, cb) {
+  const av = LS.get('chatAv') || '😀', nom = LS.get('chatNom') || '';
+  if (nom && LS.get('chatOk') === '1') return cb(nom, av);
+  const lista = SALAS?.avatares || ['😀', '😎', '🤠', '🥳', '😺', '🐶', '🦊', '🐼', '🐯', '🦁', '🐸', '🐵', '🦄', '🐙', '🌸', '🌻'];
+  stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">Elige cómo te verán los demás.</p>
+    <label for="cn">Tu apodo</label><input id="cn" maxlength="18" value="${escH(nom)}" placeholder="Ej.: Andrés de Lima">
+    <label>Tu avatar</label><div class="avs" id="avs">${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
+    <label class="check"><input type="checkbox" id="cr"><span>Seré respetuoso. Sé que <b>no se permiten enlaces, teléfonos, correos ni datos personales</b>, y que los mensajes pueden ser revisados y borrados.</span></label>
+    <p class="err" id="err"></p><button class="btn" id="go">Entrar a la sala</button></div>`);
+  let sel = av;
+  $('#avs').onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; sel = b.dataset.a; document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#go').onclick = () => {
+    const n = $('#cn').value.trim();
+    if (n.length < 2) return $('#err').textContent = 'Escribe un apodo de al menos 2 letras';
+    if (!$('#cr').checked) return $('#err').textContent = 'Acepta las reglas para entrar';
+    LS.set('chatNom', n); LS.set('chatAv', sel); LS.set('chatOk', '1'); cb(n, sel);
+  };
+}
+function sala(t) {
+  perfilChat(t, (nom, av) => {
+    registrar(t.id);
+    stage(`<div class="chatbox"><div class="chathead"><div><b>${escH(t.t)}</b><br><small class="sub" id="online" style="margin:0">Conectando…</small></div><button class="btn alt" id="cambiar" style="width:auto;margin:0;padding:6px 10px;font-size:.8rem">${av} ${escH(nom)} ✎</button></div>
+      <div class="gbox" id="gbox" hidden></div><div class="msgsv" id="msgs"></div>
+      <div class="emojis" id="emo" hidden>${['😂', '😍', '🥰', '😎', '🔥', '👏', '🙌', '❤️', '😮', '😢', '🤔', '👍', '🎉', '🇵🇪', '⚽', '🙏'].map(e => `<button>${e}</button>`).join('')}</div>
+      <div class="envio"><button class="alt" id="emob" title="Emojis" style="background:var(--surface2);color:var(--text)">😀</button><input id="txt" type="text" maxlength="200" placeholder="Escribe un mensaje…" autocomplete="off"><button id="env">➤</button></div>
+      <p class="small" style="margin-top:6px">Solo texto y emojis · Sin enlaces ni datos personales · <a href="#" id="compartirSala">Invitar amigos</a></p></div>`);
+    const box = $('#msgs'), yoNom = nom;
+    const pinta = m => { if (document.getElementById('m' + m.id)) return; const d = document.createElement('div'); d.className = 'm' + (m.bot ? ' bot' : m.nombre === yoNom ? ' yo' : ''); d.id = 'm' + m.id;
+      d.innerHTML = `<span class="av">${escH(m.avatar)}</span><div class="tx"><b>${escH(m.nombre)}</b>${escH(m.texto)}</div>${!m.bot && m.nombre !== yoNom ? `<button class="rep" data-r="${m.id}" title="Reportar">⚑</button>` : ''}`;
+      const abajo = box.scrollHeight - box.scrollTop - box.clientHeight < 80; box.append(d); while (box.children.length > 120) box.firstChild.remove(); if (abajo) box.scrollTop = box.scrollHeight; };
+    let reloj = null;
+    const ronda = r => {
+      const g = $('#gbox'); g.hidden = false; clearInterval(reloj);
+      const tabla = r.puntos?.length ? `<div class="tabla">🏅 Hoy: ${r.puntos.map((x, i) => `<span>${['🥇', '🥈', '🥉', '4.', '5.'][i]} ${escH(x.avatar)} ${escH(x.nombre)} (${x.p})</span>`).join('')}</div>` : '';
+      if (r.tipo === 'pausa') { g.innerHTML = `<p class="sub" style="margin:0">⏳ Siguiente ronda en unos segundos…</p>${tabla}`; return; }
+      const tot = Math.max(1, r.fin - Date.now()), barra = () => { const i = g.querySelector('.reloj i'); if (i) i.style.width = Math.max(0, (r.fin - Date.now()) * 100 / tot) + '%'; };
+      g.innerHTML = r.tipo === 'emoji' ? `<p class="sub" style="margin:0">🎯 Adivina (${escH(r.pista)}) — escribe tu respuesta en el chat</p><div class="big">${escH(r.e)}</div><div class="reloj"><i style="width:100%"></i></div>${tabla}`
+        : `<p class="sub" style="margin:0">🏆 Responde rápido</p><p style="font-weight:700;margin:6px 0">${escH(r.preg)}</p><div class="ops">${r.ops.map((o, k) => `<button data-l="${'ABCD'[k]}">${'ABCD'[k]}) ${escH(o)}</button>`).join('')}</div><div class="reloj"><i style="width:100%"></i></div>${tabla}`;
+      reloj = setInterval(barra, 1000);
+      g.onclick = e => { const b = e.target.closest('[data-l]'); if (b) { enviar(b.dataset.l); g.querySelectorAll('[data-l]').forEach(x => x.disabled = true); b.style.borderColor = 'var(--gold)'; } };
+    };
+    if (ES) ES.close();
+    ES = new EventSource('/api/chat/stream?sala=' + encodeURIComponent(t.sala));
+    ES.addEventListener('historial', e => { box.innerHTML = ''; JSON.parse(e.data).forEach(pinta); box.scrollTop = box.scrollHeight; if (!box.children.length) pinta({ id: 'hola', bot: true, nombre: 'Anfitrión', avatar: '🤖', texto: '¡Bienvenido! Saluda para empezar 👋' }); });
+    ES.addEventListener('msg', e => pinta(JSON.parse(e.data)));
+    ES.addEventListener('borrar', e => { const el = document.getElementById('m' + JSON.parse(e.data).id); if (el) el.remove(); });
+    ES.addEventListener('ronda', e => ronda(JSON.parse(e.data)));
+    ES.addEventListener('presencia', e => { const n = JSON.parse(e.data).n; $('#online').textContent = `● ${n} ${n === 1 ? 'persona' : 'personas'} en línea`; });
+    ES.addEventListener('cerrado', () => { toast('El chat se cerró por ahora'); ES.close(); });
+    ES.onerror = () => { const o = $('#online'); if (o) o.textContent = 'Reconectando…'; };
+    async function enviar(txt) {
+      txt = String(txt || '').trim(); if (!txt) return;
+      try { const r = await fetch('/api/chat/enviar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sala: t.sala, uid: VID, nombre: nom, avatar: av, texto: txt, consent: true }) }); const j = await r.json(); if (!r.ok) { toast(j.error || 'No se pudo enviar'); return false; } return true; }
+      catch (e) { toast('Sin conexión'); return false; }
+    }
+    $('#env').onclick = async () => { const i = $('#txt'); if (await enviar(i.value)) i.value = ''; i.focus(); };
+    $('#txt').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('#env').click(); } };
+    $('#emob').onclick = () => { $('#emo').hidden = !$('#emo').hidden; };
+    $('#emo').onclick = e => { if (e.target.tagName === 'BUTTON') { $('#txt').value += e.target.textContent; $('#txt').focus(); } };
+    box.onclick = e => { const b = e.target.closest('[data-r]'); if (b && confirm('¿Reportar este mensaje por ofensivo o spam?')) { post('/api/chat/reportar', { id: +b.dataset.r, sala: t.sala }).catch(() => {}); b.closest('.m').style.opacity = .4; toast('Gracias, lo revisaremos'); } };
+    $('#cambiar').onclick = () => { LS.set('chatOk', '0'); if (ES) ES.close(); sala(t); };
+    $('#compartirSala').onclick = e => { e.preventDefault(); const url = `${location.origin}/r/${t.id}?src=invitacion`; if (navigator.share) navigator.share({ title: t.t, text: `¡Entra a jugar conmigo! ${t.e} ${t.t}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: invítalos'); } };
+  });
+}
 const MOTOR = {
+  sala,
   calc(t) { pedirFecha(t, bd => { const r = CALC[t.id](t, bd); registrar(t.id, t.id === 'chino' ? null : signOf(bd)[0]); resultado({ g: t.id, emoji: t.e, ...r }); }); },
   perfil(t) {
     const pts = {}; let i = 0;

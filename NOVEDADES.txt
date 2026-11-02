@@ -1,3 +1,13 @@
+v7.6.0 — 🔴 Chat en vivo con juegos en la página viral
+- 3 salas en vivo, en la portada y en la nueva categoría "En vivo" (cada una con su imagen para compartir):
+  · 💬 Charla general.
+  · 🎯 Adivina el emoji: aparecen emojis (🦁👑) y el primero que escribe la respuesta gana 3 puntos.
+  · 🏆 Trivia en vivo: todos responden la misma pregunta; el primero que acierta gana 3 puntos y los demás 1.
+  · Tabla de puntajes del día y personas en línea.
+- Entrar es rápido: apodo + avatar (cuando tengas tu dominio se agrega "Entrar con Facebook").
+- Seguridad: solo texto y emojis; se bloquean enlaces, correos, teléfonos, cuentas de otras redes y groserías; límite de mensajes; botón ⚑ Reportar (con 3 reportes el mensaje se oculta solo).
+- Panel → 💬 Chat: ver mensajes y reportes, borrar, bloquear por horas o para siempre, y abrir o cerrar el chat.
+
 v7.5.0 — Página viral más profesional y más viral
 - "¿Qué les salió a los demás?": porcentajes reales y anónimos de cada resultado (aparecen cuando un test tiene 20 jugadas o más). En las trivias: "Superaste al X % de los jugadores".
 - Reto a un amigo en las trivias: el enlace compartido dice "Un amigo sacó 7/8. ¿Lo superas?" y al final muestra quién ganó.

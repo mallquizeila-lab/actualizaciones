@@ -1,311 +1,3335 @@
 {
-  "categorias": [
-    ["todos", "Todos"], ["personalidad", "Personalidad"], ["amor", "Amor y amistad"], ["trivia", "Trivias"], ["calculadoras", "Calculadoras"], ["astrologia", "Astrología y suerte"], ["estilo", "Estilo de vida"]
+ "categorias": [
+  [
+   "todos",
+   "Todos"
   ],
-  "tests": [
-    { "id": "horoscopo", "cat": "astrologia", "e": "🔮", "t": "Horóscopo y alma gemela", "d": "Tu lectura del día y la compatibilidad de tu signo.", "min": 1, "tipo": "especial" },
-    { "id": "compatibilidad", "cat": "amor", "e": "💘", "t": "Test de compatibilidad", "d": "Dos nombres, un porcentaje. Solo por diversión.", "min": 1, "tipo": "especial" },
-    { "id": "ruleta", "cat": "astrologia", "e": "🎡", "t": "Ruleta de la suerte", "d": "Un giro al día para ver qué te depara.", "min": 1, "tipo": "especial" },
-    { "id": "numerologia", "cat": "astrologia", "e": "🔢", "t": "Tu número del destino", "d": "El número que resulta de tu fecha de nacimiento.", "min": 1, "tipo": "especial" },
-    { "id": "encuesta", "cat": "estilo", "e": "📊", "t": "Encuesta del día", "d": "Vota y compara con lo que eligió la comunidad.", "min": 1, "tipo": "especial" },
-
-    { "id": "planetas", "cat": "calculadoras", "e": "🪐", "t": "Tu edad en otros planetas", "d": "Cálculo exacto según la órbita de cada planeta.", "min": 1, "tipo": "calc" },
-    { "id": "diasvividos", "cat": "calculadoras", "e": "⏳", "t": "¿Cuánto has vivido?", "d": "Días, semanas, horas y latidos aproximados desde que naciste.", "min": 1, "tipo": "calc" },
-    { "id": "generacion", "cat": "calculadoras", "e": "👥", "t": "¿A qué generación perteneces?", "d": "Boomer, X, Millennial, Z o Alfa, con sus rasgos.", "min": 1, "tipo": "calc" },
-    { "id": "chino", "cat": "astrologia", "e": "🐉", "t": "Tu animal del horóscopo chino", "d": "Según tu año de nacimiento.", "min": 1, "tipo": "calc" },
-    { "id": "cumple", "cat": "calculadoras", "e": "🎂", "t": "¿Cuánto falta para tu cumpleaños?", "d": "Días que faltan y en qué día de la semana cae.", "min": 1, "tipo": "calc" },
-
-    { "id": "trivia-peru", "cat": "trivia", "e": "🇵🇪", "t": "Trivia: ¿cuánto sabes del Perú?", "d": "10 preguntas sobre historia, geografía y cultura.", "min": 3, "tipo": "trivia",
-      "preguntas": [
-        ["¿Cuál es la capital del Perú?", ["Cusco", "Lima", "Arequipa", "Trujillo"], 1, "Lima es la capital desde su fundación por los españoles en 1535."],
-        ["¿En qué fecha se celebra la Independencia del Perú?", ["28 de julio", "9 de diciembre", "29 de junio", "8 de octubre"], 0, "José de San Martín proclamó la independencia el 28 de julio de 1821."],
-        ["¿Qué lago navegable comparten Perú y Bolivia?", ["Lago Junín", "Lago Titicaca", "Laguna de Parón", "Lago Poopó"], 1, "El Titicaca está a unos 3800 m de altura y se le considera el lago navegable más alto del mundo."],
-        ["¿En qué año la UNESCO declaró a Machu Picchu Patrimonio de la Humanidad?", ["1911", "1950", "1983", "2007"], 2, "Fue en 1983. En 2007 fue elegida una de las nuevas siete maravillas del mundo."],
-        ["¿Qué escritor peruano ganó el Premio Nobel de Literatura en 2010?", ["César Vallejo", "Ricardo Palma", "Mario Vargas Llosa", "José María Arguedas"], 2, "Mario Vargas Llosa, autor de «La ciudad y los perros» y «Conversación en La Catedral»."],
-        ["¿Cuál es la moneda oficial del Perú?", ["Peso", "Sol", "Inti", "Bolívar"], 1, "El sol reemplazó al inti en 1991."],
-        ["¿Qué plato fue declarado Patrimonio Cultural de la Nación en 2004?", ["Lomo saltado", "Ají de gallina", "Ceviche", "Pachamanca"], 2, "El ceviche fue declarado Patrimonio Cultural de la Nación en 2004."],
-        ["¿En qué región está el Cañón del Colca?", ["Cusco", "Arequipa", "Puno", "Áncash"], 1, "El Colca, en Arequipa, es uno de los cañones más profundos del mundo y hogar del cóndor andino."],
-        ["¿Cuál es el nevado más alto del Perú?", ["Huascarán", "Misti", "Ausangate", "Salkantay"], 0, "El Huascarán Sur, en Áncash, mide unos 6768 metros."],
-        ["¿Qué cultura construyó las líneas de Nasca?", ["Inca", "Moche", "Nasca", "Chavín"], 2, "La cultura Nasca las trazó en el desierto entre los años 500 a. C. y 500 d. C., aproximadamente."]
-      ] },
-    { "id": "trivia-animales", "cat": "trivia", "e": "🐾", "t": "Trivia: el reino animal", "d": "8 preguntas para amantes de los animales.", "min": 2, "tipo": "trivia",
-      "preguntas": [
-        ["¿Cuál es el animal más grande que existe?", ["Elefante africano", "Ballena azul", "Tiburón ballena", "Jirafa"], 1, "La ballena azul puede superar los 25 metros de largo."],
-        ["¿Cuál es el animal terrestre más rápido?", ["León", "Caballo", "Guepardo", "Antílope"], 2, "El guepardo alcanza alrededor de 100 km/h en carreras cortas."],
-        ["¿Cuántos corazones tiene un pulpo?", ["Uno", "Dos", "Tres", "Cuatro"], 2, "Tiene tres: dos bombean sangre a las branquias y uno al resto del cuerpo."],
-        ["¿Cuál es el único mamífero capaz de volar (no solo planear)?", ["Ardilla voladora", "Murciélago", "Colugo", "Ninguno"], 1, "Los murciélagos son los únicos mamíferos con vuelo propulsado."],
-        ["¿Cuál es el camélido sudamericano más pequeño?", ["Llama", "Alpaca", "Guanaco", "Vicuña"], 3, "La vicuña es la más pequeña y su fibra es una de las más finas del mundo."],
-        ["¿Cuántas patas tiene una araña?", ["Seis", "Ocho", "Diez", "Doce"], 1, "Las arañas son arácnidos: tienen ocho patas, a diferencia de los insectos, que tienen seis."],
-        ["¿Cómo se llama el camello de una sola joroba?", ["Bactriano", "Dromedario", "Guanaco", "Alpaca"], 1, "El dromedario tiene una joroba; el camello bactriano tiene dos."],
-        ["¿Qué ave es símbolo de los Andes y una de las más grandes que vuelan?", ["Águila arpía", "Cóndor andino", "Halcón peregrino", "Pelícano"], 1, "Sus alas abiertas pueden superar los 3 metros."]
-      ] },
-    { "id": "trivia-latam", "cat": "trivia", "e": "🌎", "t": "Trivia: geografía de Latinoamérica", "d": "8 preguntas de capitales, ríos y paisajes.", "min": 2, "tipo": "trivia",
-      "preguntas": [
-        ["¿Cuál es el país más grande de Sudamérica?", ["Argentina", "Perú", "Brasil", "Colombia"], 2, "Brasil ocupa casi la mitad del territorio sudamericano."],
-        ["¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Cartagena"], 1, "Bogotá está a unos 2600 metros sobre el nivel del mar."],
-        ["¿Cuál es la cordillera continental más larga del mundo?", ["Los Andes", "Himalaya", "Montañas Rocosas", "Alpes"], 0, "Los Andes recorren unos 7000 km, de Venezuela a la Patagonia."],
-        ["¿Cuál es el desierto no polar más árido del mundo?", ["Sahara", "Sechura", "Atacama", "Gobi"], 2, "En algunas zonas de Atacama, en Chile, casi nunca llueve."],
-        ["¿Qué idioma se habla oficialmente en Brasil?", ["Español", "Portugués", "Inglés", "Guaraní"], 1, "Brasil es el país de habla portuguesa más poblado del mundo."],
-        ["¿Entre qué países están las Cataratas del Iguazú?", ["Perú y Bolivia", "Argentina y Brasil", "Uruguay y Paraguay", "Venezuela y Colombia"], 1, "Están en la frontera entre Argentina y Brasil."],
-        ["¿Cuál es la capital de Ecuador?", ["Guayaquil", "Cuenca", "Quito", "Loja"], 2, "Quito fue una de las primeras ciudades declaradas Patrimonio de la Humanidad, en 1978."],
-        ["¿Qué país tiene la forma más larga y angosta de Sudamérica?", ["Chile", "Perú", "Uruguay", "Ecuador"], 0, "Chile mide más de 4000 km de largo y en promedio menos de 200 km de ancho."]
-      ] },
-    { "id": "trivia-futbol", "cat": "trivia", "e": "⚽", "t": "Trivia: historia del fútbol", "d": "8 preguntas sobre Mundiales y Copa América.", "min": 2, "tipo": "trivia",
-      "preguntas": [
-        ["¿Qué selección ganó el primer Mundial, en 1930?", ["Brasil", "Argentina", "Uruguay", "Italia"], 2, "Uruguay fue sede y campeón del primer Mundial."],
-        ["¿Qué selección tiene más títulos mundiales?", ["Alemania", "Brasil", "Italia", "Argentina"], 1, "Brasil ganó en 1958, 1962, 1970, 1994 y 2002."],
-        ["¿Quién es el máximo goleador en la historia de los Mundiales (hasta Qatar 2022)?", ["Pelé", "Ronaldo Nazário", "Miroslav Klose", "Lionel Messi"], 2, "Miroslav Klose marcó 16 goles en cuatro Mundiales."],
-        ["¿Qué selección ganó el Mundial de Qatar 2022?", ["Francia", "Argentina", "Croacia", "Brasil"], 1, "Argentina venció a Francia en la final por penales."],
-        ["¿En qué años ganó Perú la Copa América?", ["1939 y 1975", "1953 y 1982", "1970 y 1997", "1927 y 2019"], 0, "Perú fue campeón en 1939, como local, y en 1975."],
-        ["¿Cuántos jugadores por equipo hay en la cancha?", ["9", "10", "11", "12"], 2, "Once jugadores, incluido el arquero."],
-        ["¿Qué jugador ganó tres Copas del Mundo?", ["Maradona", "Pelé", "Zidane", "Cristiano Ronaldo"], 1, "Pelé fue campeón en 1958, 1962 y 1970."],
-        ["¿Qué países organizaron juntos el Mundial 2026?", ["España y Portugal", "Estados Unidos, México y Canadá", "Argentina y Uruguay", "Japón y Corea"], 1, "Fue el primer Mundial con 48 selecciones y tres países sede."]
-      ] },
-    { "id": "trivia-ciencia", "cat": "trivia", "e": "🔬", "t": "Trivia: ciencia para todos", "d": "8 preguntas de ciencia básica.", "min": 2, "tipo": "trivia",
-      "preguntas": [
-        ["¿Cuál es el planeta más grande del sistema solar?", ["Saturno", "Júpiter", "Neptuno", "Tierra"], 1, "En Júpiter cabrían más de mil Tierras."],
-        ["¿Cuál es la fórmula química del agua?", ["CO2", "H2O", "O2", "NaCl"], 1, "Dos átomos de hidrógeno y uno de oxígeno."],
-        ["¿Cuántos huesos tiene el cuerpo de un adulto?", ["106", "206", "306", "406"], 1, "Un adulto tiene 206 huesos; un bebé nace con más, que luego se fusionan."],
-        ["¿Qué gas absorben las plantas para hacer la fotosíntesis?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio"], 2, "Absorben dióxido de carbono y liberan oxígeno."],
-        ["¿Cuál es el órgano más grande del cuerpo humano?", ["El hígado", "El cerebro", "La piel", "Los pulmones"], 2, "La piel cubre alrededor de 2 metros cuadrados en un adulto."],
-        ["¿Qué planeta está más cerca del Sol?", ["Venus", "Marte", "Mercurio", "Tierra"], 2, "Mercurio da una vuelta al Sol en solo 88 días."],
-        ["¿A qué temperatura hierve el agua a nivel del mar?", ["90 °C", "100 °C", "110 °C", "120 °C"], 1, "A mayor altura hierve a menos temperatura: en Cusco, a unos 88 °C."],
-        ["¿A qué velocidad viaja la luz, aproximadamente?", ["300 km/s", "3000 km/s", "300 000 km/s", "3 millones de km/s"], 2, "Unos 300 000 km por segundo: la luz del Sol tarda unos 8 minutos en llegar a la Tierra."]
-      ] },
-
-    { "id": "animal", "cat": "personalidad", "e": "🦁", "t": "¿Qué animal te representa?", "d": "6 preguntas sobre cómo piensas y actúas.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Un sábado ideal para ti es…", [["Organizar un plan para todo el grupo", "leon"], ["Playa, música y amigos", "delfin"], ["Una salida tranquila con los de siempre", "lobo"], ["Un buen libro o un documental", "buho"]]],
-        ["En tu grupo de amigos, tú eres quien…", [["Toma las decisiones", "leon"], ["Pone el buen humor", "delfin"], ["Defiende a todos", "lobo"], ["Da los consejos", "buho"]]],
-        ["Ante un problema difícil…", [["Lo enfrento de inmediato", "leon"], ["Busco una salida creativa", "delfin"], ["Pido apoyo a mi gente", "lobo"], ["Lo analizo con calma", "buho"]]],
-        ["¿Qué valoras más en una persona?", [["Determinación", "leon"], ["Alegría", "delfin"], ["Lealtad", "lobo"], ["Inteligencia", "buho"]]],
-        ["Tu lugar favorito sería…", [["Un escenario frente a mucha gente", "leon"], ["El mar", "delfin"], ["Una cabaña en el bosque", "lobo"], ["Una biblioteca antigua", "buho"]]],
-        ["Tu frase sería…", [["«Si lo quiero, lo consigo»", "leon"], ["«La vida es para disfrutarla»", "delfin"], ["«Juntos somos más»", "lobo"], ["«Piensa dos veces, actúa una»", "buho"]]]
-      ],
-      "resultados": {
-        "leon": { "e": "🦁", "t": "León", "d": "Tienes energía de liderazgo: decides rápido, te haces cargo y la gente confía en tu dirección. Te mueven los retos y no te asusta la responsabilidad.", "f": ["Seguridad al decidir", "Capacidad de motivar", "Constancia"], "c": "Escuchar antes de decidir hará que tu liderazgo sea todavía más sólido." },
-        "delfin": { "e": "🐬", "t": "Delfín", "d": "Eres sociable, creativo y optimista. Haces que los demás se sientan cómodos y encuentras soluciones donde otros ven problemas.", "f": ["Empatía", "Creatividad", "Buen humor"], "c": "Reserva tiempo para ti: no siempre tienes que animar a todos." },
-        "lobo": { "e": "🐺", "t": "Lobo", "d": "La lealtad es tu sello. Cuidas a tu gente, trabajas bien en equipo y das todo por quienes quieres.", "f": ["Lealtad", "Trabajo en equipo", "Protección"], "c": "Abrirte a gente nueva puede traerte oportunidades inesperadas." },
-        "buho": { "e": "🦉", "t": "Búho", "d": "Observas antes de actuar y piensas a fondo. Tus consejos suelen ser acertados porque ves lo que otros pasan por alto.", "f": ["Análisis", "Prudencia", "Buen criterio"], "c": "No esperes a tenerlo todo claro para empezar: la práctica también enseña." }
-      } },
-    { "id": "lider", "cat": "personalidad", "e": "🧭", "t": "¿Qué tipo de líder eres?", "d": "Descubre tu estilo para guiar equipos.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Tu equipo tiene un proyecto nuevo. ¿Qué haces primero?", [["Explico hacia dónde vamos y por qué", "vis"], ["Pregunto qué necesita cada uno", "coach"], ["Armo el plan con fechas y tareas", "org"], ["Me pongo a trabajar y doy el ejemplo", "eje"]]],
-        ["¿Qué te molesta más?", [["La falta de ambición", "vis"], ["Que alguien se sienta excluido", "coach"], ["El desorden", "org"], ["Las reuniones que no llevan a nada", "eje"]]],
-        ["Un compañero comete un error…", [["Le recuerdo la meta y seguimos", "vis"], ["Converso con él para que aprenda", "coach"], ["Reviso el proceso para que no se repita", "org"], ["Lo arreglo rápido y seguimos", "eje"]]],
-        ["¿Qué te dicen más seguido?", [["Que inspiras", "vis"], ["Que sabes escuchar", "coach"], ["Que eres muy ordenado", "org"], ["Que eres muy práctico", "eje"]]],
-        ["Tu mayor satisfacción es…", [["Lograr algo que parecía imposible", "vis"], ["Ver crecer a las personas", "coach"], ["Que todo salga según lo planeado", "org"], ["Ver resultados concretos", "eje"]]],
-        ["Ante una crisis…", [["Doy una visión que tranquiliza", "vis"], ["Cuido el ánimo del grupo", "coach"], ["Organizo prioridades", "org"], ["Actúo de inmediato", "eje"]]]
-      ],
-      "resultados": {
-        "vis": { "e": "🚀", "t": "Líder visionario", "d": "Ves el panorama completo y sabes contagiar entusiasmo. La gente te sigue porque le das un propósito claro.", "f": ["Inspiración", "Visión a largo plazo", "Valentía"], "c": "Apóyate en personas detallistas para aterrizar tus ideas." },
-        "coach": { "e": "🤝", "t": "Líder coach", "d": "Tu fuerza está en las personas: escuchas, acompañas y sacas lo mejor de cada uno. Formas equipos que confían.", "f": ["Empatía", "Escucha activa", "Desarrollo de talento"], "c": "También está bien poner límites y exigir resultados." },
-        "org": { "e": "📋", "t": "Líder organizador", "d": "Conviertes el caos en un plan. Con tus procesos claros, el equipo sabe qué hacer y cuándo.", "f": ["Planificación", "Orden", "Confiabilidad"], "c": "Deja espacio para la improvisación: a veces las mejores ideas no están en el plan." },
-        "eje": { "e": "⚡", "t": "Líder ejecutor", "d": "Lideras con el ejemplo. Eres práctico, rápido y orientado a resultados; contigo las cosas se hacen.", "f": ["Acción", "Eficiencia", "Determinación"], "c": "Explicar el porqué de las tareas hará que tu equipo te siga con más ganas." }
-      } },
-    { "id": "lenguaje-amor", "cat": "amor", "e": "💞", "t": "Tu lenguaje del amor", "d": "Basado en los 5 lenguajes del amor de Gary Chapman.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["¿Qué te hace sentir más querido?", [["Que me digan lo que sienten", "pal"], ["Pasar tiempo a solas, sin celular", "tiem"], ["Un detalle inesperado", "reg"], ["Que me ayuden sin que lo pida", "act"], ["Un abrazo largo", "cont"]]],
-        ["Después de un día pesado, prefieres…", [["Que me den ánimo con palabras", "pal"], ["Conversar con calma", "tiem"], ["Recibir algo que me guste", "reg"], ["Que alguien se encargue de la cena", "act"], ["Que me abracen", "cont"]]],
-        ["¿Qué te duele más?", [["Una crítica dura", "pal"], ["Que me dejen de lado", "tiem"], ["Que olviden una fecha importante", "reg"], ["Que no cumplan lo que prometieron", "act"], ["La frialdad física", "cont"]]],
-        ["Para demostrar cariño, tú…", [["Escribo mensajes bonitos", "pal"], ["Organizo planes juntos", "tiem"], ["Doy regalos pensados", "reg"], ["Ayudo en lo que haga falta", "act"], ["Soy cariñoso físicamente", "cont"]]],
-        ["Tu cita ideal sería…", [["Una conversación profunda", "pal"], ["Un día entero juntos", "tiem"], ["Una sorpresa preparada", "reg"], ["Que la otra persona organice todo", "act"], ["Una película abrazados", "cont"]]]
-      ],
-      "resultados": {
-        "pal": { "e": "💬", "t": "Palabras de afirmación", "d": "Para ti, las palabras pesan. Un «te quiero», un «estoy orgulloso de ti» o un mensaje sincero te llenan más que cualquier regalo.", "f": ["Comunicas lo que sientes", "Valoras la honestidad", "Sabes animar a otros"], "c": "Cuéntale a tu pareja que las palabras son importantes para ti: así sabrá cómo llegarte." },
-        "tiem": { "e": "⏰", "t": "Tiempo de calidad", "d": "Lo que más valoras es la atención plena: estar juntos de verdad, sin distracciones. Para ti, el tiempo compartido es la mayor prueba de amor.", "f": ["Presencia", "Escucha", "Constancia"], "c": "Propón planes concretos en vez de esperar que la otra persona lo adivine." },
-        "reg": { "e": "🎁", "t": "Regalos", "d": "No se trata del precio, sino del gesto: un detalle te demuestra que pensaron en ti. Recuerdas cada regalo y lo que significó.", "f": ["Atención a los detalles", "Gratitud", "Memoria emocional"], "c": "Valora también los gestos simples: no todo cariño viene envuelto." },
-        "act": { "e": "🛠️", "t": "Actos de servicio", "d": "Para ti, amar es hacer. Que alguien te ayude, cumpla lo que promete o te aliviane una carga te dice más que mil palabras.", "f": ["Compromiso", "Responsabilidad", "Generosidad"], "c": "Pide ayuda cuando la necesites: no todos se dan cuenta solos." },
-        "cont": { "e": "🤗", "t": "Contacto físico", "d": "Un abrazo, tomarse de la mano o un beso te dan seguridad y cercanía. Expresas y recibes el cariño a través del contacto.", "f": ["Calidez", "Cercanía", "Expresividad"], "c": "Respeta que no todos expresan el cariño igual: conversen sobre lo que cada uno necesita." }
-      } },
-    { "id": "intro-extro", "cat": "personalidad", "e": "🔋", "t": "¿Introvertido, extrovertido o ambivertido?", "d": "Cómo recargas tu energía.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Después de una fiesta, te sientes…", [["Con más energía", "ext"], ["Contento, pero con ganas de descansar", "amb"], ["Agotado: necesito estar solo", "int"]]],
-        ["En una reunión con desconocidos…", [["Hablo con todos", "ext"], ["Hablo con una o dos personas", "amb"], ["Prefiero observar", "int"]]],
-        ["Tu fin de semana ideal…", [["Salidas y planes con gente", "ext"], ["Un poco de todo", "amb"], ["Tranquilo, en casa", "int"]]],
-        ["Cuando tienes un problema…", [["Lo converso enseguida", "ext"], ["Depende del problema", "amb"], ["Lo pienso primero a solas", "int"]]],
-        ["Trabajas mejor…", [["En equipo y con ruido", "ext"], ["Alternando", "amb"], ["Solo y en silencio", "int"]]],
-        ["Llamada o mensaje…", [["Llamada, siempre", "ext"], ["Según el caso", "amb"], ["Mensaje, sin duda", "int"]]]
-      ],
-      "resultados": {
-        "ext": { "e": "🎉", "t": "Extrovertido", "d": "Te recargas con la gente. Las conversaciones, los planes y la actividad te dan energía, y te expresas con facilidad.", "f": ["Sociable", "Comunicativo", "Entusiasta"], "c": "Reserva algunos momentos de calma: también ayudan a pensar mejor." },
-        "amb": { "e": "⚖️", "t": "Ambivertido", "d": "Tienes lo mejor de ambos mundos: disfrutas de la gente y también de tu espacio. Te adaptas según la situación, y eso es una gran ventaja.", "f": ["Flexibilidad", "Equilibrio", "Buena lectura social"], "c": "Escucha a tu cuerpo: él te dirá cuándo necesitas gente y cuándo silencio." },
-        "int": { "e": "📚", "t": "Introvertido", "d": "Te recargas en calma. Prefieres pocas relaciones pero profundas, piensas antes de hablar y disfrutas de tu propio espacio. No es timidez: es tu forma de procesar el mundo.", "f": ["Reflexivo", "Buen oyente", "Concentración"], "c": "Comparte tus ideas: suelen ser más valiosas de lo que crees." }
-      } },
-    { "id": "viajero", "cat": "estilo", "e": "🧳", "t": "¿Qué tipo de viajero eres?", "d": "Y el destino que va contigo.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Lo primero que metes en la maleta…", [["Zapatillas de caminata", "av"], ["Una guía de historia", "cul"], ["Ropa de baño", "rel"], ["Ganas de comer", "gas"]]],
-        ["Tu foto ideal del viaje…", [["En la cima de una montaña", "av"], ["Frente a un templo antiguo", "cul"], ["En una hamaca frente al mar", "rel"], ["Con un plato típico", "gas"]]],
-        ["¿Cómo planificas?", [["Lo justo; lo demás, improviso", "av"], ["Investigo cada lugar", "cul"], ["Busco un buen hotel y listo", "rel"], ["Por los restaurantes", "gas"]]],
-        ["¿Qué recuerdo traerías?", [["Una historia increíble", "av"], ["Una artesanía local", "cul"], ["Un buen bronceado", "rel"], ["Ingredientes típicos", "gas"]]],
-        ["Tu peor viaje sería…", [["Uno sin nada que explorar", "av"], ["Uno sin historia ni cultura", "cul"], ["Uno lleno de estrés", "rel"], ["Uno con comida aburrida", "gas"]]]
-      ],
-      "resultados": {
-        "av": { "e": "🏔️", "t": "Aventurero", "d": "Buscas adrenalina y paisajes que te dejen sin aliento. Para ti, el mejor viaje tiene caminatas, naturaleza y algo de riesgo.", "f": ["Valentía", "Resistencia", "Curiosidad"], "c": "Destino ideal: el Camino Inca o la Cordillera Blanca, en Áncash." },
-        "cul": { "e": "🏛️", "t": "Cultural", "d": "Viajas para entender. Museos, ruinas, tradiciones y conversaciones con la gente local son lo que más disfrutas.", "f": ["Curiosidad", "Respeto por lo diferente", "Memoria"], "c": "Destino ideal: Cusco y el Valle Sagrado, o Ciudad de México." },
-        "rel": { "e": "🏖️", "t": "Relax", "d": "Tus vacaciones son para descansar de verdad: playa, buen clima y cero apuros.", "f": ["Sabes desconectarte", "Disfrutas el presente", "Buen gusto"], "c": "Destino ideal: Máncora, Punta Cana o las playas de Cartagena." },
-        "gas": { "e": "🍽️", "t": "Gastronómico", "d": "Conoces un lugar por su comida. Mercados, huariques y platos típicos son tu brújula de viaje.", "f": ["Paladar curioso", "Disfrutas compartir", "Abierto a probar"], "c": "Destino ideal: Lima (capital gastronómica de Sudamérica) o Arequipa y sus picanterías." }
-      } },
-    { "id": "carrera", "cat": "personalidad", "e": "💼", "t": "¿Qué tipo de trabajo va contigo?", "d": "Inspirado en el modelo de intereses vocacionales de Holland.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["¿Qué actividad disfrutas más?", [["Diseñar, dibujar o crear contenido", "art"], ["Resolver problemas técnicos", "tec"], ["Ayudar o enseñar a otros", "soc"], ["Vender o liderar proyectos", "emp"]]],
-        ["En el colegio, tu curso favorito era…", [["Arte o literatura", "art"], ["Matemáticas o ciencias", "tec"], ["Tutoría o ciencias sociales", "soc"], ["Cualquiera donde pudiera debatir", "emp"]]],
-        ["Un trabajo ideal tendría…", [["Libertad creativa", "art"], ["Retos que resolver", "tec"], ["Impacto en las personas", "soc"], ["Metas y crecimiento", "emp"]]],
-        ["Te frustra…", [["La rutina", "art"], ["Lo mal hecho", "tec"], ["La injusticia", "soc"], ["La falta de oportunidades", "emp"]]],
-        ["Te imaginas como…", [["Diseñador o creador de contenido", "art"], ["Ingeniero o programador", "tec"], ["Docente, psicólogo o enfermero", "soc"], ["Empresario o gerente", "emp"]]]
-      ],
-      "resultados": {
-        "art": { "e": "🎨", "t": "Perfil creativo", "d": "Te mueve expresar ideas. Te va bien en diseño, comunicación, marketing, contenido digital, fotografía o arquitectura.", "f": ["Imaginación", "Sensibilidad estética", "Originalidad"], "c": "Arma un portafolio: en las carreras creativas, mostrar vale más que contar." },
-        "tec": { "e": "🛠️", "t": "Perfil técnico-analítico", "d": "Disfrutas entender cómo funcionan las cosas. Te va bien en ingeniería, programación, datos, ciencias o finanzas.", "f": ["Lógica", "Precisión", "Resolución de problemas"], "c": "Aprende a explicar tu trabajo de forma simple: es lo que más valoran los jefes." },
-        "soc": { "e": "🤲", "t": "Perfil social", "d": "Te realiza ayudar a otros. Te va bien en educación, salud, psicología, recursos humanos o atención al cliente.", "f": ["Empatía", "Paciencia", "Comunicación"], "c": "Cuida tu energía: ayudar a otros empieza por cuidarte a ti." },
-        "emp": { "e": "📈", "t": "Perfil emprendedor", "d": "Te motivan las metas y las oportunidades. Te va bien en ventas, negocios, administración, liderazgo de proyectos o tu propia empresa.", "f": ["Iniciativa", "Persuasión", "Ambición"], "c": "Rodéate de gente con perfiles distintos al tuyo: se complementan." }
-      } },
-    { "id": "dinero", "cat": "estilo", "e": "💰", "t": "¿Cómo manejas tu dinero?", "d": "Tu perfil financiero en 5 preguntas.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Te llega un dinero extra. ¿Qué haces?", [["Lo ahorro todo", "aho"], ["Lo reparto según mi presupuesto", "pla"], ["Me doy un gusto", "dis"], ["Lo invierto para que crezca", "inv"]]],
-        ["¿Sabes cuánto gastaste el mes pasado?", [["Más o menos", "aho"], ["Al sol exacto", "pla"], ["Ni idea", "dis"], ["Sí, y cuánto rindieron mis inversiones", "inv"]]],
-        ["Una oferta del 50 %…", [["Si no lo necesito, no compro", "aho"], ["Reviso si entra en mi presupuesto", "pla"], ["¡La aprovecho!", "dis"], ["Prefiero poner ese dinero en algo que dé ganancia", "inv"]]],
-        ["Tu mayor miedo con el dinero…", [["Quedarme sin nada", "aho"], ["Perder el control de mis gastos", "pla"], ["No disfrutar la vida", "dis"], ["Que mi dinero pierda valor", "inv"]]],
-        ["Tu meta financiera…", [["Un buen fondo de emergencia", "aho"], ["Tener todo en orden", "pla"], ["Vivir bien hoy", "dis"], ["Libertad financiera", "inv"]]]
-      ],
-      "resultados": {
-        "aho": { "e": "🐷", "t": "Ahorrador", "d": "Eres prudente y te da tranquilidad tener un respaldo. Difícilmente te endeudas sin necesidad.", "f": ["Disciplina", "Previsión", "Control"], "c": "Ahorrar es la base; aprender a invertir hará que tu dinero no pierda valor con el tiempo." },
-        "pla": { "e": "📊", "t": "Planificador", "d": "Sabes a dónde va cada sol. Llevas tus cuentas y tomas decisiones con números en la mano.", "f": ["Orden", "Claridad", "Responsabilidad"], "c": "Incluye en tu presupuesto un monto para disfrutar sin culpa." },
-        "dis": { "e": "🛍️", "t": "Disfrutador", "d": "Para ti, el dinero es para vivir experiencias, y eso también es valioso. Eres generoso y disfrutas el presente.", "f": ["Generosidad", "Saber disfrutar", "Espontaneidad"], "c": "Prueba la regla 50/30/20: 50 % necesidades, 30 % gustos y 20 % ahorro." },
-        "inv": { "e": "📈", "t": "Inversionista", "d": "Piensas a largo plazo y quieres que tu dinero trabaje para ti. Te interesan las oportunidades y el crecimiento.", "f": ["Visión", "Aprendizaje constante", "Tolerancia al riesgo"], "c": "Diversifica y nunca inviertas lo que no puedes darte el lujo de perder." }
-      } },
-    { "id": "aprendizaje", "cat": "personalidad", "e": "🧠", "t": "¿Cómo aprendes mejor?", "d": "Tu forma preferida de aprender (modelo VARK).", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Para armar un mueble nuevo…", [["Miro los dibujos del manual", "vis"], ["Pido que me expliquen", "aud"], ["Leo las instrucciones paso a paso", "lec"], ["Lo armo probando", "kin"]]],
-        ["Para recordar un número…", [["Lo visualizo", "vis"], ["Lo repito en voz alta", "aud"], ["Lo escribo", "lec"], ["Lo marco con los dedos", "kin"]]],
-        ["En clase prefieres…", [["Diapositivas con gráficos", "vis"], ["Que el profesor explique", "aud"], ["Tomar apuntes", "lec"], ["Hacer prácticas", "kin"]]],
-        ["Para llegar a un lugar nuevo…", [["Miro el mapa", "vis"], ["Pregunto cómo llegar", "aud"], ["Anoto la dirección", "lec"], ["Voy y me ubico en el camino", "kin"]]],
-        ["Aprendes más con…", [["Videos e infografías", "vis"], ["Podcasts y audios", "aud"], ["Libros y artículos", "lec"], ["Talleres prácticos", "kin"]]]
-      ],
-      "resultados": {
-        "vis": { "e": "👁️", "t": "Visual", "d": "Aprendes mejor con imágenes, colores, esquemas y videos. Si lo ves, lo entiendes.", "f": ["Memoria visual", "Organización espacial", "Creatividad"], "c": "Haz mapas mentales y usa colores en tus apuntes." },
-        "aud": { "e": "👂", "t": "Auditivo", "d": "Aprendes escuchando y conversando. Las explicaciones en voz alta y los audios son tus aliados.", "f": ["Buena escucha", "Facilidad para los idiomas", "Expresión oral"], "c": "Explica en voz alta lo que estudias o grábate y escúchate." },
-        "lec": { "e": "📝", "t": "Lectura y escritura", "d": "Las palabras escritas son tu fuerte: leer, resumir y tomar apuntes te ayuda a fijar las ideas.", "f": ["Comprensión lectora", "Orden", "Precisión"], "c": "Reescribe con tus propias palabras: es tu mejor técnica de estudio." },
-        "kin": { "e": "✋", "t": "Kinestésico", "d": "Aprendes haciendo. La práctica, el movimiento y la experiencia directa son lo que más te sirve.", "f": ["Aprendes rápido en la práctica", "Habilidad manual", "Energía"], "c": "Combina el estudio con ejercicios prácticos y pausas activas." }
-      } },
-    { "id": "amigo", "cat": "amor", "e": "🫶", "t": "¿Qué tipo de amigo eres?", "d": "El rol que cumples en tu grupo.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Tu amigo está triste. Tú…", [["Lo escucho y le aconsejo", "con"], ["Lo saco a distraerse", "fie"], ["Me quedo con él lo que haga falta", "leal"], ["Le propongo una aventura", "ave"]]],
-        ["En el grupo de WhatsApp, eres quien…", [["Responde con consejos", "con"], ["Manda memes", "fie"], ["Siempre está atento", "leal"], ["Propone planes locos", "ave"]]],
-        ["Un cumpleaños de tu mejor amigo…", [["Le escribo algo especial", "con"], ["Organizo la fiesta", "fie"], ["Estoy desde temprano ayudando", "leal"], ["Le regalo una experiencia", "ave"]]],
-        ["Te cuentan un secreto…", [["Lo guardo y doy mi opinión", "con"], ["Lo guardo… con esfuerzo 😅", "fie"], ["Me lo llevo a la tumba", "leal"], ["Lo guardo y propongo una solución", "ave"]]],
-        ["Tus amigos te describen como…", [["Sabio", "con"], ["Divertido", "fie"], ["Incondicional", "leal"], ["Impredecible", "ave"]]]
-      ],
-      "resultados": {
-        "con": { "e": "🧘", "t": "El consejero", "d": "Eres a quien todos buscan cuando algo pasa. Escuchas sin juzgar y tus consejos suelen dar en el clavo.", "f": ["Sabiduría", "Empatía", "Discreción"], "c": "Deja que tus amigos también te escuchen a ti." },
-        "fie": { "e": "🥳", "t": "El alma de la fiesta", "d": "Contigo no hay momento aburrido. Unes al grupo, organizas los planes y haces reír a todos.", "f": ["Carisma", "Energía", "Optimismo"], "c": "Los momentos serios también importan: tu apoyo vale mucho." },
-        "leal": { "e": "🛡️", "t": "El incondicional", "d": "Estás en las buenas y en las malas. Tu lealtad es tu mayor regalo y tus amigos lo saben.", "f": ["Lealtad", "Constancia", "Confianza"], "c": "Cuida que la relación sea recíproca." },
-        "ave": { "e": "🧗", "t": "El aventurero", "d": "Eres el que saca a todos de la rutina. Con tus planes se crean las mejores anécdotas del grupo.", "f": ["Espontaneidad", "Valentía", "Creatividad"], "c": "A veces un plan tranquilo también fortalece la amistad." }
-      } },
-    { "id": "plato-peruano", "cat": "estilo", "e": "🍲", "t": "¿Qué plato peruano eres?", "d": "Tu personalidad convertida en sabor.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Tu personalidad es…", [["Fresca y directa", "cev"], ["Intensa y con carácter", "lom"], ["Cálida y acogedora", "aji"], ["Dulce y detallista", "sus"]]],
-        ["Tu plan favorito…", [["Playa con amigos", "cev"], ["Una noche de fútbol", "lom"], ["Almuerzo familiar de domingo", "aji"], ["Una tarde de café y postres", "sus"]]],
-        ["Cuando cocinas…", [["Rápido y sin complicarme", "cev"], ["Con fuego alto y mucho sabor", "lom"], ["Para muchos, con cariño", "aji"], ["Con paciencia y decoración", "sus"]]],
-        ["Te dicen que eres…", [["Auténtico", "cev"], ["Apasionado", "lom"], ["Un amor", "aji"], ["Encantador", "sus"]]],
-        ["¿Qué te define?", [["La sinceridad", "cev"], ["La energía", "lom"], ["La generosidad", "aji"], ["La ternura", "sus"]]]
-      ],
-      "resultados": {
-        "cev": { "e": "🐟", "t": "Ceviche", "d": "Eres fresco, directo y auténtico, como el plato bandera del Perú. Donde llegas, te reconocen.", "f": ["Autenticidad", "Frescura", "Carisma"], "c": "Ponle un poco de calma a tu chispa: no todo tiene que ser al instante." },
-        "lom": { "e": "🥩", "t": "Lomo saltado", "d": "Tienes carácter y mucha energía, igual que un lomo saltado al wok. Eres apasionado y no pasas desapercibido.", "f": ["Intensidad", "Determinación", "Sabor propio"], "c": "Tu energía contagia; úsala para impulsar a los demás." },
-        "aji": { "e": "🍛", "t": "Ají de gallina", "d": "Eres cálido y reconfortante, como un almuerzo de casa. Cuidas a los tuyos y siempre hay un lugar en tu mesa.", "f": ["Generosidad", "Calidez", "Tradición"], "c": "Cuídate también a ti, no solo a los demás." },
-        "sus": { "e": "🍮", "t": "Suspiro a la limeña", "d": "Eres dulce, elegante y detallista. Endulzas el día de quienes te rodean.", "f": ["Ternura", "Detalle", "Encanto"], "c": "No temas mostrar tu lado más firme cuando haga falta." }
-      } },
-    { "id": "comunicacion", "cat": "personalidad", "e": "🗣️", "t": "Tu estilo de comunicación", "d": "Cómo te expresas y cómo te perciben.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["En una discusión, tú…", [["Digo lo que pienso con respeto", "ase"], ["Presento datos y argumentos", "ana"], ["Hablo desde la emoción", "exp"], ["Busco calmar los ánimos", "ama"]]],
-        ["Tus mensajes son…", [["Claros y directos", "ase"], ["Largos y detallados", "ana"], ["Con muchos emojis", "exp"], ["Siempre amables", "ama"]]],
-        ["Te cuesta…", [["Nada en particular", "ase"], ["Hablar de emociones", "ana"], ["Escuchar sin interrumpir", "exp"], ["Decir que no", "ama"]]],
-        ["En una reunión…", [["Propongo y defiendo mis ideas", "ase"], ["Hago preguntas precisas", "ana"], ["Animo a todos", "exp"], ["Me aseguro de que todos opinen", "ama"]]],
-        ["Te describen como…", [["Seguro", "ase"], ["Lógico", "ana"], ["Apasionado", "exp"], ["Diplomático", "ama"]]]
-      ],
-      "resultados": {
-        "ase": { "e": "🎯", "t": "Asertivo", "d": "Dices lo que piensas con claridad y respeto. Es el estilo más efectivo: te entienden y no lastimas.", "f": ["Claridad", "Seguridad", "Respeto"], "c": "Sigue practicando la escucha: el diálogo es de dos." },
-        "ana": { "e": "🔍", "t": "Analítico", "d": "Te comunicas con lógica, datos y precisión. Tus argumentos son sólidos y bien pensados.", "f": ["Precisión", "Objetividad", "Rigor"], "c": "Acompaña los datos con un toque humano: conecta más." },
-        "exp": { "e": "🔥", "t": "Expresivo", "d": "Hablas con pasión y entusiasmo. Contagias energía y la gente recuerda lo que dices.", "f": ["Carisma", "Entusiasmo", "Creatividad"], "c": "Haz pausas y escucha: tus ideas brillarán más." },
-        "ama": { "e": "🕊️", "t": "Conciliador", "d": "Buscas la armonía y cuidas a los demás al hablar. Eres el puente que une a las personas.", "f": ["Diplomacia", "Empatía", "Paciencia"], "c": "Practica decir «no» con amabilidad: tus necesidades también cuentan." }
-      } },
-    { "id": "cronotipo", "cat": "estilo", "e": "🌅", "t": "¿Eres alondra o búho?", "d": "Tu cronotipo: cuándo rindes mejor durante el día.", "min": 1, "tipo": "perfil",
-      "preguntas": [
-        ["Sin alarma, te despertarías…", [["Antes de las 7 a. m.", "alo"], ["Entre 7 y 9 a. m.", "col"], ["Después de las 9 a. m.", "bu"]]],
-        ["Tu mejor momento para concentrarte…", [["Muy temprano", "alo"], ["Media mañana o tarde", "col"], ["De noche", "bu"]]],
-        ["¿A qué hora te da sueño?", [["Antes de las 10 p. m.", "alo"], ["Cerca de la medianoche", "col"], ["Pasada la 1 a. m.", "bu"]]],
-        ["Un examen a las 8 a. m. es…", [["Perfecto", "alo"], ["Aceptable", "col"], ["Una tortura", "bu"]]]
-      ],
-      "resultados": {
-        "alo": { "e": "🐦", "t": "Alondra (madrugador)", "d": "Tu energía está en su punto más alto en la mañana. Rindes mejor temprano y te desgastas al final del día.", "f": ["Productividad matutina", "Disciplina", "Buen descanso"], "c": "Deja tus tareas más difíciles para la mañana." },
-        "col": { "e": "🐤", "t": "Colibrí (intermedio)", "d": "Te adaptas a horarios variados; es el cronotipo más común. Rindes bien a media mañana y por la tarde.", "f": ["Flexibilidad", "Constancia", "Adaptación"], "c": "Mantén horarios regulares de sueño para rendir al máximo." },
-        "bu": { "e": "🦉", "t": "Búho (nocturno)", "d": "Tu mente se activa de noche. Las mañanas te cuestan, pero tu creatividad aparece cuando todos duermen.", "f": ["Creatividad nocturna", "Concentración profunda", "Independencia"], "c": "Evita pantallas antes de dormir y busca dormir entre 7 y 9 horas." }
-      } },
-    { "id": "mascota", "cat": "estilo", "e": "🐶", "t": "¿Cuál es tu mascota ideal?", "d": "Según tu estilo de vida y tu personalidad.", "min": 1, "tipo": "perfil",
-      "preguntas": [
-        ["¿Cuánto tiempo pasas en casa?", [["Bastante, me gusta salir a caminar", "per"], ["Salgo mucho, pero llego cada noche", "gat"], ["Poco, viajo seguido", "pez"], ["Bastante, me gusta la calma", "con"]]],
-        ["Tu casa es…", [["Grande o con patio", "per"], ["Un departamento", "gat"], ["Pequeña", "pez"], ["Tranquila", "con"]]],
-        ["Prefieres una mascota…", [["Activa y juguetona", "per"], ["Independiente", "gat"], ["Que no requiera mucho", "pez"], ["Tierna y tranquila", "con"]]],
-        ["Un domingo ideal con tu mascota…", [["Ir al parque", "per"], ["Siesta juntos", "gat"], ["Mirarla mientras leo", "pez"], ["Acariciarla en el sofá", "con"]]]
-      ],
-      "resultados": {
-        "per": { "e": "🐕", "t": "Perro", "d": "Eres activo y te gusta la compañía. Un perro te dará lealtad, alegría y una excusa diaria para salir a caminar.", "f": ["Activo", "Afectuoso", "Responsable"], "c": "Considera adoptar: hay muchos perros esperando un hogar." },
-        "gat": { "e": "🐈", "t": "Gato", "d": "Valoras tu independencia y la tranquilidad. Un gato se adapta a tu ritmo y te acompaña a su manera.", "f": ["Independiente", "Tranquilo", "Observador"], "c": "Los gatos también necesitan juego diario y chequeos veterinarios." },
-        "pez": { "e": "🐠", "t": "Peces", "d": "Tu agenda es movida, pero te gusta tener vida en casa. Un acuario relaja y requiere poco tiempo diario.", "f": ["Práctico", "Ordenado", "Calmado"], "c": "Infórmate bien sobre el acuario: el agua y la temperatura son clave." },
-        "con": { "e": "🐇", "t": "Conejo", "d": "Eres tierno y tranquilo. Un conejo es cariñoso, silencioso y perfecto para un hogar en calma.", "f": ["Paciente", "Cariñoso", "Hogareño"], "c": "Los conejos viven muchos años y necesitan espacio para moverse." }
-      } },
-    { "id": "superpoder", "cat": "personalidad", "e": "🦸", "t": "¿Qué superpoder tendrías?", "d": "Según lo que más valoras.", "min": 1, "tipo": "perfil",
-      "preguntas": [
-        ["Si pudieras cambiar algo del mundo…", [["Que nadie llegue tarde a nada", "tel"], ["Entender lo que piensan los demás", "men"], ["Ayudar en cualquier emergencia", "fue"], ["Corregir errores del pasado", "tie"]]],
-        ["Tu mayor deseo…", [["Conocer todo el mundo", "tel"], ["Comprender a las personas", "men"], ["Proteger a los míos", "fue"], ["Tener más tiempo", "tie"]]],
-        ["Tu película ideal…", [["De viajes y aventuras", "tel"], ["De misterio", "men"], ["De acción", "fue"], ["De ciencia ficción", "tie"]]],
-        ["Te frustra…", [["El tráfico", "tel"], ["No saber qué sienten los demás", "men"], ["Sentirme impotente", "fue"], ["Que el día no alcance", "tie"]]]
-      ],
-      "resultados": {
-        "tel": { "e": "✨", "t": "Teletransportación", "d": "Eres curioso e inquieto: quieres estar en todas partes y vivir muchas experiencias.", "f": ["Curiosidad", "Espontaneidad", "Energía"], "c": "Mientras tanto, planifica ese viaje que llevas tiempo postergando." },
-        "men": { "e": "🧠", "t": "Leer mentes", "d": "Te fascinan las personas y quieres entenderlas a fondo. Eres intuitivo y perceptivo.", "f": ["Intuición", "Empatía", "Observación"], "c": "Preguntar con interés genuino es el superpoder más cercano." },
-        "fue": { "e": "💪", "t": "Súper fuerza", "d": "Eres protector y valiente. Te gustaría estar siempre listo para ayudar a quien lo necesite.", "f": ["Valentía", "Protección", "Determinación"], "c": "Ayudar en lo pequeño también cambia vidas." },
-        "tie": { "e": "⏱️", "t": "Controlar el tiempo", "d": "Eres reflexivo y ambicioso: quieres aprovechar cada minuto y aprender de cada experiencia.", "f": ["Visión", "Reflexión", "Organización"], "c": "Prioriza: no todo lo urgente es importante." }
-      } },
-    { "id": "emprendedor", "cat": "personalidad", "e": "🚀", "t": "¿Qué tipo de emprendedor serías?", "d": "Tu estilo para crear un negocio.", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Tu idea de negocio nace de…", [["Algo que nadie ha hecho", "inn"], ["Algo que ya funciona y puedo mejorar", "opt"], ["Un problema de mi comunidad", "soc"], ["Lo que más disfruto hacer", "pas"]]],
-        ["El riesgo…", [["Me motiva", "inn"], ["Lo calculo bien", "opt"], ["Lo asumo si ayuda a otros", "soc"], ["Lo acepto si hago lo que amo", "pas"]]],
-        ["Tu éxito sería…", [["Cambiar una industria", "inn"], ["Un negocio rentable y estable", "opt"], ["Mejorar vidas", "soc"], ["Vivir de mi pasión", "pas"]]],
-        ["¿Con qué empezarías?", [["Una app o tecnología", "inn"], ["Una franquicia o tienda", "opt"], ["Un proyecto social", "soc"], ["Un emprendimiento creativo", "pas"]]]
-      ],
-      "resultados": {
-        "inn": { "e": "💡", "t": "Innovador", "d": "Buscas crear algo nuevo y te atrae la tecnología. Tu fuerza es ver oportunidades donde otros no las ven.", "f": ["Creatividad", "Tolerancia al riesgo", "Visión"], "c": "Valida tu idea con clientes reales antes de invertir mucho." },
-        "opt": { "e": "📈", "t": "Optimizador", "d": "Prefieres mejorar lo que ya funciona. Eres práctico, analizas los números y construyes con solidez.", "f": ["Análisis", "Prudencia", "Eficiencia"], "c": "Diferénciate con el servicio: es lo que más fideliza." },
-        "soc": { "e": "🌱", "t": "Social", "d": "Quieres que tu negocio genere impacto en tu comunidad. Combinas propósito con trabajo duro.", "f": ["Propósito", "Empatía", "Compromiso"], "c": "Un negocio social también debe ser sostenible: cuida tus números." },
-        "pas": { "e": "🎨", "t": "Apasionado", "d": "Quieres vivir de lo que amas. Tu entusiasmo y tu autenticidad son tu mejor marketing.", "f": ["Autenticidad", "Constancia", "Creatividad"], "c": "Aprende lo básico de ventas y finanzas: harán crecer tu pasión." }
-      } },
-    { "id": "epoca", "cat": "estilo", "e": "🕰️", "t": "¿En qué época deberías haber nacido?", "d": "Tu estilo, tus gustos y tu forma de ver la vida.", "min": 1, "tipo": "perfil",
-      "preguntas": [
-        ["Tu música favorita…", [["Boleros y valses criollos", "50"], ["Rock y disco", "70"], ["Pop y baladas en español", "90"], ["Lo que suena hoy", "hoy"]]],
-        ["Tu forma de comunicarte…", [["Cartas escritas a mano", "50"], ["Llamadas por teléfono fijo", "70"], ["SMS y chat", "90"], ["Notas de voz y videollamadas", "hoy"]]],
-        ["Tu plan del viernes…", [["Baile de salón", "50"], ["La discoteca", "70"], ["Alquilar películas", "90"], ["Ver series en streaming", "hoy"]]],
-        ["Tu estilo…", [["Elegante y clásico", "50"], ["Colorido y atrevido", "70"], ["Casual y relajado", "90"], ["Moderno y práctico", "hoy"]]]
-      ],
-      "resultados": {
-        "50": { "e": "🎙️", "t": "Los años 50", "d": "Eres clásico y elegante. Valoras los detalles, las tradiciones y las conversaciones largas.", "f": ["Elegancia", "Romanticismo", "Buenos modales"], "c": "Tu estilo clásico es tendencia: no lo pierdas." },
-        "70": { "e": "🪩", "t": "Los años 70", "d": "Eres libre y expresivo. Te encantan la música, el baile y vivir sin tantas reglas.", "f": ["Libertad", "Alegría", "Creatividad"], "c": "Tu energía contagia: compártela." },
-        "90": { "e": "📼", "t": "Los años 90", "d": "Eres nostálgico y relajado. Disfrutas lo simple: la música, los amigos y las buenas películas.", "f": ["Sencillez", "Lealtad", "Buen humor"], "c": "Arma tu playlist noventera y compártela." },
-        "hoy": { "e": "📱", "t": "La era digital", "d": "Eres práctico y estás al día. Aprovechas la tecnología y te adaptas rápido a lo nuevo.", "f": ["Adaptabilidad", "Curiosidad", "Rapidez"], "c": "Date tiempo para desconectarte: también se disfruta." }
-      } },
-    { "id": "estres", "cat": "estilo", "e": "🧘", "t": "¿Cómo manejas el estrés?", "d": "Tu forma de reaccionar ante la presión (no es un diagnóstico).", "min": 2, "tipo": "perfil",
-      "preguntas": [
-        ["Tienes muchas tareas a la vez. Tú…", [["Hago una lista y voy una por una", "org"], ["Me pongo a hacer ejercicio para despejarme", "act"], ["Lo converso con alguien", "soc"], ["Lo dejo para después", "evi"]]],
-        ["Cuando algo sale mal…", [["Busco la solución", "org"], ["Salgo a caminar", "act"], ["Llamo a un amigo", "soc"], ["Prefiero no pensar en eso", "evi"]]],
-        ["Antes de una entrevista importante…", [["Me preparo al detalle", "org"], ["Respiro y me muevo", "act"], ["Pido consejos", "soc"], ["Me distraigo con el celular", "evi"]]],
-        ["Tu escape favorito…", [["Ordenar mi espacio", "org"], ["El deporte", "act"], ["Una buena conversación", "soc"], ["Series y redes sociales", "evi"]]]
-      ],
-      "resultados": {
-        "org": { "e": "🗂️", "t": "Organizador", "d": "Enfrentas la presión ordenando y planificando. Es una estrategia muy efectiva para recuperar el control.", "f": ["Planificación", "Enfoque", "Resolución"], "c": "Incluye pausas en tu lista: descansar también es productivo." },
-        "act": { "e": "🏃", "t": "Activo", "d": "Liberas la tensión con movimiento. La actividad física es una de las mejores formas de reducir el estrés.", "f": ["Energía", "Hábitos saludables", "Resiliencia"], "c": "Combínalo con buen sueño para un efecto completo." },
-        "soc": { "e": "💬", "t": "Social", "d": "Te ayuda hablar y sentirte acompañado. El apoyo de otras personas es un gran protector frente al estrés.", "f": ["Comunicación", "Confianza", "Red de apoyo"], "c": "Elige bien con quién hablas: busca personas que te sumen." },
-        "evi": { "e": "🙈", "t": "Evitador", "d": "Tiendes a postergar o distraerte. Es una reacción común, aunque a la larga puede acumular más presión.", "f": ["Sabes desconectarte", "Calma aparente", "Flexibilidad"], "c": "Prueba dividir lo pendiente en pasos de 10 minutos. Si el estrés es constante, habla con un profesional de la salud." }
-      } }
+  [
+   "envivo",
+   "🔴 En vivo"
+  ],
+  [
+   "personalidad",
+   "Personalidad"
+  ],
+  [
+   "amor",
+   "Amor y amistad"
+  ],
+  [
+   "trivia",
+   "Trivias"
+  ],
+  [
+   "calculadoras",
+   "Calculadoras"
+  ],
+  [
+   "astrologia",
+   "Astrología y suerte"
+  ],
+  [
+   "estilo",
+   "Estilo de vida"
   ]
+ ],
+ "tests": [
+  {
+   "id": "sala-general",
+   "sala": "general",
+   "cat": "envivo",
+   "e": "💬",
+   "t": "Charla general en vivo",
+   "d": "Conversa con gente de toda Latinoamérica en tiempo real.",
+   "min": 1,
+   "tipo": "sala"
+  },
+  {
+   "id": "sala-emoji",
+   "sala": "emoji",
+   "cat": "envivo",
+   "e": "🎯",
+   "t": "Adivina el emoji (en vivo)",
+   "d": "Adivina la película o la comida escondida en los emojis. ¡El primero gana!",
+   "min": 1,
+   "tipo": "sala"
+  },
+  {
+   "id": "sala-trivia",
+   "sala": "trivia",
+   "cat": "envivo",
+   "e": "🏆",
+   "t": "Trivia en vivo",
+   "d": "Todos responden la misma pregunta al mismo tiempo. ¿Quién sabe más?",
+   "min": 1,
+   "tipo": "sala"
+  },
+  {
+   "id": "horoscopo",
+   "cat": "astrologia",
+   "e": "🔮",
+   "t": "Horóscopo y alma gemela",
+   "d": "Tu lectura del día y la compatibilidad de tu signo.",
+   "min": 1,
+   "tipo": "especial"
+  },
+  {
+   "id": "compatibilidad",
+   "cat": "amor",
+   "e": "💘",
+   "t": "Test de compatibilidad",
+   "d": "Dos nombres, un porcentaje. Solo por diversión.",
+   "min": 1,
+   "tipo": "especial"
+  },
+  {
+   "id": "ruleta",
+   "cat": "astrologia",
+   "e": "🎡",
+   "t": "Ruleta de la suerte",
+   "d": "Un giro al día para ver qué te depara.",
+   "min": 1,
+   "tipo": "especial"
+  },
+  {
+   "id": "numerologia",
+   "cat": "astrologia",
+   "e": "🔢",
+   "t": "Tu número del destino",
+   "d": "El número que resulta de tu fecha de nacimiento.",
+   "min": 1,
+   "tipo": "especial"
+  },
+  {
+   "id": "encuesta",
+   "cat": "estilo",
+   "e": "📊",
+   "t": "Encuesta del día",
+   "d": "Vota y compara con lo que eligió la comunidad.",
+   "min": 1,
+   "tipo": "especial"
+  },
+  {
+   "id": "planetas",
+   "cat": "calculadoras",
+   "e": "🪐",
+   "t": "Tu edad en otros planetas",
+   "d": "Cálculo exacto según la órbita de cada planeta.",
+   "min": 1,
+   "tipo": "calc"
+  },
+  {
+   "id": "diasvividos",
+   "cat": "calculadoras",
+   "e": "⏳",
+   "t": "¿Cuánto has vivido?",
+   "d": "Días, semanas, horas y latidos aproximados desde que naciste.",
+   "min": 1,
+   "tipo": "calc"
+  },
+  {
+   "id": "generacion",
+   "cat": "calculadoras",
+   "e": "👥",
+   "t": "¿A qué generación perteneces?",
+   "d": "Boomer, X, Millennial, Z o Alfa, con sus rasgos.",
+   "min": 1,
+   "tipo": "calc"
+  },
+  {
+   "id": "chino",
+   "cat": "astrologia",
+   "e": "🐉",
+   "t": "Tu animal del horóscopo chino",
+   "d": "Según tu año de nacimiento.",
+   "min": 1,
+   "tipo": "calc"
+  },
+  {
+   "id": "cumple",
+   "cat": "calculadoras",
+   "e": "🎂",
+   "t": "¿Cuánto falta para tu cumpleaños?",
+   "d": "Días que faltan y en qué día de la semana cae.",
+   "min": 1,
+   "tipo": "calc"
+  },
+  {
+   "id": "trivia-peru",
+   "cat": "trivia",
+   "e": "🇵🇪",
+   "t": "Trivia: ¿cuánto sabes del Perú?",
+   "d": "10 preguntas sobre historia, geografía y cultura.",
+   "min": 3,
+   "tipo": "trivia",
+   "preguntas": [
+    [
+     "¿Cuál es la capital del Perú?",
+     [
+      "Cusco",
+      "Lima",
+      "Arequipa",
+      "Trujillo"
+     ],
+     1,
+     "Lima es la capital desde su fundación por los españoles en 1535."
+    ],
+    [
+     "¿En qué fecha se celebra la Independencia del Perú?",
+     [
+      "28 de julio",
+      "9 de diciembre",
+      "29 de junio",
+      "8 de octubre"
+     ],
+     0,
+     "José de San Martín proclamó la independencia el 28 de julio de 1821."
+    ],
+    [
+     "¿Qué lago navegable comparten Perú y Bolivia?",
+     [
+      "Lago Junín",
+      "Lago Titicaca",
+      "Laguna de Parón",
+      "Lago Poopó"
+     ],
+     1,
+     "El Titicaca está a unos 3800 m de altura y se le considera el lago navegable más alto del mundo."
+    ],
+    [
+     "¿En qué año la UNESCO declaró a Machu Picchu Patrimonio de la Humanidad?",
+     [
+      "1911",
+      "1950",
+      "1983",
+      "2007"
+     ],
+     2,
+     "Fue en 1983. En 2007 fue elegida una de las nuevas siete maravillas del mundo."
+    ],
+    [
+     "¿Qué escritor peruano ganó el Premio Nobel de Literatura en 2010?",
+     [
+      "César Vallejo",
+      "Ricardo Palma",
+      "Mario Vargas Llosa",
+      "José María Arguedas"
+     ],
+     2,
+     "Mario Vargas Llosa, autor de «La ciudad y los perros» y «Conversación en La Catedral»."
+    ],
+    [
+     "¿Cuál es la moneda oficial del Perú?",
+     [
+      "Peso",
+      "Sol",
+      "Inti",
+      "Bolívar"
+     ],
+     1,
+     "El sol reemplazó al inti en 1991."
+    ],
+    [
+     "¿Qué plato fue declarado Patrimonio Cultural de la Nación en 2004?",
+     [
+      "Lomo saltado",
+      "Ají de gallina",
+      "Ceviche",
+      "Pachamanca"
+     ],
+     2,
+     "El ceviche fue declarado Patrimonio Cultural de la Nación en 2004."
+    ],
+    [
+     "¿En qué región está el Cañón del Colca?",
+     [
+      "Cusco",
+      "Arequipa",
+      "Puno",
+      "Áncash"
+     ],
+     1,
+     "El Colca, en Arequipa, es uno de los cañones más profundos del mundo y hogar del cóndor andino."
+    ],
+    [
+     "¿Cuál es el nevado más alto del Perú?",
+     [
+      "Huascarán",
+      "Misti",
+      "Ausangate",
+      "Salkantay"
+     ],
+     0,
+     "El Huascarán Sur, en Áncash, mide unos 6768 metros."
+    ],
+    [
+     "¿Qué cultura construyó las líneas de Nasca?",
+     [
+      "Inca",
+      "Moche",
+      "Nasca",
+      "Chavín"
+     ],
+     2,
+     "La cultura Nasca las trazó en el desierto entre los años 500 a. C. y 500 d. C., aproximadamente."
+    ]
+   ]
+  },
+  {
+   "id": "trivia-animales",
+   "cat": "trivia",
+   "e": "🐾",
+   "t": "Trivia: el reino animal",
+   "d": "8 preguntas para amantes de los animales.",
+   "min": 2,
+   "tipo": "trivia",
+   "preguntas": [
+    [
+     "¿Cuál es el animal más grande que existe?",
+     [
+      "Elefante africano",
+      "Ballena azul",
+      "Tiburón ballena",
+      "Jirafa"
+     ],
+     1,
+     "La ballena azul puede superar los 25 metros de largo."
+    ],
+    [
+     "¿Cuál es el animal terrestre más rápido?",
+     [
+      "León",
+      "Caballo",
+      "Guepardo",
+      "Antílope"
+     ],
+     2,
+     "El guepardo alcanza alrededor de 100 km/h en carreras cortas."
+    ],
+    [
+     "¿Cuántos corazones tiene un pulpo?",
+     [
+      "Uno",
+      "Dos",
+      "Tres",
+      "Cuatro"
+     ],
+     2,
+     "Tiene tres: dos bombean sangre a las branquias y uno al resto del cuerpo."
+    ],
+    [
+     "¿Cuál es el único mamífero capaz de volar (no solo planear)?",
+     [
+      "Ardilla voladora",
+      "Murciélago",
+      "Colugo",
+      "Ninguno"
+     ],
+     1,
+     "Los murciélagos son los únicos mamíferos con vuelo propulsado."
+    ],
+    [
+     "¿Cuál es el camélido sudamericano más pequeño?",
+     [
+      "Llama",
+      "Alpaca",
+      "Guanaco",
+      "Vicuña"
+     ],
+     3,
+     "La vicuña es la más pequeña y su fibra es una de las más finas del mundo."
+    ],
+    [
+     "¿Cuántas patas tiene una araña?",
+     [
+      "Seis",
+      "Ocho",
+      "Diez",
+      "Doce"
+     ],
+     1,
+     "Las arañas son arácnidos: tienen ocho patas, a diferencia de los insectos, que tienen seis."
+    ],
+    [
+     "¿Cómo se llama el camello de una sola joroba?",
+     [
+      "Bactriano",
+      "Dromedario",
+      "Guanaco",
+      "Alpaca"
+     ],
+     1,
+     "El dromedario tiene una joroba; el camello bactriano tiene dos."
+    ],
+    [
+     "¿Qué ave es símbolo de los Andes y una de las más grandes que vuelan?",
+     [
+      "Águila arpía",
+      "Cóndor andino",
+      "Halcón peregrino",
+      "Pelícano"
+     ],
+     1,
+     "Sus alas abiertas pueden superar los 3 metros."
+    ]
+   ]
+  },
+  {
+   "id": "trivia-latam",
+   "cat": "trivia",
+   "e": "🌎",
+   "t": "Trivia: geografía de Latinoamérica",
+   "d": "8 preguntas de capitales, ríos y paisajes.",
+   "min": 2,
+   "tipo": "trivia",
+   "preguntas": [
+    [
+     "¿Cuál es el país más grande de Sudamérica?",
+     [
+      "Argentina",
+      "Perú",
+      "Brasil",
+      "Colombia"
+     ],
+     2,
+     "Brasil ocupa casi la mitad del territorio sudamericano."
+    ],
+    [
+     "¿Cuál es la capital de Colombia?",
+     [
+      "Medellín",
+      "Bogotá",
+      "Cali",
+      "Cartagena"
+     ],
+     1,
+     "Bogotá está a unos 2600 metros sobre el nivel del mar."
+    ],
+    [
+     "¿Cuál es la cordillera continental más larga del mundo?",
+     [
+      "Los Andes",
+      "Himalaya",
+      "Montañas Rocosas",
+      "Alpes"
+     ],
+     0,
+     "Los Andes recorren unos 7000 km, de Venezuela a la Patagonia."
+    ],
+    [
+     "¿Cuál es el desierto no polar más árido del mundo?",
+     [
+      "Sahara",
+      "Sechura",
+      "Atacama",
+      "Gobi"
+     ],
+     2,
+     "En algunas zonas de Atacama, en Chile, casi nunca llueve."
+    ],
+    [
+     "¿Qué idioma se habla oficialmente en Brasil?",
+     [
+      "Español",
+      "Portugués",
+      "Inglés",
+      "Guaraní"
+     ],
+     1,
+     "Brasil es el país de habla portuguesa más poblado del mundo."
+    ],
+    [
+     "¿Entre qué países están las Cataratas del Iguazú?",
+     [
+      "Perú y Bolivia",
+      "Argentina y Brasil",
+      "Uruguay y Paraguay",
+      "Venezuela y Colombia"
+     ],
+     1,
+     "Están en la frontera entre Argentina y Brasil."
+    ],
+    [
+     "¿Cuál es la capital de Ecuador?",
+     [
+      "Guayaquil",
+      "Cuenca",
+      "Quito",
+      "Loja"
+     ],
+     2,
+     "Quito fue una de las primeras ciudades declaradas Patrimonio de la Humanidad, en 1978."
+    ],
+    [
+     "¿Qué país tiene la forma más larga y angosta de Sudamérica?",
+     [
+      "Chile",
+      "Perú",
+      "Uruguay",
+      "Ecuador"
+     ],
+     0,
+     "Chile mide más de 4000 km de largo y en promedio menos de 200 km de ancho."
+    ]
+   ]
+  },
+  {
+   "id": "trivia-futbol",
+   "cat": "trivia",
+   "e": "⚽",
+   "t": "Trivia: historia del fútbol",
+   "d": "8 preguntas sobre Mundiales y Copa América.",
+   "min": 2,
+   "tipo": "trivia",
+   "preguntas": [
+    [
+     "¿Qué selección ganó el primer Mundial, en 1930?",
+     [
+      "Brasil",
+      "Argentina",
+      "Uruguay",
+      "Italia"
+     ],
+     2,
+     "Uruguay fue sede y campeón del primer Mundial."
+    ],
+    [
+     "¿Qué selección tiene más títulos mundiales?",
+     [
+      "Alemania",
+      "Brasil",
+      "Italia",
+      "Argentina"
+     ],
+     1,
+     "Brasil ganó en 1958, 1962, 1970, 1994 y 2002."
+    ],
+    [
+     "¿Quién es el máximo goleador en la historia de los Mundiales (hasta Qatar 2022)?",
+     [
+      "Pelé",
+      "Ronaldo Nazário",
+      "Miroslav Klose",
+      "Lionel Messi"
+     ],
+     2,
+     "Miroslav Klose marcó 16 goles en cuatro Mundiales."
+    ],
+    [
+     "¿Qué selección ganó el Mundial de Qatar 2022?",
+     [
+      "Francia",
+      "Argentina",
+      "Croacia",
+      "Brasil"
+     ],
+     1,
+     "Argentina venció a Francia en la final por penales."
+    ],
+    [
+     "¿En qué años ganó Perú la Copa América?",
+     [
+      "1939 y 1975",
+      "1953 y 1982",
+      "1970 y 1997",
+      "1927 y 2019"
+     ],
+     0,
+     "Perú fue campeón en 1939, como local, y en 1975."
+    ],
+    [
+     "¿Cuántos jugadores por equipo hay en la cancha?",
+     [
+      "9",
+      "10",
+      "11",
+      "12"
+     ],
+     2,
+     "Once jugadores, incluido el arquero."
+    ],
+    [
+     "¿Qué jugador ganó tres Copas del Mundo?",
+     [
+      "Maradona",
+      "Pelé",
+      "Zidane",
+      "Cristiano Ronaldo"
+     ],
+     1,
+     "Pelé fue campeón en 1958, 1962 y 1970."
+    ],
+    [
+     "¿Qué países organizaron juntos el Mundial 2026?",
+     [
+      "España y Portugal",
+      "Estados Unidos, México y Canadá",
+      "Argentina y Uruguay",
+      "Japón y Corea"
+     ],
+     1,
+     "Fue el primer Mundial con 48 selecciones y tres países sede."
+    ]
+   ]
+  },
+  {
+   "id": "trivia-ciencia",
+   "cat": "trivia",
+   "e": "🔬",
+   "t": "Trivia: ciencia para todos",
+   "d": "8 preguntas de ciencia básica.",
+   "min": 2,
+   "tipo": "trivia",
+   "preguntas": [
+    [
+     "¿Cuál es el planeta más grande del sistema solar?",
+     [
+      "Saturno",
+      "Júpiter",
+      "Neptuno",
+      "Tierra"
+     ],
+     1,
+     "En Júpiter cabrían más de mil Tierras."
+    ],
+    [
+     "¿Cuál es la fórmula química del agua?",
+     [
+      "CO2",
+      "H2O",
+      "O2",
+      "NaCl"
+     ],
+     1,
+     "Dos átomos de hidrógeno y uno de oxígeno."
+    ],
+    [
+     "¿Cuántos huesos tiene el cuerpo de un adulto?",
+     [
+      "106",
+      "206",
+      "306",
+      "406"
+     ],
+     1,
+     "Un adulto tiene 206 huesos; un bebé nace con más, que luego se fusionan."
+    ],
+    [
+     "¿Qué gas absorben las plantas para hacer la fotosíntesis?",
+     [
+      "Oxígeno",
+      "Nitrógeno",
+      "Dióxido de carbono",
+      "Helio"
+     ],
+     2,
+     "Absorben dióxido de carbono y liberan oxígeno."
+    ],
+    [
+     "¿Cuál es el órgano más grande del cuerpo humano?",
+     [
+      "El hígado",
+      "El cerebro",
+      "La piel",
+      "Los pulmones"
+     ],
+     2,
+     "La piel cubre alrededor de 2 metros cuadrados en un adulto."
+    ],
+    [
+     "¿Qué planeta está más cerca del Sol?",
+     [
+      "Venus",
+      "Marte",
+      "Mercurio",
+      "Tierra"
+     ],
+     2,
+     "Mercurio da una vuelta al Sol en solo 88 días."
+    ],
+    [
+     "¿A qué temperatura hierve el agua a nivel del mar?",
+     [
+      "90 °C",
+      "100 °C",
+      "110 °C",
+      "120 °C"
+     ],
+     1,
+     "A mayor altura hierve a menos temperatura: en Cusco, a unos 88 °C."
+    ],
+    [
+     "¿A qué velocidad viaja la luz, aproximadamente?",
+     [
+      "300 km/s",
+      "3000 km/s",
+      "300 000 km/s",
+      "3 millones de km/s"
+     ],
+     2,
+     "Unos 300 000 km por segundo: la luz del Sol tarda unos 8 minutos en llegar a la Tierra."
+    ]
+   ]
+  },
+  {
+   "id": "animal",
+   "cat": "personalidad",
+   "e": "🦁",
+   "t": "¿Qué animal te representa?",
+   "d": "6 preguntas sobre cómo piensas y actúas.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Un sábado ideal para ti es…",
+     [
+      [
+       "Organizar un plan para todo el grupo",
+       "leon"
+      ],
+      [
+       "Playa, música y amigos",
+       "delfin"
+      ],
+      [
+       "Una salida tranquila con los de siempre",
+       "lobo"
+      ],
+      [
+       "Un buen libro o un documental",
+       "buho"
+      ]
+     ]
+    ],
+    [
+     "En tu grupo de amigos, tú eres quien…",
+     [
+      [
+       "Toma las decisiones",
+       "leon"
+      ],
+      [
+       "Pone el buen humor",
+       "delfin"
+      ],
+      [
+       "Defiende a todos",
+       "lobo"
+      ],
+      [
+       "Da los consejos",
+       "buho"
+      ]
+     ]
+    ],
+    [
+     "Ante un problema difícil…",
+     [
+      [
+       "Lo enfrento de inmediato",
+       "leon"
+      ],
+      [
+       "Busco una salida creativa",
+       "delfin"
+      ],
+      [
+       "Pido apoyo a mi gente",
+       "lobo"
+      ],
+      [
+       "Lo analizo con calma",
+       "buho"
+      ]
+     ]
+    ],
+    [
+     "¿Qué valoras más en una persona?",
+     [
+      [
+       "Determinación",
+       "leon"
+      ],
+      [
+       "Alegría",
+       "delfin"
+      ],
+      [
+       "Lealtad",
+       "lobo"
+      ],
+      [
+       "Inteligencia",
+       "buho"
+      ]
+     ]
+    ],
+    [
+     "Tu lugar favorito sería…",
+     [
+      [
+       "Un escenario frente a mucha gente",
+       "leon"
+      ],
+      [
+       "El mar",
+       "delfin"
+      ],
+      [
+       "Una cabaña en el bosque",
+       "lobo"
+      ],
+      [
+       "Una biblioteca antigua",
+       "buho"
+      ]
+     ]
+    ],
+    [
+     "Tu frase sería…",
+     [
+      [
+       "«Si lo quiero, lo consigo»",
+       "leon"
+      ],
+      [
+       "«La vida es para disfrutarla»",
+       "delfin"
+      ],
+      [
+       "«Juntos somos más»",
+       "lobo"
+      ],
+      [
+       "«Piensa dos veces, actúa una»",
+       "buho"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "leon": {
+     "e": "🦁",
+     "t": "León",
+     "d": "Tienes energía de liderazgo: decides rápido, te haces cargo y la gente confía en tu dirección. Te mueven los retos y no te asusta la responsabilidad.",
+     "f": [
+      "Seguridad al decidir",
+      "Capacidad de motivar",
+      "Constancia"
+     ],
+     "c": "Escuchar antes de decidir hará que tu liderazgo sea todavía más sólido."
+    },
+    "delfin": {
+     "e": "🐬",
+     "t": "Delfín",
+     "d": "Eres sociable, creativo y optimista. Haces que los demás se sientan cómodos y encuentras soluciones donde otros ven problemas.",
+     "f": [
+      "Empatía",
+      "Creatividad",
+      "Buen humor"
+     ],
+     "c": "Reserva tiempo para ti: no siempre tienes que animar a todos."
+    },
+    "lobo": {
+     "e": "🐺",
+     "t": "Lobo",
+     "d": "La lealtad es tu sello. Cuidas a tu gente, trabajas bien en equipo y das todo por quienes quieres.",
+     "f": [
+      "Lealtad",
+      "Trabajo en equipo",
+      "Protección"
+     ],
+     "c": "Abrirte a gente nueva puede traerte oportunidades inesperadas."
+    },
+    "buho": {
+     "e": "🦉",
+     "t": "Búho",
+     "d": "Observas antes de actuar y piensas a fondo. Tus consejos suelen ser acertados porque ves lo que otros pasan por alto.",
+     "f": [
+      "Análisis",
+      "Prudencia",
+      "Buen criterio"
+     ],
+     "c": "No esperes a tenerlo todo claro para empezar: la práctica también enseña."
+    }
+   }
+  },
+  {
+   "id": "lider",
+   "cat": "personalidad",
+   "e": "🧭",
+   "t": "¿Qué tipo de líder eres?",
+   "d": "Descubre tu estilo para guiar equipos.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tu equipo tiene un proyecto nuevo. ¿Qué haces primero?",
+     [
+      [
+       "Explico hacia dónde vamos y por qué",
+       "vis"
+      ],
+      [
+       "Pregunto qué necesita cada uno",
+       "coach"
+      ],
+      [
+       "Armo el plan con fechas y tareas",
+       "org"
+      ],
+      [
+       "Me pongo a trabajar y doy el ejemplo",
+       "eje"
+      ]
+     ]
+    ],
+    [
+     "¿Qué te molesta más?",
+     [
+      [
+       "La falta de ambición",
+       "vis"
+      ],
+      [
+       "Que alguien se sienta excluido",
+       "coach"
+      ],
+      [
+       "El desorden",
+       "org"
+      ],
+      [
+       "Las reuniones que no llevan a nada",
+       "eje"
+      ]
+     ]
+    ],
+    [
+     "Un compañero comete un error…",
+     [
+      [
+       "Le recuerdo la meta y seguimos",
+       "vis"
+      ],
+      [
+       "Converso con él para que aprenda",
+       "coach"
+      ],
+      [
+       "Reviso el proceso para que no se repita",
+       "org"
+      ],
+      [
+       "Lo arreglo rápido y seguimos",
+       "eje"
+      ]
+     ]
+    ],
+    [
+     "¿Qué te dicen más seguido?",
+     [
+      [
+       "Que inspiras",
+       "vis"
+      ],
+      [
+       "Que sabes escuchar",
+       "coach"
+      ],
+      [
+       "Que eres muy ordenado",
+       "org"
+      ],
+      [
+       "Que eres muy práctico",
+       "eje"
+      ]
+     ]
+    ],
+    [
+     "Tu mayor satisfacción es…",
+     [
+      [
+       "Lograr algo que parecía imposible",
+       "vis"
+      ],
+      [
+       "Ver crecer a las personas",
+       "coach"
+      ],
+      [
+       "Que todo salga según lo planeado",
+       "org"
+      ],
+      [
+       "Ver resultados concretos",
+       "eje"
+      ]
+     ]
+    ],
+    [
+     "Ante una crisis…",
+     [
+      [
+       "Doy una visión que tranquiliza",
+       "vis"
+      ],
+      [
+       "Cuido el ánimo del grupo",
+       "coach"
+      ],
+      [
+       "Organizo prioridades",
+       "org"
+      ],
+      [
+       "Actúo de inmediato",
+       "eje"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "vis": {
+     "e": "🚀",
+     "t": "Líder visionario",
+     "d": "Ves el panorama completo y sabes contagiar entusiasmo. La gente te sigue porque le das un propósito claro.",
+     "f": [
+      "Inspiración",
+      "Visión a largo plazo",
+      "Valentía"
+     ],
+     "c": "Apóyate en personas detallistas para aterrizar tus ideas."
+    },
+    "coach": {
+     "e": "🤝",
+     "t": "Líder coach",
+     "d": "Tu fuerza está en las personas: escuchas, acompañas y sacas lo mejor de cada uno. Formas equipos que confían.",
+     "f": [
+      "Empatía",
+      "Escucha activa",
+      "Desarrollo de talento"
+     ],
+     "c": "También está bien poner límites y exigir resultados."
+    },
+    "org": {
+     "e": "📋",
+     "t": "Líder organizador",
+     "d": "Conviertes el caos en un plan. Con tus procesos claros, el equipo sabe qué hacer y cuándo.",
+     "f": [
+      "Planificación",
+      "Orden",
+      "Confiabilidad"
+     ],
+     "c": "Deja espacio para la improvisación: a veces las mejores ideas no están en el plan."
+    },
+    "eje": {
+     "e": "⚡",
+     "t": "Líder ejecutor",
+     "d": "Lideras con el ejemplo. Eres práctico, rápido y orientado a resultados; contigo las cosas se hacen.",
+     "f": [
+      "Acción",
+      "Eficiencia",
+      "Determinación"
+     ],
+     "c": "Explicar el porqué de las tareas hará que tu equipo te siga con más ganas."
+    }
+   }
+  },
+  {
+   "id": "lenguaje-amor",
+   "cat": "amor",
+   "e": "💞",
+   "t": "Tu lenguaje del amor",
+   "d": "Basado en los 5 lenguajes del amor de Gary Chapman.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "¿Qué te hace sentir más querido?",
+     [
+      [
+       "Que me digan lo que sienten",
+       "pal"
+      ],
+      [
+       "Pasar tiempo a solas, sin celular",
+       "tiem"
+      ],
+      [
+       "Un detalle inesperado",
+       "reg"
+      ],
+      [
+       "Que me ayuden sin que lo pida",
+       "act"
+      ],
+      [
+       "Un abrazo largo",
+       "cont"
+      ]
+     ]
+    ],
+    [
+     "Después de un día pesado, prefieres…",
+     [
+      [
+       "Que me den ánimo con palabras",
+       "pal"
+      ],
+      [
+       "Conversar con calma",
+       "tiem"
+      ],
+      [
+       "Recibir algo que me guste",
+       "reg"
+      ],
+      [
+       "Que alguien se encargue de la cena",
+       "act"
+      ],
+      [
+       "Que me abracen",
+       "cont"
+      ]
+     ]
+    ],
+    [
+     "¿Qué te duele más?",
+     [
+      [
+       "Una crítica dura",
+       "pal"
+      ],
+      [
+       "Que me dejen de lado",
+       "tiem"
+      ],
+      [
+       "Que olviden una fecha importante",
+       "reg"
+      ],
+      [
+       "Que no cumplan lo que prometieron",
+       "act"
+      ],
+      [
+       "La frialdad física",
+       "cont"
+      ]
+     ]
+    ],
+    [
+     "Para demostrar cariño, tú…",
+     [
+      [
+       "Escribo mensajes bonitos",
+       "pal"
+      ],
+      [
+       "Organizo planes juntos",
+       "tiem"
+      ],
+      [
+       "Doy regalos pensados",
+       "reg"
+      ],
+      [
+       "Ayudo en lo que haga falta",
+       "act"
+      ],
+      [
+       "Soy cariñoso físicamente",
+       "cont"
+      ]
+     ]
+    ],
+    [
+     "Tu cita ideal sería…",
+     [
+      [
+       "Una conversación profunda",
+       "pal"
+      ],
+      [
+       "Un día entero juntos",
+       "tiem"
+      ],
+      [
+       "Una sorpresa preparada",
+       "reg"
+      ],
+      [
+       "Que la otra persona organice todo",
+       "act"
+      ],
+      [
+       "Una película abrazados",
+       "cont"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "pal": {
+     "e": "💬",
+     "t": "Palabras de afirmación",
+     "d": "Para ti, las palabras pesan. Un «te quiero», un «estoy orgulloso de ti» o un mensaje sincero te llenan más que cualquier regalo.",
+     "f": [
+      "Comunicas lo que sientes",
+      "Valoras la honestidad",
+      "Sabes animar a otros"
+     ],
+     "c": "Cuéntale a tu pareja que las palabras son importantes para ti: así sabrá cómo llegarte."
+    },
+    "tiem": {
+     "e": "⏰",
+     "t": "Tiempo de calidad",
+     "d": "Lo que más valoras es la atención plena: estar juntos de verdad, sin distracciones. Para ti, el tiempo compartido es la mayor prueba de amor.",
+     "f": [
+      "Presencia",
+      "Escucha",
+      "Constancia"
+     ],
+     "c": "Propón planes concretos en vez de esperar que la otra persona lo adivine."
+    },
+    "reg": {
+     "e": "🎁",
+     "t": "Regalos",
+     "d": "No se trata del precio, sino del gesto: un detalle te demuestra que pensaron en ti. Recuerdas cada regalo y lo que significó.",
+     "f": [
+      "Atención a los detalles",
+      "Gratitud",
+      "Memoria emocional"
+     ],
+     "c": "Valora también los gestos simples: no todo cariño viene envuelto."
+    },
+    "act": {
+     "e": "🛠️",
+     "t": "Actos de servicio",
+     "d": "Para ti, amar es hacer. Que alguien te ayude, cumpla lo que promete o te aliviane una carga te dice más que mil palabras.",
+     "f": [
+      "Compromiso",
+      "Responsabilidad",
+      "Generosidad"
+     ],
+     "c": "Pide ayuda cuando la necesites: no todos se dan cuenta solos."
+    },
+    "cont": {
+     "e": "🤗",
+     "t": "Contacto físico",
+     "d": "Un abrazo, tomarse de la mano o un beso te dan seguridad y cercanía. Expresas y recibes el cariño a través del contacto.",
+     "f": [
+      "Calidez",
+      "Cercanía",
+      "Expresividad"
+     ],
+     "c": "Respeta que no todos expresan el cariño igual: conversen sobre lo que cada uno necesita."
+    }
+   }
+  },
+  {
+   "id": "intro-extro",
+   "cat": "personalidad",
+   "e": "🔋",
+   "t": "¿Introvertido, extrovertido o ambivertido?",
+   "d": "Cómo recargas tu energía.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Después de una fiesta, te sientes…",
+     [
+      [
+       "Con más energía",
+       "ext"
+      ],
+      [
+       "Contento, pero con ganas de descansar",
+       "amb"
+      ],
+      [
+       "Agotado: necesito estar solo",
+       "int"
+      ]
+     ]
+    ],
+    [
+     "En una reunión con desconocidos…",
+     [
+      [
+       "Hablo con todos",
+       "ext"
+      ],
+      [
+       "Hablo con una o dos personas",
+       "amb"
+      ],
+      [
+       "Prefiero observar",
+       "int"
+      ]
+     ]
+    ],
+    [
+     "Tu fin de semana ideal…",
+     [
+      [
+       "Salidas y planes con gente",
+       "ext"
+      ],
+      [
+       "Un poco de todo",
+       "amb"
+      ],
+      [
+       "Tranquilo, en casa",
+       "int"
+      ]
+     ]
+    ],
+    [
+     "Cuando tienes un problema…",
+     [
+      [
+       "Lo converso enseguida",
+       "ext"
+      ],
+      [
+       "Depende del problema",
+       "amb"
+      ],
+      [
+       "Lo pienso primero a solas",
+       "int"
+      ]
+     ]
+    ],
+    [
+     "Trabajas mejor…",
+     [
+      [
+       "En equipo y con ruido",
+       "ext"
+      ],
+      [
+       "Alternando",
+       "amb"
+      ],
+      [
+       "Solo y en silencio",
+       "int"
+      ]
+     ]
+    ],
+    [
+     "Llamada o mensaje…",
+     [
+      [
+       "Llamada, siempre",
+       "ext"
+      ],
+      [
+       "Según el caso",
+       "amb"
+      ],
+      [
+       "Mensaje, sin duda",
+       "int"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "ext": {
+     "e": "🎉",
+     "t": "Extrovertido",
+     "d": "Te recargas con la gente. Las conversaciones, los planes y la actividad te dan energía, y te expresas con facilidad.",
+     "f": [
+      "Sociable",
+      "Comunicativo",
+      "Entusiasta"
+     ],
+     "c": "Reserva algunos momentos de calma: también ayudan a pensar mejor."
+    },
+    "amb": {
+     "e": "⚖️",
+     "t": "Ambivertido",
+     "d": "Tienes lo mejor de ambos mundos: disfrutas de la gente y también de tu espacio. Te adaptas según la situación, y eso es una gran ventaja.",
+     "f": [
+      "Flexibilidad",
+      "Equilibrio",
+      "Buena lectura social"
+     ],
+     "c": "Escucha a tu cuerpo: él te dirá cuándo necesitas gente y cuándo silencio."
+    },
+    "int": {
+     "e": "📚",
+     "t": "Introvertido",
+     "d": "Te recargas en calma. Prefieres pocas relaciones pero profundas, piensas antes de hablar y disfrutas de tu propio espacio. No es timidez: es tu forma de procesar el mundo.",
+     "f": [
+      "Reflexivo",
+      "Buen oyente",
+      "Concentración"
+     ],
+     "c": "Comparte tus ideas: suelen ser más valiosas de lo que crees."
+    }
+   }
+  },
+  {
+   "id": "viajero",
+   "cat": "estilo",
+   "e": "🧳",
+   "t": "¿Qué tipo de viajero eres?",
+   "d": "Y el destino que va contigo.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Lo primero que metes en la maleta…",
+     [
+      [
+       "Zapatillas de caminata",
+       "av"
+      ],
+      [
+       "Una guía de historia",
+       "cul"
+      ],
+      [
+       "Ropa de baño",
+       "rel"
+      ],
+      [
+       "Ganas de comer",
+       "gas"
+      ]
+     ]
+    ],
+    [
+     "Tu foto ideal del viaje…",
+     [
+      [
+       "En la cima de una montaña",
+       "av"
+      ],
+      [
+       "Frente a un templo antiguo",
+       "cul"
+      ],
+      [
+       "En una hamaca frente al mar",
+       "rel"
+      ],
+      [
+       "Con un plato típico",
+       "gas"
+      ]
+     ]
+    ],
+    [
+     "¿Cómo planificas?",
+     [
+      [
+       "Lo justo; lo demás, improviso",
+       "av"
+      ],
+      [
+       "Investigo cada lugar",
+       "cul"
+      ],
+      [
+       "Busco un buen hotel y listo",
+       "rel"
+      ],
+      [
+       "Por los restaurantes",
+       "gas"
+      ]
+     ]
+    ],
+    [
+     "¿Qué recuerdo traerías?",
+     [
+      [
+       "Una historia increíble",
+       "av"
+      ],
+      [
+       "Una artesanía local",
+       "cul"
+      ],
+      [
+       "Un buen bronceado",
+       "rel"
+      ],
+      [
+       "Ingredientes típicos",
+       "gas"
+      ]
+     ]
+    ],
+    [
+     "Tu peor viaje sería…",
+     [
+      [
+       "Uno sin nada que explorar",
+       "av"
+      ],
+      [
+       "Uno sin historia ni cultura",
+       "cul"
+      ],
+      [
+       "Uno lleno de estrés",
+       "rel"
+      ],
+      [
+       "Uno con comida aburrida",
+       "gas"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "av": {
+     "e": "🏔️",
+     "t": "Aventurero",
+     "d": "Buscas adrenalina y paisajes que te dejen sin aliento. Para ti, el mejor viaje tiene caminatas, naturaleza y algo de riesgo.",
+     "f": [
+      "Valentía",
+      "Resistencia",
+      "Curiosidad"
+     ],
+     "c": "Destino ideal: el Camino Inca o la Cordillera Blanca, en Áncash."
+    },
+    "cul": {
+     "e": "🏛️",
+     "t": "Cultural",
+     "d": "Viajas para entender. Museos, ruinas, tradiciones y conversaciones con la gente local son lo que más disfrutas.",
+     "f": [
+      "Curiosidad",
+      "Respeto por lo diferente",
+      "Memoria"
+     ],
+     "c": "Destino ideal: Cusco y el Valle Sagrado, o Ciudad de México."
+    },
+    "rel": {
+     "e": "🏖️",
+     "t": "Relax",
+     "d": "Tus vacaciones son para descansar de verdad: playa, buen clima y cero apuros.",
+     "f": [
+      "Sabes desconectarte",
+      "Disfrutas el presente",
+      "Buen gusto"
+     ],
+     "c": "Destino ideal: Máncora, Punta Cana o las playas de Cartagena."
+    },
+    "gas": {
+     "e": "🍽️",
+     "t": "Gastronómico",
+     "d": "Conoces un lugar por su comida. Mercados, huariques y platos típicos son tu brújula de viaje.",
+     "f": [
+      "Paladar curioso",
+      "Disfrutas compartir",
+      "Abierto a probar"
+     ],
+     "c": "Destino ideal: Lima (capital gastronómica de Sudamérica) o Arequipa y sus picanterías."
+    }
+   }
+  },
+  {
+   "id": "carrera",
+   "cat": "personalidad",
+   "e": "💼",
+   "t": "¿Qué tipo de trabajo va contigo?",
+   "d": "Inspirado en el modelo de intereses vocacionales de Holland.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "¿Qué actividad disfrutas más?",
+     [
+      [
+       "Diseñar, dibujar o crear contenido",
+       "art"
+      ],
+      [
+       "Resolver problemas técnicos",
+       "tec"
+      ],
+      [
+       "Ayudar o enseñar a otros",
+       "soc"
+      ],
+      [
+       "Vender o liderar proyectos",
+       "emp"
+      ]
+     ]
+    ],
+    [
+     "En el colegio, tu curso favorito era…",
+     [
+      [
+       "Arte o literatura",
+       "art"
+      ],
+      [
+       "Matemáticas o ciencias",
+       "tec"
+      ],
+      [
+       "Tutoría o ciencias sociales",
+       "soc"
+      ],
+      [
+       "Cualquiera donde pudiera debatir",
+       "emp"
+      ]
+     ]
+    ],
+    [
+     "Un trabajo ideal tendría…",
+     [
+      [
+       "Libertad creativa",
+       "art"
+      ],
+      [
+       "Retos que resolver",
+       "tec"
+      ],
+      [
+       "Impacto en las personas",
+       "soc"
+      ],
+      [
+       "Metas y crecimiento",
+       "emp"
+      ]
+     ]
+    ],
+    [
+     "Te frustra…",
+     [
+      [
+       "La rutina",
+       "art"
+      ],
+      [
+       "Lo mal hecho",
+       "tec"
+      ],
+      [
+       "La injusticia",
+       "soc"
+      ],
+      [
+       "La falta de oportunidades",
+       "emp"
+      ]
+     ]
+    ],
+    [
+     "Te imaginas como…",
+     [
+      [
+       "Diseñador o creador de contenido",
+       "art"
+      ],
+      [
+       "Ingeniero o programador",
+       "tec"
+      ],
+      [
+       "Docente, psicólogo o enfermero",
+       "soc"
+      ],
+      [
+       "Empresario o gerente",
+       "emp"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "art": {
+     "e": "🎨",
+     "t": "Perfil creativo",
+     "d": "Te mueve expresar ideas. Te va bien en diseño, comunicación, marketing, contenido digital, fotografía o arquitectura.",
+     "f": [
+      "Imaginación",
+      "Sensibilidad estética",
+      "Originalidad"
+     ],
+     "c": "Arma un portafolio: en las carreras creativas, mostrar vale más que contar."
+    },
+    "tec": {
+     "e": "🛠️",
+     "t": "Perfil técnico-analítico",
+     "d": "Disfrutas entender cómo funcionan las cosas. Te va bien en ingeniería, programación, datos, ciencias o finanzas.",
+     "f": [
+      "Lógica",
+      "Precisión",
+      "Resolución de problemas"
+     ],
+     "c": "Aprende a explicar tu trabajo de forma simple: es lo que más valoran los jefes."
+    },
+    "soc": {
+     "e": "🤲",
+     "t": "Perfil social",
+     "d": "Te realiza ayudar a otros. Te va bien en educación, salud, psicología, recursos humanos o atención al cliente.",
+     "f": [
+      "Empatía",
+      "Paciencia",
+      "Comunicación"
+     ],
+     "c": "Cuida tu energía: ayudar a otros empieza por cuidarte a ti."
+    },
+    "emp": {
+     "e": "📈",
+     "t": "Perfil emprendedor",
+     "d": "Te motivan las metas y las oportunidades. Te va bien en ventas, negocios, administración, liderazgo de proyectos o tu propia empresa.",
+     "f": [
+      "Iniciativa",
+      "Persuasión",
+      "Ambición"
+     ],
+     "c": "Rodéate de gente con perfiles distintos al tuyo: se complementan."
+    }
+   }
+  },
+  {
+   "id": "dinero",
+   "cat": "estilo",
+   "e": "💰",
+   "t": "¿Cómo manejas tu dinero?",
+   "d": "Tu perfil financiero en 5 preguntas.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Te llega un dinero extra. ¿Qué haces?",
+     [
+      [
+       "Lo ahorro todo",
+       "aho"
+      ],
+      [
+       "Lo reparto según mi presupuesto",
+       "pla"
+      ],
+      [
+       "Me doy un gusto",
+       "dis"
+      ],
+      [
+       "Lo invierto para que crezca",
+       "inv"
+      ]
+     ]
+    ],
+    [
+     "¿Sabes cuánto gastaste el mes pasado?",
+     [
+      [
+       "Más o menos",
+       "aho"
+      ],
+      [
+       "Al sol exacto",
+       "pla"
+      ],
+      [
+       "Ni idea",
+       "dis"
+      ],
+      [
+       "Sí, y cuánto rindieron mis inversiones",
+       "inv"
+      ]
+     ]
+    ],
+    [
+     "Una oferta del 50 %…",
+     [
+      [
+       "Si no lo necesito, no compro",
+       "aho"
+      ],
+      [
+       "Reviso si entra en mi presupuesto",
+       "pla"
+      ],
+      [
+       "¡La aprovecho!",
+       "dis"
+      ],
+      [
+       "Prefiero poner ese dinero en algo que dé ganancia",
+       "inv"
+      ]
+     ]
+    ],
+    [
+     "Tu mayor miedo con el dinero…",
+     [
+      [
+       "Quedarme sin nada",
+       "aho"
+      ],
+      [
+       "Perder el control de mis gastos",
+       "pla"
+      ],
+      [
+       "No disfrutar la vida",
+       "dis"
+      ],
+      [
+       "Que mi dinero pierda valor",
+       "inv"
+      ]
+     ]
+    ],
+    [
+     "Tu meta financiera…",
+     [
+      [
+       "Un buen fondo de emergencia",
+       "aho"
+      ],
+      [
+       "Tener todo en orden",
+       "pla"
+      ],
+      [
+       "Vivir bien hoy",
+       "dis"
+      ],
+      [
+       "Libertad financiera",
+       "inv"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "aho": {
+     "e": "🐷",
+     "t": "Ahorrador",
+     "d": "Eres prudente y te da tranquilidad tener un respaldo. Difícilmente te endeudas sin necesidad.",
+     "f": [
+      "Disciplina",
+      "Previsión",
+      "Control"
+     ],
+     "c": "Ahorrar es la base; aprender a invertir hará que tu dinero no pierda valor con el tiempo."
+    },
+    "pla": {
+     "e": "📊",
+     "t": "Planificador",
+     "d": "Sabes a dónde va cada sol. Llevas tus cuentas y tomas decisiones con números en la mano.",
+     "f": [
+      "Orden",
+      "Claridad",
+      "Responsabilidad"
+     ],
+     "c": "Incluye en tu presupuesto un monto para disfrutar sin culpa."
+    },
+    "dis": {
+     "e": "🛍️",
+     "t": "Disfrutador",
+     "d": "Para ti, el dinero es para vivir experiencias, y eso también es valioso. Eres generoso y disfrutas el presente.",
+     "f": [
+      "Generosidad",
+      "Saber disfrutar",
+      "Espontaneidad"
+     ],
+     "c": "Prueba la regla 50/30/20: 50 % necesidades, 30 % gustos y 20 % ahorro."
+    },
+    "inv": {
+     "e": "📈",
+     "t": "Inversionista",
+     "d": "Piensas a largo plazo y quieres que tu dinero trabaje para ti. Te interesan las oportunidades y el crecimiento.",
+     "f": [
+      "Visión",
+      "Aprendizaje constante",
+      "Tolerancia al riesgo"
+     ],
+     "c": "Diversifica y nunca inviertas lo que no puedes darte el lujo de perder."
+    }
+   }
+  },
+  {
+   "id": "aprendizaje",
+   "cat": "personalidad",
+   "e": "🧠",
+   "t": "¿Cómo aprendes mejor?",
+   "d": "Tu forma preferida de aprender (modelo VARK).",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Para armar un mueble nuevo…",
+     [
+      [
+       "Miro los dibujos del manual",
+       "vis"
+      ],
+      [
+       "Pido que me expliquen",
+       "aud"
+      ],
+      [
+       "Leo las instrucciones paso a paso",
+       "lec"
+      ],
+      [
+       "Lo armo probando",
+       "kin"
+      ]
+     ]
+    ],
+    [
+     "Para recordar un número…",
+     [
+      [
+       "Lo visualizo",
+       "vis"
+      ],
+      [
+       "Lo repito en voz alta",
+       "aud"
+      ],
+      [
+       "Lo escribo",
+       "lec"
+      ],
+      [
+       "Lo marco con los dedos",
+       "kin"
+      ]
+     ]
+    ],
+    [
+     "En clase prefieres…",
+     [
+      [
+       "Diapositivas con gráficos",
+       "vis"
+      ],
+      [
+       "Que el profesor explique",
+       "aud"
+      ],
+      [
+       "Tomar apuntes",
+       "lec"
+      ],
+      [
+       "Hacer prácticas",
+       "kin"
+      ]
+     ]
+    ],
+    [
+     "Para llegar a un lugar nuevo…",
+     [
+      [
+       "Miro el mapa",
+       "vis"
+      ],
+      [
+       "Pregunto cómo llegar",
+       "aud"
+      ],
+      [
+       "Anoto la dirección",
+       "lec"
+      ],
+      [
+       "Voy y me ubico en el camino",
+       "kin"
+      ]
+     ]
+    ],
+    [
+     "Aprendes más con…",
+     [
+      [
+       "Videos e infografías",
+       "vis"
+      ],
+      [
+       "Podcasts y audios",
+       "aud"
+      ],
+      [
+       "Libros y artículos",
+       "lec"
+      ],
+      [
+       "Talleres prácticos",
+       "kin"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "vis": {
+     "e": "👁️",
+     "t": "Visual",
+     "d": "Aprendes mejor con imágenes, colores, esquemas y videos. Si lo ves, lo entiendes.",
+     "f": [
+      "Memoria visual",
+      "Organización espacial",
+      "Creatividad"
+     ],
+     "c": "Haz mapas mentales y usa colores en tus apuntes."
+    },
+    "aud": {
+     "e": "👂",
+     "t": "Auditivo",
+     "d": "Aprendes escuchando y conversando. Las explicaciones en voz alta y los audios son tus aliados.",
+     "f": [
+      "Buena escucha",
+      "Facilidad para los idiomas",
+      "Expresión oral"
+     ],
+     "c": "Explica en voz alta lo que estudias o grábate y escúchate."
+    },
+    "lec": {
+     "e": "📝",
+     "t": "Lectura y escritura",
+     "d": "Las palabras escritas son tu fuerte: leer, resumir y tomar apuntes te ayuda a fijar las ideas.",
+     "f": [
+      "Comprensión lectora",
+      "Orden",
+      "Precisión"
+     ],
+     "c": "Reescribe con tus propias palabras: es tu mejor técnica de estudio."
+    },
+    "kin": {
+     "e": "✋",
+     "t": "Kinestésico",
+     "d": "Aprendes haciendo. La práctica, el movimiento y la experiencia directa son lo que más te sirve.",
+     "f": [
+      "Aprendes rápido en la práctica",
+      "Habilidad manual",
+      "Energía"
+     ],
+     "c": "Combina el estudio con ejercicios prácticos y pausas activas."
+    }
+   }
+  },
+  {
+   "id": "amigo",
+   "cat": "amor",
+   "e": "🫶",
+   "t": "¿Qué tipo de amigo eres?",
+   "d": "El rol que cumples en tu grupo.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tu amigo está triste. Tú…",
+     [
+      [
+       "Lo escucho y le aconsejo",
+       "con"
+      ],
+      [
+       "Lo saco a distraerse",
+       "fie"
+      ],
+      [
+       "Me quedo con él lo que haga falta",
+       "leal"
+      ],
+      [
+       "Le propongo una aventura",
+       "ave"
+      ]
+     ]
+    ],
+    [
+     "En el grupo de WhatsApp, eres quien…",
+     [
+      [
+       "Responde con consejos",
+       "con"
+      ],
+      [
+       "Manda memes",
+       "fie"
+      ],
+      [
+       "Siempre está atento",
+       "leal"
+      ],
+      [
+       "Propone planes locos",
+       "ave"
+      ]
+     ]
+    ],
+    [
+     "Un cumpleaños de tu mejor amigo…",
+     [
+      [
+       "Le escribo algo especial",
+       "con"
+      ],
+      [
+       "Organizo la fiesta",
+       "fie"
+      ],
+      [
+       "Estoy desde temprano ayudando",
+       "leal"
+      ],
+      [
+       "Le regalo una experiencia",
+       "ave"
+      ]
+     ]
+    ],
+    [
+     "Te cuentan un secreto…",
+     [
+      [
+       "Lo guardo y doy mi opinión",
+       "con"
+      ],
+      [
+       "Lo guardo… con esfuerzo 😅",
+       "fie"
+      ],
+      [
+       "Me lo llevo a la tumba",
+       "leal"
+      ],
+      [
+       "Lo guardo y propongo una solución",
+       "ave"
+      ]
+     ]
+    ],
+    [
+     "Tus amigos te describen como…",
+     [
+      [
+       "Sabio",
+       "con"
+      ],
+      [
+       "Divertido",
+       "fie"
+      ],
+      [
+       "Incondicional",
+       "leal"
+      ],
+      [
+       "Impredecible",
+       "ave"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "con": {
+     "e": "🧘",
+     "t": "El consejero",
+     "d": "Eres a quien todos buscan cuando algo pasa. Escuchas sin juzgar y tus consejos suelen dar en el clavo.",
+     "f": [
+      "Sabiduría",
+      "Empatía",
+      "Discreción"
+     ],
+     "c": "Deja que tus amigos también te escuchen a ti."
+    },
+    "fie": {
+     "e": "🥳",
+     "t": "El alma de la fiesta",
+     "d": "Contigo no hay momento aburrido. Unes al grupo, organizas los planes y haces reír a todos.",
+     "f": [
+      "Carisma",
+      "Energía",
+      "Optimismo"
+     ],
+     "c": "Los momentos serios también importan: tu apoyo vale mucho."
+    },
+    "leal": {
+     "e": "🛡️",
+     "t": "El incondicional",
+     "d": "Estás en las buenas y en las malas. Tu lealtad es tu mayor regalo y tus amigos lo saben.",
+     "f": [
+      "Lealtad",
+      "Constancia",
+      "Confianza"
+     ],
+     "c": "Cuida que la relación sea recíproca."
+    },
+    "ave": {
+     "e": "🧗",
+     "t": "El aventurero",
+     "d": "Eres el que saca a todos de la rutina. Con tus planes se crean las mejores anécdotas del grupo.",
+     "f": [
+      "Espontaneidad",
+      "Valentía",
+      "Creatividad"
+     ],
+     "c": "A veces un plan tranquilo también fortalece la amistad."
+    }
+   }
+  },
+  {
+   "id": "plato-peruano",
+   "cat": "estilo",
+   "e": "🍲",
+   "t": "¿Qué plato peruano eres?",
+   "d": "Tu personalidad convertida en sabor.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tu personalidad es…",
+     [
+      [
+       "Fresca y directa",
+       "cev"
+      ],
+      [
+       "Intensa y con carácter",
+       "lom"
+      ],
+      [
+       "Cálida y acogedora",
+       "aji"
+      ],
+      [
+       "Dulce y detallista",
+       "sus"
+      ]
+     ]
+    ],
+    [
+     "Tu plan favorito…",
+     [
+      [
+       "Playa con amigos",
+       "cev"
+      ],
+      [
+       "Una noche de fútbol",
+       "lom"
+      ],
+      [
+       "Almuerzo familiar de domingo",
+       "aji"
+      ],
+      [
+       "Una tarde de café y postres",
+       "sus"
+      ]
+     ]
+    ],
+    [
+     "Cuando cocinas…",
+     [
+      [
+       "Rápido y sin complicarme",
+       "cev"
+      ],
+      [
+       "Con fuego alto y mucho sabor",
+       "lom"
+      ],
+      [
+       "Para muchos, con cariño",
+       "aji"
+      ],
+      [
+       "Con paciencia y decoración",
+       "sus"
+      ]
+     ]
+    ],
+    [
+     "Te dicen que eres…",
+     [
+      [
+       "Auténtico",
+       "cev"
+      ],
+      [
+       "Apasionado",
+       "lom"
+      ],
+      [
+       "Un amor",
+       "aji"
+      ],
+      [
+       "Encantador",
+       "sus"
+      ]
+     ]
+    ],
+    [
+     "¿Qué te define?",
+     [
+      [
+       "La sinceridad",
+       "cev"
+      ],
+      [
+       "La energía",
+       "lom"
+      ],
+      [
+       "La generosidad",
+       "aji"
+      ],
+      [
+       "La ternura",
+       "sus"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "cev": {
+     "e": "🐟",
+     "t": "Ceviche",
+     "d": "Eres fresco, directo y auténtico, como el plato bandera del Perú. Donde llegas, te reconocen.",
+     "f": [
+      "Autenticidad",
+      "Frescura",
+      "Carisma"
+     ],
+     "c": "Ponle un poco de calma a tu chispa: no todo tiene que ser al instante."
+    },
+    "lom": {
+     "e": "🥩",
+     "t": "Lomo saltado",
+     "d": "Tienes carácter y mucha energía, igual que un lomo saltado al wok. Eres apasionado y no pasas desapercibido.",
+     "f": [
+      "Intensidad",
+      "Determinación",
+      "Sabor propio"
+     ],
+     "c": "Tu energía contagia; úsala para impulsar a los demás."
+    },
+    "aji": {
+     "e": "🍛",
+     "t": "Ají de gallina",
+     "d": "Eres cálido y reconfortante, como un almuerzo de casa. Cuidas a los tuyos y siempre hay un lugar en tu mesa.",
+     "f": [
+      "Generosidad",
+      "Calidez",
+      "Tradición"
+     ],
+     "c": "Cuídate también a ti, no solo a los demás."
+    },
+    "sus": {
+     "e": "🍮",
+     "t": "Suspiro a la limeña",
+     "d": "Eres dulce, elegante y detallista. Endulzas el día de quienes te rodean.",
+     "f": [
+      "Ternura",
+      "Detalle",
+      "Encanto"
+     ],
+     "c": "No temas mostrar tu lado más firme cuando haga falta."
+    }
+   }
+  },
+  {
+   "id": "comunicacion",
+   "cat": "personalidad",
+   "e": "🗣️",
+   "t": "Tu estilo de comunicación",
+   "d": "Cómo te expresas y cómo te perciben.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "En una discusión, tú…",
+     [
+      [
+       "Digo lo que pienso con respeto",
+       "ase"
+      ],
+      [
+       "Presento datos y argumentos",
+       "ana"
+      ],
+      [
+       "Hablo desde la emoción",
+       "exp"
+      ],
+      [
+       "Busco calmar los ánimos",
+       "ama"
+      ]
+     ]
+    ],
+    [
+     "Tus mensajes son…",
+     [
+      [
+       "Claros y directos",
+       "ase"
+      ],
+      [
+       "Largos y detallados",
+       "ana"
+      ],
+      [
+       "Con muchos emojis",
+       "exp"
+      ],
+      [
+       "Siempre amables",
+       "ama"
+      ]
+     ]
+    ],
+    [
+     "Te cuesta…",
+     [
+      [
+       "Nada en particular",
+       "ase"
+      ],
+      [
+       "Hablar de emociones",
+       "ana"
+      ],
+      [
+       "Escuchar sin interrumpir",
+       "exp"
+      ],
+      [
+       "Decir que no",
+       "ama"
+      ]
+     ]
+    ],
+    [
+     "En una reunión…",
+     [
+      [
+       "Propongo y defiendo mis ideas",
+       "ase"
+      ],
+      [
+       "Hago preguntas precisas",
+       "ana"
+      ],
+      [
+       "Animo a todos",
+       "exp"
+      ],
+      [
+       "Me aseguro de que todos opinen",
+       "ama"
+      ]
+     ]
+    ],
+    [
+     "Te describen como…",
+     [
+      [
+       "Seguro",
+       "ase"
+      ],
+      [
+       "Lógico",
+       "ana"
+      ],
+      [
+       "Apasionado",
+       "exp"
+      ],
+      [
+       "Diplomático",
+       "ama"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "ase": {
+     "e": "🎯",
+     "t": "Asertivo",
+     "d": "Dices lo que piensas con claridad y respeto. Es el estilo más efectivo: te entienden y no lastimas.",
+     "f": [
+      "Claridad",
+      "Seguridad",
+      "Respeto"
+     ],
+     "c": "Sigue practicando la escucha: el diálogo es de dos."
+    },
+    "ana": {
+     "e": "🔍",
+     "t": "Analítico",
+     "d": "Te comunicas con lógica, datos y precisión. Tus argumentos son sólidos y bien pensados.",
+     "f": [
+      "Precisión",
+      "Objetividad",
+      "Rigor"
+     ],
+     "c": "Acompaña los datos con un toque humano: conecta más."
+    },
+    "exp": {
+     "e": "🔥",
+     "t": "Expresivo",
+     "d": "Hablas con pasión y entusiasmo. Contagias energía y la gente recuerda lo que dices.",
+     "f": [
+      "Carisma",
+      "Entusiasmo",
+      "Creatividad"
+     ],
+     "c": "Haz pausas y escucha: tus ideas brillarán más."
+    },
+    "ama": {
+     "e": "🕊️",
+     "t": "Conciliador",
+     "d": "Buscas la armonía y cuidas a los demás al hablar. Eres el puente que une a las personas.",
+     "f": [
+      "Diplomacia",
+      "Empatía",
+      "Paciencia"
+     ],
+     "c": "Practica decir «no» con amabilidad: tus necesidades también cuentan."
+    }
+   }
+  },
+  {
+   "id": "cronotipo",
+   "cat": "estilo",
+   "e": "🌅",
+   "t": "¿Eres alondra o búho?",
+   "d": "Tu cronotipo: cuándo rindes mejor durante el día.",
+   "min": 1,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Sin alarma, te despertarías…",
+     [
+      [
+       "Antes de las 7 a. m.",
+       "alo"
+      ],
+      [
+       "Entre 7 y 9 a. m.",
+       "col"
+      ],
+      [
+       "Después de las 9 a. m.",
+       "bu"
+      ]
+     ]
+    ],
+    [
+     "Tu mejor momento para concentrarte…",
+     [
+      [
+       "Muy temprano",
+       "alo"
+      ],
+      [
+       "Media mañana o tarde",
+       "col"
+      ],
+      [
+       "De noche",
+       "bu"
+      ]
+     ]
+    ],
+    [
+     "¿A qué hora te da sueño?",
+     [
+      [
+       "Antes de las 10 p. m.",
+       "alo"
+      ],
+      [
+       "Cerca de la medianoche",
+       "col"
+      ],
+      [
+       "Pasada la 1 a. m.",
+       "bu"
+      ]
+     ]
+    ],
+    [
+     "Un examen a las 8 a. m. es…",
+     [
+      [
+       "Perfecto",
+       "alo"
+      ],
+      [
+       "Aceptable",
+       "col"
+      ],
+      [
+       "Una tortura",
+       "bu"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "alo": {
+     "e": "🐦",
+     "t": "Alondra (madrugador)",
+     "d": "Tu energía está en su punto más alto en la mañana. Rindes mejor temprano y te desgastas al final del día.",
+     "f": [
+      "Productividad matutina",
+      "Disciplina",
+      "Buen descanso"
+     ],
+     "c": "Deja tus tareas más difíciles para la mañana."
+    },
+    "col": {
+     "e": "🐤",
+     "t": "Colibrí (intermedio)",
+     "d": "Te adaptas a horarios variados; es el cronotipo más común. Rindes bien a media mañana y por la tarde.",
+     "f": [
+      "Flexibilidad",
+      "Constancia",
+      "Adaptación"
+     ],
+     "c": "Mantén horarios regulares de sueño para rendir al máximo."
+    },
+    "bu": {
+     "e": "🦉",
+     "t": "Búho (nocturno)",
+     "d": "Tu mente se activa de noche. Las mañanas te cuestan, pero tu creatividad aparece cuando todos duermen.",
+     "f": [
+      "Creatividad nocturna",
+      "Concentración profunda",
+      "Independencia"
+     ],
+     "c": "Evita pantallas antes de dormir y busca dormir entre 7 y 9 horas."
+    }
+   }
+  },
+  {
+   "id": "mascota",
+   "cat": "estilo",
+   "e": "🐶",
+   "t": "¿Cuál es tu mascota ideal?",
+   "d": "Según tu estilo de vida y tu personalidad.",
+   "min": 1,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "¿Cuánto tiempo pasas en casa?",
+     [
+      [
+       "Bastante, me gusta salir a caminar",
+       "per"
+      ],
+      [
+       "Salgo mucho, pero llego cada noche",
+       "gat"
+      ],
+      [
+       "Poco, viajo seguido",
+       "pez"
+      ],
+      [
+       "Bastante, me gusta la calma",
+       "con"
+      ]
+     ]
+    ],
+    [
+     "Tu casa es…",
+     [
+      [
+       "Grande o con patio",
+       "per"
+      ],
+      [
+       "Un departamento",
+       "gat"
+      ],
+      [
+       "Pequeña",
+       "pez"
+      ],
+      [
+       "Tranquila",
+       "con"
+      ]
+     ]
+    ],
+    [
+     "Prefieres una mascota…",
+     [
+      [
+       "Activa y juguetona",
+       "per"
+      ],
+      [
+       "Independiente",
+       "gat"
+      ],
+      [
+       "Que no requiera mucho",
+       "pez"
+      ],
+      [
+       "Tierna y tranquila",
+       "con"
+      ]
+     ]
+    ],
+    [
+     "Un domingo ideal con tu mascota…",
+     [
+      [
+       "Ir al parque",
+       "per"
+      ],
+      [
+       "Siesta juntos",
+       "gat"
+      ],
+      [
+       "Mirarla mientras leo",
+       "pez"
+      ],
+      [
+       "Acariciarla en el sofá",
+       "con"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "per": {
+     "e": "🐕",
+     "t": "Perro",
+     "d": "Eres activo y te gusta la compañía. Un perro te dará lealtad, alegría y una excusa diaria para salir a caminar.",
+     "f": [
+      "Activo",
+      "Afectuoso",
+      "Responsable"
+     ],
+     "c": "Considera adoptar: hay muchos perros esperando un hogar."
+    },
+    "gat": {
+     "e": "🐈",
+     "t": "Gato",
+     "d": "Valoras tu independencia y la tranquilidad. Un gato se adapta a tu ritmo y te acompaña a su manera.",
+     "f": [
+      "Independiente",
+      "Tranquilo",
+      "Observador"
+     ],
+     "c": "Los gatos también necesitan juego diario y chequeos veterinarios."
+    },
+    "pez": {
+     "e": "🐠",
+     "t": "Peces",
+     "d": "Tu agenda es movida, pero te gusta tener vida en casa. Un acuario relaja y requiere poco tiempo diario.",
+     "f": [
+      "Práctico",
+      "Ordenado",
+      "Calmado"
+     ],
+     "c": "Infórmate bien sobre el acuario: el agua y la temperatura son clave."
+    },
+    "con": {
+     "e": "🐇",
+     "t": "Conejo",
+     "d": "Eres tierno y tranquilo. Un conejo es cariñoso, silencioso y perfecto para un hogar en calma.",
+     "f": [
+      "Paciente",
+      "Cariñoso",
+      "Hogareño"
+     ],
+     "c": "Los conejos viven muchos años y necesitan espacio para moverse."
+    }
+   }
+  },
+  {
+   "id": "superpoder",
+   "cat": "personalidad",
+   "e": "🦸",
+   "t": "¿Qué superpoder tendrías?",
+   "d": "Según lo que más valoras.",
+   "min": 1,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Si pudieras cambiar algo del mundo…",
+     [
+      [
+       "Que nadie llegue tarde a nada",
+       "tel"
+      ],
+      [
+       "Entender lo que piensan los demás",
+       "men"
+      ],
+      [
+       "Ayudar en cualquier emergencia",
+       "fue"
+      ],
+      [
+       "Corregir errores del pasado",
+       "tie"
+      ]
+     ]
+    ],
+    [
+     "Tu mayor deseo…",
+     [
+      [
+       "Conocer todo el mundo",
+       "tel"
+      ],
+      [
+       "Comprender a las personas",
+       "men"
+      ],
+      [
+       "Proteger a los míos",
+       "fue"
+      ],
+      [
+       "Tener más tiempo",
+       "tie"
+      ]
+     ]
+    ],
+    [
+     "Tu película ideal…",
+     [
+      [
+       "De viajes y aventuras",
+       "tel"
+      ],
+      [
+       "De misterio",
+       "men"
+      ],
+      [
+       "De acción",
+       "fue"
+      ],
+      [
+       "De ciencia ficción",
+       "tie"
+      ]
+     ]
+    ],
+    [
+     "Te frustra…",
+     [
+      [
+       "El tráfico",
+       "tel"
+      ],
+      [
+       "No saber qué sienten los demás",
+       "men"
+      ],
+      [
+       "Sentirme impotente",
+       "fue"
+      ],
+      [
+       "Que el día no alcance",
+       "tie"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "tel": {
+     "e": "✨",
+     "t": "Teletransportación",
+     "d": "Eres curioso e inquieto: quieres estar en todas partes y vivir muchas experiencias.",
+     "f": [
+      "Curiosidad",
+      "Espontaneidad",
+      "Energía"
+     ],
+     "c": "Mientras tanto, planifica ese viaje que llevas tiempo postergando."
+    },
+    "men": {
+     "e": "🧠",
+     "t": "Leer mentes",
+     "d": "Te fascinan las personas y quieres entenderlas a fondo. Eres intuitivo y perceptivo.",
+     "f": [
+      "Intuición",
+      "Empatía",
+      "Observación"
+     ],
+     "c": "Preguntar con interés genuino es el superpoder más cercano."
+    },
+    "fue": {
+     "e": "💪",
+     "t": "Súper fuerza",
+     "d": "Eres protector y valiente. Te gustaría estar siempre listo para ayudar a quien lo necesite.",
+     "f": [
+      "Valentía",
+      "Protección",
+      "Determinación"
+     ],
+     "c": "Ayudar en lo pequeño también cambia vidas."
+    },
+    "tie": {
+     "e": "⏱️",
+     "t": "Controlar el tiempo",
+     "d": "Eres reflexivo y ambicioso: quieres aprovechar cada minuto y aprender de cada experiencia.",
+     "f": [
+      "Visión",
+      "Reflexión",
+      "Organización"
+     ],
+     "c": "Prioriza: no todo lo urgente es importante."
+    }
+   }
+  },
+  {
+   "id": "emprendedor",
+   "cat": "personalidad",
+   "e": "🚀",
+   "t": "¿Qué tipo de emprendedor serías?",
+   "d": "Tu estilo para crear un negocio.",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tu idea de negocio nace de…",
+     [
+      [
+       "Algo que nadie ha hecho",
+       "inn"
+      ],
+      [
+       "Algo que ya funciona y puedo mejorar",
+       "opt"
+      ],
+      [
+       "Un problema de mi comunidad",
+       "soc"
+      ],
+      [
+       "Lo que más disfruto hacer",
+       "pas"
+      ]
+     ]
+    ],
+    [
+     "El riesgo…",
+     [
+      [
+       "Me motiva",
+       "inn"
+      ],
+      [
+       "Lo calculo bien",
+       "opt"
+      ],
+      [
+       "Lo asumo si ayuda a otros",
+       "soc"
+      ],
+      [
+       "Lo acepto si hago lo que amo",
+       "pas"
+      ]
+     ]
+    ],
+    [
+     "Tu éxito sería…",
+     [
+      [
+       "Cambiar una industria",
+       "inn"
+      ],
+      [
+       "Un negocio rentable y estable",
+       "opt"
+      ],
+      [
+       "Mejorar vidas",
+       "soc"
+      ],
+      [
+       "Vivir de mi pasión",
+       "pas"
+      ]
+     ]
+    ],
+    [
+     "¿Con qué empezarías?",
+     [
+      [
+       "Una app o tecnología",
+       "inn"
+      ],
+      [
+       "Una franquicia o tienda",
+       "opt"
+      ],
+      [
+       "Un proyecto social",
+       "soc"
+      ],
+      [
+       "Un emprendimiento creativo",
+       "pas"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "inn": {
+     "e": "💡",
+     "t": "Innovador",
+     "d": "Buscas crear algo nuevo y te atrae la tecnología. Tu fuerza es ver oportunidades donde otros no las ven.",
+     "f": [
+      "Creatividad",
+      "Tolerancia al riesgo",
+      "Visión"
+     ],
+     "c": "Valida tu idea con clientes reales antes de invertir mucho."
+    },
+    "opt": {
+     "e": "📈",
+     "t": "Optimizador",
+     "d": "Prefieres mejorar lo que ya funciona. Eres práctico, analizas los números y construyes con solidez.",
+     "f": [
+      "Análisis",
+      "Prudencia",
+      "Eficiencia"
+     ],
+     "c": "Diferénciate con el servicio: es lo que más fideliza."
+    },
+    "soc": {
+     "e": "🌱",
+     "t": "Social",
+     "d": "Quieres que tu negocio genere impacto en tu comunidad. Combinas propósito con trabajo duro.",
+     "f": [
+      "Propósito",
+      "Empatía",
+      "Compromiso"
+     ],
+     "c": "Un negocio social también debe ser sostenible: cuida tus números."
+    },
+    "pas": {
+     "e": "🎨",
+     "t": "Apasionado",
+     "d": "Quieres vivir de lo que amas. Tu entusiasmo y tu autenticidad son tu mejor marketing.",
+     "f": [
+      "Autenticidad",
+      "Constancia",
+      "Creatividad"
+     ],
+     "c": "Aprende lo básico de ventas y finanzas: harán crecer tu pasión."
+    }
+   }
+  },
+  {
+   "id": "epoca",
+   "cat": "estilo",
+   "e": "🕰️",
+   "t": "¿En qué época deberías haber nacido?",
+   "d": "Tu estilo, tus gustos y tu forma de ver la vida.",
+   "min": 1,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tu música favorita…",
+     [
+      [
+       "Boleros y valses criollos",
+       "50"
+      ],
+      [
+       "Rock y disco",
+       "70"
+      ],
+      [
+       "Pop y baladas en español",
+       "90"
+      ],
+      [
+       "Lo que suena hoy",
+       "hoy"
+      ]
+     ]
+    ],
+    [
+     "Tu forma de comunicarte…",
+     [
+      [
+       "Cartas escritas a mano",
+       "50"
+      ],
+      [
+       "Llamadas por teléfono fijo",
+       "70"
+      ],
+      [
+       "SMS y chat",
+       "90"
+      ],
+      [
+       "Notas de voz y videollamadas",
+       "hoy"
+      ]
+     ]
+    ],
+    [
+     "Tu plan del viernes…",
+     [
+      [
+       "Baile de salón",
+       "50"
+      ],
+      [
+       "La discoteca",
+       "70"
+      ],
+      [
+       "Alquilar películas",
+       "90"
+      ],
+      [
+       "Ver series en streaming",
+       "hoy"
+      ]
+     ]
+    ],
+    [
+     "Tu estilo…",
+     [
+      [
+       "Elegante y clásico",
+       "50"
+      ],
+      [
+       "Colorido y atrevido",
+       "70"
+      ],
+      [
+       "Casual y relajado",
+       "90"
+      ],
+      [
+       "Moderno y práctico",
+       "hoy"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "50": {
+     "e": "🎙️",
+     "t": "Los años 50",
+     "d": "Eres clásico y elegante. Valoras los detalles, las tradiciones y las conversaciones largas.",
+     "f": [
+      "Elegancia",
+      "Romanticismo",
+      "Buenos modales"
+     ],
+     "c": "Tu estilo clásico es tendencia: no lo pierdas."
+    },
+    "70": {
+     "e": "🪩",
+     "t": "Los años 70",
+     "d": "Eres libre y expresivo. Te encantan la música, el baile y vivir sin tantas reglas.",
+     "f": [
+      "Libertad",
+      "Alegría",
+      "Creatividad"
+     ],
+     "c": "Tu energía contagia: compártela."
+    },
+    "90": {
+     "e": "📼",
+     "t": "Los años 90",
+     "d": "Eres nostálgico y relajado. Disfrutas lo simple: la música, los amigos y las buenas películas.",
+     "f": [
+      "Sencillez",
+      "Lealtad",
+      "Buen humor"
+     ],
+     "c": "Arma tu playlist noventera y compártela."
+    },
+    "hoy": {
+     "e": "📱",
+     "t": "La era digital",
+     "d": "Eres práctico y estás al día. Aprovechas la tecnología y te adaptas rápido a lo nuevo.",
+     "f": [
+      "Adaptabilidad",
+      "Curiosidad",
+      "Rapidez"
+     ],
+     "c": "Date tiempo para desconectarte: también se disfruta."
+    }
+   }
+  },
+  {
+   "id": "estres",
+   "cat": "estilo",
+   "e": "🧘",
+   "t": "¿Cómo manejas el estrés?",
+   "d": "Tu forma de reaccionar ante la presión (no es un diagnóstico).",
+   "min": 2,
+   "tipo": "perfil",
+   "preguntas": [
+    [
+     "Tienes muchas tareas a la vez. Tú…",
+     [
+      [
+       "Hago una lista y voy una por una",
+       "org"
+      ],
+      [
+       "Me pongo a hacer ejercicio para despejarme",
+       "act"
+      ],
+      [
+       "Lo converso con alguien",
+       "soc"
+      ],
+      [
+       "Lo dejo para después",
+       "evi"
+      ]
+     ]
+    ],
+    [
+     "Cuando algo sale mal…",
+     [
+      [
+       "Busco la solución",
+       "org"
+      ],
+      [
+       "Salgo a caminar",
+       "act"
+      ],
+      [
+       "Llamo a un amigo",
+       "soc"
+      ],
+      [
+       "Prefiero no pensar en eso",
+       "evi"
+      ]
+     ]
+    ],
+    [
+     "Antes de una entrevista importante…",
+     [
+      [
+       "Me preparo al detalle",
+       "org"
+      ],
+      [
+       "Respiro y me muevo",
+       "act"
+      ],
+      [
+       "Pido consejos",
+       "soc"
+      ],
+      [
+       "Me distraigo con el celular",
+       "evi"
+      ]
+     ]
+    ],
+    [
+     "Tu escape favorito…",
+     [
+      [
+       "Ordenar mi espacio",
+       "org"
+      ],
+      [
+       "El deporte",
+       "act"
+      ],
+      [
+       "Una buena conversación",
+       "soc"
+      ],
+      [
+       "Series y redes sociales",
+       "evi"
+      ]
+     ]
+    ]
+   ],
+   "resultados": {
+    "org": {
+     "e": "🗂️",
+     "t": "Organizador",
+     "d": "Enfrentas la presión ordenando y planificando. Es una estrategia muy efectiva para recuperar el control.",
+     "f": [
+      "Planificación",
+      "Enfoque",
+      "Resolución"
+     ],
+     "c": "Incluye pausas en tu lista: descansar también es productivo."
+    },
+    "act": {
+     "e": "🏃",
+     "t": "Activo",
+     "d": "Liberas la tensión con movimiento. La actividad física es una de las mejores formas de reducir el estrés.",
+     "f": [
+      "Energía",
+      "Hábitos saludables",
+      "Resiliencia"
+     ],
+     "c": "Combínalo con buen sueño para un efecto completo."
+    },
+    "soc": {
+     "e": "💬",
+     "t": "Social",
+     "d": "Te ayuda hablar y sentirte acompañado. El apoyo de otras personas es un gran protector frente al estrés.",
+     "f": [
+      "Comunicación",
+      "Confianza",
+      "Red de apoyo"
+     ],
+     "c": "Elige bien con quién hablas: busca personas que te sumen."
+    },
+    "evi": {
+     "e": "🙈",
+     "t": "Evitador",
+     "d": "Tiendes a postergar o distraerte. Es una reacción común, aunque a la larga puede acumular más presión.",
+     "f": [
+      "Sabes desconectarte",
+      "Calma aparente",
+      "Flexibilidad"
+     ],
+     "c": "Prueba dividir lo pendiente en pasos de 10 minutos. Si el estrés es constante, habla con un profesional de la salud."
+    }
+   }
+  }
+ ]
 }

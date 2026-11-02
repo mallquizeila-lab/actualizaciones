@@ -188,12 +188,15 @@ function send(res, code, body, type = 'application/json; charset=utf-8', extra =
 const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > 20000) { no(new Error('muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(new Error('JSON inválido')); } }); });
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
+const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
 async function api(req, res, u) {
   const ip = clientIp(req), P = req.method === 'POST';
   if (P && limite(ip, 'api', 240)) return send(res, 429, { error: 'Demasiadas peticiones, espera un momento' });
 
+  // ---- chat en vivo ----
+  if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
@@ -265,6 +268,7 @@ async function api(req, res, u) {
     if (!admin(req)) return send(res, 401, { error: 'Inicia sesión' });
     if (P && req.headers['x-panel'] !== '1' && !req.headers['x-sf-token']) return send(res, 403, { error: 'Prohibido' }); // protección CSRF
     const r = u.pathname.slice(11), F = Object.fromEntries(u.searchParams);
+    if (r === 'chat' || r.startsWith('chat/')) { const cr = chat.admin(r, P ? await json(req) : {}, F); if (cr) return send(res, 200, cr); }
     if (r === 'logout') return send(res, 200, { ok: 1 }, undefined, { 'set-cookie': 'sid=; Path=/; Max-Age=0' });
     if (r === 'stats') {
       const dias = q(`select date(created_at,'-5 hours') d, count(*) n from visitors where created_at>=datetime('now','-14 days') group by d order by d`);
