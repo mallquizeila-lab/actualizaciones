@@ -56,6 +56,12 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .err{color:#ffb4a8;font-size:.9rem;margin-top:8px;min-height:1.1em}
 .video{display:flex;gap:12px;align-items:center}
 [hidden]{display:none!important}
+.marca{display:flex;align-items:center;gap:10px;padding:2px 0 10px;border-bottom:1px solid var(--line);margin-bottom:12px}.marca b{font:800 1.15rem Fraunces,serif}.marca span{color:var(--muted);font-size:.8rem}
+.badge{display:inline-block;background:#ff5a5f;color:#fff;font:700 .68rem Figtree,sans-serif;padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle}
+.cargando{text-align:center;padding:50px 10px}.cargando .sp{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--gold);margin:0 auto 14px;animation:gira .8s linear infinite}@keyframes gira{to{transform:rotate(360deg)}}
+.stat{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.88rem;color:var(--muted)}.stat .bar{flex:1;margin:0}.stat b{min-width:42px;text-align:right;color:var(--text)}.stat.yo{color:var(--text);font-weight:700}
+.reto{background:linear-gradient(90deg,#ff7aa8,#f4b942);color:#241a00;border-radius:14px;padding:12px 14px;font-weight:700;margin-bottom:12px;text-align:center}
+.recs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.recs .game{padding:12px 8px;text-align:center;align-items:center}.recs .game .e{font-size:1.6rem}.recs .game b{font-size:.82rem}
 .cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}
 .cats button{flex:none;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .85rem Figtree,sans-serif;cursor:pointer}
 .cats button.on{background:var(--gold);border-color:var(--gold);color:#241a00}
@@ -71,6 +77,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 </head>
 <body>
 <main>
+  <header class="marca" id="marca" hidden></header>
   <section id="home">
     <h1>Descubre algo nuevo de ti</h1>
     <p class="sub">Tests de personalidad, trivias y calculadoras. Gratis, en 1 a 3 minutos.</p>
@@ -151,14 +158,15 @@ const NUM = { 1:'Líder nato. Abres caminos y te gusta ser el primero.', 2:'Dipl
 
 // ---------- Navegación ----------
 // ---------- Catálogo de tests (public/tests.json) ----------
-let TESTS = [], CATS = [], cat = 'todos';
+let TESTS = [], CATS = [], cat = 'todos', POP = [];
+fetch('/api/populares').then(r => r.json()).then(d => { POP = d.populares || []; if (TESTS.length) pintarHome(); }).catch(() => {});
 const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
 const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const TIPO = { perfil: 'Personalidad', trivia: 'Trivia', calc: 'Calculadora', especial: 'Interactivo' };
 function pintarHome() {
-  const q = norm($('#buscar').value || ''), lista = TESTS.filter(t => (cat === 'todos' || t.cat === cat) && (!q || norm(t.t + ' ' + t.d).includes(q)));
+  const q = norm($('#buscar').value || ''), lista = [...TESTS].sort((a, b) => (POP.includes(b.id) ? 6 - POP.indexOf(b.id) : 0) - (POP.includes(a.id) ? 6 - POP.indexOf(a.id) : 0)).filter(t => (cat === 'todos' || t.cat === cat) && (!q || norm(t.t + ' ' + t.d).includes(q)));
   $('#cats').innerHTML = CATS.map(([k, l]) => `<button data-c="${k}" class="${k === cat ? 'on' : ''}">${l}</button>`).join('');
-  $('#games').innerHTML = lista.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}</b><small>${escH(t.d)}</small><span class="meta">${TIPO[t.tipo] || ''} · ${t.min} min</span></button>`).join('') || '<p class="sub">No hay tests con esa búsqueda.</p>';
+  $('#games').innerHTML = lista.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}${POP.slice(0, 3).includes(t.id) ? '<span class="badge">🔥 Popular</span>' : ''}</b><small>${escH(t.d)}</small><span class="meta">${TIPO[t.tipo] || ''} · ${t.min} min</span></button>`).join('') || '<p class="sub">No hay tests con esa búsqueda.</p>';
 }
 $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; pintarHome(); } };
 $('#buscar').oninput = () => pintarHome();
@@ -287,7 +295,7 @@ const MOTOR = {
       if (i === t.preguntas.length) {
         const orden = Object.keys(t.resultados), top = orden.reduce((a, k) => (pts[k] || 0) > (pts[a] || 0) ? k : a, orden[0]), R = t.resultados[top];
         registrar(t.id);
-        return resultado({ g: t.id, emoji: R.e, titulo: R.t, sub: t.t, bloques: [['Tu resultado', escH(R.d)]], fortalezas: R.f, consejo: R.c, nota: 'Test de entretenimiento: no reemplaza una evaluación profesional.', compartir: `${t.t} → Me salió: ${R.t} ${R.e} ¿Y a ti?` });
+        return resultado({ g: t.id, clave: top, opciones: orden.map(k => [k, t.resultados[k].t]), emoji: R.e, titulo: R.t, sub: t.t, bloques: [['Tu resultado', escH(R.d)]], fortalezas: R.f, consejo: R.c, nota: 'Test de entretenimiento: no reemplaza una evaluación profesional.', compartir: `${t.t} → Me salió: ${R.t} ${R.e} ¿Y a ti?` });
       }
       const [q, ops] = t.preguntas[i];
       stage(`<div class="card"><p class="sub" style="text-align:left;margin:0">${escH(t.t)} · Pregunta ${i + 1} de ${t.preguntas.length}</p><div class="prog"><i style="width:${i * 100 / t.preguntas.length}%"></i></div><h2>${escH(q)}</h2>${ops.map(([o], k) => `<button class="opt" data-k="${k}">${escH(o)}</button>`).join('')}</div>`);
@@ -296,16 +304,17 @@ const MOTOR = {
     paso();
   },
   trivia(t) {
-    let i = 0, ok = 0; const resp = [];
+    let i = 0, ok = 0; const resp = [], reto = +P.get('reto'), banner = P.get('reto') !== null && P.get('g') === t.id ? `<div class="reto">⚔️ Un amigo sacó ${reto}/${t.preguntas.length}. ¿Lo superas?</div>` : '';
     const paso = () => {
       if (i === t.preguntas.length) {
         const n = t.preguntas.length, pc = Math.round(ok * 100 / n);
         const nivel = pc === 100 ? ['🏆', '¡Perfecto! Eres un experto'] : pc >= 70 ? ['🥇', '¡Muy bien! Sabes bastante'] : pc >= 40 ? ['👍', 'Nada mal, pero puedes mejorar'] : ['📚', 'Hoy aprendiste algo nuevo'];
         registrar(t.id);
-        return resultado({ g: t.id, emoji: nivel[0], titulo: `${ok} de ${n} correctas`, sub: nivel[1], pct: pc, bloques: [['Revisa las respuestas', `<ul class="rev">${t.preguntas.map(([q, ops, c, dato], k) => `<li><span class="${resp[k] === c ? 'ok' : 'bad'}">${resp[k] === c ? '✔' : '✘'}</span> <b>${escH(q)}</b><br>Respuesta: ${escH(ops[c])}. ${escH(dato)}</li>`).join('')}</ul>`]], compartir: `Saqué ${ok}/${n} en «${t.t}» ${nivel[0]} ¿Me superas?` });
+        const vsAmigo = P.get('reto') !== null && P.get('g') === t.id ? (ok > reto ? ` ¡Le ganaste a tu amigo (${reto}/${n})! 🏆` : ok === reto ? ` Empataste con tu amigo (${reto}/${n}).` : ` Tu amigo sacó ${reto}/${n}: ¡revancha!`) : '';
+        return resultado({ g: t.id, clave: String(ok), trivia: true, reto: ok, emoji: nivel[0], titulo: `${ok} de ${n} correctas`, sub: nivel[1] + vsAmigo, pct: pc, bloques: [['Revisa las respuestas', `<ul class="rev">${t.preguntas.map(([q, ops, c, dato], k) => `<li><span class="${resp[k] === c ? 'ok' : 'bad'}">${resp[k] === c ? '✔' : '✘'}</span> <b>${escH(q)}</b><br>Respuesta: ${escH(ops[c])}. ${escH(dato)}</li>`).join('')}</ul>`]], compartir: `⚔️ Saqué ${ok}/${n} en «${t.t}». ¿Me superas?` });
       }
       const [q, ops, c, dato] = t.preguntas[i];
-      stage(`<div class="card"><p class="sub" style="text-align:left;margin:0">${escH(t.t)} · ${i + 1} de ${t.preguntas.length} · ✔ ${ok}</p><div class="prog"><i style="width:${i * 100 / t.preguntas.length}%"></i></div><h2>${escH(q)}</h2><div id="ops">${ops.map((o, k) => `<button class="opt" data-k="${k}">${escH(o)}</button>`).join('')}</div><p id="dato" class="sub" style="text-align:left;margin-top:12px" hidden></p></div>`);
+      stage(`${i === 0 ? banner : ''}<div class="card"><p class="sub" style="text-align:left;margin:0">${escH(t.t)} · ${i + 1} de ${t.preguntas.length} · ✔ ${ok}</p><div class="prog"><i style="width:${i * 100 / t.preguntas.length}%"></i></div><h2>${escH(q)}</h2><div id="ops">${ops.map((o, k) => `<button class="opt" data-k="${k}">${escH(o)}</button>`).join('')}</div><p id="dato" class="sub" style="text-align:left;margin-top:12px" hidden></p></div>`);
       $('#ops').onclick = e => {
         const b = e.target.closest('[data-k]'); if (!b) return; $('#ops').onclick = null;
         const k = +b.dataset.k; resp[i] = k; if (k === c) ok++;
@@ -325,6 +334,8 @@ function preguntas(ops, titulo, cb) {
 // ---------- Resultado + compartir + alertas + video ----------
 let ultimo = null;
 function resultado(r) {
+  // Suspenso corto antes de mostrar (sin pasar de ~1 s para no perder el permiso del clic).
+  if (!r._listo && r.g !== 'encuesta') { stage(`<div class="card cargando"><div class="sp"></div><p>Analizando tus respuestas…</p></div>`); pedirAlertasAuto(r); return setTimeout(() => resultado({ ...r, _listo: true }), 900); }
   ultimo = r;
   stage(`<div class="card res"><div class="big">${r.emoji}</div><h2>${escH(r.titulo)}</h2>${r.sub ? `<p style="text-align:center">${escH(r.sub)}</p>` : ''}
     ${r.pct != null ? `<div class="pct">${r.pct}%</div><div class="bar"><i id="pb"></i></div>` : ''}
@@ -332,13 +343,34 @@ function resultado(r) {
     ${r.fortalezas?.length ? `<div class="sec"><h3>Tus fortalezas</h3><ul class="f">${r.fortalezas.map(x => `<li>${escH(x)}</li>`).join('')}</ul></div>` : ''}
     ${r.consejo ? `<div class="sec"><h3>Un consejo para ti</h3><p class="tip">${escH(r.consejo)}</p></div>` : ''}
     ${r.nota ? `<p class="small" style="margin-top:14px">${escH(r.nota)}</p>` : ''}</div>
-    <div id="shareBox"></div><div id="pushBox"></div><div id="vBox"></div>
+    <div id="statBox"></div><div id="shareBox"></div><div id="pushBox"></div><div id="vBox"></div><div id="recBox"></div>
     <button class="btn alt" onclick="document.getElementById('back').click()">🎮 Jugar otro test</button>`);
   if (r.pct != null) requestAnimationFrame(() => setTimeout(() => $('#pb').style.width = r.pct + '%', 60));
-  compartirBox(r); alertasBox(r); videoBox();
-  pedirAlertasAuto(r);
+  compartirBox(r); alertasBox(r); videoBox(); recomendar(r); estadisticas(r);
 }
-function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido&t=${encodeURIComponent(r.compartir.slice(0, 110))}`; }
+// "El X % obtuvo lo mismo que tú" (datos reales y anónimos de todos los que jugaron).
+async function estadisticas(r) {
+  if (!r.clave) return;
+  try {
+    const d = await post('/api/resultado', { test: r.g, clave: r.clave, vid: VID }), box = $('#statBox'); if (!box || d.total < 20) return;
+    const pct = k => Math.round((d.claves[k] || 0) * 100 / d.total);
+    if (r.trivia) {
+      const n = +r.clave, peor = Object.entries(d.claves).filter(([k]) => +k < n).reduce((a, [, v]) => a + v, 0);
+      box.innerHTML = `<div class="card"><h3>📊 Comparado con todos</h3><p>Superaste al <b>${Math.round(peor * 100 / d.total)} %</b> de las ${d.total.toLocaleString('es-PE')} personas que hicieron esta trivia.</p></div>`;
+    } else if (r.opciones) {
+      box.innerHTML = `<div class="card"><h3>📊 ¿Qué les salió a los demás?</h3><p class="sub" style="text-align:left;margin:0 0 6px">El <b>${pct(r.clave)} %</b> obtuvo lo mismo que tú (${d.total.toLocaleString('es-PE')} personas).</p>
+        ${r.opciones.sort((a, b) => pct(b[0]) - pct(a[0])).map(([k, nom]) => `<div class="stat ${k === r.clave ? 'yo' : ''}"><span style="min-width:110px">${escH(nom)}</span><div class="bar"><i style="width:${pct(k)}%"></i></div><b>${pct(k)} %</b></div>`).join('')}</div>`;
+    }
+  } catch (e) {}
+}
+function recomendar(r) {
+  const yo = TESTS.find(t => t.id === r.g), otros = TESTS.filter(t => t.id !== r.g && t.tipo !== 'especial');
+  const recs = [...otros.filter(t => yo && t.cat === yo.cat), ...otros.filter(t => POP.includes(t.id)), ...otros].filter((t, i, a) => a.indexOf(t) === i).slice(0, 3);
+  if (!recs.length || !$('#recBox')) return;
+  $('#recBox').innerHTML = `<div class="card"><h3>👉 Te puede gustar</h3><div class="recs">${recs.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}</b></button>`).join('')}</div></div>`;
+  $('#recBox').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
+}
+function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido&t=${encodeURIComponent(r.compartir.slice(0, 110))}${r.reto != null ? '&reto=' + r.reto : ''}`; }
 function compartirBox(r) {
   const url = enlace(r), txt = r.compartir, e = encodeURIComponent;
   const box = document.createElement('div'); box.className = 'card';
@@ -442,6 +474,7 @@ function videoBox() {
 }
 function pintarExtras() {
   pixel();
+  if (cfg.marca?.nombre) { const m = $('#marca'); m.hidden = false; m.innerHTML = `<span style="font-size:1.5rem">✨</span><div><b>${escH(cfg.marca.nombre)}</b>${cfg.marca.eslogan ? `<br><span>${escH(cfg.marca.eslogan)}</span>` : ''}</div>`; }
   if (cfg.video?.url) { const v = $('#videoCard'); v.hidden = false; v.innerHTML = `<p class="sub" style="text-align:left;margin:0">🎬 Mira el video de hoy</p><h3>${escH(String(cfg.video.title).replace(/^🎬\s*(Mira el video de hoy:\s*)?/, ''))}</h3><a class="btn" href="${escH(cfg.video.url)}" target="_blank" rel="noopener">▶ Ver el video</a>`; }
   if (cfg.poll) { const p = $('#pollCard'); p.hidden = false; p.innerHTML = `<h3>📊 Encuesta del día</h3><p class="sub" style="text-align:left;margin:4px 0 0">${escH(cfg.poll.q)}</p><button class="btn alt" data-g="encuesta">Votar</button>`; p.onclick = e => { if (e.target.closest('[data-g]')) abrir('encuesta'); }; }
 }

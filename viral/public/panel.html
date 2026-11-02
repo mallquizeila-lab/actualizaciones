@@ -179,6 +179,10 @@ const V = {
     <div class="card"><h2>📊 Encuesta del día</h2>${a.encuesta ? `<p class="hint">Actual: <b>${esc(a.encuesta.q)}</b></p><table>${a.encuesta.options.map((o, i) => `<tr><td>${esc(o)}</td><td class="n">${n(a.encuesta.votos[i])}</td></tr>`).join('')}</table>` : ''}
       <label>Nueva pregunta</label><input id="p-q" maxlength="120" placeholder="¿Qué prefieres…?"><label>Opciones (una por línea, 2 a 6)</label><textarea id="p-o" placeholder="🍕 Pizza&#10;🍔 Hamburguesa"></textarea>
       <p style="margin-top:10px"><button class="btn" id="p-go">Publicar encuesta nueva</button></p></div>
+    <div class="card"><h2>🏷️ Tu marca</h2><p class="hint">Aparece arriba de la página y en las vistas previas. Ej.: "Descúbrete" · "Tests y curiosidades para conocerte mejor".</p>
+      <label>Nombre del sitio</label><input id="m-n" maxlength="40" value="${esc(a.marca?.nombre || '')}" placeholder="Descúbrete">
+      <label>Lema</label><input id="m-e" maxlength="90" value="${esc(a.marca?.eslogan || '')}" placeholder="Tests y curiosidades para conocerte mejor">
+      <p style="margin-top:10px"><button class="btn" id="m-go">Guardar</button></p></div>
     <div class="card"><h2>👋 Notificación de bienvenida</h2><p class="hint">Se envía una sola vez, apenas alguien activa las alertas: así ve al instante cómo serán.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="b-on" style="width:auto" ${a.bienvenida?.on !== false ? 'checked' : ''}> Activada</label>
       <label>Título</label><input id="b-t" maxlength="80" value="${esc(a.bienvenida?.title || '')}"><label>Mensaje</label><textarea id="b-b" maxlength="200">${esc(a.bienvenida?.body || '')}</textarea>
@@ -194,6 +198,7 @@ const V = {
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#m-go').onclick = () => api('ajustes', { marca: { nombre: $('#m-n').value, eslogan: $('#m-e').value } }).then(ok, e => alert(e.message));
     $('#b-go').onclick = () => api('ajustes', { bienvenida: { on: $('#b-on').checked, title: $('#b-t').value, body: $('#b-b').value } }).then(ok, e => alert(e.message));
     $('#pr-go').onclick = () => api('ajustes', { priv: { nombre: $('#pr-n').value, ciudad: $('#pr-c').value, correo: $('#pr-m').value, plazo: $('#pr-p').value, codigo: $('#pr-k').value } }).then(ok, e => alert(e.message));
     $('#t-go').onclick = () => api('ajustes', { tope: +$('#t-n').value }).then(ok, e => alert(e.message));

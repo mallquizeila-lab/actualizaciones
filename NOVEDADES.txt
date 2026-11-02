@@ -1,3 +1,11 @@
+v7.5.0 — Página viral más profesional y más viral
+- "¿Qué les salió a los demás?": porcentajes reales y anónimos de cada resultado (aparecen cuando un test tiene 20 jugadas o más). En las trivias: "Superaste al X % de los jugadores".
+- Reto a un amigo en las trivias: el enlace compartido dice "Un amigo sacó 7/8. ¿Lo superas?" y al final muestra quién ganó.
+- 🔥 Popular: los tests más jugados de la semana salen primero y con etiqueta (datos reales).
+- "Te puede gustar": 3 tests recomendados después de cada resultado.
+- "Analizando tus respuestas…": un instante de suspenso antes del resultado.
+- Tu marca arriba de la página (nombre y lema), editable en Panel → Ajustes.
+
 v7.4.0 — Vista previa atractiva al compartir
 - Al publicar el enlace de la página viral en Facebook o WhatsApp ahora sale una imagen grande con título, descripción y botón "Haz el test gratis" (antes salía solo el enlace).
 - Cada uno de los 32 tests tiene su propia imagen de vista previa, con color por categoría.
