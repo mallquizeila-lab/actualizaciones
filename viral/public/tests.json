@@ -99,6 +99,16 @@
    "tipo": "mesa"
   },
   {
+   "id": "arcade-batalla",
+   "juego": "batalla",
+   "cat": "juegos",
+   "e": "⚔️",
+   "t": "Duelo de Torres",
+   "d": "Batallas de cartas en tiempo real: 1 vs 1, 2 vs 2 en línea, clanes con chat, trofeos y ligas.",
+   "min": 4,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-mundo",
    "juego": "mundo",
    "cat": "juegos",

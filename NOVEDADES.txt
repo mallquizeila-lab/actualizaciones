@@ -1,3 +1,11 @@
+v7.15.0 — Duelo de Torres en línea, clanes y usuarios
+- Nuevo juego "Duelo de Torres": batallas de cartas en tiempo real con personajes propios (Oso Escudero, Búhos Arqueros, Jabalí, Tortuga Gigante, Llama Escupidora, Dragoncito, Cóndor, Puma, Abejas, Erizos) y hechizos (Bola de Fuego, Ventisca).
+- Modos: 1 vs 1 en línea, 2 vs 2 en línea (si falta gente se completa con bots), con un amigo por código y contra la máquina.
+- Trofeos y 5 ligas (Bronce, Plata, Oro, Diamante, Leyenda) que desbloquean cartas; las cartas se mejoran con monedas.
+- Clanes: crea o únete a un clan (hasta 30 miembros), chat del clan solo con texto y emojis (bloquea enlaces, teléfonos, correos y cuentas) y retos entre miembros.
+- Usuarios: cada jugador puede crear su usuario y contraseña para entrar desde cualquier celular y seguir donde se quedó.
+- Música de batalla, voces y efectos.
+
 v7.14.0 — Música gamer, voces y escenarios nuevos en Huerto Defensor
 - Música de fondo propia generada en vivo (sin archivos): un tema para cada juego, música de jefa cuando aparece la rata y más intensidad en la gran oleada y en los retos.
 - Las plagas hablan con voz y globos de diálogo: "¡Ahí voy a comerte!", "¡Tengo un hambre!", "¡Me las pagarás!", "¡Volveré!"... Cada una con su propio tono; los defensores también responden.

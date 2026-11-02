@@ -193,6 +193,7 @@ const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { 
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
 const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
+const online = require('./juego_online').crear({ db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
@@ -202,6 +203,7 @@ async function api(req, res, u) {
 
   // ---- chat en vivo ----
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (/^\/api\/(cuenta|clan|duelo)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
   if (u.pathname === '/api/config') {
@@ -248,7 +250,7 @@ async function api(req, res, u) {
   }
   // Ranking del día de los juegos arcade.
   if (u.pathname === '/api/arcade/puntaje' && P) {
-    const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200, bloques: 200000, frutas: 200000, colores: 2000, torre: 1000, palabra: 600, sudoku: 1000, ladrillos: 50000, vuela: 2000, corredor: 200000, flechas: 5000, joyas: 100000, huerto: 100000, ahorcado: 5000, sopa: 1000, ppt: 200, reflejos: 1000, tuberias: 1000, penales: 500, calculo: 3000, simon: 2000, topos: 2000, color: 2000 };
+    const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200, bloques: 200000, frutas: 200000, colores: 2000, torre: 1000, palabra: 600, sudoku: 1000, ladrillos: 50000, vuela: 2000, corredor: 200000, flechas: 5000, joyas: 100000, huerto: 100000, batalla: 100000, ahorcado: 5000, sopa: 1000, ppt: 200, reflejos: 1000, tuberias: 1000, penales: 500, calculo: 3000, simon: 2000, topos: 2000, color: 2000 };
     const b = await json(req), jg = String(b.juego || ''), pts = Math.round(+b.puntos || 0);
     if (!TOPE[jg] || pts < 0 || pts > TOPE[jg]) return send(res, 400, { error: 'Puntaje no válido' });
     if (limite(ip, 'arc', 30)) return send(res, 429, { error: 'Más despacio' });
@@ -282,7 +284,7 @@ async function api(req, res, u) {
     return send(res, 200, { otros, cuenta });
   }
   if (u.pathname === '/api/perfil' && P) {
-    const b = await json(req), id = crypto.createHash('sha256').update('perfil:' + String(b.uid || '')).digest('hex').slice(0, 24);
+    const b = await json(req), id = online.perfilId(b);
     if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     let fila = q1('select codigo, data from perfiles where id=?', id);
     if (b.data && typeof b.data === 'object') {
@@ -298,7 +300,7 @@ async function api(req, res, u) {
     if (limite(ip, 'recup', 10, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera 15 minutos.' });
     const b = await json(req), f = q1('select data from perfiles where codigo=?', String(b.codigo || '').trim().toUpperCase());
     if (!f) return send(res, 404, { error: 'Ese código no existe' });
-    const id = crypto.createHash('sha256').update('perfil:' + String(b.uid || '')).digest('hex').slice(0, 24);
+    const id = online.perfilId(b);
     run('insert into perfiles(id, codigo, data) values(?,?,?) on conflict(id) do update set data=excluded.data', id, crypto.randomBytes(5).toString('hex').toUpperCase().slice(0, 8), f.data);
     return send(res, 200, { data: JSON.parse(f.data) });
   }

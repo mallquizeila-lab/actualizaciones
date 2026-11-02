@@ -113,6 +113,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .chips{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.chips span{background:rgba(255,255,255,.08);border-radius:999px;padding:4px 10px;font-weight:800;font-size:.85rem}
 .cont{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory}.cont button{flex:0 0 132px;scroll-snap-align:start;border:0;border-radius:18px;padding:12px 8px;color:#fff;cursor:pointer;background:linear-gradient(160deg,rgba(123,47,247,.75),rgba(255,95,162,.6));text-align:center;font:inherit;box-shadow:0 8px 20px rgba(0,0,0,.25)}.cont button span{font-size:2rem;display:block}.cont button b{display:block;font-size:.85rem;margin-top:4px}.cont button small{opacity:.85;font-size:.72rem}
 .mis{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.88rem}.mis .xpbar{flex:1;margin:0}.mis.ok{opacity:.6}
+.banners{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin:0 -2px}.banners .joyban{flex:0 0 86%;scroll-snap-align:start}
 .joyban{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:22px;padding:14px;margin:10px 0 4px;cursor:pointer;color:#fff;text-align:left;font:inherit;background:linear-gradient(120deg,#7b2ff7,#ff5fa2 55%,#ffb36b);box-shadow:0 10px 30px rgba(255,95,162,.35);position:relative;overflow:hidden}.joyban:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);animation:brillo 3s infinite}@keyframes brillo{from{transform:translateX(-100%)}to{transform:translateX(100%)}}.joyban span{font-size:2.6rem}.joyban b{font-size:1.15rem;display:block}.joyban small{opacity:.9}
 </style>
 </head>
@@ -497,7 +498,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=5'; sc.onload = () => { const sn = document.createElement('script'); sn.src = '/sonido.js?v=1'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=1'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=3'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=3'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = ir2; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sn = document.createElement('script'); sn.src = '/sonido.js?v=2'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=1'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=3'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=3'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=1'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
@@ -699,16 +700,36 @@ function pintarExtras() {
 testsP.then(() => { if (P.get('g') && (JUEGO[P.get('g')] || TESTS.some(t => t.id === P.get('g')))) abrir(P.get('g')); });
 
 // ---------- Mi progreso: nivel, monedas, racha, "Continuar jugando", misiones y logros ----------
+// ---------- Usuario del jugador (para entrar desde cualquier celular) ----------
+window.cuentaModal = function (modo = 'crear', alTerminar) {
+  const d = document.createElement('div'); d.className = 'modal';
+  const pinta = () => { d.innerHTML = `<div class="card"><h2>${modo === 'crear' ? '👤 Crea tu usuario' : '🔑 Entra con tu usuario'}</h2>
+    <p class="sub" style="text-align:left">${modo === 'crear' ? 'Tu progreso actual (niveles, monedas, trofeos) quedará guardado en tu usuario. Así podrás entrar desde cualquier celular.' : 'Se cargará el progreso guardado en tu usuario.'}</p>
+    <input id="cuU" maxlength="18" placeholder="Usuario (sin espacios)" autocomplete="username" style="margin-bottom:8px"><input id="cuC" type="password" maxlength="100" placeholder="Contraseña (mínimo 6)" autocomplete="${modo === 'crear' ? 'new-password' : 'current-password'}" style="margin-bottom:8px">
+    ${modo === 'crear' ? '<input id="cuC2" type="password" maxlength="100" placeholder="Repite la contraseña" autocomplete="new-password" style="margin-bottom:8px"><p class="small" style="text-align:left;margin:0 0 6px">No uses tu nombre real ni la contraseña de tu correo o Facebook. Guárdala bien: no pedimos correo.</p>' : ''}
+    <p id="cuErr" style="color:#ff8a8a;min-height:1em;margin:4px 0"></p>
+    <button class="btn" id="cuOk">${modo === 'crear' ? 'Crear mi usuario' : 'Entrar'}</button><button class="btn alt" id="cuCambia">${modo === 'crear' ? 'Ya tengo usuario' : 'Crear un usuario nuevo'}</button><button class="btn alt" id="cuNo">Ahora no</button></div>`; };
+  pinta(); document.body.append(d);
+  d.onclick = async e => { const id = e.target.id; if (id === 'cuNo') return d.remove(); if (id === 'cuCambia') { modo = modo === 'crear' ? 'entrar' : 'crear'; return pinta(); }
+    if (id !== 'cuOk') return; const u = $('#cuU').value.trim(), c = $('#cuC').value, err = $('#cuErr');
+    if (u.length < 3) return err.textContent = 'Escribe un usuario de al menos 3 letras'; if (c.length < 6) return err.textContent = 'La contraseña debe tener al menos 6 caracteres';
+    if (modo === 'crear' && c !== $('#cuC2').value) return err.textContent = 'Las contraseñas no coinciden';
+    e.target.disabled = true;
+    try { if (modo === 'crear') await PERFIL.crearCuenta(u, c); else await PERFIL.entrar(u, c); d.remove(); toast(modo === 'crear' ? `✅ ¡Listo, ${PERFIL.usuario}! Tu progreso está guardado` : `👋 ¡Hola de nuevo, ${PERFIL.usuario}!`); FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
+    catch (er) { err.textContent = er.message || 'No se pudo. Inténtalo otra vez.'; e.target.disabled = false; } };
+};
 window.pintarHub = function () {
   const h = $('#hub'); if (!h || !window.PERFIL) return;
   const D = PERFIL.datos, nv = PERFIL.nivelDe(D.xp), a = PERFIL.xpPara(nv), b = PERFIL.xpPara(nv + 1), pct = Math.round((D.xp - a) * 100 / (b - a));
   const av = LS.get('chatAv'), nom = LS.get('chatNom') || 'Jugador', jn = D.juegos.joyas?.nivel || 1;
   const rec = PERFIL.recientes(6).map(j => { const t = TESTS.find(x => x.juego === j.juego || x.id === j.juego); if (!t) return ''; return `<button data-g="${t.id}"><span>${t.e}</span><b>${escH(t.t.split(':')[0])}</b><small>${j.nivel ? 'Nivel ' + j.nivel : j.record ? 'Récord ' + j.record : 'Seguir'}</small></button>`; }).join('');
   const mis = PERFIL.misiones(), lg = PERFIL.logros(), hechos = lg.filter(x => x.ok).length;
-  h.innerHTML = `<button class="joyban" data-g="arcade-mundo" style="background:linear-gradient(120deg,#1e1b4b,#7c3aed 45%,#ec4899 80%,#f59e0b);box-shadow:0 10px 30px rgba(124,58,237,.4)"><span>🌍</span><div><b>${D.juegos.mundo?.pos ? 'Vuelve a Islas Portal 3D' : 'Nuevo: Islas Portal 3D'}</b><small>Mundo 3D con portales, monedas y gente jugando en vivo. ${D.juegos.mundo?.pos ? 'Sigues donde te quedaste.' : '¡Entra ya!'}</small></div></button>
+  h.innerHTML = `<div class="banners"><button class="joyban" data-g="arcade-batalla" style="background:linear-gradient(120deg,#1e3a8a,#7c3aed 45%,#ef4444 85%);box-shadow:0 10px 30px rgba(239,68,68,.35)"><span>⚔️</span><div><b>${D.juegos.batalla ? '🏆 ' + D.juegos.batalla.trofeos + ' · Duelo de Torres' : 'Nuevo: Duelo de Torres'}</b><small>Batallas de cartas en vivo: 1 vs 1, 2 vs 2 y clanes con chat.</small></div></button>
+  <button class="joyban" data-g="arcade-mundo" style="background:linear-gradient(120deg,#1e1b4b,#7c3aed 45%,#ec4899 80%,#f59e0b);box-shadow:0 10px 30px rgba(124,58,237,.4)"><span>🌍</span><div><b>${D.juegos.mundo?.pos ? 'Vuelve a Islas Portal 3D' : 'Nuevo: Islas Portal 3D'}</b><small>Mundo 3D con portales, monedas y gente jugando en vivo. ${D.juegos.mundo?.pos ? 'Sigues donde te quedaste.' : '¡Entra ya!'}</small></div></button>
   <button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
-  <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button>
+  <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
+  ${PERFIL.usuario ? `<div style="margin-top:8px;font-size:.85rem;opacity:.9">👤 Conectado como <b>${escH(PERFIL.usuario)}</b> · <a href="#" id="hubSalir">Cerrar sesión</a></div>` : `<div style="background:linear-gradient(100deg,#7c3aed,#ec4899);border-radius:14px;padding:10px 12px;margin-top:10px"><b>👤 Crea tu usuario</b><br><small>Para entrar desde cualquier celular y seguir donde te quedaste: niveles, monedas, trofeos y clan.</small><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="hubCrear" style="margin:0;padding:8px">Crear usuario</button><button class="btn alt" id="hubEntrar" style="margin:0;padding:8px">Ya tengo usuario</button></div></div>`}
   <div class="chips"><span>🪙 ${D.monedas}</span><span>🔥 ${D.racha.n || 0} ${D.racha.n === 1 ? 'día' : 'días'}</span><span>🎮 ${D.partidas} ${D.partidas === 1 ? 'partida' : 'partidas'}</span><span>🏅 ${hechos}/${lg.length}</span></div>
   ${rec ? `<h3 style="margin:14px 0 6px">▶ Continuar jugando</h3><div class="cont">${rec}</div>` : ''}
   <h3 style="margin:12px 0 4px">🎯 Misiones de hoy</h3>${mis.map(m => `<div class="mis ${m.hecho ? 'ok' : ''}"><span style="flex:0 0 46%">${m.hecho ? '✅' : '⬜'} ${escH(m.txt)}</span><div class="xpbar"><i style="width:${m.prog * 100 / m.meta}%"></i></div><small>${m.prog}/${m.meta} · ${m.premio}🪙</small></div>`).join('')}
@@ -717,10 +738,12 @@ window.pintarHub = function () {
   <p class="sub" style="text-align:left;font-size:.85rem">Tu progreso se guarda solo en este navegador y en la nube. ${PERFIL.codigo ? `Tu código para seguir en otro celular: <b style="letter-spacing:2px;color:var(--gold)">${PERFIL.codigo}</b> (guárdalo, no lo compartas).` : 'Juega una partida para obtener tu código de respaldo.'}</p>
   <div style="display:flex;gap:6px"><input id="codRec" maxlength="8" placeholder="¿Tienes un código? Escríbelo" style="flex:1;margin:0;text-transform:uppercase"><button class="btn" id="btnRec" style="width:auto;margin:0;padding:8px 14px">Recuperar</button></div></details></div>`;
   h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g);
+    if (e.target.id === 'hubCrear') return cuentaModal('crear'); if (e.target.id === 'hubEntrar') return cuentaModal('entrar');
+    if (e.target.id === 'hubSalir') { e.preventDefault(); if (confirm('¿Cerrar sesión en este celular? Tu progreso queda guardado en tu usuario.')) { await PERFIL.salirCuenta(); toast('Sesión cerrada'); } return; }
     if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
 };
 </script>
-<script src="/perfil.js?v=1"></script>
+<script src="/perfil.js?v=2"></script>
 <script>window.pintarHub?.();</script>
 </body>
 </html>

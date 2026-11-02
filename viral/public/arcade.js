@@ -304,6 +304,6 @@
 
   // Para los juegos de arcade2.js
   window.ARC_API = { JUEGOS, cab, fin, swipe, teclas, pad, cuadro, salir, setParar: f => { parar = f; } };
-  const TEMA = { joyas: 'joyas', huerto: 'huerto', mundo: 'mundo' };
+  const TEMA = { joyas: 'joyas', huerto: 'huerto', mundo: 'mundo', batalla: 'batalla' };
   window.ARCADE = { jugar: t => { (JUEGOS[t.juego] || (() => toast('Juego no disponible')))(t); FX.musica?.(TEMA[t.juego] || 'arcade'); }, salir: () => { salir(); FX.pararMusica?.(); FX.callar?.(); } };
 })();

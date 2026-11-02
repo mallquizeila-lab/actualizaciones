@@ -4,7 +4,7 @@
   const hoy = () => new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 10);
   const base = () => ({ v: 1, xp: 0, monedas: 50, racha: { dia: null, n: 0, max: 0 }, juegos: {}, misiones: null, logros: [], partidas: 0, creado: hoy() });
   let D = (() => { try { return Object.assign(base(), JSON.parse(LS.get('perfil') || 'null') || {}); } catch (e) { return base(); } })();
-  let codigo = LS.get('perfilCodigo') || null, tg = null;
+  let codigo = LS.get('perfilCodigo') || null, tg = null, tok = LS.get('perfilTok') || null, usuario = LS.get('perfilUsuario') || null;
   const nivelDe = xp => Math.floor(Math.sqrt(xp / 60)) + 1, xpPara = n => 60 * (n - 1) * (n - 1);
   const MISIONES = [
     ['jugar3', 'Juega 3 partidas', 3, 30], ['joyas2', 'Supera 2 niveles de Joyas', 2, 50], ['test1', 'Haz 1 test de personalidad', 1, 20],
@@ -16,7 +16,7 @@
 
   function guardar() {
     LS.set('perfil', JSON.stringify(D)); clearTimeout(tg);
-    tg = setTimeout(() => post('/api/perfil', { uid: VID, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } }).catch(() => {}), 1500);
+    tg = setTimeout(() => post('/api/perfil', { uid: VID, tok, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } }).catch(() => {}), 1500);
   }
   function misionesHoy() {
     if (D.misiones?.dia !== hoy()) {
@@ -43,7 +43,10 @@
   function sumarXp(n) { const antes = nivelDe(D.xp); D.xp += n; const ahora = nivelDe(D.xp); if (ahora > antes) { D.monedas += 20 * ahora; setTimeout(() => aviso(`⭐ ¡Subiste a nivel ${ahora}! +${20 * ahora} 🪙`), 400); } }
 
   window.PERFIL = {
-    get datos() { return D; }, get codigo() { return codigo; }, nivelDe, xpPara,
+    get datos() { return D; }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara,
+    async crearCuenta(u, clave) { const r = await post('/api/cuenta/crear', { uid: VID, tok, usuario: u, clave, data: D }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); if (!LS.get('chatNom')) LS.set('chatNom', usuario); guardar(); return usuario; },
+    async entrar(u, clave) { const r = await post('/api/cuenta/entrar', { usuario: u, clave }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); LS.set('chatNom', usuario); if (r.data) D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); return usuario; },
+    async salirCuenta() { clearTimeout(tg); await post('/api/perfil', { uid: VID, tok, data: D }).catch(() => {}); post('/api/cuenta/salir', { tok }).catch(() => {}); tok = null; usuario = null; LS.set('perfilTok', ''); LS.set('perfilUsuario', ''); D = base(); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); },
     // fin de una partida de cualquier juego
     partida(juego, puntos, extra = {}) {
       racha(); const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 };
@@ -63,5 +66,5 @@
     async recuperar(cod) { const r = await post('/api/perfil/recuperar', { uid: VID, codigo: cod }); if (r.error) throw new Error(r.error); D = Object.assign(base(), r.data); guardar(); return true; },
   };
   // Si este navegador no tiene progreso guardado pero el servidor sí (p. ej. borraron datos del sitio sin cambiar de navegador), se recupera.
-  post('/api/perfil', { uid: VID }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } if (r.data && (r.data.xp || 0) > (D.xp || 0)) { D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); } }).catch(() => {});
+  post('/api/perfil', { uid: VID, tok }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } if (r.data && (tok || (r.data.xp || 0) > (D.xp || 0))) { D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); } }).catch(() => {});
 })();
