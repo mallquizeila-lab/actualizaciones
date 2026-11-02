@@ -109,6 +109,16 @@
    "tipo": "arcade"
   },
   {
+   "id": "arcade-huerto",
+   "juego": "huerto",
+   "cat": "juegos",
+   "e": "🌱",
+   "t": "Huerto Defensor",
+   "d": "Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles y tu avance se guarda.",
+   "min": 6,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-bloques",
    "juego": "bloques",
    "cat": "juegos",

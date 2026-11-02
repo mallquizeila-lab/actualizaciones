@@ -1,3 +1,11 @@
+v7.12.0 — Nuevo juego "Huerto Defensor"
+- Juego de defensa por carriles con personajes propios: Hongo Rocío (da agua), Choclo Lanzagranos, Coco Muralla, Ají Explosivo, Limón Helado (frena), Piña Bomba y Palta Doble.
+- Plagas con su propio comportamiento: gusano, caracol blindado, langosta que salta, escarabajo tanque y la rata jefa.
+- 30 niveles con mapa y estrellas; cada nivel presenta defensores o plagas nuevas. El progreso se guarda y se sigue donde te quedaste.
+- Calidad moderna: personajes animados que parpadean y rebotan, explosiones, golpes, partículas, sacudida de pantalla, velocidad x2 y pausa automática al salir.
+- Conectado al perfil: experiencia, monedas, misión del día, logro y ranking diario. Segunda oportunidad con monedas.
+- Portada: acceso directo "Continúa Huerto Defensor".
+
 v7.11.0 — Juego "Joyas" de 100 niveles y progreso del jugador
 - Nuevo juego insignia 💎 Joyas: combina 3 o más, crea rayos (4 en línea), bombas (en L o T) y arcoíris (5 en línea). Mapa de 100 niveles con estrellas, objetivos de puntos, recoger colores y romper hielo, y potenciadores con monedas (martillo, mezclar, +5 movimientos).
 - Progreso del jugador: nivel y experiencia, monedas, racha diaria, 3 misiones al día y 11 logros.
