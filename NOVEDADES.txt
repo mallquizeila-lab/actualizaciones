@@ -1,3 +1,7 @@
+v7.20.0 — GLORY BROWN: los personajes de las ilustraciones pelean en la batalla
+- ⚔️ Ahora en la arena pelea el mismo personaje de su ilustración (misma cara, armadura y colores), de cuerpo entero y sin fondo, en lugar de los muñequitos hechos con código. Salta al caminar, respira quieto, se lanza al atacar, mira hacia donde va y tiene sombra.
+- 🎨 El botón de ShortForge "🎨 Completar ilustraciones y personajes de batalla" crea esos personajes a partir de cada ilustración ya hecha (90 tropas). Usa el cupo gratis de Cloudflare: si se acaba, sigue sola al día siguiente. Mientras falte alguno, esa carta usa su modelo 3D.
+
 v7.19.0 — GLORY BROWN: batalla en 3D e ilustraciones de cartas con IA
 - 🎮 Batalla en 3D real: arena con perspectiva, castillos 3D con su guardia (la Reina en la torre del rey), banderas al viento, río animado, puentes, sombras y ruinas al destruir una torre. Los personajes son modelos 3D que caminan, atacan, vuelan y caen al aparecer. Las barras de vida, los globos de diálogo y los efectos van encima de cada personaje.
 - 📲 Calidad automática: si el celular va lento, baja la calidad sola. Botón "🎮 Gráficos 3D/2D" en el menú para volver al modo 2D.

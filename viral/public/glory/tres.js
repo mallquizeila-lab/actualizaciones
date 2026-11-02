@@ -182,7 +182,7 @@
   }
 
   // ---------- Escena de la batalla ----------
-  function crear({ W, H, dpr, mundoI, voltear, CARTA, suelo, calidad = 1 }) {
+  function crear({ W, H, dpr, mundoI, voltear, CARTA, suelo, calidad = 1, sprite = () => null }) {
     const THREE = T3(); geos();
     const ren = new THREE.WebGLRenderer({ antialias: calidad > 0, powerPreference: 'high-performance' }); ren.setPixelRatio(Math.min(dpr, calidad > 0 ? 2 : 1)); ren.setSize(W, H, false);
     ren.shadowMap.enabled = calidad > 0; ren.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -234,7 +234,27 @@
     function ruinas(g) { const pos = g.position.clone(); escena.remove(g); const r = new THREE.Group(); r.position.copy(pos); for (let i = 0; i < 9; i++) { const me = new THREE.Mesh(GEO.dode, mat(0x8b857d, { flat: true })); me.position.set(Math.sin(i * 2.3) * 1, .25, Math.cos(i * 1.7) * .8); me.scale.setScalar(.3 + (i % 3) * .12); me.rotation.set(i, i * 2, 0); me.castShadow = true; r.add(me); } escena.add(r); return r; }
     // unidades
     const modelos = new Map(), plantillas = new Map(), muriendo = [];
-    function modelo(e) { const k = e.cid + '|' + e.team; let p = plantillas.get(k); if (!p) { p = construir(e.card, e.team); const tam = Math.max(.55, e.r * 2.1) * (e.card.tipo === 'estructura' ? .9 : 1); p.scale.multiplyScalar(tam); plantillas.set(k, p); }
+    // Personaje ilustrado (imagen sin fondo) que siempre mira a la cámara, con sombra y animación
+    const sombraTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+    const sombraMat = new THREE.MeshBasicMaterial({ map: sombraTex, transparent: true, depthWrite: false }), texSp = new Map();
+    function matSprite(cid, img, flip) { const k = cid + (flip ? '|f' : ''); let m = texSp.get(k); if (!m) { const t = new THREE.CanvasTexture(img); t.anisotropy = 4; if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding; if (flip) { t.wrapS = THREE.RepeatWrapping; t.repeat.x = -1; } m = new THREE.SpriteMaterial({ map: t, transparent: true, alphaTest: .08 }); texSp.set(k, m); } return m; }
+    function modeloSprite(e, img) {
+      const g = new THREE.Group(), alto = Math.max(1.1, e.r * 2.1) * (e.card.tipo === 'estructura' ? 1.5 : 1.55) * (e.card.arq === 'reina' ? 1.15 : 1), sp = new THREE.Sprite(matSprite(e.cid, img, false));
+      sp.center.set(.5, .04); sp.scale.set(alto * img.width / img.height, alto, 1); sp.name = 'sp'; g.add(sp);
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), sombraMat); sh.rotation.x = -Math.PI / 2; sh.position.y = .03; sh.scale.set(alto * .75, alto * .4, 1); sh.name = 'sombra'; g.add(sh);
+      g.userData.fam = 'sprite'; g.__img = img; g.__alto = alto; g.__sw = alto * img.width / img.height; return g; }
+    function animarSprite(o, e, t, dt, dx) {
+      const sp = o.children[0], mov = e.mueve > 0, at = e.at > 0; o.__fase = (o.__fase ?? Math.random() * 6) + dt * (mov ? 11 : 2.6); const f = o.__fase;
+      const sd = dx * dir; if (Math.abs(sd) > .004) { const fl = sd < 0; if (fl !== o.__fl) { o.__fl = fl; sp.material = matSprite(e.cid, o.__img, fl); } }
+      const salto = mov ? Math.abs(Math.sin(f)) * .12 * o.__alto : 0, resp = mov ? 0 : Math.sin(t * 2.4 + f) * .025;
+      o.__golpe = at ? Math.min(1, (o.__golpe || 0) + dt * 9) : Math.max(0, (o.__golpe || 0) - dt * 5);
+      const sq = 1 + resp + (mov ? Math.cos(f * 2) * .04 : 0) - o.__golpe * .08, an = 1 - resp * .6 + o.__golpe * .1;
+      sp.position.y = salto + (e.aire ? Math.sin(t * 2) * .15 : 0); sp.scale.set(o.__sw * an, o.__alto * sq, 1);
+      sp.material.rotation = (mov ? Math.sin(f) * .06 : 0) + (o.__fl ? 1 : -1) * o.__golpe * .14 * (at ? Math.sin(t * 25) : 1);
+      o.children[1].position.y = .03 - (e.aire ? 2.05 : 0); o.children[1].material.opacity = 1;
+    }
+    function modelo(e) { const img = e.card.tipo !== 'estructura' && sprite(e.cid); if (img) { const o = modeloSprite(e, img); o.__base = 1; escena.add(o); return o; }
+      const k = e.cid + '|' + e.team; let p = plantillas.get(k); if (!p) { p = construir(e.card, e.team); const tam = Math.max(.55, e.r * 2.1) * (e.card.tipo === 'estructura' ? .9 : 1); p.scale.multiplyScalar(tam); plantillas.set(k, p); }
       const o = p.clone(); o.__base = p.scale.x; escena.add(o); return o; }
     // proyectiles
     const glow = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, 'rgba(255,255,255,.6)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
@@ -254,7 +274,7 @@
         let o = modelos.get(e.id); if (!o) { o = modelo(e); modelos.set(e.id, o); o.__px = e.x; o.__py = e.y; o.rotation.y = (e.team ? 0 : Math.PI); }
         const cae = e.nace > 0 ? Math.max(0, e.nace - .5) * 2 : 0, alto = e.aire ? 2.1 : 0;
         o.position.set(e.x - 9, alto + cae * 6, e.y - 16);
-        const dx = e.x - o.__px, dy = e.y - o.__py; if (Math.hypot(dx, dy) > .004) { const obj = Math.atan2(dx, dy); let d = obj - o.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); o.rotation.y += d * Math.min(1, dt * 10); } o.__px = e.x; o.__py = e.y;
+        const dx = e.x - o.__px, dy = e.y - o.__py; if (o.userData.fam === 'sprite') { o.__px = e.x; o.__py = e.y; const sc = e.flash > 0 ? 1.1 : 1; o.scale.setScalar(sc); o.visible = !(e.invis && e.team !== (voltear ? 1 : 0)); animarSprite(o, e, t, dt, dx); continue; } if (Math.hypot(dx, dy) > .004) { const obj = Math.atan2(dx, dy); let d = obj - o.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); o.rotation.y += d * Math.min(1, dt * 10); } o.__px = e.x; o.__py = e.y;
         const sc = e.flash > 0 ? 1.12 : e.at > 0 ? 1.06 : 1; o.scale.setScalar(o.__base * sc); o.visible = !(e.invis && e.team !== (voltear ? 1 : 0));
         animar(o, e, t, dt);
       }
@@ -266,7 +286,7 @@
     // de casillas del juego a píxeles de pantalla (para barras de vida, globos y efectos)
     function proj(x, y, h = 0) { v.set(x - 9, h, y - 16).project(cam); const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H; v.set(x - 9 + 1, h, y - 16).project(cam); const ex = (v.x + 1) / 2 * W; return [sx, sy, Math.abs(ex - sx)]; }
     function pick(px, py) { ray.setFromCamera({ x: px / W * 2 - 1, y: -(py / H * 2 - 1) }, cam); const p = new THREE.Vector3(); if (!ray.ray.intersectPlane(plano, p)) return null; return [p.x + 9, p.z + 16]; }
-    return { canvas: ren.domElement, render, proj, pick, zona: on => { prohibida.visible = !!on; }, liberar: () => { ren.dispose(); ren.forceContextLoss?.(); } };
+    return { canvas: ren.domElement, render, proj, pick, altoDe: e => modelos.get(e.id)?.__alto, zona: on => { prohibida.visible = !!on; }, liberar: () => { ren.dispose(); ren.forceContextLoss?.(); } };
   }
   // Retrato 3D para la colección (un solo lienzo compartido)
   let RR = null; const RCACHE = new Map();

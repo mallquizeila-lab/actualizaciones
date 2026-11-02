@@ -5,7 +5,7 @@
   const AN = 18, AL = 32, RIO0 = 15, RIO1 = 17, PUENTES = [3.5, 14.5];
   let G = null, CARTA = {}, GA = null;
   const cargar = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
-  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=2'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); }
+  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=3'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); }
   const azar = l => l[Math.floor(Math.random() * l.length)];
   const RZ = () => G.rarezas;
   const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
@@ -27,8 +27,10 @@
   const monedasPara = nv => 25 * nv * nv;
   // ---------- Voces y diálogos ----------
   let MANI = null; const AUD = {};
-  let ARTE = {}; const IMG = {};
-  async function arteManifest() { try { const r = await Promise.race([fetch('/arte/glory/manifest.json'), new Promise((_, n) => setTimeout(n, 1500))]); if (r.ok) { const m = await r.json(); ARTE = Object.fromEntries((m.arte || []).map(v => [v, 1])); } } catch (e) {} }
+  let ARTE = {}, UNI = {}; const IMG = {}, SPR = {};
+  // personajes de batalla: imagen sin fondo, recortada a su silueta
+  function precargar(ids) { for (const id of ids || []) { if (!UNI[id] || SPR[id] !== undefined) continue; SPR[id] = null; const im = new Image(); im.onload = () => { try { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, y0 = c.height, x1 = 0, y1 = 0; for (let y = 0; y < c.height; y++) for (let xx = 0; xx < c.width; xx++) if (d[(y * c.width + xx) * 4 + 3] > 40) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; } if (x1 <= x0) return; const o = document.createElement('canvas'); o.width = x1 - x0 + 5; o.height = y1 - y0 + 5; o.getContext('2d').drawImage(c, x0 - 2, y0 - 2, o.width, o.height, 0, 0, o.width, o.height); SPR[id] = o; } catch (e) {} }; im.src = '/arte/glory/' + id + '_u.webp'; } }
+  async function arteManifest() { try { const r = await Promise.race([fetch('/arte/glory/manifest.json'), new Promise((_, n) => setTimeout(n, 1500))]); if (r.ok) { const m = await r.json(); ARTE = Object.fromEntries((m.arte || []).map(v => [v, 1])); UNI = Object.fromEntries((m.unidades || []).map(v => [v, 1])); } precargar(D().mazo); } catch (e) {} }
   const tieneArte = c => c && ARTE[c.id];
   function imgArte(c) { if (!IMG[c.id]) IMG[c.id] = new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = '/arte/glory/' + c.id + '.webp'; }); return IMG[c.id]; }
   function cubrir(X, im, x, y, w, h) { const s = Math.max(w / im.width, h / im.height), iw = im.width * s, ih = im.height * s; X.drawImage(im, x + (w - iw) / 2, y + (h - ih) * .3, iw, ih); }
@@ -612,11 +614,11 @@
     }
     function globo(e, x, y) { if (!e.dice || e.dice.v <= 0) return; X.font = `800 ${Math.max(10, k * .48)}px Figtree,sans-serif`; const w = Math.min(W * .7, X.measureText(e.dice.txt).width + 16), hh = Math.max(18, k * .8); x = Math.max(w / 2 + 2, Math.min(W - w / 2 - 2, x)); y = Math.max(hh + 4, y);
       X.globalAlpha = Math.min(1, e.dice.v * 3); X.fillStyle = vt(e.team) ? '#fff1f2' : '#eff6ff'; X.strokeStyle = vt(e.team) ? '#dc2626' : '#2563eb'; X.lineWidth = 2; X.beginPath(); X.roundRect(x - w / 2, y - hh, w, hh, hh / 2); X.fill(); X.stroke(); X.beginPath(); X.moveTo(x - 5, y - 1); X.lineTo(x, y + 7); X.lineTo(x + 5, y - 1); X.fill(); X.fillStyle = '#111827'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(e.dice.txt, x, y - hh / 2 + 1, w - 8); X.textBaseline = 'alphabetic'; X.globalAlpha = 1; }
-    let G3 = null; const K0 = k;
-    if (window.GLORY3D && LS.get('gb3d') !== '0') { try { const su = document.createElement('canvas'); su.width = 576; su.height = 1024; pintarArena(su.getContext('2d'), 576, 1024, 32, mundoI, variante, 1, true); G3 = GLORY3D.crear({ W, H, dpr, mundoI, voltear, CARTA, suelo: su, calidad: LS.get('gb3dq') === '0' ? 0 : 1 }); } catch (er) { console.warn('3D no disponible', er); G3 = null; } }
+    let G3 = null; const K0 = k; try { asientos.forEach(a => precargar([...a.mano, ...a.cola])); } catch (e) {}
+    if (window.GLORY3D && LS.get('gb3d') !== '0') { try { const su = document.createElement('canvas'); su.width = 576; su.height = 1024; pintarArena(su.getContext('2d'), 576, 1024, 32, mundoI, variante, 1, true); G3 = GLORY3D.crear({ W, H, dpr, mundoI, voltear, CARTA, suelo: su, sprite: cid => { if (SPR[cid] === undefined) precargar([cid]); return SPR[cid] || null; }, calidad: LS.get('gb3dq') === '0' ? 0 : 1 }); } catch (er) { console.warn('3D no disponible', er); G3 = null; } }
     const scr = (x, y, h = 0) => G3 ? G3.proj(x, y, h) : [x * k, vy(y) * k - h * k * .6, k];
     function overlay3D(e, tm, tt) {
-      const alto = (e.aire ? 2.1 : 0) + Math.max(.55, e.r * 2.1) * (e.card?.tipo === 'estructura' ? 1.6 : 1.15) + .15, [x, y, kk] = scr(e.x, e.y, alto), [, yp] = scr(e.x, e.y, 0), [, ym] = scr(e.x, e.y, alto / 2);
+      const alto = (e.aire ? 2.1 : 0) + (G3.altoDe(e) || Math.max(.55, e.r * 2.1) * (e.card?.tipo === 'estructura' ? 1.6 : 1.15)) + .15, [x, y, kk] = scr(e.x, e.y, alto), [, yp] = scr(e.x, e.y, 0), [, ym] = scr(e.x, e.y, alto / 2);
       X.save(); X.strokeStyle = GA.EQ[tm].c; X.shadowColor = GA.EQ[tm].c; X.shadowBlur = 8; X.lineWidth = 2; X.globalAlpha = .8; X.beginPath(); X.ellipse(x, yp, kk * e.r * .95, kk * e.r * .5, 0, 0, 7); X.stroke(); X.restore();
       if (e.card?.id === 'glory_brown') GA.brillo(X, x, ym, kk * 1.7, '#fde047', .22 + .1 * Math.sin(tt * 3));
       if (e.flash > 0) GA.brillo(X, x, ym, kk * e.r * 1.4, '#ffffff', .55);
