@@ -44,6 +44,8 @@ create table if not exists campaigns (id integer primary key, created_at text de
 create table if not exists polls (id integer primary key, created_at text default (datetime('now')), question text, options text, active integer default 1);
 create table if not exists votes (poll_id integer, option integer, voter text, created_at text default (datetime('now')), primary key (poll_id, voter));
 create table if not exists settings (k text primary key, v text);
+create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
+create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists resultados (id integer primary key, test text, clave text, created_at text default (datetime('now')));
 create index if not exists ix_r_test on resultados(test, clave);`);
 try { db.exec('alter table subscribers add column intereses text'); } catch (e) {} // agrega la columna si falta
@@ -241,6 +243,20 @@ async function api(req, res, u) {
     if (!hits.has(k)) { hits.set(k, [Date.now()]); run('insert into resultados(test, clave) values(?,?)', test, clave); } // uno por persona y test (aprox.)
     const filas = q('select clave, count(*) n from resultados where test=? group by clave', test), total = filas.reduce((a, x) => a + x.n, 0);
     return send(res, 200, { total, claves: Object.fromEntries(filas.map(x => [x.clave, x.n])) });
+  }
+  // Ranking del día de los juegos arcade.
+  if (u.pathname === '/api/arcade/puntaje' && P) {
+    const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200 };
+    const b = await json(req), jg = String(b.juego || ''), pts = Math.round(+b.puntos || 0);
+    if (!TOPE[jg] || pts < 0 || pts > TOPE[jg]) return send(res, 400, { error: 'Puntaje no válido' });
+    if (limite(ip, 'arc', 30)) return send(res, 429, { error: 'Más despacio' });
+    const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = /^a\d\d$/.test(b.avatar || '') ? b.avatar : 'a01', uidh = crypto.createHash('sha256').update(String(b.uid || ip)).digest('hex').slice(0, 16);
+    run('insert into arcade(juego, uid, nombre, avatar, puntos) values(?,?,?,?,?)', jg, uidh, nombre, avatar, pts);
+    const hoy = hoyPeru();
+    const top = q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy);
+    const mio = q1(`select max(puntos) p from arcade where juego=? and uid=? and date(created_at,'-5 hours')=?`, jg, uidh, hoy).p;
+    const puesto = q1(`select count(*) n from (select uid, max(puntos) p from arcade where juego=? and date(created_at,'-5 hours')=? group by uid) where p > ?`, jg, hoy, mio).n + 1;
+    return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto });
   }
   if (u.pathname === '/api/populares') {
     if (!populares.t || Date.now() - populares.t > 10 * 60000) { populares.lista = q(`select game, count(*) n from visitors where game is not null and created_at>=datetime('now','-7 days') group by game order by n desc limit 6`).filter(x => x.n >= 3).map(x => x.game); populares.t = Date.now(); }

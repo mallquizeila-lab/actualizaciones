@@ -191,7 +191,7 @@ pintarVivo(); setInterval(() => { if (!$('#home').hidden) pintarVivo(); }, 30000
 fetch('/api/populares').then(r => r.json()).then(d => { POP = d.populares || []; if (TESTS.length) pintarHome(); }).catch(() => {});
 const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
 const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const TIPO = { perfil: 'Personalidad', trivia: 'Trivia', calc: 'Calculadora', especial: 'Interactivo' };
+const TIPO = { perfil: 'Personalidad', trivia: 'Trivia', calc: 'Calculadora', especial: 'Interactivo', sala: 'En vivo', mesa: 'Multijugador', arcade: 'Juego' };
 function pintarHome() {
   const q = norm($('#buscar').value || ''), lista = [...TESTS].sort((a, b) => (POP.includes(b.id) ? 6 - POP.indexOf(b.id) : 0) - (POP.includes(a.id) ? 6 - POP.indexOf(a.id) : 0)).filter(t => (cat === 'todos' || t.cat === cat) && (!q || norm(t.t + ' ' + t.d).includes(q)));
   $('#cats').innerHTML = CATS.map(([k, l]) => `<button data-c="${k}" class="${k === cat ? 'on' : ''}">${l}</button>`).join('');
@@ -200,7 +200,7 @@ function pintarHome() {
 $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; pintarHome(); } };
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
-$('#back').onclick = () => { if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
+$('#back').onclick = () => { if (window.ARCADE) ARCADE.salir(); if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
 function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); }
 async function abrir(g) {
   if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
@@ -460,7 +460,16 @@ function mesa(t) {
     }
   });
 }
+function arcade(t) {
+  perfilChat(t, () => {
+    const ir2 = () => window.ARCADE.jugar(t);
+    if (window.ARCADE) return ir2();
+    stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=1'; sc.onload = ir2; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+  });
+}
 const MOTOR = {
+  arcade,
   mesa,
   sala,
   calc(t) { pedirFecha(t, bd => { const r = CALC[t.id](t, bd); registrar(t.id, t.id === 'chino' ? null : signOf(bd)[0]); resultado({ g: t.id, emoji: t.e, ...r }); }); },

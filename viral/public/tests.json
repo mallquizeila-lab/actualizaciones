@@ -9,6 +9,10 @@
    "🔴 En vivo"
   ],
   [
+   "juegos",
+   "🎮 Juegos"
+  ],
+  [
    "personalidad",
    "Personalidad"
   ],
@@ -93,6 +97,76 @@
    "d": "El clásico 1 contra 1. Reta a un amigo o a la máquina.",
    "min": 2,
    "tipo": "mesa"
+  },
+  {
+   "id": "arcade-gusanito",
+   "juego": "gusanito",
+   "cat": "juegos",
+   "e": "🐍",
+   "t": "Gusanito",
+   "d": "Come manzanas y crece sin chocar. ¿Hasta dónde llegas?",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-ludo",
+   "juego": "ludo",
+   "cat": "juegos",
+   "e": "🎲",
+   "t": "Ludo rápido",
+   "d": "Tú contra 3 rivales: lleva tus 2 fichas a la meta antes que nadie.",
+   "min": 6,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-billar",
+   "juego": "billar",
+   "cat": "juegos",
+   "e": "🎱",
+   "t": "Billar",
+   "d": "Mete todas las bolas con la menor cantidad de tiros.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-rompecabezas",
+   "juego": "rompecabezas",
+   "cat": "juegos",
+   "e": "🧩",
+   "t": "Rompecabezas",
+   "d": "Ordena la imagen moviendo las piezas.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-memoria",
+   "juego": "memoria",
+   "cat": "juegos",
+   "e": "🧠",
+   "t": "Memoria",
+   "d": "Encuentra las 8 parejas lo más rápido posible.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-buscaminas",
+   "juego": "buscaminas",
+   "cat": "juegos",
+   "e": "💣",
+   "t": "Buscaminas",
+   "d": "Abre todas las casillas sin pisar una mina.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-n2048",
+   "juego": "n2048",
+   "cat": "juegos",
+   "e": "🔢",
+   "t": "2048",
+   "d": "Junta números iguales hasta llegar a 2048.",
+   "min": 4,
+   "tipo": "arcade"
   },
   {
    "id": "horoscopo",

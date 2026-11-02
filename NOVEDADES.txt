@@ -1,3 +1,9 @@
+v7.8.0 — 🎮 7 juegos nuevos en la página viral
+- Nueva categoría "🎮 Juegos": 🐍 Gusanito, 🎲 Ludo rápido (tú contra 3 rivales de la máquina), 🎱 Billar (mete todas las bolas con pocos tiros), 🧩 Rompecabezas, 🧠 Memoria (con los avatares), 💣 Buscaminas y 🔢 2048.
+- Funcionan con el dedo (deslizar, tocar, arrastrar) y con el teclado.
+- Ranking del día en cada juego ("🏆 Récords de hoy" y tu puesto) y reto: al compartir, tu amigo ve "Tu amigo hizo 2328 puntos. ¿Lo superas?".
+- Cada juego tiene su imagen para compartir.
+
 v7.7.0 — 🎲 Juegos multijugador en la página viral
 - 🕵️ ¿Quién es el impostor? (3 a 8 jugadores): todos tienen una palabra secreta menos el impostor; cada uno da una pista y luego votan. Puntos para quien acierta o para el impostor si no lo descubren.
 - 🔴 Cuatro en línea y ❌ Tres en raya (1 contra 1). Si nadie se une, juegas contra la máquina.
