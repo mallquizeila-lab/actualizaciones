@@ -159,6 +159,106 @@
    "tipo": "arcade"
   },
   {
+   "id": "arcade-penales",
+   "juego": "penales",
+   "cat": "juegos",
+   "e": "⚽",
+   "t": "Penales",
+   "d": "Elige dónde patear y engaña al arquero. 5 tiros.",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-ahorcado",
+   "juego": "ahorcado",
+   "cat": "juegos",
+   "e": "🎈",
+   "t": "Ahorcado (globos)",
+   "d": "Adivina la palabra antes de que revienten todos tus globos.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-sopa",
+   "juego": "sopa",
+   "cat": "juegos",
+   "e": "🔎",
+   "t": "Sopa de letras",
+   "d": "Encuentra las 6 palabras escondidas en la cuadrícula.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-ppt",
+   "juego": "ppt",
+   "cat": "juegos",
+   "e": "✊",
+   "t": "Piedra, papel o tijera",
+   "d": "Al mejor de 5 contra la máquina… que aprende de tus jugadas.",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-reflejos",
+   "juego": "reflejos",
+   "cat": "juegos",
+   "e": "⚡",
+   "t": "Test de reflejos",
+   "d": "Toca cuando se ponga verde. ¿Cuántos milisegundos tardas?",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-tuberias",
+   "juego": "tuberias",
+   "cat": "juegos",
+   "e": "🚰",
+   "t": "Tuberías",
+   "d": "Gira las piezas y lleva el agua hasta la casa. 5 niveles.",
+   "min": 3,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-calculo",
+   "juego": "calculo",
+   "cat": "juegos",
+   "e": "➗",
+   "t": "Cálculo rápido",
+   "d": "¿Cuántas operaciones resuelves en 60 segundos?",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-simon",
+   "juego": "simon",
+   "cat": "juegos",
+   "e": "🔴",
+   "t": "Simón dice",
+   "d": "Repite la secuencia de colores. Cada nivel suma uno.",
+   "min": 2,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-topos",
+   "juego": "topos",
+   "cat": "juegos",
+   "e": "🐹",
+   "t": "Atrapa al topo",
+   "d": "Toca los topos y esquiva las bombas en 30 segundos.",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
+   "id": "arcade-color",
+   "juego": "color",
+   "cat": "juegos",
+   "e": "🎨",
+   "t": "¿Qué color es?",
+   "d": "Toca el color de la tinta, no la palabra. ¡Tu cerebro te engañará!",
+   "min": 1,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-ladrillos",
    "juego": "ladrillos",
    "cat": "juegos",

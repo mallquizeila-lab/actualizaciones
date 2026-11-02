@@ -1,3 +1,7 @@
+v7.10.0 — 10 juegos más (tanda 2): ya son 27 juegos
+- ⚽ Penales · 🎈 Ahorcado con globos · 🔎 Sopa de letras · ✊ Piedra, papel o tijera (la máquina aprende de tus jugadas) · ⚡ Test de reflejos · 🚰 Tuberías (5 niveles) · ➗ Cálculo rápido · 🔴 Simón dice · 🐹 Atrapa al topo · 🎨 ¿Qué color es?
+- Todos con sonidos, vibración, ranking del día, reto para amigos e imagen para compartir.
+
 v7.9.0 — Juegos modernos + 10 juegos nuevos (tanda 1)
 - Billar arreglado: las troneras ahora están abiertas de verdad (antes las bandas no dejaban entrar las bolas). Mesa, bolas y taco con look nuevo.
 - Estilo moderno en todos los juegos: colores neón, brillos, partículas, confeti al ganar, sonidos y vibración en el celular (botón 🔊/🔇 en cada juego).
