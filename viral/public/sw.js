@@ -11,3 +11,10 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(self.clients.openWindow(e.notification.data && e.notification.data.url || '/'));
 });
+// Hace la página instalable como app y guarda en caché los archivos del juego para que abra más rápido.
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return; const u = new URL(e.request.url);
+  if (u.origin !== location.origin || u.pathname.startsWith('/api/') || u.pathname.startsWith('/voces/') || u.pathname.startsWith('/c/')) return;
+  e.respondWith(fetch(e.request).then(r => { if (r.ok && (u.pathname.startsWith('/glory/') || u.pathname.startsWith('/avatares/') || /\.(js|png|webp|svg)$/.test(u.pathname))) { const c = r.clone(); caches.open('glory-v1').then(x => x.put(e.request, c)).catch(() => {}); } return r; })
+    .catch(() => caches.match(e.request).then(r => r || new Response('Sin conexión', { status: 503 }))));
+});

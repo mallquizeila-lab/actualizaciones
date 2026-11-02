@@ -37,5 +37,5 @@ Corre dentro de la página viral: funciona en PC, Android y iPhone desde el nave
 - ✅ Fase 2 — Catálogo de 127 cartas con datos estructurados, rarezas, habilidades, mundos y colección.
 - 🟡 Fase 3 — Arte: personajes vectoriales propios y animados (2D). Los **modelos 3D** reales necesitan archivos GLB (por ejemplo, creados a partir de tus ilustraciones); el motor permite cambiar el arte sin tocar la lógica.
 - ✅ Fase 4 — Mundos, campaña, cofres, menús, música y voces.
-- 🟡 Fase 5 — En línea: cuentas, emparejamiento, salas 1 vs 1 y 2 vs 2 y clanes funcionan. El primer jugador de la sala simula la partida ("anfitrión"); el paso siguiente es mover toda la simulación al servidor para que sea 100% a prueba de trampas.
-- ⏳ Fase 6 — Publicación en tiendas (Play Store / App Store) empaquetando la versión web.
+- ✅ Fase 5 — En línea: cuentas, emparejamiento, salas 1 vs 1 y 2 vs 2, clanes y ranking (mundial, por país y de clanes). **El servidor calcula cada partida** con el mismo motor (`public/glory/motor.js`): valida mazo, elixir, mano y lado del río, y todos juegan al nivel de torneo 9.
+- 🟡 Fase 6 — App instalable desde el navegador en /glory (ícono de la Reina, pantalla completa). Falta publicarla en Play Store / App Store.

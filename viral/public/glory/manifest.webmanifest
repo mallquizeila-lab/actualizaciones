@@ -1,0 +1,32 @@
+{
+ "name": "GLORY BROWN · El Choque de los Reinos",
+ "short_name": "GLORY BROWN",
+ "id": "/glory",
+ "start_url": "/glory?g=arcade-batalla&src=app",
+ "scope": "/",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0f0c29",
+ "theme_color": "#1e1b4b",
+ "description": "Juego de estrategia con cartas en tiempo real: 127 cartas, 7 mundos y la Reina Glory Brown.",
+ "icons": [
+  {
+   "src": "/glory/icono-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "/glory/icono-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "/glory/icono-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

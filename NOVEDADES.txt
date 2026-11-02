@@ -1,3 +1,10 @@
+v7.17.0 — GLORY BROWN: servidor a prueba de trampas, ranking y app instalable
+- Las partidas en línea ahora las calcula el SERVIDOR con el mismo motor del juego: valida mazo, elixir, cartas en la mano y lado del río. Nadie puede hacer trampa modificando su navegador.
+- En línea todas las cartas juegan al nivel de torneo 9: gana quien mejor juega, no quien tiene más mejoras.
+- Si alguien se desconecta, un bot sigue jugando por él; la rendición da la victoria al rival.
+- Nuevo Ranking: mundial, por país (con bandera) y de clanes. Los puntos solo los da el servidor en batallas en línea (+30 al ganar, -20 al perder).
+- App instalable: entra a tu-pagina/glory y toca "📲 Instalar GLORY BROWN en mi celular" para tener el ícono de la Reina en la pantalla de inicio (Android, iPhone y PC). Abre más rápido gracias a la memoria caché.
+
 v7.16.0 — 👑 GLORY BROWN: El Choque de los Reinos
 - Duelo de Torres se transforma en GLORY BROWN, en homenaje a la abuelita: intro con la Reina, logo y estilo propio.
 - 127 cartas originales (90 tropas, 21 hechizos, 15 estructuras y la Reina Glory Brown, Legendaria Real) con estadísticas, rarezas, habilidades e historia.

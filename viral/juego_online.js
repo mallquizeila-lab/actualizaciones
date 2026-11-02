@@ -1,9 +1,18 @@
 // Cuentas de jugador (usuario + contraseña), clanes con chat moderado y salas en línea de Duelo de Torres (1 vs 1 y 2 vs 2).
 // Las salas usan un "anfitrión": el primer jugador simula la partida y el servidor solo reenvía mensajes (rápido y sin carga).
-const crypto = require('crypto');
+const crypto = require('crypto'), fs = require('fs'), path = require('path'), vm = require('vm');
+// Catálogo y motor de GLORY BROWN: el servidor calcula las partidas en línea (los celulares solo las dibujan).
+function cargarGlory() {
+  const ctx = { window: {} }; vm.runInNewContext(fs.readFileSync(path.join(__dirname, 'public', 'glory', 'cartas.js'), 'utf8'), ctx); const G = ctx.window.GLORY;
+  const CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c]));
+  for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null };
+  return { G, CARTA, Motor: require('./public/glory/motor.js') };
+}
 
 function crear({ db, q, q1, run, revisar, apodo }) {
   db.exec(`
+    create table if not exists glory_rank (jugador text primary key, nombre text, pais text, puntos integer default 0, victorias integer default 0, derrotas integer default 0, updated_at text default (datetime('now')));
+    create index if not exists i_glory_rank on glory_rank(puntos desc);
     create table if not exists cuentas (id integer primary key, usuario text unique collate nocase, sal text, hash text, perfil_id text, created_at text default (datetime('now')));
     create table if not exists sesiones (tok text primary key, cuenta_id integer, created_at text default (datetime('now')));
     create table if not exists clanes (id integer primary key, nombre text unique collate nocase, insignia text, descr text, lider text, trofeos integer default 0, created_at text default (datetime('now')));
@@ -30,9 +39,39 @@ function crear({ db, q, q1, run, revisar, apodo }) {
     const j = { asiento: libre, tok: crypto.randomBytes(12).toString('hex'), nombre: apodo(b.nombre) || 'Jugador', trofeos: Math.max(0, Math.min(99999, +b.trofeos || 0)), mazo: Array.isArray(b.mazo) ? b.mazo.slice(0, 8).map(x => String(x).slice(0, 40)) : [], niveles: typeof b.niveles === 'object' && b.niveles ? Object.fromEntries(Object.entries(b.niveles).slice(0, 12).map(([k, v]) => [String(k).slice(0, 40), Math.max(1, Math.min(10, +v || 1))])) : {}, clan: String(b.clan || '').slice(0, 30), jid: jugadorId(b) };
     s.jugadores.push(j); s.activo = Date.now(); return j;
   }
+  let GL = null; const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
   function empezar(s, conBots) {
     if (conBots) for (let i = 0; i < tam(s.modo); i++) if (!s.jugadores.some(j => j.asiento === i)) s.jugadores.push({ asiento: i, bot: 1, nombre: ['Bot Kira', 'Bot Toro', 'Bot Luna', 'Bot Rayo'][i], trofeos: 0, mazo: [], niveles: {} });
     s.estado = 'jugando'; s.inicio = Date.now(); emitir(s, 'empieza', pub(s));
+    try { iniciarMotor(s); } catch (e) { console.error('GLORY motor:', e.message); }
+  }
+  // La partida la calcula el servidor: valida mazos, elixir, mano y lado del río; todos juegan con nivel de torneo 9.
+  function iniciarMotor(s) {
+    GL = GL || cargarGlory(); const { G, CARTA, Motor } = GL, n4 = s.modo === '2v2', equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a;
+    const arenaDe = tr => G.arenas.reduce((a, x, i) => tr >= x.trofeos ? i : a, 0), arenaI = arenaDe(Math.max(...s.jugadores.filter(j => !j.bot).map(j => j.trofeos), 0));
+    const NIV = Object.fromEntries(G.cartas.map(c => [c.id, 9])), baraja = l => [...l].sort(() => Math.random() - .5);
+    const valido = m => { const v = (Array.isArray(m) ? m : []).filter((c, i, a) => CARTA[c] && !c.startsWith('_') && a.indexOf(c) === i); return v.length === 8 ? v : MAZO_INICIAL; };
+    const mazoBot = () => { const pool = G.cartas.filter(c => c.id !== 'glory_brown' && c.arena <= Math.max(arenaI, 2)); const t1 = pool.filter(c => ['gigante', 'golem', 'titan', 'jinete'].includes(c.arq)), t2 = pool.filter(c => c.tipo === 'hechizo'), t3 = pool.filter(c => c.tipo === 'tropa' && !t1.includes(c)); const m = [...baraja(t1).slice(0, 2), ...baraja(t2).slice(0, 2), ...baraja(t3)].slice(0, 8).map(c => c.id); return m.length === 8 ? m : MAZO_INICIAL; };
+    s.nuevos = { fx: [], so: [], tx: [], ha: [], vo: [] };
+    const asientos = [...s.jugadores].sort((a, b) => a.asiento - b.asiento).map(j => ({ a: j.asiento, team: equipoDe(j.asiento), ctrl: j.bot ? 'ia' : 'jugador', mazo: j.bot ? mazoBot() : valido(j.mazo), niv: NIV, nombre: j.nombre }));
+    s.motor = Motor.crear({ G, CARTA, n4, arenaI, asientos, ev: {
+      efecto: f => s.nuevos.fx.push(f), son: t => s.nuevos.so.push(t), texto: (t, o) => s.nuevos.tx.push([t, o]), voz: (t, team) => s.nuevos.vo.push([t, team]),
+      habla: (e, clave, i) => s.nuevos.ha.push([e.id, clave, i]), emote: (a, e) => emitir(s, 'emote', { de: a, a, e }), fin: g => finSala(s, g) } });
+    let envT = 0, errores = 0;
+    s.reloj = setInterval(() => {
+      try { s.motor.paso(.05); } catch (e) { if (++errores < 3) console.error('GLORY paso:', e.message); }
+      if ((envT -= .05) <= 0 && !s.motor.S.fin) { envT = .1; const d = s.motor.foto(s.nuevos); s.nuevos = { fx: [], so: [], tx: [], ha: [], vo: [] }; emitir(s, 'estado', d); }
+      s.activo = Date.now(); if (Date.now() - s.inicio > 6 * 60000) s.motor.terminar();
+    }, 50);
+  }
+  function finSala(s, g) {
+    clearInterval(s.reloj); const d = s.motor.foto(s.nuevos); emitir(s, 'estado', d);
+    const n4 = s.modo === '2v2', equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a, rank = {};
+    for (const j of s.jugadores) { if (j.bot || !j.jid) continue; const eq = equipoDe(j.asiento), rival = s.jugadores.filter(x => equipoDe(x.asiento) !== eq), contraBots = rival.every(x => x.bot);
+      const delta = g === null ? 0 : g === eq ? (contraBots ? 10 : 30) : (contraBots ? -5 : -20), fila = q1('select puntos from glory_rank where jugador=?', j.jid), pts = Math.max(0, (fila?.puntos || 0) + delta);
+      run(`insert into glory_rank(jugador, nombre, pais, puntos, victorias, derrotas) values(?,?,?,?,?,?) on conflict(jugador) do update set nombre=excluded.nombre, pais=coalesce(excluded.pais, pais), puntos=excluded.puntos, victorias=victorias+excluded.victorias, derrotas=derrotas+excluded.derrotas, updated_at=datetime('now')`, j.jid, j.nombre, j.pais || null, pts, g === eq ? 1 : 0, g !== null && g !== eq ? 1 : 0);
+      rank[j.asiento] = pts; }
+    emitir(s, 'fin', { g, c: s.motor.S.coronas, rank }); s.estado = 'terminada'; setTimeout(() => { salas.delete(s.id); subs.delete(s.id); }, 20000);
   }
   setInterval(() => { const ahora = Date.now(); for (const [id, s] of salas) if (ahora - s.activo > (s.estado === 'jugando' ? 90000 : 10 * 60000)) { emitir(s, 'cerrada', {}); salas.delete(id); subs.delete(id); } for (const m in cola) cola[m] = cola[m].filter(x => salas.has(x) && salas.get(x).estado === 'esperando'); }, 15000).unref();
 
@@ -116,6 +155,17 @@ function crear({ db, q, q1, run, revisar, apodo }) {
       return false;
     }
 
+    // ===== Ranking de GLORY BROWN (puntos que solo da el servidor en partidas en línea) =====
+    if (r === '/api/glory/ranking') {
+      const tipo = u.searchParams.get('tipo') === 'clanes' ? 'clanes' : 'jugadores', pais = String(u.searchParams.get('pais') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+      if (tipo === 'clanes') return send(res, 200, { lista: q(`select c.nombre, c.insignia, count(*) miembros, coalesce(sum(r.puntos),0) puntos from clanes c join clan_miembros m on m.clan_id=c.id left join glory_rank r on r.jugador=m.jugador group by c.id order by puntos desc limit 50`) });
+      return send(res, 200, { lista: q(`select nombre, pais, puntos, victorias, derrotas from glory_rank ${pais ? 'where pais=?' : ''} order by puntos desc, victorias desc limit 50`, ...(pais ? [pais] : [])) });
+    }
+    if (r === '/api/glory/yo' && P) {
+      const b = await json(req), jid = jugadorId(b), f = q1('select puntos, pais, victorias, derrotas from glory_rank where jugador=?', jid); if (!f) return send(res, 200, { puntos: 0, puesto: null });
+      const puesto = q1('select count(*) n from glory_rank where puntos > ?', f.puntos).n + 1, puestoPais = f.pais ? q1('select count(*) n from glory_rank where pais=? and puntos > ?', f.pais, f.puntos).n + 1 : null;
+      return send(res, 200, { ...f, puesto, puestoPais });
+    }
     // ===== Salas de Duelo de Torres =====
     if (r === '/api/duelo/stream') {
       const s = salas.get(u.searchParams.get('sala')), tok = String(u.searchParams.get('tok') || '');
@@ -125,7 +175,7 @@ function crear({ db, q, q1, run, revisar, apodo }) {
       res.write(`event: sala\ndata: ${JSON.stringify(pub(s))}\n\n`); if (s.estado === 'jugando') res.write(`event: empieza\ndata: ${JSON.stringify(pub(s))}\n\n`);
       const ka = setInterval(() => { try { res.write(': ping\n\n'); } catch (e) {} }, 15000);
       req.on('close', () => { clearInterval(ka); subs.get(s.id)?.delete(c); const j = s.jugadores.find(x => x.tok === tok);
-        setTimeout(() => { if (![...(subs.get(s.id) || [])].some(x => x.tok === tok) && j && salas.has(s.id)) { if (s.estado === 'esperando') { s.jugadores = s.jugadores.filter(x => x !== j); emitir(s, 'sala', pub(s)); if (!s.jugadores.length) salas.delete(s.id); } else emitir(s, 'salio', { asiento: j.asiento, nombre: j.nombre }); } }, 4000); });
+        setTimeout(() => { if (![...(subs.get(s.id) || [])].some(x => x.tok === tok) && j && salas.has(s.id)) { if (s.estado === 'esperando') { s.jugadores = s.jugadores.filter(x => x !== j); emitir(s, 'sala', pub(s)); if (!s.jugadores.length) salas.delete(s.id); } else { if (s.motor) s.motor.S.asientos[j.asiento].ctrl = 'ia'; emitir(s, 'salio', { asiento: j.asiento, nombre: j.nombre }); } } }, 4000); });
       return;
     }
     if (!P || !r.startsWith('/api/duelo/')) return false;
@@ -137,7 +187,7 @@ function crear({ db, q, q1, run, revisar, apodo }) {
       if (accion === 'unir') { s = [...salas.values()].find(x => x.codigo === String(b.codigo || '').toUpperCase().trim() && x.estado === 'esperando'); if (!s) return send(res, 404, { error: 'No hay ninguna sala esperando con ese código' }); }
       else if (accion === 'crear') s = nuevaSala(modo, true);
       else { s = cola[modo].map(id => salas.get(id)).find(x => x && x.estado === 'esperando' && x.jugadores.length < tam(modo) && !x.jugadores.some(j => j.jid === jugadorId(b))); if (!s) { s = nuevaSala(modo, false); cola[modo].push(s.id); } }
-      const j = sentar(s, b); if (!j) return send(res, 400, { error: 'La sala está llena' });
+      const j = sentar(s, b); if (!j) return send(res, 400, { error: 'La sala está llena' }); j.pais = String(req.headers['cf-ipcountry'] || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2) || null; if (j.pais === 'XX' || j.pais === 'T1') j.pais = null;
       if (s.jugadores.length === tam(s.modo)) empezar(s); else emitir(s, 'sala', pub(s));
       return send(res, 200, { sala: s.id, tok: j.tok, asiento: j.asiento, codigo: s.codigo, modo: s.modo });
     }
@@ -145,16 +195,13 @@ function crear({ db, q, q1, run, revisar, apodo }) {
     if (!s || !j) return send(res, 404, { error: 'Sala no encontrada' });
     s.activo = Date.now();
     if (accion === 'bots') { if (s.estado === 'esperando' && j.asiento === 0) empezar(s, true); return send(res, 200, { ok: 1 }); }
-    if (accion === 'salir') { s.jugadores = s.jugadores.filter(x => x !== j); emitir(s, s.estado === 'esperando' ? 'sala' : 'salio', s.estado === 'esperando' ? pub(s) : { asiento: j.asiento, nombre: j.nombre }); if (!s.jugadores.some(x => !x.bot)) salas.delete(s.id); return send(res, 200, { ok: 1 }); }
+    if (accion === 'salir') { if (s.motor && !s.motor.S.fin) { s.motor.S.asientos[j.asiento].ctrl = 'ia'; if (!s.jugadores.some(x => !x.bot && x !== j)) { s.motor.terminar(1 - (s.modo === '2v2' ? (j.asiento < 2 ? 0 : 1) : j.asiento)); } } s.jugadores = s.jugadores.filter(x => x !== j); emitir(s, s.estado === 'esperando' ? 'sala' : 'salio', s.estado === 'esperando' ? pub(s) : { asiento: j.asiento, nombre: j.nombre }); if (!s.jugadores.some(x => !x.bot)) { clearInterval(s.reloj); salas.delete(s.id); } return send(res, 200, { ok: 1 }); }
     if (accion === 'msg') {
-      const tipo = String(b.tipo || ''), datos = b.datos;
-      if (!['estado', 'jugar', 'emote', 'fin'].includes(tipo)) return send(res, 400, { error: 'Mensaje no válido' });
-      if (tipo === 'estado' && j.asiento !== 0) return send(res, 403, { error: 'Solo el anfitrión' });
-      if (tipo === 'emote' && !['😂', '👍', '😡', '😭', '😎', '👏'].includes(datos?.e)) return send(res, 400, { error: 'Emoji no válido' });
-      if (JSON.stringify(datos || {}).length > 60000) return send(res, 413, { error: 'Muy grande' });
-      emitir(s, tipo, { de: j.asiento, ...((datos && typeof datos === 'object') ? datos : {}) }, j.tok);
-      if (tipo === 'fin') { s.estado = 'terminada'; setTimeout(() => { salas.delete(s.id); subs.delete(s.id); }, 20000); }
-      return send(res, 200, { ok: 1 });
+      const tipo = String(b.tipo || ''), datos = b.datos || {};
+      if (tipo === 'jugar') { if (!s.motor) return send(res, 409, { error: 'La partida no ha empezado' }); if (limite(b.tok, 'jugada', 60, 10000)) return send(res, 429, { error: 'Más despacio' }); const ok = s.motor.jugar(j.asiento, String(datos.k || ''), +datos.x, +datos.y); return send(res, 200, { ok }); }
+      if (tipo === 'rendirse') { if (s.motor && !s.motor.S.fin) { if (s.modo === '2v2') { s.motor.S.asientos[j.asiento].ctrl = 'ia'; emitir(s, 'salio', { asiento: j.asiento, nombre: j.nombre }); } else s.motor.terminar(1 - j.asiento); } return send(res, 200, { ok: 1 }); }
+      if (tipo === 'emote') { if (!['😂', '👍', '😡', '😭', '😎', '👏'].includes(datos.e)) return send(res, 400, { error: 'Emoji no válido' }); if (limite(b.tok, 'emote', 6, 10000)) return send(res, 429, { error: 'Más despacio' }); emitir(s, 'emote', { de: j.asiento, a: j.asiento, e: datos.e }, j.tok); return send(res, 200, { ok: 1 }); }
+      return send(res, 400, { error: 'Mensaje no válido' });
     }
     return send(res, 404, { error: 'No encontrado' });
   }

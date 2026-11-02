@@ -203,7 +203,7 @@ async function api(req, res, u) {
 
   // ---- chat en vivo ----
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
-  if (/^\/api\/(cuenta|clan|duelo)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (/^\/api\/(cuenta|clan|duelo|glory)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
   if (u.pathname === '/api/config') {
@@ -470,6 +470,11 @@ http.createServer(async (req, res) => {
       return send(res, 302, '', 'text/plain', { location: '/panel' + (u.searchParams.get('tema') ? '?tema=' + encodeURIComponent(u.searchParams.get('tema')) : ''), 'set-cookie': `sid=${nuevaSesion()}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800` });
     }
     // Página principal con la vista previa correcta para Facebook/WhatsApp (imagen y textos de cada test).
+    if (u.pathname === '/glory' || u.pathname === '/glory/') { // GLORY BROWN como app instalable (su propio ícono y nombre)
+      const t = CATALOGO.find(x => x.id === 'arcade-batalla') || { t: 'GLORY BROWN', d: '' }, img = `${PUBLIC_URL}/og/arcade-batalla.png`;
+      const og = `<title>GLORY BROWN · El Choque de los Reinos</title><meta name="description" content="${esc(t.d)}"><meta property="og:type" content="website"><meta property="og:title" content="👑 GLORY BROWN · El Choque de los Reinos"><meta property="og:description" content="${esc(t.d)} ¡Juega gratis!"><meta property="og:url" content="${esc(PUBLIC_URL + '/glory')}"><meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}"><meta name="apple-mobile-web-app-title" content="GLORY BROWN"><link rel="apple-touch-icon" href="/glory/icono-192.png"><script>if (!/[?&]g=/.test(location.search)) history.replaceState(null, '', '/glory?g=arcade-batalla&src=app');</script>`;
+      return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
+    }
     if (u.pathname === '/' || u.pathname === '/index.html') {
       const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
       const titulo = t ? t.t : (getS('marca', null)?.titulo || '32 tests gratis: descubre algo nuevo de ti');

@@ -5,7 +5,7 @@
   const AN = 18, AL = 32, RIO0 = 15, RIO1 = 17, PUENTES = [3.5, 14.5];
   let G = null, CARTA = {}, GA = null;
   const cargar = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
-  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); }
+  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); }
   const azar = l => l[Math.floor(Math.random() * l.length)];
   const RZ = () => G.rarezas;
   const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
@@ -53,7 +53,7 @@
     .gb-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #92400e}
     .gb-btn.azul{background:linear-gradient(180deg,#93c5fd,#3b82f6 45%,#1e3a8a);color:#fff;text-shadow:0 1px 0 #0b1440;box-shadow:0 5px 0 #0b1440,0 10px 20px rgba(0,0,0,.4)}
     .gb-btn.chico{font-size:.9rem;padding:10px 8px;margin:4px 0}
-    .gb-tabs{position:sticky;bottom:6px;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:rgba(10,8,30,.92);backdrop-filter:blur(8px);border:2px solid rgba(252,211,77,.4);border-radius:18px;padding:5px;margin-top:10px}
+    .gb-tabs{position:sticky;bottom:6px;z-index:6;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;background:rgba(10,8,30,.92);backdrop-filter:blur(8px);border:2px solid rgba(252,211,77,.4);border-radius:18px;padding:5px;margin-top:10px}
     .gb-tabs button{border:0;background:none;color:#cbd5e1;font:800 .68rem Figtree,sans-serif;padding:6px 0;border-radius:12px;cursor:pointer}
     .gb-tabs button span{display:block;font-size:1.35rem}
     .gb-tabs button.on{background:linear-gradient(180deg,#4c1d95,#1e1b4b);color:#fde68a;box-shadow:inset 0 0 0 1px #fcd34d}
@@ -168,10 +168,10 @@
     if (!G) { stage('<div class="card cargando"><div class="sp"></div><p>Abriendo los reinos…</p></div>'); listo().then(() => lobby(t)).catch(() => stage('<div class="card"><h2>No se pudo cargar GLORY BROWN</h2><p class="sub">Revisa tu conexión.</p></div>')); return; }
     const J = D(); if (!J.intro) return intro(() => lobby(t));
     FX.musica?.('batalla');
-    const tabs = [['batalla', '⚔️', 'Batalla'], ['cartas', '🃏', 'Cartas'], ['mundos', '🗺️', 'Mundos'], ['cofres', '🎁', 'Cofres'], ['clan', '🛡️', 'Clan']];
-    const cuerpo = { batalla: tabBatalla, cartas: tabCartas, mundos: tabMundos, cofres: tabCofres }[TAB] || tabBatalla;
+    const tabs = [['batalla', '⚔️', 'Batalla'], ['cartas', '🃏', 'Cartas'], ['mundos', '🗺️', 'Mundos'], ['ranking', '🏆', 'Ranking'], ['cofres', '🎁', 'Cofres'], ['clan', '🛡️', 'Clan']];
+    const cuerpo = { batalla: tabBatalla, cartas: tabCartas, mundos: tabMundos, cofres: tabCofres, ranking: tabRanking }[TAB] || tabBatalla;
     stage(`<div class="gb">${cuerpo(J)}<nav class="gb-tabs">${tabs.map(([k, e, n]) => `<button data-tab="${k}" class="${TAB === k ? 'on' : ''}"><span>${e}</span>${n}${k === 'cofres' && (J.cofres.length || cofreGratisListo(J)) ? ' 🔴' : ''}</button>`).join('')}</nav></div>`);
-    pintarRetratos();
+    pintarRetratos(); if (TAB === 'ranking') cargarRanking();
     $('#stage').onclick = e => {
       const tb = e.target.closest('[data-tab]'); if (tb) { if (tb.dataset.tab === 'clan') return clanes(t); return lobby(t, tb.dataset.tab); }
       const cid = e.target.closest('[data-carta]')?.dataset.carta; if (cid) return clicCarta(t, cid);
@@ -182,6 +182,8 @@
       if (id === 'm_ia2') return batalla(t, { modo: '2v2' });
       if (id === 'm_amigo') return amigo(t);
       if (id === 'reinaVer') return presentacion('glory_brown');
+      if (id === 'instalar') return instalarApp();
+      const rk = e.target.closest('[data-rk]'); if (rk) { RK = rk.dataset.rk; return cargarRanking(); }
       const ca = e.target.closest('[data-camp]'); if (ca) return batalla(t, { modo: '1v1', campana: +ca.dataset.camp });
       const co = e.target.closest('[data-cofre]'); if (co) { const i = +co.dataset.cofre; const tipo = J.cofres[i]; J.cofres.splice(i, 1); PERFIL.guardar(); return abrirCofre(tipo, () => lobby(t)); }
       if (id === 'cgratis') { if (!cofreGratisListo(J)) return toast('Aún no está listo ⏳'); J.cofreGratis = Date.now(); PERFIL.guardar(); return abrirCofre('plata', () => lobby(t)); }
@@ -203,7 +205,35 @@
         <button class="gb-btn gb-shine" id="m_1v1" style="font-size:1.45rem;margin-top:12px">⚔️ BATALLA EN LÍNEA</button>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="gb-btn chico azul" id="m_2v2">👥 2 vs 2 en línea</button><button class="gb-btn chico azul" id="m_ia">🤖 Contra la máquina</button><button class="gb-btn chico azul" id="m_amigo">🤝 Con un amigo</button><button class="gb-btn chico azul" id="m_ia2">👥 2 vs 2 con bots</button></div></div>
       <div class="gb-panel"><b>🃏 Tu mazo</b> <small style="opacity:.8">· coste medio 💜 ${(J.mazo.reduce((a, k) => a + CARTA[k].c, 0) / 8).toFixed(1)}</small><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">${J.mazo.map(k => cartaHTML(CARTA[k])).join('')}</div></div>
+      ${matchMedia('(display-mode: standalone)').matches ? '' : '<button class="gb-btn azul gb-shine" id="instalar">📲 Instalar GLORY BROWN en mi celular</button>'}
       <p class="sub" style="text-align:center">${J.victorias} victorias · ${J.derrotas} derrotas</p>`;
+  }
+  // ---------- App instalable ----------
+  async function instalarApp() {
+    if (window.__instalar) { const e = window.__instalar; window.__instalar = null; e.prompt(); const r = await e.userChoice.catch(() => ({})); if (r.outcome === 'accepted') { toast('👑 ¡GLORY BROWN se instaló en tu celular!'); FX.confeti(); } return; }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (!ios && location.pathname !== '/glory') { location.href = '/glory?g=arcade-batalla&src=app'; return; }
+    const d = document.createElement('div'); d.className = 'gb-modal gb';
+    d.innerHTML = `<div class="box"><div class="gb-panel" style="text-align:center"><img src="/glory/icono-192.png" style="width:90px;border-radius:22px"><h2 style="color:#fde68a">📲 Instala GLORY BROWN</h2>${ios ? '<p>1. Toca el botón <b>Compartir</b> <span style="font-size:1.3rem">⬆️</span> de Safari.<br>2. Elige <b>"Agregar a pantalla de inicio"</b>.<br>3. Toca <b>Agregar</b>. ¡Listo! Tendrás el ícono de la Reina.</p>' : '<p>1. Toca el menú <b>⋮</b> del navegador.<br>2. Elige <b>"Instalar aplicación"</b> o <b>"Agregar a la pantalla principal"</b>.<br>3. Confirma. ¡Listo! Tendrás el ícono de la Reina.</p>'}<button class="gb-btn" id="okInst">Entendido</button></div></div>`;
+    document.body.append(d); d.onclick = e => { if (e.target.id === 'okInst' || e.target === d) d.remove(); };
+  }
+  // ---------- Ranking (puntos que da el servidor en partidas en línea) ----------
+  let RK = 'mundial', MIO = null;
+  function tabRanking() {
+    return `<div class="gb-logo"><b style="font-size:1.6rem">RANKING</b><small>BATALLAS EN LÍNEA</small></div>
+      <div class="gb-panel" id="rkYo" style="text-align:center"><small>Cargando tu puesto…</small></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">${[['mundial', '🌎 Mundial'], ['pais', '🏳️ Mi país'], ['clanes', '🛡️ Clanes']].map(([k, n]) => `<button class="gb-btn chico ${RK === k ? '' : 'azul'}" data-rk="${k}" style="margin:0">${n}</button>`).join('')}</div>
+      <div class="gb-panel" id="rkLista"><p class="sub">Cargando…</p></div>
+      <p class="sub" style="text-align:center;font-size:.8rem">Los puntos de ranking solo se ganan en batallas en línea y los calcula el servidor: nadie puede hacer trampa. En línea todas las cartas juegan al nivel de torneo 9.</p>`;
+  }
+  const BANDERA = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc].map(ch => 127397 + ch.charCodeAt(0))) : '🏳️';
+  async function cargarRanking() {
+    document.querySelectorAll('[data-rk]').forEach(b => b.classList.toggle('azul', b.dataset.rk !== RK));
+    try { MIO = await post('/api/glory/yo', datosJugador()); } catch (e) { MIO = {}; }
+    const yo2 = $('#rkYo'); if (yo2) yo2.innerHTML = MIO.puesto ? `<b style="font-size:1.4rem;color:#fde68a">#${MIO.puesto}</b> mundial ${MIO.puestoPais ? `· <b>#${MIO.puestoPais}</b> en ${BANDERA(MIO.pais)}` : ''}<br><small>${MIO.puntos} puntos · ${MIO.victorias} victorias</small>` : '<small>Juega una batalla en línea para entrar al ranking 🏆</small>';
+    const pais = RK === 'pais' ? (MIO.pais || 'PE') : '', d = await fetch(`/api/glory/ranking?tipo=${RK === 'clanes' ? 'clanes' : 'jugadores'}${pais ? '&pais=' + pais : ''}`).then(r => r.json()).catch(() => ({ lista: [] }));
+    const box = $('#rkLista'); if (!box) return;
+    box.innerHTML = d.lista.length ? d.lista.map((x, i) => `<div class="dato" style="${i < 3 ? 'background:rgba(252,211,77,.1);border-radius:10px;padding:6px' : ''}"><span>${['🥇', '🥈', '🥉'][i] || `<b style="display:inline-block;width:26px">${i + 1}</b>`} ${RK === 'clanes' ? `${x.insignia} ${escH(x.nombre)} <small style="opacity:.7">· ${x.miembros} 👥</small>` : `${BANDERA(x.pais)} ${escH(x.nombre)}`}</span><b>🏆 ${x.puntos}</b></div>`).join('') : '<p class="sub">Todavía no hay nadie aquí. ¡Sé el primero!</p>';
   }
   const FILTRO = { mundo: 'todos', rareza: 'todas', tipo: 'todos' };
   let CAMBIO = null;
@@ -387,7 +417,7 @@
     salir(); scrollTo(0, 0); $('#stage').onclick = null; estilos();
     if (!G) return listo().then(() => batalla(t, cfg));
     const J = D(), B = G.balance, dpr = Math.min(2, devicePixelRatio || 1), ON = cfg.online || null, n4 = cfg.modo === '2v2';
-    const miAsiento = ON ? ON.asiento : 0, equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a, miEquipo = equipoDe(miAsiento), anfitrion = !ON || miAsiento === 0, voltear = miEquipo === 1;
+    const miAsiento = ON ? ON.asiento : 0, equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a, miEquipo = equipoDe(miAsiento), anfitrion = !ON, voltear = miEquipo === 1;
     const arenaI = cfg.campana ?? (ON ? arenaDe(ON.jugadores?.[0]?.trofeos || 0) : arenaDe(J.trofeos)), arena = G.arenas[arenaI], mundoI = arena.mundo, variante = arenaI % 3;
     const ancho = Math.min(($('#stage').clientWidth || 360) - 12, 460), k = Math.max(14, Math.min(ancho / AN, (innerHeight - 215) / AL)), W = AN * k, H = AL * k;
     const nivIA = Math.min(10, 1 + Math.floor((cfg.campana ?? arenaDe(J.trofeos)) / 2));
@@ -396,7 +426,7 @@
     const asientos = [...Array(n4 ? 4 : 2).keys()].map(a => {
       const jo = ON?.jugadores.find(j => j.asiento === a), local = a === miAsiento, ia = ON ? (!jo || jo.bot) : !local;
       let mazo = local ? [...J.mazo] : jo && !jo.bot && jo.mazo?.length === 8 ? jo.mazo.filter(c => CARTA[c]) : mazoBot(); while (mazo.length < 8) mazo.push(MAZO_INICIAL[mazo.length]); mazo = baraja(mazo);
-      const niv = local ? Object.fromEntries(Object.entries(J.cartas).map(([k2, v]) => [k2, v.nv])) : jo && !jo.bot ? (jo.niveles || {}) : Object.fromEntries(G.cartas.map(c => [c.id, nivIA]));
+      const niv = ON ? Object.fromEntries(G.cartas.map(c => [c.id, 9])) : local ? Object.fromEntries(Object.entries(J.cartas).map(([k2, v]) => [k2, v.nv])) : jo && !jo.bot ? (jo.niveles || {}) : Object.fromEntries(G.cartas.map(c => [c.id, nivIA]));
       return { a, team: equipoDe(a), ctrl: local ? 'local' : ia ? 'ia' : 'remoto', mana: B.manaInicial, mano: mazo.slice(0, 4), cola: mazo.slice(4), niv, nombre: jo ? jo.nombre : local ? (LS.get('chatNom') || 'Tú') : cfg.campana != null ? `Guardián de ${arena.n.split(' ').slice(-1)[0]}` : ['Bot Kira', 'Bot Toro', 'Bot Luna', 'Bot Rayo'][a], iaT: 2 + a * .7 };
     });
     const yo = asientos[miAsiento];
@@ -408,225 +438,47 @@
       <div style="position:relative;height:22px;margin-top:6px;border-radius:11px;background:rgba(0,0,0,.5);overflow:hidden;border:1px solid #d946ef88"><i id="mana" style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#86198f,#d946ef,#f5d0fe);width:0%;box-shadow:0 0 12px #d946ef"></i><i id="manaP" style="position:absolute;top:0;bottom:0;background:rgba(245,208,254,.35);width:0%"></i><div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(10,1fr)">${'<span style="border-right:1px solid rgba(255,255,255,.25)"></span>'.repeat(10)}</div><b id="manaN" style="position:absolute;left:8px;top:0;font-size:.9rem;line-height:22px;text-shadow:0 1px 2px #000">💜 5</b></div></div></div>`);
     const cv = $('#cv'), X = cv.getContext('2d'); X.setTransform(dpr, 0, 0, dpr, 0, 0);
     const fondo = document.createElement('canvas'); fondo.width = W * dpr; fondo.height = H * dpr; pintarArena(fondo.getContext('2d'), W, H, k, mundoI, variante, dpr);
-    let ents = [], proys = [], efectos = [], textos = [], zonas = [], uid = 0, tiempo = B.duracion, extra = false, fin = false, vivo = true, raf, last = performance.now(), sel = null, coronas = [0, 0], iaEmoT = 10, shake = 0, envT = 0, charlaT = 3;
-    let nuevos = { fx: [], son: [], tx: [], ha: [] };
-    const son = tipo => { FX.son(tipo); if (ON && anfitrion) nuevos.son.push(tipo); };
-    const efecto = f => { efectos.push(f); if (ON && anfitrion) nuevos.fx.push(f); };
-    const texto = (txt, x, y, tam, dur, solo) => { textos.push({ txt, x, y, tam, v: dur, max: dur }); if (ON && anfitrion && !solo) nuevos.tx.push([txt, tam / k, dur]); };
-    // Habla de un personaje (globo + voz). En línea se reenvía a todos.
-    function habla(e, clave, i, forzar) { if (!e || !e.card || e.hp <= 0) return; const txt = decir(e.card, clave, i, forzar); if (txt) { e.dice = { txt, v: 2.2 }; if (ON && anfitrion) nuevos.ha.push([e.id, clave, i ?? 0]); } }
-    const torre = (team, x, y, rey) => { const tb = rey ? B.rey : B.torre, hp = tb.vida * (n4 ? 1.35 : 1); ents.push({ id: ++uid, team, torre: 1, rey, x, y, hp, max: hp, r: rey ? 1.9 : 1.5, rango: tb.rango, dmg: tb.dmg, golpe: tb.golpe, cd: 0, activo: !rey, obj: 'todo', aAire: 1, buf: {} }); };
-    torre(0, 3.5, 25.5); torre(0, 14.5, 25.5); torre(0, 9, 28.4, 1); torre(1, 3.5, 6.5); torre(1, 14.5, 6.5); torre(1, 9, 3.6, 1);
+    let ents = [], proys = [], efectos = [], textos = [], zonas = [], tiempo = B.duracion, extra = false, fin = false, vivo = true, raf, last = performance.now(), sel = null, coronas = [0, 0], shake = 0;
     const torres = tm => ents.filter(e => e.torre && e.team === tm && e.hp > 0);
-    const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
     const vy = y => voltear ? AL - y : y, vt = tm => voltear ? 1 - tm : tm;
-
-    // ---------- Creación de unidades y hechizos ----------
-    function crearUnidad(team, card, x, y, nv, extra2 = {}) {
-      const m = mult(nv || 1), e = { id: ++uid, team, card, cid: card.id, x: Math.max(.5, Math.min(AN - .5, x)), y: Math.max(.5, Math.min(AL - .5, y)), hp: card.hp * m, max: card.hp * m, dmg: (card.dmg || 0) * m, golpe: card.golpe, rango: card.rango || 1, vel: card.vel, r: card.r, obj: card.obj, aire: card.aire, aAire: card.aAire || card.aire, area: card.area, proy: card.proy, hab: card.hab, cd: .4, nace: 1, t: Math.random() * 5, at: 0, buf: {}, habT: card.hab?.cada || 0, recorrido: 0, ...extra2 };
-      if (card.tipo === 'estructura') { e.estructura = 1; e.vida = card.dur || 30; }
-      if (card.hab?.tipo === 'invisible') e.invis = 1;
-      if (card.hab?.tipo === 'reina') e.rt = { luz: 4, rayo: 6, escudo: 8, corazon: 12 };
-      ents.push(e); return e;
+    const texto = (txt, x, y, tam, dur) => { textos.push({ txt, x, y, tam, v: dur, max: dur }); };
+    // Eventos que llegan del motor (local) o del servidor (en línea)
+    function recibirEfecto(f) { if (f.tipo === 'sacudida') shake = Math.max(shake, f.v); else if (f.tipo === 'confeti') FX.confeti(); else if (f.tipo === 'muerte') { for (let i = 0; i < 8; i++) efectos.push({ tipo: 'chispa', x: f.x, y: f.y, vx: (Math.random() - .5) * 6, vy: (Math.random() - .5) * 6, v: .5, max: .5, team: f.team }); } else efectos.push(f); }
+    function recibirTexto(txt, o = {}) { if (txt == null) txt = o.equipo === miEquipo ? o.a : o.b; texto(txt, o.x != null ? o.x * k : W / 2, o.y != null ? vy(o.y) * k : H / 2, (o.tam || 1) * k, o.dur || 1.8); }
+    function recibirVoz(tipo, team) { const mio = team === miEquipo; const t2 = { reyDespierta: mio ? '¡La reina despierta! ¡Defiendan el castillo!' : null, torre: mio ? '¡Cuidado! Perdimos una torre' : '¡Torre destruida! ¡Bien hecho!', extra: '¡Tiempo extra!', doble: '¡Elixir doble!' }[tipo]; if (t2) FX.voz?.(t2, { forzar: true, tono: mio ? .9 : 1.05 }); if (tipo === 'extra' || tipo === 'doble') FX.intensidad?.(2); }
+    function recibirHabla(e, clave, i, forzar) { if (!e?.card) return; const txt = decir(e.card, clave, i, forzar); if (txt) e.dice = { txt, v: 2.2 }; }
+    // ---------- Motor local (contra la máquina) ----------
+    let M = null;
+    if (!ON) {
+      M = GloryMotor.crear({ G, CARTA, n4, arenaI, asientos: asientos.map(a => ({ a: a.a, team: a.team, ctrl: a.ctrl === 'ia' ? 'ia' : 'jugador', mazo: [...a.mano, ...a.cola], niv: a.niv, nombre: a.nombre, bonus: a.ctrl === 'ia' && a.team !== miEquipo ? 1 + arenaI * .01 : 1 })),
+        ev: { efecto: recibirEfecto, son: t2 => FX.son(t2), texto: recibirTexto, habla: recibirHabla, voz: recibirVoz, emote: (a, e) => emote(a, e), fin: g => terminar(g) } });
+      M.S.asientos.forEach((s, i) => { const c = asientos[i].ctrl; Object.assign(asientos[i], s, { ctrl: s.ctrl === 'ia' ? 'ia' : c }); M.S.asientos[i] = asientos[i]; });
     }
-    function desplegar(as, key, x, y) {
-      const card = CARTA[key], nv = as.niv[key] || 1, team = as.team;
-      if (card.tipo === 'hechizo') return hechizo(team, card, x, y, mult(nv));
-      const n = card.cant || 1; let primera = null;
-      for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, d = n > 1 ? .55 + n * .08 : 0; const e = crearUnidad(team, card, x + Math.cos(a) * d, y + Math.sin(a) * d, nv); primera = primera || e; }
-      efecto({ tipo: 'aparece', x, y, v: .6, max: .6, team, reina: key === 'glory_brown' });
-      if (key === 'glory_brown') { texto('👑 ¡GLORY BROWN ENTRA A LA BATALLA!', W / 2, H * .45, k * .75, 2.4); son('nivel'); setTimeout(() => habla(primera, 'aparece', null, true), 300); }
-      else if (Math.random() < .6) setTimeout(() => habla(primera, 'aparece'), 450);
-    }
-    function hechizo(team, c, x, y, m) {
-      const enemigos = () => ents.filter(e => e.team !== team && e.hp > 0), aliados = () => ents.filter(e => e.team === team && e.hp > 0 && !e.torre), en = (e, r) => Math.hypot(e.x - x, e.y - y) < r + (e.torre ? e.r : 0);
-      const col = c.color || '#fde047'; son('swish');
-      switch (c.arq) {
-        case 'bola': case 'meteoro': { const rey = torres(team).find(e => e.rey) || { x: 9, y: team ? 3.6 : 28.4 }; proys.push({ x: c.arq === 'meteoro' ? x : rey.x, y: c.arq === 'meteoro' ? y - 12 * (team ? -1 : 1) : rey.y, tx: x, ty: y, v: c.arq === 'meteoro' ? 10 : 13, tipo: 'bola', team, dmg: c.dmg * m, radio: c.radio, color: col, grande: c.arq === 'meteoro' }); break; }
-        case 'congelar': for (const e of enemigos()) if (en(e, c.radio)) { e.buf.aturdido = (c.dur || 4) * (e.torre ? .6 : 1); herir(e, (c.dmg || 0) * m); } efecto({ tipo: 'hielo', x, y, r: c.radio, v: 1, max: 1, c: col }); son('hielo'); break;
-        case 'rayo': { const obj = enemigos().filter(e => en(e, c.radio)).sort((a, b) => b.hp - a.hp).slice(0, c.objetivos || 3); for (const e of obj) { herir(e, c.dmg * m * (e.torre ? .35 : 1)); efecto({ tipo: 'rayo', x: e.x, y: e.y, v: .5, max: .5 }); } shake = .3; son('explosion'); break; }
-        case 'linea': { const dir = team ? 1 : -1; for (const e of enemigos()) if (Math.abs(e.x - x) < (c.ancho || 1.2) + e.r * .5 && (e.y - y) * dir >= -.5 && (e.y - y) * dir <= (c.largo || 9)) herir(e, c.dmg * m * (e.torre ? .35 : 1)); efecto({ tipo: 'linea', x, y, l: (c.largo || 9) * dir, w: c.ancho || 1.2, v: .6, max: .6, c: col }); son('swish'); break; }
-        case 'cura': case 'veneno': case 'furia': case 'tornado': zonas.push({ tipo: c.arq, team, x, y, radio: c.radio, hasta: tiempo - (c.dur || 4), valor: (c.valor || c.dmg || 0) * m, pct: c.pct || 40, col, tick: 0 }); efecto({ tipo: 'zona', x, y, r: c.radio, v: Math.min(8, c.dur || 4), max: Math.min(8, c.dur || 4), c: col }); son(c.arq === 'cura' ? 'ganar' : 'hielo'); break;
-        case 'empuje': for (const e of enemigos()) if (!e.torre && en(e, c.radio)) { const a = Math.atan2(e.y - y, e.x - x); e.x += Math.cos(a) * 2.2; e.y += Math.sin(a) * 2.2; herir(e, c.dmg * m); } efecto({ tipo: 'onda', x, y, r: c.radio, v: .5, max: .5, c: col }); son('swish'); break;
-        case 'escudo': for (const e of aliados()) if (en(e, c.radio)) { e.buf.escudo = (c.valor || 400) * m; e.buf.escudoT = c.dur || 8; } efecto({ tipo: 'escudo', x, y, r: c.radio, v: 1, max: 1 }); son('nivel'); break;
-        case 'invoca': { const mini = CARTA['_' + (c.unidad || 'esbirro')]; for (let i = 0; i < (c.cantidad || 4); i++) { const a = i / 4 * Math.PI * 2; crearUnidad(team, mini, x + Math.cos(a) * .8, y + Math.sin(a) * .8, Math.round(m * 10 - 9)); } efecto({ tipo: 'onda', x, y, r: 1.6, v: .6, max: .6, c: '#7c3aed' }); son('jefe'); break; }
-        case 'drenar': { let tot = 0; for (const e of enemigos()) if (en(e, c.radio)) { const d = c.dmg * m * (e.torre ? .35 : 1); herir(e, d); tot += d; } for (const e of aliados()) if (en(e, c.radio + 1.5)) e.hp = Math.min(e.max, e.hp + tot * .5); efecto({ tipo: 'zona', x, y, r: c.radio, v: .8, max: .8, c: col }); son('splat'); break; }
-      }
-    }
-    function herir(e, d, de) {
-      if (e.hp <= 0 || d <= 0) return;
-      if (!e.torre) { const prot = ents.find(a => a.team === e.team && a.hp > 0 && a.hab?.tipo === 'escudo_aura' && dist(a, e) < a.hab.radio); if (prot) d *= 1 - prot.hab.red / 100; if (e.buf.red) d *= .6; if (e.buf.escudo > 0) { const ab = Math.min(e.buf.escudo, d); e.buf.escudo -= ab; d -= ab; } }
-      e.hp -= d; e.flash = .15;
-      if (e.torre && e.rey && !e.activo) { e.activo = true; if (e.team === miEquipo) FX.voz?.('¡La reina despierta! ¡Defiendan el castillo!', { tono: .9 }); }
-      if (e.hp <= 0) morir(e, de);
-    }
-    function morir(e, de) {
-      if (e.torre) {
-        coronas[1 - e.team] += e.rey ? 3 - coronas[1 - e.team] : 1; shake = .7; son('explosion'); FX.vibrar([80, 50, 120]);
-        efecto({ tipo: 'boom', x: e.x, y: e.y, v: .9, max: .9, r: 3.2 });
-        const rey = ents.find(x => x.torre && x.rey && x.team === e.team); if (rey) rey.activo = true;
-        textoEquipo(e.team, '😱 ¡Perdimos una torre!', '👑 ¡Torre destruida!');
-        if (e.rey || coronas[0] >= 3 || coronas[1] >= 3 || extra) terminar();
-        return;
-      }
-      for (let i = 0; i < 8; i++) efectos.push({ tipo: 'chispa', x: e.x, y: e.y, vx: (Math.random() - .5) * 6, vy: (Math.random() - .5) * 6, v: .5, max: .5, team: e.team });
-      son('pop'); if (e.card?.frases && Math.random() < .3) habla(e, 'muere');
-      const h = e.hab;
-      if (h?.tipo === 'explota') { for (const o of ents) if (o.team !== e.team && o.hp > 0 && dist(o, e) < h.radio + o.r * .5) herir(o, h.dmg); efecto({ tipo: 'boom', x: e.x, y: e.y, v: .5, max: .5, r: h.radio }); son('explosion'); }
-      if (h?.tipo === 'divide') { const mini = CARTA['_' + h.unidad]; for (let i = 0; i < h.n; i++) crearUnidad(e.team, mini, e.x + (i - (h.n - 1) / 2) * .9, e.y, 1, { nace: .2 }); }
-      if (h?.tipo === 'revive' && !e.revivio) { const n = crearUnidad(e.team, e.card, e.x, e.y, 1, { revivio: 1, nace: 1.2 }); n.hp = n.max * .5; efecto({ tipo: 'aparece', x: e.x, y: e.y, v: 1, max: 1, team: e.team }); texto('🔥 ¡Renace!', e.x * k, vy(e.y) * k - k, k * .6, 1.2); }
-      if (e.card?.id === 'glory_brown') { texto('👑 Su luz nunca se apagará', W / 2, H / 2, k * .8, 2.5); efecto({ tipo: 'zona', x: e.x, y: e.y, r: 3, v: 2, max: 2, c: '#fde047' }); }
-    }
-    function textoEquipo(teamAfectado, txtAfectado, txtOtro) { texto(teamAfectado === miEquipo ? txtAfectado : txtOtro, W / 2, H / 2, k * 1.1, 1.8, true); if (ON && anfitrion) nuevos.tx.push(['@' + teamAfectado + '|' + txtAfectado + '|' + txtOtro, 1.1, 1.8]); if (teamAfectado !== miEquipo) FX.voz?.('¡Torre destruida! ¡Bien hecho!', { forzar: true }); else FX.voz?.('¡Cuidado! Perdimos una torre', { forzar: true, tono: .9 }); }
-    function objetivo(u) {
-      let mejor = null, md = 1e9; const vista = u.hab?.tipo === 'asesino' || u.hab?.tipo === 'invisible' ? 7 : 5.5;
-      const prov = ents.find(e => e.team !== u.team && e.hp > 0 && e.hab?.tipo === 'provoca' && dist(u, e) < e.hab.radio && !u.aire); if (prov && u.obj !== 'edif') return prov;
-      for (const e of ents) { if (e.team === u.team || e.hp <= 0 || e.nace > 0 || e.invis) continue; if (u.obj === 'edif' && !e.torre && !e.estructura) continue; if (e.aire && !u.aAire) continue;
-        const d = dist(u, e) - e.r; if (!e.torre && d > vista) continue; if (e.torre) { const mismoLado = (e.x < 9) === (u.x < 9) || e.rey; if (!mismoLado && torres(e.team).some(o => !o.rey && (o.x < 9) === (u.x < 9))) continue; }
-        let pd = d + (e.torre ? 3 : 0); if (u.hab?.tipo === 'asesino' && !e.torre) pd = e.hp / 100 + d * .3; if (pd < md) { md = pd; mejor = e; } }
-      return mejor;
-    }
-    function moverHacia(u, tx, ty, dt) {
-      let px = tx, py = ty; const lado = y => y < RIO0 ? 1 : y > RIO1 ? 0 : 2;
-      if (!u.aire && lado(u.y) !== lado(ty)) { const bx = Math.abs(u.x - PUENTES[0]) < Math.abs(u.x - PUENTES[1]) ? PUENTES[0] : PUENTES[1]; const ent = u.team ? RIO0 - .3 : RIO1 + .3, sal = u.team ? RIO1 + .5 : RIO0 - .5;
-        if (lado(u.y) === 2 || Math.abs(u.x - bx) < .4) { px = bx; py = sal; } else { px = bx; py = ent; } }
-      const lento = u.buf.lento > 0 ? .5 : 1, furia = u.buf.furia > 0 ? 1.4 : 1;
-      const dx = px - u.x, dy = py - u.y, d = Math.hypot(dx, dy) || 1, v = u.vel * lento * furia * dt; const mv = Math.min(v, d); u.x += dx / d * mv; u.y += dy / d * mv; u.recorrido += mv; u.mueve = .15;
-    }
-    function paso(dt) {
-      tiempo -= dt; const doble = tiempo <= B.dobleDesde || extra;
-      for (const as of asientos) as.mana = Math.min(B.manaMax, as.mana + dt / B.regen * (doble ? 2 : 1) * (n4 ? .8 : 1) * (as.ctrl === 'ia' && !ON && as.team !== miEquipo ? 1 + arenaI * .01 : 1));
-      if (tiempo <= 0) { if (!extra && coronas[0] === coronas[1]) { extra = true; tiempo = B.extra; texto('⏱️ ¡Tiempo extra! La siguiente torre gana', W / 2, H / 2, k * .8, 2.2); son('sirena'); FX.intensidad?.(2); FX.voz?.('¡Tiempo extra!', { forzar: true }); } else return terminar(); }
-      if (!extra && tiempo <= B.dobleDesde && tiempo + dt > B.dobleDesde) { texto('💜 ¡Elixir doble!', W / 2, H / 2, k, 1.8); son('combo'); FX.intensidad?.(2); FX.voz?.('¡Elixir doble!', { forzar: true }); }
-      // zonas de hechizos
-      for (const z of zonas) { z.tick -= dt; if (z.tick > 0) continue; z.tick = .5;
-        for (const e of ents) { if (e.hp <= 0 || Math.hypot(e.x - z.x, e.y - z.y) > z.radio + (e.torre ? e.r : 0)) continue;
-          if (z.tipo === 'cura' && e.team === z.team && !e.torre) e.hp = Math.min(e.max, e.hp + z.valor * .5);
-          if (z.tipo === 'veneno' && e.team !== z.team) { herir(e, z.valor * .5 * (e.torre ? .35 : 1)); if (!e.torre) e.buf.lento = .6; }
-          if (z.tipo === 'furia' && e.team === z.team && !e.torre) e.buf.furia = .6;
-          if (z.tipo === 'tornado' && e.team !== z.team && !e.torre) { const a = Math.atan2(z.y - e.y, z.x - e.x); e.x += Math.cos(a) * .5; e.y += Math.sin(a) * .5; herir(e, z.valor * .25); } } }
-      zonas = zonas.filter(z => tiempo > z.hasta);
-      for (const u of ents) {
-        if (u.hp <= 0) continue; u.t = (u.t || 0) + dt; u.flash = Math.max(0, (u.flash || 0) - dt); u.at = Math.max(0, (u.at || 0) - dt); u.mueve = Math.max(0, (u.mueve || 0) - dt);
-        const bf = u.buf; for (const kk of ['lento', 'furia', 'red', 'aturdido', 'escudoT']) if (bf[kk] > 0) bf[kk] -= dt; if (bf.escudoT <= 0) bf.escudo = 0;
-        if (bf.dot && bf.dot.hasta > 0) { bf.dot.hasta -= dt; herir(u, bf.dot.dps * dt); if (u.hp <= 0) continue; }
-        if (u.estructura) { u.hp -= u.max / u.vida * dt; if (u.hp <= 0) { morir(u); continue; } }
-        if (u.nace > 0) { u.nace -= dt; if (u.nace <= 0 && u.hab?.tipo === 'rugido') { for (const o of ents) if (o.team !== u.team && o.hp > 0 && !o.torre && dist(o, u) < u.hab.radio) o.buf.aturdido = u.hab.dur; efecto({ tipo: 'onda', x: u.x, y: u.y, r: u.hab.radio, v: .6, max: .6, c: '#fde047' }); son('jefe'); shake = .3; } continue; }
-        if (bf.aturdido > 0) continue;
-        if (u.torre && !u.activo) continue;
-        habilidades(u, dt);
-        if (!u.dmg || (u.golpe >= 99)) continue;
-        if (!u.tgt || u.tgt.hp <= 0 || u.tgt.invis || (!u.torre && !u.tgt.torre && dist(u, u.tgt) > 7.5) || ((u.torre || u.estructura) && dist(u, u.tgt) - u.tgt.r > u.rango)) {
-          const ant = u.tgt; u.tgt = (u.torre || u.estructura) ? (() => { let m = null, md = 1e9; for (const e of ents) if (e.team !== u.team && e.hp > 0 && !e.torre && !(e.nace > 0) && !e.invis && (!e.aire || u.aAire)) { const d = dist(u, e) - e.r; if (d <= u.rango && d < md && !(u.card?.arq === 'mortero' && d < 3.5)) { md = d; m = e; } } return m; })() : objetivo(u);
-          // diálogo: al encontrar un rival, se provocan entre sí
-          if (u.tgt && u.tgt !== ant && !u.tgt.torre && u.card?.frases && u.tgt.card?.frases && charlaT <= 0) { charlaT = 4 + Math.random() * 3; const yo2 = u, el = u.tgt; habla(yo2, 'ataque'); setTimeout(() => { if (el.hp > 0 && yo2.hp > 0) habla(el, 'resp', null, true); }, 1400); }
-        }
-        const tg = u.tgt; if (!tg) continue;
-        const d = dist(u, tg) - tg.r - (u.torre ? 0 : u.r * .3);
-        if (d <= u.rango) { u.cd -= dt * (bf.furia > 0 ? 1.4 : 1); if (u.cd <= 0) { u.cd = u.golpe; u.at = .25; if (u.invis) u.invis = 0; atacar(u, tg); } }
-        else if (!u.torre && !u.estructura) { u.cd = Math.min(u.cd, u.golpe * .5); moverHacia(u, tg.x, tg.y, dt); }
-      }
-      charlaT -= dt;
-      const vivos = ents.filter(e => e.hp > 0);
-      for (let i = 0; i < vivos.length; i++) for (let j = i + 1; j < vivos.length; j++) { const a = vivos[i], b = vivos[j]; if (!!a.aire !== !!b.aire || (a.torre && b.torre)) continue; const fa = a.torre || a.estructura, fb = b.torre || b.estructura; if (fa && fb) continue; const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .01, m = (a.r + b.r) * .85; if (d < m) { const p = (m - d) / 2, nx = dx / d, ny = dy / d; if (fa) { b.x += nx * p * 2; b.y += ny * p * 2; } else if (fb) { a.x -= nx * p * 2; a.y -= ny * p * 2; } else { a.x -= nx * p; a.y -= ny * p; b.x += nx * p; b.y += ny * p; } } }
-      for (const u of vivos) if (!u.torre && !u.estructura) { u.x = Math.max(.4, Math.min(AN - .4, u.x)); u.y = Math.max(.4, Math.min(AL - .4, u.y)); if (!u.aire && u.y > RIO0 - .1 && u.y < RIO1 + .1) { const bx = Math.abs(u.x - PUENTES[0]) < Math.abs(u.x - PUENTES[1]) ? PUENTES[0] : PUENTES[1]; u.x = Math.max(bx - 1, Math.min(bx + 1, u.x)); } }
-      for (const p of proys) {
-        if (p.tipo === 'bola') { const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy); if (d < p.v * dt) { p.fin = 1; for (const e of ents) if (e.team !== p.team && e.hp > 0 && Math.hypot(e.x - p.tx, e.y - p.ty) < p.radio + (e.torre ? e.r : 0)) herir(e, e.torre ? p.dmg * .35 : p.dmg); efecto({ tipo: 'boom', x: p.tx, y: p.ty, v: .7, max: .7, r: p.radio }); son('explosion'); shake = p.grande ? .7 : .35; } else { p.x += dx / d * p.v * dt; p.y += dy / d * p.v * dt; } continue; }
-        const tg = p.tgt; if (!tg || tg.hp <= 0) { p.fin = 1; continue; } const dx = tg.x - p.x, dy = tg.y - p.y, d = Math.hypot(dx, dy); p.tx = tg.x; p.ty = tg.y;
-        if (d < p.v * dt + .2) { p.fin = 1; impacto(p.de, tg, p.dmg, p.area, p.tipo); } else { p.x += dx / d * p.v * dt; p.y += dy / d * p.v * dt; }
-      }
-      proys = proys.filter(p => !p.fin); ents = ents.filter(e => e.hp > 0 || e.torre);
-      for (const as of asientos) if (as.ctrl === 'ia') ia(as, dt);
-      iaEmoT -= dt; if (iaEmoT <= 0) { iaEmoT = 14 + Math.random() * 15; const bot = asientos.find(a => a.ctrl === 'ia' && a.team !== miEquipo); if (bot && Math.random() < .5) emote(bot.a, azar(['😂', '😡', '👍', '😭', '😎']), true); }
-    }
-    function habilidades(u, dt) {
-      const h = u.hab; if (!h) return;
-      if (h.tipo === 'cura' || h.tipo === 'invoca') { u.habT -= dt; if (u.habT > 0) return; u.habT = h.cada;
-        if (h.tipo === 'cura') { let alguien = false; for (const a of ents) if (a.team === u.team && a.hp > 0 && !a.torre && a !== u && dist(a, u) < h.radio && a.hp < a.max) { a.hp = Math.min(a.max, a.hp + h.valor * mult(1)); alguien = true; } if (alguien) efecto({ tipo: 'curar', x: u.x, y: u.y, r: h.radio, v: .8, max: .8 }); }
-        else { const mini = CARTA['_' + h.unidad]; for (let i = 0; i < h.n; i++) crearUnidad(u.team, mini, u.x + (Math.random() - .5) * 1.4, u.y + (u.team ? 1 : -1) * (u.r + .5), 1, { nace: .3 }); efecto({ tipo: 'onda', x: u.x, y: u.y, r: 1.2, v: .4, max: .4, c: '#a855f7' }); } }
-      if (h.tipo === 'carga' && u.recorrido > 2.5) u.cargado = 1;
-      if (h.tipo === 'reina') { const R = u.rt, aliados = () => ents.filter(a => a.team === u.team && a.hp > 0 && !a.torre);
-        for (const kk in R) R[kk] -= dt;
-        if (R.luz <= 0) { R.luz = h.luz.cada; let n = 0; for (const a of aliados()) if (dist(a, u) < h.luz.radio) { a.hp = Math.min(a.max, a.hp + h.luz.valor); a.buf.dot = null; a.buf.lento = 0; a.buf.aturdido = 0; n++; } efecto({ tipo: 'curar', x: u.x, y: u.y, r: h.luz.radio, v: 1, max: 1, oro: 1 }); if (n > 1) habla(u, 'luz', 0, true); }
-        if (R.rayo <= 0) { const obj = objetivo(u); if (obj) { R.rayo = h.rayo.cada; const a = Math.atan2(obj.y - u.y, obj.x - u.x); for (const e of ents) if (e.team !== u.team && e.hp > 0) { const rx = e.x - u.x, ry = e.y - u.y, along = rx * Math.cos(a) + ry * Math.sin(a), perp = Math.abs(-rx * Math.sin(a) + ry * Math.cos(a)); if (along > 0 && along < h.rayo.largo && perp < h.rayo.ancho + e.r * .5) herir(e, h.rayo.dmg * (e.torre ? .5 : 1)); } efecto({ tipo: 'rayoD', x: u.x, y: u.y, a, l: h.rayo.largo, v: .6, max: .6 }); son('explosion'); shake = .25; habla(u, 'rayo', 0, true); } }
-        if (R.escudo <= 0) { R.escudo = h.escudo.cada; for (const a of aliados()) if (dist(a, u) < h.escudo.radio) a.buf.red = h.escudo.dur; efecto({ tipo: 'escudo', x: u.x, y: u.y, r: h.escudo.radio, v: 1.2, max: 1.2 }); son('nivel'); habla(u, 'escudo', 0, true); }
-        if (R.corazon <= 0) { R.corazon = h.corazon.cada; for (const a of aliados()) if (dist(a, u) < h.corazon.radio) { a.buf.furia = h.corazon.dur; a.hp = Math.min(a.max, a.hp + a.max * .1); } efecto({ tipo: 'corazon', x: u.x, y: u.y, r: h.corazon.radio, v: 1.6, max: 1.6 }); texto('❤️ ¡CORAZÓN DE ABUELITA!', u.x * k, vy(u.y) * k - k * 1.5, k * .7, 2); son('combo'); FX.confeti(); habla(u, 'corazon', 0, true); } }
-    }
-    function atacar(u, tg) {
-      if (u.proy || u.torre) { proys.push({ x: u.x, y: u.y - (u.torre ? u.r : 0), tgt: tg, tx: tg.x, ty: tg.y, v: u.torre ? 14 : 11, dmg: u.dmg, area: u.area, tipo: u.torre ? 'flecha' : u.proy, team: u.team, de: u }); if (!u.torre) son(u.card?.sfx?.ataque || 'swish'); }
-      else { impacto(u, tg, u.dmg * (u.cargado ? 2 : 1), u.area, 'golpe'); if (u.cargado) { u.cargado = 0; u.recorrido = 0; efecto({ tipo: 'onda', x: tg.x, y: tg.y, r: 1.2, v: .4, max: .4, c: '#fde047' }); } efecto({ tipo: 'golpe', x: (u.x + tg.x) / 2, y: (u.y + tg.y) / 2, v: .2, max: .2 }); son(tg.torre ? 'choque' : 'splat'); }
-    }
-    function impacto(u, tg, dmg, area, tipo) {
-      const team = u ? u.team : 1 - tg.team, lista = area ? ents.filter(e => e.team !== team && e.hp > 0 && dist(e, tg) < area + e.r * .5) : [tg];
-      if (area) efecto({ tipo: 'boom', x: tg.x, y: tg.y, v: .35, max: .35, r: area, c: tipo === 'magia' || tipo === 'luz' ? '#c4b5fd' : tipo === 'hielo' ? '#bae6fd' : tipo === 'espina' ? '#a3e635' : null });
-      const h = u?.hab;
-      for (const e of lista) { herir(e, dmg, u); if (!h || e.torre) continue;
-        if (h.tipo === 'veneno' || h.tipo === 'quema') e.buf.dot = { dps: h.dps, hasta: h.dur };
-        if (h.tipo === 'congela') e.buf.lento = h.dur; if (h.tipo === 'aturde') e.buf.aturdido = h.dur;
-        if (h.tipo === 'empuje') { const a = Math.atan2(e.y - u.y, e.x - u.x); e.x += Math.cos(a) * .8; e.y += Math.sin(a) * .8; } }
-      if (h?.tipo === 'robo' && u.hp > 0) u.hp = Math.min(u.max, u.hp + dmg * h.pct / 100);
-      if (h?.tipo === 'cadena') { let prev = tg; const vistos = new Set([tg]); for (let i = 0; i < h.saltos; i++) { const sig = ents.filter(e => e.team !== team && e.hp > 0 && !vistos.has(e) && dist(e, prev) < 4).sort((a, b) => dist(a, prev) - dist(b, prev))[0]; if (!sig) break; vistos.add(sig); herir(sig, dmg * .7, u); efecto({ tipo: 'cadena', x: prev.x, y: prev.y, x2: sig.x, y2: sig.y, v: .3, max: .3 }); prev = sig; } }
-      if (tipo !== 'golpe') son('splat');
-    }
-    function jugarCarta(as, key, x, y) {
-      const C = CARTA[key]; if (!C || !as.mano.includes(key) || as.mana < C.c || fin) return false;
-      if (C.tipo !== 'hechizo') { const propio = as.team ? y <= RIO0 - .3 : y >= RIO1 + .3, bolsillo = C.tipo === 'tropa' && !torres(1 - as.team).some(o => !o.rey && (o.x < 9) === (x < 9)) && (as.team ? y <= 23 : y >= 9); if (!propio && !bolsillo) return false; }
-      as.mana -= C.c; as.mano.splice(as.mano.indexOf(key), 1); as.mano.push(as.cola.shift()); as.cola.push(key);
-      desplegar(as, key, Math.max(.5, Math.min(AN - .5, x)), Math.max(.5, Math.min(AL - .5, y))); return true;
-    }
-    // ---------- Inteligencia de los bots ----------
-    function ia(as, dt) {
-      as.iaT -= dt; if (as.iaT > 0) return; as.iaT = Math.max(.4, 1.1 - arenaI * .03) + Math.random() * .5 + (n4 ? .5 : 0);
-      const Y = y => as.team ? y : AL - y, rel = e => as.team ? e.y : AL - e.y, enemigo = 1 - as.team, C = id => CARTA[id];
-      const jugar = (key, x, yr) => jugarCarta(as, key, x, Y(C(key).tipo === 'hechizo' ? yr : Math.min(RIO0 - .5, yr)));
-      const amenazas = ents.filter(e => e.team === enemigo && e.hp > 0 && !e.torre && !e.invis && rel(e) < 21);
-      const hech = as.mano.filter(c => C(c).tipo === 'hechizo' && C(c).c <= as.mana && ['bola', 'meteoro', 'rayo', 'veneno', 'congelar', 'linea', 'tornado', 'drenar'].includes(C(c).arq));
-      if (hech.length) { const g = ents.filter(e => e.team === enemigo && !e.torre && e.hp > 0); for (const e of g) { const cerca = g.filter(o => dist(o, e) < 2.4); if (cerca.length >= 3 || cerca.reduce((a, o) => a + o.hp, 0) > 1100) { const cx = cerca.reduce((a, o) => a + o.x, 0) / cerca.length, cy = cerca.reduce((a, o) => a + o.y, 0) / cerca.length; jugarCarta(as, hech[0], cx, cy); return; } } }
-      if (amenazas.length) {
-        const a = amenazas.sort((p, q) => rel(p) - rel(q))[0], volador = a.aire, enjambre = amenazas.filter(o => dist(o, a) < 2.5).length >= 3;
-        const def = as.mano.filter(c => C(c).tipo !== 'hechizo' && C(c).c <= as.mana && C(c).obj !== 'edif' && (C(c).dmg > 0) && (!volador || C(c).aAire)).sort((p, q) => (enjambre ? (C(q).area ? 1 : 0) - (C(p).area ? 1 : 0) : 0) || C(q).hp - C(p).hp);
-        if (def.length && rel(a) < 18) { const c = def[0], est = C(c).tipo === 'estructura'; jugar(c, est ? 9 + (a.x < 9 ? -1.5 : 1.5) : Math.max(1, Math.min(AN - 1, a.x + (Math.random() - .5) * 2)), est ? 10.5 : Math.max(1.5, Math.min(RIO0 - .5, rel(a) - (C(c).rango > 2 ? 4 : 2)))); return; }
-      }
-      if (as.mana >= 8.5 || (as.mana >= 6 && Math.random() < .25)) {
-        const lado = (() => { const ts = torres(enemigo).filter(e => !e.rey); if (!ts.length) return Math.random() < .5 ? 0 : 1; return ts.sort((p, q) => p.hp - q.hp)[0].x < 9 ? 0 : 1; })(), bx = PUENTES[n4 && as.a % 2 ? 1 - lado : lado];
-        const propios = ents.filter(e => e.team === as.team && !e.torre && !e.estructura && e.hp > 0 && Math.abs(e.x - bx) < 4);
-        const tanque = as.mano.find(c => (['gigante', 'golem', 'titan', 'jinete', 'reina'].includes(C(c).arq)) && C(c).c <= as.mana);
-        if (tanque && !propios.length) { jugar(tanque, bx + (Math.random() - .5), ['golem', 'titan', 'gigante'].includes(C(tanque).arq) ? 4 : RIO0 - 1); return; }
-        const apoyo = as.mano.find(c => C(c).tipo === 'tropa' && C(c).c <= as.mana && !['golem', 'titan'].includes(C(c).arq)) || as.mano.find(c => C(c).tipo === 'estructura' && C(c).c <= as.mana);
-        if (apoyo) { const t0 = propios[0]; if (C(apoyo).tipo === 'estructura') jugar(apoyo, 9 + (Math.random() - .5) * 4, C(apoyo).arq === 'mortero' || C(apoyo).arq === 'generador' ? 4 : 10); else jugar(apoyo, t0 ? t0.x : bx, t0 ? rel(t0) - 2 : RIO0 - 2); }
-      }
-    }
+    const sincronizar = () => { ents = M.S.ents; proys = M.S.proys; zonas = M.S.zonas; tiempo = M.S.tiempo; extra = M.S.extra; coronas = M.S.coronas; };
+    if (M) sincronizar();
     function emote(asiento, e, enviarRed) { efectos.push({ tipo: 'emote', team: equipoDe(asiento), e, v: 2.5, max: 2.5, x: 0, y: 0 }); FX.son('pop'); if (ON && enviarRed) post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'emote', datos: { e, a: asiento } }).catch(() => {}); }
-    // ---------- Red (en línea) ----------
+    // ---------- En línea: el servidor calcula la partida; aquí solo se dibuja ----------
     let mapa = new Map();
-    function enviarEstado() {
-      const r1 = v => Math.round(v * 10) / 10;
-      const d = { t: r1(tiempo), x: extra ? 1 : 0, c: coronas, e: ents.map(e => [e.id, e.team, e.torre ? (e.rey ? 'R' : 'T') : e.cid, r1(e.x), r1(e.y), Math.round(e.hp), Math.round(e.max), (e.buf.aturdido > 0 ? 1 : 0) | (e.nace > 0 ? 2 : 0) | (e.at > 0 ? 4 : 0) | (e.activo ? 8 : 0) | (e.flash > 0 ? 16 : 0) | (e.invis ? 32 : 0) | (e.buf.lento > 0 ? 64 : 0) | (e.buf.red > 0 || e.buf.escudo > 0 ? 128 : 0) | (e.buf.furia > 0 ? 256 : 0) | (e.mueve > 0 ? 512 : 0)]),
-        p: proys.map(p => [p.tipo, r1(p.x), r1(p.y), r1(p.tx ?? p.x), r1(p.ty ?? p.y)]), z: zonas.map(z => [z.tipo, r1(z.x), r1(z.y), z.radio, z.col]), s: asientos.map(a => [r1(a.mana), a.mano, a.cola[0]]), fx: nuevos.fx.map(f => ({ ...f })), so: nuevos.son, tx: nuevos.tx, ha: nuevos.ha };
-      nuevos = { fx: [], son: [], tx: [], ha: [] };
-      post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'estado', datos: d }).catch(() => {});
-    }
     function aplicarEstado(d) {
       tiempo = d.t; extra = !!d.x; coronas = d.c; const vistos = new Set();
       for (const [id, team, cid, x, y, hp, max, fl] of d.e) { vistos.add(id); let e = mapa.get(id);
-        if (!e) { e = { id, team, x, y, hp, max, t: Math.random() * 5, buf: {} }; if (cid === 'R' || cid === 'T') Object.assign(e, { torre: 1, rey: cid === 'R', r: cid === 'R' ? 1.9 : 1.5 }); else { const c = CARTA[cid]; Object.assign(e, { card: c, cid, r: c.r, aire: c.aire, estructura: c.tipo === 'estructura' }); } mapa.set(id, e); }
+        if (!e) { e = { id, team, x, y, hp, max, t: Math.random() * 5, buf: {} }; if (cid === 'R' || cid === 'T') Object.assign(e, { torre: 1, rey: cid === 'R', r: cid === 'R' ? 1.9 : 1.5 }); else { const c = CARTA[cid]; if (!c) continue; Object.assign(e, { card: c, cid, r: c.r, aire: c.aire, estructura: c.tipo === 'estructura' }); } mapa.set(id, e); }
         if (hp < e.hp) e.flash = .15; e.tx = x; e.ty = y; e.hp = hp; e.max = max; e.buf.aturdido = fl & 1; e.nace = fl & 2 ? .5 : 0; e.at = fl & 4 ? .25 : 0; e.activo = !!(fl & 8); e.invis = fl & 32; e.buf.lento = fl & 64; e.buf.red = fl & 128; e.buf.furia = fl & 256; e.mueve = fl & 512 ? .15 : 0; }
-      for (const [id, e] of mapa) if (!vistos.has(id) && !e.torre) { mapa.delete(id); for (let i = 0; i < 8; i++) efectos.push({ tipo: 'chispa', x: e.x, y: e.y, vx: (Math.random() - .5) * 6, vy: (Math.random() - .5) * 6, v: .5, max: .5, team: e.team }); }
+      for (const [id, e] of mapa) if (!vistos.has(id) && !e.torre) mapa.delete(id);
       ents = [...mapa.values()].filter(e => e.hp > 0 || e.torre);
       proys = d.p.map(([tipo, x, y, tx, ty]) => ({ tipo, x, y, tx, ty, tgt: { x: tx, y: ty } })); zonas = d.z.map(([tipo, x, y, radio, col]) => ({ tipo, x, y, radio, col }));
-      d.s.forEach((s, i) => { asientos[i].mana = s[0]; asientos[i].mano = s[1]; asientos[i].cola = [s[2]]; });
-      for (const f of d.fx) efectos.push(f); for (const s of d.so.slice(0, 6)) FX.son(s);
-      for (const [txt, tam, dur] of d.tx) { if (txt[0] === '@') { const [tmA, a, b] = txt.slice(1).split('|'); texto(+tmA === miEquipo ? a : b, W / 2, H / 2, k * tam, dur, true); } else texto(txt, W / 2, H / 2, k * tam, dur, true); }
-      for (const [id, clave, i] of d.ha || []) { const e = mapa.get(id); if (e?.card) { const txt = decir(e.card, clave, i, true); if (txt) e.dice = { txt, v: 2.2 }; } }
+      d.s.forEach((s, i) => { if (!asientos[i]) return; asientos[i].mana = s[0]; asientos[i].mano = s[1]; asientos[i].cola = [s[2]]; });
+      for (const f of d.fx || []) recibirEfecto(f); for (const s of (d.so || []).slice(0, 6)) FX.son(s);
+      for (const [txt, o] of d.tx || []) recibirTexto(txt, o); for (const [tipo, team] of d.vo || []) recibirVoz(tipo, team);
+      for (const [id, clave, i] of d.ha || []) recibirHabla(mapa.get(id), clave, i, true);
       if (JSON.stringify(yo.mano) !== manoPintada) pintarMano();
     }
     if (ON) {
       ES = ES || new EventSource(`/api/duelo/stream?sala=${ON.sala}&tok=${ON.tok}`);
-      ES.addEventListener('estado', e => { if (!anfitrion) aplicarEstado(JSON.parse(e.data)); });
-      ES.addEventListener('jugar', e => { if (!anfitrion) return; const d = JSON.parse(e.data), as = asientos[d.de]; if (as && as.ctrl === 'remoto') jugarCarta(as, d.k, +d.x, +d.y); });
+      ES.addEventListener('estado', e => aplicarEstado(JSON.parse(e.data)));
       ES.addEventListener('emote', e => { const d = JSON.parse(e.data); if (d.de !== miAsiento) emote(d.a ?? d.de, d.e, false); });
-      ES.addEventListener('salio', e => { const d = JSON.parse(e.data); if (fin) return; if (d.asiento === 0 && !anfitrion) { texto('📴 El anfitrión se desconectó', W / 2, H / 2, k * .8, 3, true); terminar(equipoDe(0) !== miEquipo ? miEquipo : null, true); return; } const as = asientos[d.asiento]; if (as) { as.ctrl = 'ia'; texto(`📴 ${d.nombre} se desconectó · un bot juega por él`, W / 2, H * .4, k * .6, 3); } });
-      ES.addEventListener('fin', e => { if (anfitrion) return; const d = JSON.parse(e.data); coronas = d.c; terminar(d.g, true); });
+      ES.addEventListener('salio', e => { const d = JSON.parse(e.data); if (!fin) texto(`📴 ${d.nombre} se desconectó · un bot juega por él`, W / 2, H * .4, k * .6, 3); });
+      ES.addEventListener('fin', e => { const d = JSON.parse(e.data); coronas = d.c; terminar(d.g, d.rank ? d.rank[miAsiento] : null); });
     }
     // ---------- Dibujo ----------
     const PART = (() => { const T = TEMA[mundoI].part; return [...Array(T === 'nieve' ? 70 : 34)].map(() => ({ x: Math.random() * W, y: Math.random() * H, f: Math.random() * 9, v: .4 + Math.random() * .8, tipo: T })); })();
@@ -711,7 +563,7 @@
         if (f.tipo === 'rayo') { X.save(); X.strokeStyle = `rgba(254,240,138,${a})`; X.shadowColor = '#fde047'; X.shadowBlur = 16; X.lineWidth = 4; X.beginPath(); X.moveTo(x, 0); for (let yy = 0; yy < y; yy += k * 1.2) X.lineTo(x + (Math.random() - .5) * k, yy); X.lineTo(x, y); X.stroke(); X.restore(); GA.brillo(X, x, y, k * 1.5, '#fde047', a); }
         if (f.tipo === 'cadena') { X.save(); X.strokeStyle = `rgba(254,240,138,${a})`; X.shadowColor = '#fde047'; X.shadowBlur = 10; X.lineWidth = 2.5; X.beginPath(); X.moveTo(x, y); const x2 = f.x2 * k, y2 = vy(f.y2) * k; for (let i = 1; i < 5; i++) X.lineTo(x + (x2 - x) * i / 5 + (Math.random() - .5) * k * .6, y + (y2 - y) * i / 5 + (Math.random() - .5) * k * .6); X.lineTo(x2, y2); X.stroke(); X.restore(); }
         if (f.tipo === 'linea') { const y2 = vy(f.y + f.l) * k; X.save(); X.globalCompositeOperation = 'lighter'; X.fillStyle = GA.lin(X, 0, y, 0, y2, [f.c || '#fde047', 'rgba(0,0,0,0)']); X.globalAlpha = a; X.fillRect(x - f.w * k, Math.min(y, y2), f.w * k * 2, Math.abs(y2 - y)); X.restore(); }
-        if (f.tipo === 'rayoD') { const yd = voltear ? -1 : 1, x2 = x + Math.cos(f.a) * f.l * k, y2 = y + Math.sin(f.a) * f.l * k * yd; X.save(); X.globalCompositeOperation = 'lighter'; X.strokeStyle = `rgba(253,224,71,${a})`; X.shadowColor = '#fde047'; X.shadowBlur = 24; X.lineWidth = k * .9 * a + 2; X.lineCap = 'round'; X.beginPath(); X.moveTo(x, y); X.lineTo(x2, y2); X.stroke(); X.strokeStyle = `rgba(255,255,255,${a})`; X.lineWidth = k * .25; X.stroke(); X.restore(); }
+        if (f.tipo === 'rayoD') { const x2 = f.x2 * k, y2 = vy(f.y2) * k; X.save(); X.globalCompositeOperation = 'lighter'; X.strokeStyle = `rgba(253,224,71,${a})`; X.shadowColor = '#fde047'; X.shadowBlur = 24; X.lineWidth = k * .9 * a + 2; X.lineCap = 'round'; X.beginPath(); X.moveTo(x, y); X.lineTo(x2, y2); X.stroke(); X.strokeStyle = `rgba(255,255,255,${a})`; X.lineWidth = k * .25; X.stroke(); X.restore(); }
         if (f.tipo === 'zona' || f.tipo === 'onda') { X.save(); X.strokeStyle = f.c || '#fde047'; X.globalAlpha = a; X.lineWidth = 3; X.beginPath(); X.arc(x, y, f.r * k * (f.tipo === 'onda' ? 1.3 - a * .5 : 1), 0, 7); X.stroke(); X.restore(); }
         if (f.tipo === 'curar') { for (let i = 0; i < 5; i++) { const an = i * 1.25 + f.v, rr = f.r * k * .6, cx = x + Math.cos(an) * rr, cy = y + Math.sin(an) * rr * .6 - (1 - a) * k * 1.5; X.globalAlpha = a; X.fillStyle = f.oro ? '#fde047' : '#4ade80'; X.fillRect(cx - 2, cy - 7, 4, 14); X.fillRect(cx - 7, cy - 2, 14, 4); } X.globalAlpha = 1; GA.brillo(X, x, y, f.r * k, f.oro ? '#fde047' : '#4ade80', a * .5); }
         if (f.tipo === 'escudo') { X.save(); X.globalAlpha = a * .6; X.fillStyle = GA.lin(X, x, y - f.r * k, x, y + f.r * k, ['rgba(191,219,254,.9)', 'rgba(37,99,235,.2)']); X.beginPath(); X.arc(x, y, f.r * k, Math.PI, 0); X.fill(); X.strokeStyle = '#bfdbfe'; X.lineWidth = 3; X.stroke(); X.restore(); }
@@ -745,17 +597,16 @@
       if (yo.mana < C.c) { texto('💜 Te falta elixir', W / 2, H * .62, k * .8, 1, true); FX.son('error'); return; }
       if (C.tipo !== 'hechizo') { const bolsillo = C.tipo === 'tropa' && !torres(1 - miEquipo).some(o => !o.rey && (o.x < 9) === (x < 9)) && ys >= 9; if (ys < RIO1 + .3 && !bolsillo) { texto('Despliega en tu lado del río', W / 2, H * .62, k * .7, 1, true); FX.son('error'); return; } }
       const key = sel; sel = null;
-      if (anfitrion) { if (!jugarCarta(yo, key, x, y)) return; }
+      if (!ON) { if (!M.jugar(miAsiento, key, x, y)) return; }
       else { post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'jugar', datos: { k: key, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 } }).catch(() => {}); yo.mana -= C.c; efectos.push({ tipo: 'aparece', x, y, v: .6, max: .6, team: miEquipo }); }
       FX.son(C.tipo === 'hechizo' ? 'swish' : 'plantar'); FX.vibrar(12); pintarMano(); hud();
     });
     $('#emo').onclick = () => { const d = $('#emos'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; };
     $('#emos').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; emote(miAsiento, b.dataset.e, true); $('#emos').style.display = 'none'; if (!ON && Math.random() < .5) setTimeout(() => emote(1, azar(['😂', '😡', '👍', '😭'])), 900 + Math.random() * 800); };
-    $('#rend').onclick = () => { if (!fin && confirm('¿Rendirte? Perderás trofeos.')) { if (ON) post('/api/duelo/salir', { sala: ON.sala, tok: ON.tok }).catch(() => {}); coronas[1 - miEquipo] = 3; terminar(1 - miEquipo, true); } };
+    $('#rend').onclick = () => { if (!fin && confirm('¿Rendirte? Perderás trofeos.')) { if (ON) { post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'rendirse' }).catch(() => {}); if (!n4) return setTimeout(() => { if (!fin) { coronas[1 - miEquipo] = 3; terminar(1 - miEquipo); } }, 3000); } if (M) { M.S.coronas[1 - miEquipo] = 3; M.terminar(1 - miEquipo); } else { coronas[1 - miEquipo] = 3; terminar(1 - miEquipo); } } };
     // ---------- Final y recompensas ----------
-    function terminar(ganador, remoto) {
+    function terminar(ganador, rank) {
       if (fin) return; fin = true;
-      if (!remoto) { ganador = coronas[0] > coronas[1] ? 0 : coronas[1] > coronas[0] ? 1 : null; if (ganador === null) { const pct = tm => torres(tm).reduce((a, e) => Math.min(a, e.hp / e.max), 1); ganador = pct(0) > pct(1) ? 0 : pct(0) < pct(1) ? 1 : null; } if (ON && anfitrion) { enviarEstado(); post('/api/duelo/msg', { sala: ON.sala, tok: ON.tok, tipo: 'fin', datos: { g: ganador, c: coronas } }).catch(() => {}); } }
       const gano = ganador === null ? null : ganador === miEquipo, misC = Math.min(3, coronas[miEquipo]);
       const camp = cfg.campana != null, dTr = camp || gano === null ? 0 : gano ? Math.round((28 + Math.floor(Math.random() * 6)) * (ON ? 1.2 : 1)) : -Math.min(J.trofeos, 18 + Math.floor(Math.random() * 5)), arenaAntes = arenaDe(J.trofeos);
       J.trofeos += dTr; if (gano) J.victorias++; else if (gano === false) J.derrotas++; J.coronas += misC;
@@ -771,7 +622,7 @@
       setTimeout(() => { cerrarES(); const d = document.createElement('div'); d.className = 'gb-modal gb'; const nuevas = subio ? G.cartas.filter(c => c.arena === arenaAhora) : [];
         d.innerHTML = `<div class="box"><div class="gb-panel" style="text-align:center"><div style="font-size:3rem">${gano ? '🏆' : gano === null ? '🤝' : '💔'}</div><h2 style="font:900 2rem 'Fraunces',Georgia,serif;color:${gano ? '#fde68a' : '#fca5a5'};margin:0">${gano ? '¡VICTORIA!' : gano === null ? '¡EMPATE!' : 'DERROTA'}</h2>
           <div style="font-size:2rem;letter-spacing:4px">${'👑'.repeat(misC)}<span style="opacity:.25">${'👑'.repeat(3 - misC)}</span></div>
-          <p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑</p>
+          ${rank != null ? `<p class="gb-chip" style="color:#fde68a">🌎 Ranking en línea: ${rank} puntos</p>` : ''}<p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑</p>
           ${cofre ? `<div class="gb-panel gb-shine" style="display:inline-block;padding:8px 18px"><span style="font-size:2.4rem">${COFRES[cofre].e}</span><br><b>¡Ganaste un ${COFRES[cofre].n}!</b></div>` : gano && J.cofres.length >= 4 ? '<p class="sub">Tus 4 espacios de cofres están llenos: ábrelos para ganar más.</p>' : ''}
           ${subio ? `<div class="gb-panel" style="border-color:#fde047"><b style="color:#fde68a">🗺️ ¡Nueva arena: ${escH(G.arenas[arenaAhora].n)}!</b><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">${nuevas.map(c => cartaHTML(c)).join('')}</div></div>` : ''}
           ${reinaNueva ? `<div class="gb-panel gb-shine" style="border-color:#fde047"><img src="/glory/reina_mini.webp" style="width:80px;border-radius:50%;border:3px solid #fde047"><br><b style="color:#fde68a">👑 ¡Desbloqueaste a Glory Brown, la Reina de la Victoria!</b></div>` : ''}
@@ -782,14 +633,14 @@
     }
     let errores = 0;
     const bucleInt = dt => {
-      if (!fin && anfitrion && !(document.hidden && !ON)) { paso(dt); if (ON) { envT -= dt; if (envT <= 0) { envT = .1; enviarEstado(); } } }
-      if (!anfitrion) for (const a of asientos) a.mana = Math.min(B.manaMax, a.mana + dt / B.regen * (tiempo <= B.dobleDesde || extra ? 2 : 1) * (n4 ? .8 : 1));
+      if (M && !fin && !document.hidden) { M.paso(dt); sincronizar(); }
+      if (ON && !fin) for (const a of asientos) a.mana = Math.min(B.manaMax, a.mana + dt / B.regen * (tiempo <= B.dobleDesde || extra ? 2 : 1) * (n4 ? .8 : 1));
       dibujar(dt); hud(); };
     const bucle = now => { if (!vivo) return; raf = requestAnimationFrame(bucle); const dt = Math.min(.05, (now - last) / 1000); last = now; try { bucleInt(dt); } catch (er) { if (++errores < 5) console.warn('GLORY BROWN:', er); } };
-    texto(ON ? `⚔️ ${cfg.modo === '2v2' ? '2 vs 2' : '1 vs 1'} en línea` : cfg.campana != null ? `🗺️ Campaña · ${arena.n}` : '⚔️ ¡A la batalla!', W / 2, H / 2, k * 1.1, 1.8, true); FX.musica?.('batalla'); FX.voz?.('¡Que empiece la batalla!', { forzar: true, cortar: true });
+    texto(ON ? `⚔️ ${cfg.modo === '2v2' ? '2 vs 2' : '1 vs 1'} · nivel de torneo` : cfg.campana != null ? `🗺️ Campaña · ${arena.n}` : '⚔️ ¡A la batalla!', W / 2, H / 2, k * 1.1, 1.8); FX.musica?.('batalla'); FX.voz?.('¡Que empiece la batalla!', { forzar: true, cortar: true });
     raf = requestAnimationFrame(bucle);
     setParar(() => { vivo = false; cancelAnimationFrame(raf); if (ON && !fin) post('/api/duelo/salir', { sala: ON.sala, tok: ON.tok }).catch(() => {}); cerrarES(); document.querySelectorAll('.gb-modal').forEach(m => m.remove()); });
-    window.__batalla = { estado: () => ({ tiempo, mana: asientos.map(a => a.mana), coronas: [...coronas], ents: ents.filter(e => e.hp > 0 && !e.torre).length, torres: ents.filter(e => e.torre).map(e => [e.team, Math.round(e.hp)]), fin, anfitrion, miAsiento, ctrl: asientos.map(a => a.ctrl) }), mana: v => yo.mana = v, jugar: (c, x, y) => { sel = c; const r = cv.getBoundingClientRect(); cv.dispatchEvent(new PointerEvent('pointerdown', { clientX: r.left + x / AN * r.width, clientY: r.top + y / AL * r.height, bubbles: true })); }, mano: () => [...yo.mano], tiempo: v => tiempo = v, poner: (tm, c, x, y) => desplegar(asientos.find(a => a.team === tm), c, x, y) };
+    window.__batalla = { estado: () => ({ tiempo, mana: asientos.map(a => a.mana), coronas: [...coronas], ents: ents.filter(e => e.hp > 0 && !e.torre).length, torres: ents.filter(e => e.torre).map(e => [e.team, Math.round(e.hp)]), fin, anfitrion, miAsiento, ctrl: asientos.map(a => a.ctrl) }), mana: v => { yo.mana = v; }, jugar: (c, x, y) => { sel = c; const r = cv.getBoundingClientRect(); cv.dispatchEvent(new PointerEvent('pointerdown', { clientX: r.left + x / AN * r.width, clientY: r.top + y / AL * r.height, bubbles: true })); }, mano: () => [...yo.mano], tiempo: v => { if (M) M.S.tiempo = v; }, poner: (tm, c, x, y) => M.desplegar(asientos.findIndex(a => a.team === tm), c, x, y) };
   }
   JUEGOS.batalla = t => lobby(t);
 })();
