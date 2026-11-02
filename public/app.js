@@ -318,6 +318,13 @@ VIEWS.viral = () => {
     <div class="btns"><button class="b sm" data-act="vfSave">Guardar</button>${v.fijo ? '<button class="b ghost sm" data-act="vfTemp">Volver a dirección temporal</button>' : ''}</div></details>
   ${v.on && v.panel && v.estado === 'encendida' ? `<div class="card" style="padding:0;overflow:hidden"><iframe id="vf-frame" src="${esc(v.panel)}" style="width:100%;height:1400px;border:0;display:block" title="Panel de la página viral"></iframe></div>`
     : '<div class="card"><p class="hint">Cuando la página esté encendida, aquí verás el panel: visitantes por país y ciudad, suscriptores, campañas de notificaciones, encuesta del día y más.</p></div>'}
+  ${v.on && v.url ? `<details class="card"><summary><b>🔗 Enlaces para compartir</b> <span class="hint">(cada test con su imagen para Facebook y WhatsApp)</span></summary>
+    <div class="row" style="margin-top:8px"><label>¿Dónde lo vas a publicar? (para saber qué trae más gente)<input id="vf-src" value="fb" placeholder="fb, whatsapp, tiktok-bio, grupo-x…"></label></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:8px">${[{ id: '', t: 'Portada (todos los tests)', e: '✨' }, ...(v.tests || [])].map(t => `<div class="card" style="margin:0;padding:8px">
+      <img src="${esc(v.local)}/og/${t.id || 'general'}.png" alt="" loading="lazy" style="width:100%;border-radius:8px;display:block">
+      <div style="font-size:13px;margin:6px 0"><b>${esc(t.e)} ${esc(t.t)}</b></div>
+      <div class="btns" style="margin:0"><button class="b sm" data-act="vfLink" data-g="${t.id}">Copiar enlace</button><a class="b ghost sm" target="_blank" href="https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(v.url + '/' + (t.id ? '?g=' + t.id : ''))}" style="text-decoration:none">Revisar en Facebook</a></div></div>`).join('')}</div>
+    <p class="hint" style="margin-top:8px">Si Facebook todavía muestra la vista previa vieja, pulsa "Revisar en Facebook" → <b>"Volver a extraer"</b> (Facebook guarda las vistas previas por un tiempo).</p></details>` : ''}
   <div class="card"><h3>Antes de compartirla</h3><ul class="hint" style="margin:0 0 0 18px"><li>Completa la <b>política de privacidad</b> en el panel de abajo → <b>Ajustes</b> (tu nombre y correo).</li>
     <li>Ley 29733 (Perú): inscribe tu banco de datos en la Autoridad Nacional de Protección de Datos Personales (gratis).</li>
     <li>En Facebook pon el enlace en el primer comentario o en una Historia (con enlace en el texto llega a menos gente). Usa <code>?src=</code> para saber qué publicación trae más gente, ej. <code>/?g=ruleta&src=fb-reel-1</code>.</li></ul></div>`;
@@ -864,6 +871,7 @@ const ACT = {
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
   vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),
+  vfLink: el => { const u = VS.url + '/?' + (el.dataset.g ? 'g=' + el.dataset.g + '&' : '') + 'src=' + encodeURIComponent(($('#vf-src')?.value || 'fb').trim().replace(/\s+/g, '-').slice(0, 40)); navigator.clipboard.writeText(u).then(() => toast('Enlace copiado: ' + u)); },
   vfCopy: el => navigator.clipboard.writeText(el.dataset.u).then(() => toast('Dirección copiada')),
   vfSave: guard(async () => { const o = { url: $('#vf-url').value, email: $('#vf-mail').value }; if ($('#vf-tok').value.trim()) o.tokenTunel = $('#vf-tok').value; VS = await api('/api/viral/config', o); toast('Guardado ✓'); render(); }),
   vfTemp: guard(async () => { if (!confirm('¿Quitar la dirección fija y usar una temporal?')) return; VS = await api('/api/viral/config', { tokenTunel: '', url: '' }); render(); }),

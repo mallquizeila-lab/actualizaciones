@@ -382,6 +382,22 @@ http.createServer(async (req, res) => {
     if (u.pathname === '/panel' && u.searchParams.get('k') && LOCAL_TOKEN && u.searchParams.get('k').length === 64 && crypto.timingSafeEqual(Buffer.from(u.searchParams.get('k')), Buffer.from(LOCAL_TOKEN))) {
       return send(res, 302, '', 'text/plain', { location: '/panel' + (u.searchParams.get('tema') ? '?tema=' + encodeURIComponent(u.searchParams.get('tema')) : ''), 'set-cookie': `sid=${nuevaSesion()}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800` });
     }
+    // Página principal con la vista previa correcta para Facebook/WhatsApp (imagen y textos de cada test).
+    if (u.pathname === '/' || u.pathname === '/index.html') {
+      const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
+      const titulo = t ? t.t : (getS('marca', null)?.titulo || '32 tests gratis: descubre algo nuevo de ti');
+      const desc = t ? `${t.d} Gratis, en ${t.min} min. ¿Te animas?` : 'Tests de personalidad, trivias, horóscopo y calculadoras. Gratis, en 1 a 3 minutos. ¿Te animas?';
+      const img = `${PUBLIC_URL}/og/${t && fs.existsSync(path.join(PUB, 'og', t.id + '.png')) ? t.id : 'general'}.png`;
+      const og = `<title>${esc(titulo)}</title>
+<meta name="description" content="${esc(desc)}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(getS('marca', null)?.nombre || 'Tests virales')}">
+<meta property="og:title" content="${esc(titulo)}"><meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
+<meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
+<meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">`;
+      return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
+    }
     // Archivos de la página.
     let f = u.pathname === '/' ? '/index.html' : u.pathname === '/panel' ? '/panel.html' : u.pathname;
     f = path.normalize(path.join(PUB, decodeURIComponent(f)));

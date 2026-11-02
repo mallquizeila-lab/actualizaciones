@@ -1,3 +1,8 @@
+v7.4.0 — Vista previa atractiva al compartir
+- Al publicar el enlace de la página viral en Facebook o WhatsApp ahora sale una imagen grande con título, descripción y botón "Haz el test gratis" (antes salía solo el enlace).
+- Cada uno de los 32 tests tiene su propia imagen de vista previa, con color por categoría.
+- Pestaña Página viral → "🔗 Enlaces para compartir": cada test con su imagen, botón para copiar el enlace (con la fuente para medir qué publicación trae más gente) y botón para revisar la vista previa en Facebook.
+
 v7.3.0 — Página viral: captar más suscriptores
 - La ventana del navegador "Permitir notificaciones" aparece sola al ver el primer resultado (una sola vez), sin tener que buscar el botón. El aviso de permiso inicial lo explica.
 - Notificación de bienvenida apenas alguien acepta (se edita en Panel → Ajustes).
