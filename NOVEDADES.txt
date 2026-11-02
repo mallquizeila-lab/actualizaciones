@@ -1,3 +1,10 @@
+v7.7.0 — 🎲 Juegos multijugador en la página viral
+- 🕵️ ¿Quién es el impostor? (3 a 8 jugadores): todos tienen una palabra secreta menos el impostor; cada uno da una pista y luego votan. Puntos para quien acierta o para el impostor si no lo descubren.
+- 🔴 Cuatro en línea y ❌ Tres en raya (1 contra 1). Si nadie se une, juegas contra la máquina.
+- "⚡ Jugar ya" te junta con otra persona; "🔒 Mesa privada" te da un enlace para invitar amigos (abre directo en tu mesa).
+- Chat en cada mesa (con el mismo filtro: sin enlaces, teléfonos ni groserías), revancha y puntos.
+- Cada juego tiene su imagen para compartir en Facebook y WhatsApp.
+
 v7.6.1 — Avatares ilustrados en el chat
 - 48 avatares nuevos, tipo personajes de juego: personajes ilustrados, pixel art gamer, robots y caras dibujadas (de DiceBear, con licencias libres para uso comercial).
 - Se ven en la elección de perfil, en cada mensaje y en la tabla de puntajes. Arreglado el cuadro del apodo.

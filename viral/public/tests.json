@@ -65,6 +65,36 @@
    "tipo": "sala"
   },
   {
+   "id": "juego-impostor",
+   "juego": "impostor",
+   "cat": "envivo",
+   "e": "🕵️",
+   "t": "¿Quién es el impostor?",
+   "d": "De 3 a 8 jugadores: todos tienen la misma palabra secreta menos uno. Den pistas y voten quién miente.",
+   "min": 5,
+   "tipo": "mesa"
+  },
+  {
+   "id": "juego-cuatro",
+   "juego": "cuatro",
+   "cat": "envivo",
+   "e": "🔴",
+   "t": "Cuatro en línea",
+   "d": "1 contra 1: alinea 4 fichas antes que tu rival. Si no hay nadie, juegas contra la máquina.",
+   "min": 3,
+   "tipo": "mesa"
+  },
+  {
+   "id": "juego-tresenraya",
+   "juego": "tresenraya",
+   "cat": "envivo",
+   "e": "❌",
+   "t": "Tres en raya",
+   "d": "El clásico 1 contra 1. Reta a un amigo o a la máquina.",
+   "min": 2,
+   "tipo": "mesa"
+  },
+  {
    "id": "horoscopo",
    "cat": "astrologia",
    "e": "🔮",

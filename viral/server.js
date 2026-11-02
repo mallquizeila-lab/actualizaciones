@@ -189,6 +189,7 @@ const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { 
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
 const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
+const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
 async function api(req, res, u) {
@@ -197,6 +198,7 @@ async function api(req, res, u) {
 
   // ---- chat en vivo ----
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
@@ -379,7 +381,7 @@ http.createServer(async (req, res) => {
     m = /^\/r\/([a-z0-9-]+)$/.exec(u.pathname);
     if (m && JUEGO[m[1]]) {
       const [t, d] = JUEGO[m[1]], txt = clip(u.searchParams.get('t') || '', 120), img = fs.existsSync(path.join(PUB, 'og', m[1] + '.png')) ? `${PUBLIC_URL}/og/${m[1]}.png` : `${PUBLIC_URL}/og/general.png`;
-      const reto = /^\d{1,2}$/.test(u.searchParams.get('reto') || '') ? '&reto=' + u.searchParams.get('reto') : '';
+      const reto = (/^\d{1,2}$/.test(u.searchParams.get('reto') || '') ? '&reto=' + u.searchParams.get('reto') : '') + (/^[a-f0-9]{6}$/.test(u.searchParams.get('mesa') || '') ? '&mesa=' + u.searchParams.get('mesa') : '');
       const target = `/?g=${m[1]}&src=${encodeURIComponent(clip(u.searchParams.get('src') || 'compartido', 40))}${reto}`;
       return send(res, 200, `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(t)}</title>
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(txt || t)}"><meta property="og:description" content="${esc(d)}">

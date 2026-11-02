@@ -56,6 +56,12 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .err{color:#ffb4a8;font-size:.9rem;margin-top:8px;min-height:1.1em}
 .video{display:flex;gap:12px;align-items:center}
 [hidden]{display:none!important}
+.jug{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.jug span{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:3px 10px 3px 3px;font-size:.82rem}.jug span.t{border-color:var(--gold);box-shadow:0 0 0 2px rgba(244,185,66,.3)}.jug span.off{opacity:.45}
+.t3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:10px auto}.t3 button{aspect-ratio:1;border-radius:14px;border:0;background:var(--surface2);font:800 3rem Figtree,sans-serif;cursor:pointer;color:#ff5a5f}.t3 button.o{color:var(--gold)}.t3 button.w{background:#2f6b4f}
+.c4{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;background:#1e46b4;padding:8px;border-radius:16px;max-width:380px;margin:10px auto}.c4 i{aspect-ratio:1;border-radius:50%;background:#141d4a;display:block}.c4 i.R{background:#ff505a}.c4 i.A{background:#ffd646}.c4 i.w{box-shadow:0 0 0 3px #fff}
+.c4col{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:380px;margin:0 auto;padding:0 8px}.c4col button{border:0;background:var(--surface2);color:var(--text);border-radius:8px;padding:4px 0;cursor:pointer;font-weight:700}
+.estado{text-align:center;font-weight:700;margin:6px 0}.mchat{max-height:180px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:10px;font-size:.88rem}.mchat div{margin:3px 0}.mchat b{color:var(--gold)}
+.pal{background:var(--surface2);border:2px dashed var(--gold);border-radius:14px;padding:12px;text-align:center;margin:8px 0}.pal b{font-size:1.5rem;display:block}
 .vivo{background:linear-gradient(135deg,#c8284a,#5a1236);border:0}.vivo h3{display:flex;align-items:center;gap:8px}.dot{width:10px;height:10px;border-radius:50%;background:#ff5a5f;box-shadow:0 0 0 0 #ff5a5f;animation:late 1.6s infinite}@keyframes late{70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
 .salas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.salas button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:10px 6px;color:#fff;font:600 .8rem Figtree,sans-serif;cursor:pointer}.salas button span{display:block;font-size:1.5rem}.salas small{display:block;opacity:.8;font-weight:400}
 .chatbox{display:flex;flex-direction:column;height:calc(100vh - 120px);min-height:460px}
@@ -194,7 +200,7 @@ function pintarHome() {
 $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; pintarHome(); } };
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
-$('#back').onclick = () => { if (window.ES) { ES.close(); ES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
+$('#back').onclick = () => { if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
 function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); }
 async function abrir(g) {
   if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
@@ -377,7 +383,85 @@ function sala(t) {
     $('#compartirSala').onclick = e => { e.preventDefault(); const url = `${location.origin}/r/${t.id}?src=invitacion`; if (navigator.share) navigator.share({ title: t.t, text: `¡Entra a jugar conmigo! ${t.e} ${t.t}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: invítalos'); } };
   });
 }
+// ---------- 🎲 Mesas de juego ----------
+let MES = null;
+function mesa(t) {
+  perfilChat(t, (nom, av) => {
+    let tl = null;
+    const base = { uid: VID, nombre: nom, avatar: av }, api2 = (r, o = {}) => post('/api/mesas/' + r, { ...base, ...o });
+    const entrar = async (r, o) => { const d = await api2(r, o); if (d.error) return toast(d.error); abrirMesa(d.id); };
+    const pid = P.get('mesa');
+    if (pid && P.get('g') === t.id) { history.replaceState(null, '', '?g=' + t.id); return entrar('unir', { id: pid }); }
+    registrar(t.id);
+    stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">${escH(t.d)}</p>
+      <button class="btn" id="ya">⚡ Jugar ya</button><button class="btn alt" id="priv">🔒 Mesa privada para jugar con amigos</button>
+      <h3 style="margin-top:16px">Mesas esperando jugadores</h3><div id="lista"><p class="sub" style="text-align:left">Buscando…</p></div></div>`);
+    $('#ya').onclick = () => entrar('rapido', { juego: t.juego });
+    $('#priv').onclick = () => entrar('crear', { juego: t.juego, privada: true });
+    const listar = async () => { if (!$('#lista')) return clearInterval(tl); const d = await fetch('/api/mesas/lista?juego=' + t.juego).then(r => r.json()).catch(() => ({ mesas: [] }));
+      $('#lista').innerHTML = d.mesas.length ? d.mesas.map(m => `<div class="dato"><span style="display:flex;gap:4px;align-items:center">${m.jugadores.map(j => avImg(j.avatar, 24)).join('')} ${m.jugadores.map(j => escH(j.nombre)).join(', ')} <small class="sub" style="margin:0">(${m.jugadores.length}/${m.max})</small></span><button class="btn" style="width:auto;margin:0;padding:6px 12px" data-m="${m.id}">Unirme</button></div>`).join('')
+        : `<p class="sub" style="text-align:left">No hay mesas abiertas ahora${d.jugando ? ` (${d.jugando} partidas en juego)` : ''}. Pulsa <b>Jugar ya</b> y espera a alguien${t.juego !== 'impostor' ? ' o juega contra la máquina' : ''}.</p>`; };
+    tl = setInterval(listar, 5000); listar();
+    $('#stage').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { clearInterval(tl); entrar('unir', { id: b.dataset.m }); } };
+    function abrirMesa(id) {
+      clearInterval(tl); if (MES) MES.close();
+      let M = null, espera = Date.now(), reloj = null;
+      stage(`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${t.e} ${escH(t.t)}</b><button class="btn alt" id="salir" style="width:auto;margin:0;padding:5px 10px;font-size:.8rem">Salir</button></div>
+        <div class="jug" id="jug"></div><p class="estado" id="est">Conectando…</p><div id="tab"></div><div id="ctl"></div>
+        <div class="mchat" id="mch"></div><div class="envio"><input id="mtx" type="text" maxlength="120" placeholder="Escribe en la mesa…"><button id="men">➤</button></div></div>`);
+      MES = new EventSource(`/api/mesas/stream?id=${id}&uid=${encodeURIComponent(VID)}`);
+      MES.addEventListener('mesa', e => { M = JSON.parse(e.data); pintar(); });
+      MES.addEventListener('chat', e => { const c = JSON.parse(e.data), d = document.createElement('div'); d.innerHTML = `${c.bot ? '🤖' : ''} <b>${escH(c.nombre)}:</b> ${escH(c.texto)}`; const x = $('#mch'); if (x) { x.append(d); x.scrollTop = x.scrollHeight; } });
+      MES.onerror = () => { if (!M) { $('#est').textContent = 'Esta mesa ya no existe'; MES.close(); } };
+      const jugar = async o => { const d = await api2('jugar', { id, ...o }); if (d.error) toast(d.error); };
+      const invitar = () => { const url = `${location.origin}/r/${t.id}?src=invitacion&mesa=${id}`; if (navigator.share) navigator.share({ title: t.t, text: `¡Juega ${t.t} conmigo! ${t.e}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: mándaselo a tus amigos'); } };
+      function pintar() {
+        const yo = M.yo, turno = M.jugadores[M.turno];
+        $('#jug').innerHTML = M.jugadores.map((j, i) => `<span class="${M.estado === 'jugando' && i === M.turno && M.juego !== 'impostor' ? 't' : ''} ${j.conectado ? '' : 'off'}">${avImg(j.avatar, 24)} ${escH(j.nombre)}${j.ficha ? ' ' + ({ X: '❌', O: '⭕', R: '🔴', A: '🟡' })[j.ficha] : ''}${j.puntos ? ` · ${j.puntos}` : ''}</span>`).join('');
+        let est = '', ctl = '';
+        if (M.estado === 'esperando') {
+          est = M.juego === 'impostor' ? `Esperando jugadores (${M.jugadores.length}/${M.max}, mínimo ${M.min})` : 'Esperando a tu rival…';
+          ctl = `<button class="btn" id="inv">📨 Invitar amigos</button>` + (M.juego === 'impostor' ? `<button class="btn alt" id="emp" ${M.jugadores.length < M.min ? 'disabled' : ''}>▶ Empezar partida</button>` : `<button class="btn alt" id="maq">🤖 Jugar contra la máquina</button>`);
+        } else if (M.estado === 'fin') { est = M.msg || 'Fin'; ctl = `<button class="btn" id="rev">🔁 Revancha</button><button class="btn alt" id="inv">📨 Invitar amigos</button>`; }
+        else if (M.juego !== 'impostor') est = turno && yo && M.turno === yo.i ? '👉 ¡Tu turno!' : `Turno de ${escH(turno?.nombre || '')}`;
+        $('#est').textContent = est;
+        // tableros
+        let tab = '';
+        if (M.juego === 'tresenraya' && M.tablero) tab = `<div class="t3">${M.tablero.map((v, k) => `<button data-p="${k}" class="${v === 'O' ? 'o' : ''} ${M.linea?.includes(k) ? 'w' : ''}" ${v || M.estado !== 'jugando' ? 'disabled' : ''}>${v === 'X' ? '✕' : v === 'O' ? '◯' : ''}</button>`).join('')}</div>`;
+        if (M.juego === 'cuatro' && M.tablero) tab = `${M.estado === 'jugando' && yo && M.turno === yo.i ? `<div class="c4col">${[...Array(7).keys()].map(c => `<button data-p="${c}" ${M.tablero[c] ? 'disabled' : ''}>⬇</button>`).join('')}</div>` : ''}<div class="c4">${M.tablero.map((v, k) => `<i class="${v || ''} ${M.linea?.includes(k) ? 'w' : ''}" data-c="${k % 7}"></i>`).join('')}</div>`;
+        if (M.juego === 'impostor' && M.ronda) {
+          const R = M.ronda;
+          tab = `<div class="pal">${R.soyImpostor ? `<span>😈 Eres el <b style="display:inline;font-size:1rem">IMPOSTOR</b></span><small style="display:block;margin-top:4px">Categoría: ${escH(R.categoria)}. Disimula con tus pistas.</small>` : `<small>Tu palabra secreta (${escH(R.categoria)})</small><b>${escH(R.palabra || '')}</b>`}</div>
+            <div>${R.pistas.map(p => `<div class="dato"><span style="display:flex;gap:6px;align-items:center">${avImg(p.avatar, 22)} ${escH(p.nombre)}</span><b style="color:var(--text)">${escH(p.texto)}</b></div>`).join('')}</div>`;
+          if (R.fase === 'pistas') { est = R.miTurno ? '👉 Te toca: escribe UNA pista' : `Turno de ${escH(R.turnoNombre || '')}`; if (R.miTurno) tab += `<div class="envio"><input id="pista" type="text" maxlength="60" placeholder="Tu pista (una palabra o frase corta)"><button id="pen">✓</button></div>`; }
+          if (R.fase === 'votacion') { est = R.yaVote ? '✓ Votaste. Esperando a los demás…' : '🗳️ ¿Quién es el impostor?'; if (!R.yaVote) tab += `<div class="salas" style="grid-template-columns:repeat(2,1fr)">${M.jugadores.map((j, i) => i === yo?.i ? '' : `<button data-v="${i}" style="background:var(--surface2);border-color:var(--line);color:var(--text)">${avImg(j.avatar, 30)}${escH(j.nombre)}${R.votaron.includes(i) ? '<small>ya votó</small>' : ''}</button>`).join('')}</div>`; }
+          if (R.fase === 'resultado' && R.revelado) { est = R.revelado.atrapado ? '🎉 ¡Atraparon al impostor!' : '😈 ¡Ganó el impostor!'; tab += `<p class="sub" style="text-align:left">El impostor era <b>${escH(R.revelado.impostor)}</b> y la palabra era <b>«${escH(R.revelado.palabra)}»</b>. Siguiente ronda en unos segundos…</p>`; }
+          clearInterval(reloj); reloj = setInterval(() => { const e2 = $('#est'); if (!e2 || !M.ronda) return clearInterval(reloj); const s2 = Math.max(0, Math.round((M.ronda.fin - Date.now()) / 1000)); e2.dataset.base = e2.dataset.base || ''; e2.textContent = e2.textContent.replace(/ · ⏱ \d+ s$/, '') + ` · ⏱ ${s2} s`; }, 1000);
+          $('#est').textContent = est;
+        }
+        $('#tab').innerHTML = tab; $('#ctl').innerHTML = ctl;
+        if (M.estado === 'esperando' && M.juego !== 'impostor' && Date.now() - espera > 8000 && $('#maq')) $('#maq').classList.remove('alt');
+        if (M.estado === 'fin') pedirAlertasAuto({ g: t.id });
+      }
+      $('#stage').onclick = async e => {
+        const p = e.target.closest('[data-p]'); if (p && !p.disabled) return jugar({ pos: +p.dataset.p });
+        const c = e.target.closest('.c4 i'); if (c && M?.estado === 'jugando' && M.yo && M.turno === M.yo.i) return jugar({ pos: +c.dataset.c });
+        const v = e.target.closest('[data-v]'); if (v) return jugar({ voto: +v.dataset.v });
+        const id2 = e.target.id;
+        if (id2 === 'inv') invitar();
+        if (id2 === 'maq') { const d = await api2('maquina', { id }); if (d.error) toast(d.error); }
+        if (id2 === 'emp') { const d = await api2('empezar', { id }); if (d.error) toast(d.error); }
+        if (id2 === 'rev') { const d = await api2('revancha', { id }); if (d.error) toast(d.error); }
+        if (id2 === 'pen') { const i = $('#pista'); if (i.value.trim()) await jugar({ texto: i.value.trim() }); }
+        if (id2 === 'men') { const i = $('#mtx'); if (!i.value.trim()) return; const d = await api2('chat', { id, texto: i.value }); if (d.error) toast(d.error); else i.value = ''; }
+        if (id2 === 'salir') { await api2('salir', { id }); MES.close(); MES = null; mesa(t); }
+      };
+      $('#stage').onkeydown = e => { if (e.key === 'Enter') { if (e.target.id === 'mtx') $('#men').click(); if (e.target.id === 'pista') $('#pen').click(); } };
+    }
+  });
+}
 const MOTOR = {
+  mesa,
   sala,
   calc(t) { pedirFecha(t, bd => { const r = CALC[t.id](t, bd); registrar(t.id, t.id === 'chino' ? null : signOf(bd)[0]); resultado({ g: t.id, emoji: t.e, ...r }); }); },
   perfil(t) {
