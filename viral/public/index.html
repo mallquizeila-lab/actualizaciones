@@ -64,10 +64,10 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .reloj{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:8px}.reloj i{display:block;height:100%;background:var(--gold);transition:width 1s linear}
 .tabla{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:6px}
 .msgsv{flex:1;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
-.m{display:flex;gap:8px;margin:7px 0;align-items:flex-start}.m .av{font-size:1.4rem;line-height:1}.m .tx{background:var(--surface2);border-radius:4px 12px 12px 12px;padding:6px 10px;max-width:85%;word-wrap:break-word}.m .tx b{display:block;font-size:.75rem;color:var(--gold)}.m.yo{flex-direction:row-reverse}.m.yo .tx{background:#4b3bbf;border-radius:12px 4px 12px 12px}.m.bot .tx{background:#1f5c4a}.m .rep{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.75rem;align-self:center}
+.m{display:flex;gap:8px;margin:7px 0;align-items:flex-start}.m .av{flex:none;width:34px;display:flex;justify-content:center}.m .tx{background:var(--surface2);border-radius:4px 12px 12px 12px;padding:6px 10px;max-width:85%;word-wrap:break-word}.m .tx b{display:block;font-size:.75rem;color:var(--gold)}.m.yo{flex-direction:row-reverse}.m.yo .tx{background:#4b3bbf;border-radius:12px 4px 12px 12px}.m.bot .tx{background:#1f5c4a}.m .rep{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.75rem;align-self:center}
 .envio{display:flex;gap:6px;margin-top:8px}.envio input{flex:1}.envio button{padding:0 14px;border-radius:10px;border:0;background:var(--gold);color:#241a00;font:700 1rem Figtree,sans-serif;cursor:pointer}
 .emojis{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.emojis button{background:none;border:0;font-size:1.3rem;cursor:pointer;padding:2px}
-.avs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px}.avs button{font-size:1.5rem;background:var(--surface2);border:2px solid transparent;border-radius:10px;padding:4px;cursor:pointer}.avs button.on{border-color:var(--gold)}
+.avs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px;max-height:260px;overflow-y:auto;padding:4px}.avs button{background:none;border:3px solid transparent;border-radius:50%;padding:0;cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;transition:transform .1s}.avs button img{width:100%!important;height:auto!important}.avs button:hover{transform:scale(1.08)}.avs button.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(244,185,66,.35)}
 .marca{display:flex;align-items:center;gap:10px;padding:2px 0 10px;border-bottom:1px solid var(--line);margin-bottom:12px}.marca b{font:800 1.15rem Fraunces,serif}.marca span{color:var(--muted);font-size:.8rem}
 .badge{display:inline-block;background:#ff5a5f;color:#fff;font:700 .68rem Figtree,sans-serif;padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle}
 .cargando{text-align:center;padding:50px 10px}.cargando .sp{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--gold);margin:0 auto 14px;animation:gira .8s linear infinite}@keyframes gira{to{transform:rotate(360deg)}}
@@ -106,7 +106,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
     <div id="stage"></div>
   </section>
 
-  <p class="small">Contenido solo de entretenimiento. <a href="/privacidad.html">Privacidad</a> · <a href="#" id="unsub">No quiero más notificaciones</a></p>
+  <p class="small">Contenido solo de entretenimiento. Avatares: DiceBear (licencias libres). <a href="/privacidad.html">Privacidad</a> · <a href="#" id="unsub">No quiero más notificaciones</a></p>
 </main>
 
 <div class="modal" id="gate" hidden>
@@ -311,14 +311,15 @@ const CALC = {
   },
 };
 // ---------- 💬 Salas en vivo ----------
+const avImg = (a, t = 32) => /^a\d\d$/.test(a || '') ? `<img src="/avatares/${a}.svg" alt="" width="${t}" height="${t}" style="border-radius:50%;display:block">` : `<span style="font-size:${Math.round(t * .8)}px;line-height:1">${escH(a || '😀')}</span>`;
 let ES = null;
 function perfilChat(t, cb) {
-  const av = LS.get('chatAv') || '😀', nom = LS.get('chatNom') || '';
+  let av = LS.get('chatAv'); if (!/^a\d\d$/.test(av || '')) av = 'a' + String(1 + Math.floor(Math.random() * 14)).padStart(2, '0'); const nom = LS.get('chatNom') || '';
   if (nom && LS.get('chatOk') === '1') return cb(nom, av);
-  const lista = SALAS?.avatares || ['😀', '😎', '🤠', '🥳', '😺', '🐶', '🦊', '🐼', '🐯', '🦁', '🐸', '🐵', '🦄', '🐙', '🌸', '🌻'];
+  const lista = SALAS?.avatares?.length ? SALAS.avatares : Array.from({ length: 48 }, (_, i) => 'a' + String(i + 1).padStart(2, '0'));
   stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">Elige cómo te verán los demás.</p>
-    <label for="cn">Tu apodo</label><input id="cn" maxlength="18" value="${escH(nom)}" placeholder="Ej.: Andrés de Lima">
-    <label>Tu avatar</label><div class="avs" id="avs">${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
+    <label for="cn">Tu apodo</label><input id="cn" type="text" maxlength="18" value="${escH(nom)}" placeholder="Ej.: Andrés de Lima">
+    <label>Tu avatar</label><div class="avs" id="avs">${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}" aria-label="Avatar">${avImg(a, 44)}</button>`).join('')}</div>
     <label class="check"><input type="checkbox" id="cr"><span>Seré respetuoso. Sé que <b>no se permiten enlaces, teléfonos, correos ni datos personales</b>, y que los mensajes pueden ser revisados y borrados.</span></label>
     <p class="err" id="err"></p><button class="btn" id="go">Entrar a la sala</button></div>`);
   let sel = av;
@@ -333,19 +334,19 @@ function perfilChat(t, cb) {
 function sala(t) {
   perfilChat(t, (nom, av) => {
     registrar(t.id);
-    stage(`<div class="chatbox"><div class="chathead"><div><b>${escH(t.t)}</b><br><small class="sub" id="online" style="margin:0">Conectando…</small></div><button class="btn alt" id="cambiar" style="width:auto;margin:0;padding:6px 10px;font-size:.8rem">${av} ${escH(nom)} ✎</button></div>
+    stage(`<div class="chatbox"><div class="chathead"><div><b>${escH(t.t)}</b><br><small class="sub" id="online" style="margin:0">Conectando…</small></div><button class="btn alt" id="cambiar" style="width:auto;margin:0;padding:6px 10px;font-size:.8rem"><span style="display:inline-flex;align-items:center;gap:6px">${avImg(av, 22)} ${escH(nom)} ✎</span></button></div>
       <div class="gbox" id="gbox" hidden></div><div class="msgsv" id="msgs"></div>
       <div class="emojis" id="emo" hidden>${['😂', '😍', '🥰', '😎', '🔥', '👏', '🙌', '❤️', '😮', '😢', '🤔', '👍', '🎉', '🇵🇪', '⚽', '🙏'].map(e => `<button>${e}</button>`).join('')}</div>
       <div class="envio"><button class="alt" id="emob" title="Emojis" style="background:var(--surface2);color:var(--text)">😀</button><input id="txt" type="text" maxlength="200" placeholder="Escribe un mensaje…" autocomplete="off"><button id="env">➤</button></div>
       <p class="small" style="margin-top:6px">Solo texto y emojis · Sin enlaces ni datos personales · <a href="#" id="compartirSala">Invitar amigos</a></p></div>`);
     const box = $('#msgs'), yoNom = nom;
     const pinta = m => { if (document.getElementById('m' + m.id)) return; const d = document.createElement('div'); d.className = 'm' + (m.bot ? ' bot' : m.nombre === yoNom ? ' yo' : ''); d.id = 'm' + m.id;
-      d.innerHTML = `<span class="av">${escH(m.avatar)}</span><div class="tx"><b>${escH(m.nombre)}</b>${escH(m.texto)}</div>${!m.bot && m.nombre !== yoNom ? `<button class="rep" data-r="${m.id}" title="Reportar">⚑</button>` : ''}`;
+      d.innerHTML = `<span class="av">${m.bot ? '<span style="font-size:26px;line-height:1">🤖</span>' : avImg(m.avatar, 34)}</span><div class="tx"><b>${escH(m.nombre)}</b>${escH(m.texto)}</div>${!m.bot && m.nombre !== yoNom ? `<button class="rep" data-r="${m.id}" title="Reportar">⚑</button>` : ''}`;
       const abajo = box.scrollHeight - box.scrollTop - box.clientHeight < 80; box.append(d); while (box.children.length > 120) box.firstChild.remove(); if (abajo) box.scrollTop = box.scrollHeight; };
     let reloj = null;
     const ronda = r => {
       const g = $('#gbox'); g.hidden = false; clearInterval(reloj);
-      const tabla = r.puntos?.length ? `<div class="tabla">🏅 Hoy: ${r.puntos.map((x, i) => `<span>${['🥇', '🥈', '🥉', '4.', '5.'][i]} ${escH(x.avatar)} ${escH(x.nombre)} (${x.p})</span>`).join('')}</div>` : '';
+      const tabla = r.puntos?.length ? `<div class="tabla">🏅 Hoy: ${r.puntos.map((x, i) => `<span style="display:inline-flex;align-items:center;gap:4px">${['🥇', '🥈', '🥉', '4.', '5.'][i]} ${avImg(x.avatar, 18)} ${escH(x.nombre)} (${x.p})</span>`).join('')}</div>` : '';
       if (r.tipo === 'pausa') { g.innerHTML = `<p class="sub" style="margin:0">⏳ Siguiente ronda en unos segundos…</p>${tabla}`; return; }
       const tot = Math.max(1, r.fin - Date.now()), barra = () => { const i = g.querySelector('.reloj i'); if (i) i.style.width = Math.max(0, (r.fin - Date.now()) * 100 / tot) + '%'; };
       g.innerHTML = r.tipo === 'emoji' ? `<p class="sub" style="margin:0">🎯 Adivina (${escH(r.pista)}) — escribe tu respuesta en el chat</p><div class="big">${escH(r.e)}</div><div class="reloj"><i style="width:100%"></i></div>${tabla}`

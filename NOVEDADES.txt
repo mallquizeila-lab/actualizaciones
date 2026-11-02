@@ -1,3 +1,7 @@
+v7.6.1 — Avatares ilustrados en el chat
+- 48 avatares nuevos, tipo personajes de juego: personajes ilustrados, pixel art gamer, robots y caras dibujadas (de DiceBear, con licencias libres para uso comercial).
+- Se ven en la elección de perfil, en cada mensaje y en la tabla de puntajes. Arreglado el cuadro del apodo.
+
 v7.6.0 — 🔴 Chat en vivo con juegos en la página viral
 - 3 salas en vivo, en la portada y en la nueva categoría "En vivo" (cada una con su imagen para compartir):
   · 💬 Charla general.

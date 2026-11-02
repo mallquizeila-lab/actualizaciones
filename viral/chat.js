@@ -50,7 +50,8 @@ function apodo(n) {
   if (GROSERIAS.some(g => g.length > 3 && nn.includes(g)) || /admin|moderador|soporte|oficial|facebook|meta/i.test(n)) return null;
   return n;
 }
-const AVATARES = ['😀', '😎', '🤠', '🥳', '😺', '🐶', '🦊', '🐼', '🐯', '🦁', '🐸', '🐵', '🦄', '🐙', '🌸', '🌻', '⚽', '🎸', '🍕', '🚀', '👑', '💎', '🔥', '⭐'];
+const AVATARES = Array.from({ length: 48 }, (_, i) => 'a' + String(i + 1).padStart(2, '0')); // ilustrados (public/avatares, licencias libres)
+const EMOJI_AV = ['😀', '😎', '🤠', '🥳', '😺', '🐶', '🦊', '🐼', '🐯', '🦁', '🐸', '🐵', '🦄', '🐙', '🌸', '🌻', '⚽', '🎸', '🍕', '🚀', '👑', '💎', '🔥', '⭐'];
 
 function crear({ db, q, q1, run, getS, setS, preguntasTrivia }) {
   db.exec(`create table if not exists chat (id integer primary key, created_at text default (datetime('now')), sala text, uid text, nombre text, avatar text, texto text, reportes integer default 0, borrado integer default 0, ip text);
@@ -150,7 +151,7 @@ create index if not exists ix_chat_sala on chat(sala, id);`);
       const B = bloqueados(), hu = hash(uid), hi = hash(ip);
       if ((B[hu] && B[hu] > Date.now()) || (B[hi] && B[hi] > Date.now())) return send(res, 403, { error: 'No puedes escribir en el chat por ahora' });
       const nombre = apodo(b.nombre); if (!nombre) return send(res, 400, { error: 'Elige otro apodo (2 a 18 letras, sin groserías)' });
-      const avatar = AVATARES.includes(b.avatar) ? b.avatar : '😀';
+      const avatar = AVATARES.includes(b.avatar) || EMOJI_AV.includes(b.avatar) ? b.avatar : 'a01';
       const t = (ultimos[uid] || []).filter(x => Date.now() - x < 30000); ultimos[uid] = t;
       if (t.length && Date.now() - t[t.length - 1] < 2500) return send(res, 429, { error: 'Más despacio 🙂' });
       if (t.length >= 8 || limite(ip, 'chat', 30)) return send(res, 429, { error: 'Estás escribiendo muy rápido. Espera un momento.' });
