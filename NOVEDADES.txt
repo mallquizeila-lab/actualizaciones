@@ -1,3 +1,10 @@
+v7.15.1 — Duelo de Torres con arte épico y sin cuelgues
+- Arreglado: la partida podía congelarse en la liga Bronce (el mazo del rival quedaba incompleto). Además, ahora la partida nunca se congela aunque ocurra un error.
+- Arte nuevo estilo épico: guerreros con armadura, ojos que brillan, capas del color del equipo, escudos y armas detalladas.
+- Arena nueva: césped con textura, caminos de adoquines, río profundo con orillas de roca, puentes de piedra, árboles, rocas y muros.
+- Torres de castillo en 2.5D con estandartes, almenas, bandera ondeando, rey con corona y barba, grietas y humo al dañarse, y ruinas al caer.
+- Efectos: bola de fuego con estela, explosiones con fuego y humo, cortes al golpear, polvo al aparecer las tropas (caen desde arriba) y cartas con marco premium.
+
 v7.15.0 — Duelo de Torres en línea, clanes y usuarios
 - Nuevo juego "Duelo de Torres": batallas de cartas en tiempo real con personajes propios (Oso Escudero, Búhos Arqueros, Jabalí, Tortuga Gigante, Llama Escupidora, Dragoncito, Cóndor, Puma, Abejas, Erizos) y hechizos (Bola de Fuego, Ventisca).
 - Modos: 1 vs 1 en línea, 2 vs 2 en línea (si falta gente se completa con bots), con un amigo por código y contra la máquina.
