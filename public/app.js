@@ -300,6 +300,9 @@ function viralTop() {
     <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(250,204,21,.12)"><b>👑 Voces de GLORY BROWN</b> <span class="hint">Cada uno de los 127 personajes habla con su propia voz de tu biblioteca (${v.vocesListas || 0} de ${v.vozGlory?.total || 983} frases grabadas).</span>
       ${v.vozGlory?.activo ? `<p class="hint">🎙️ Grabando… ${v.vozGlory.hechas}/${v.vozGlory.total} (puede tardar unos 15 minutos; puedes seguir usando ShortForge)</p>` : `<button class="b sm" data-act="vfVoces" style="margin-top:6px">🎙️ ${v.vocesListas ? 'Completar o actualizar las voces' : 'Grabar las voces de los personajes'}</button>`}
       ${v.vozGlory?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.vozGlory.error)}</p>` : ''}<p class="hint" style="margin:4px 0 0">Mientras no estén grabadas, el juego usa la voz del celular de cada jugador.</p></div>
+    <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(168,85,247,.12)"><b>🎨 Ilustraciones de GLORY BROWN</b> <span class="hint">Arte original tipo póster para las 126 cartas (la Reina ya usa tu imagen), hecho con tu cuenta de Cloudflare: ${v.arteListo || 0} de 126 listas.</span>
+      ${v.arteGlory?.activo ? `<p class="hint">🎨 Creando… ${v.arteGlory.hechas}/${v.arteGlory.total}. El cupo gratis alcanza unas 70 por día; si se acaba, sigue sola al día siguiente.</p>` : `<button class="b sm" data-act="vfArte" style="margin-top:6px">🎨 ${v.arteListo ? 'Completar las ilustraciones' : 'Crear las ilustraciones de las cartas'}</button>`}
+      ${v.arteGlory?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.arteGlory.error)}</p>` : ''}</div>
     <details style="margin-top:8px"><summary class="hint">Registro</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:180px;overflow:auto">${esc((v.log || []).join('\n'))}</pre></details>`;
 }
 VIEWS.viral = () => {
@@ -872,6 +875,7 @@ const ACT = {
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
+  vfArte: guard(async () => { VS = await api('/api/viral/arte-glory', {}); toast('🎨 Creando las ilustraciones de GLORY BROWN…'); render(); }),
   vfVoces: guard(async () => { VS = await api('/api/viral/voces-glory', {}); toast('🎙️ Grabando las voces de GLORY BROWN…'); render(); }),
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
   vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),

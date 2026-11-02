@@ -35,7 +35,7 @@ Corre dentro de la página viral: funciona en PC, Android y iPhone desde el nave
 ## Estado por fases
 - ✅ Fase 1 — Combate jugable (arena, torres, elixir, mazo de 8 y mano de 4, IA, victoria y derrota, sonido).
 - ✅ Fase 2 — Catálogo de 127 cartas con datos estructurados, rarezas, habilidades, mundos y colección.
-- 🟡 Fase 3 — Arte: personajes vectoriales propios y animados (2D). Los **modelos 3D** reales necesitan archivos GLB (por ejemplo, creados a partir de tus ilustraciones); el motor permite cambiar el arte sin tocar la lógica.
+- 🟡 Fase 3 — Arte: batalla en 3D (`public/glory/tres.js`, Three.js) con modelos hechos por código y animados, con opción 2D. Ilustraciones de cartas creadas con IA desde ShortForge (`arte_glory`, servidas en `/arte/glory/`). Para llegar a nivel de estudio en la batalla faltan modelos GLB hechos por un artista a partir de tus ilustraciones.
 - ✅ Fase 4 — Mundos, campaña, cofres, menús, música y voces.
 - ✅ Fase 5 — En línea: cuentas, emparejamiento, salas 1 vs 1 y 2 vs 2, clanes y ranking (mundial, por país y de clanes). **El servidor calcula cada partida** con el mismo motor (`public/glory/motor.js`): valida mazo, elixir, mano y lado del río, y todos juegan al nivel de torneo 9.
 - 🟡 Fase 6 — App instalable desde el navegador en /glory (ícono de la Reina, pantalla completa). Falta publicarla en Play Store / App Store.

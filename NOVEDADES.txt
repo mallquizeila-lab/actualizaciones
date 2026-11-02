@@ -1,3 +1,8 @@
+v7.19.0 — GLORY BROWN: batalla en 3D e ilustraciones de cartas con IA
+- 🎮 Batalla en 3D real: arena con perspectiva, castillos 3D con su guardia (la Reina en la torre del rey), banderas al viento, río animado, puentes, sombras y ruinas al destruir una torre. Los personajes son modelos 3D que caminan, atacan, vuelan y caen al aparecer. Las barras de vida, los globos de diálogo y los efectos van encima de cada personaje.
+- 📲 Calidad automática: si el celular va lento, baja la calidad sola. Botón "🎮 Gráficos 3D/2D" en el menú para volver al modo 2D.
+- 🎨 Ilustraciones originales de las cartas: en ShortForge → 📣 Página viral → "🎨 Crear las ilustraciones de las cartas". Crea con tu Cloudflare un póster estilo juego móvil para cada una de las 126 cartas (unas 70 por día con el cupo gratis; si se acaba, sigue sola al día siguiente). Aparecen en la colección, la presentación de cada carta, la mano de batalla y la imagen para compartir. La Reina sigue con tu imagen.
+
 v7.18.0 — GLORY BROWN: Pase Real, torneo semanal y video de la batalla
 - 🎬 Video de la batalla para compartir: al terminar, el botón "Compartir video de la batalla" arma un video vertical 1080x1920 (formato TikTok, Reels y Facebook) con intro de la Reina y el "Jugador vs Rival", la batalla con sus sonidos y música (acelerada si fue larga) y un cierre con el resultado y la invitación "¿Tú me ganas? Juega gratis". Con marca de agua de tu página.
 - 🎫 Pase Real (gratis): 30 niveles de recompensas por temporada (monedas, fragmentos y cofres; el nivel 30 da el Cofre Real). Ganas XP en cada batalla. Se reinicia cada mes.
