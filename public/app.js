@@ -297,6 +297,9 @@ function viralTop() {
     ${v.password ? `<p class="hint" style="margin-top:6px">Contraseña del panel (para entrar desde el celular): <code>${esc(v.password)}</code></p>` : ''}
     <label style="margin-top:8px"><input type="checkbox" id="vf-dest" ${v.destacado ? 'checked' : ''}> 🎬 Poner automáticamente mi último video publicado (YouTube o Facebook) como "video destacado" de la página</label>
     ${v.error ? `<p class="hint" style="color:#b91c1c">${esc(v.error)}</p>` : ''}
+    <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(250,204,21,.12)"><b>👑 Voces de GLORY BROWN</b> <span class="hint">Cada uno de los 127 personajes habla con su propia voz de tu biblioteca (${v.vocesListas || 0} de ${v.vozGlory?.total || 983} frases grabadas).</span>
+      ${v.vozGlory?.activo ? `<p class="hint">🎙️ Grabando… ${v.vozGlory.hechas}/${v.vozGlory.total} (puede tardar unos 15 minutos; puedes seguir usando ShortForge)</p>` : `<button class="b sm" data-act="vfVoces" style="margin-top:6px">🎙️ ${v.vocesListas ? 'Completar o actualizar las voces' : 'Grabar las voces de los personajes'}</button>`}
+      ${v.vozGlory?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.vozGlory.error)}</p>` : ''}<p class="hint" style="margin:4px 0 0">Mientras no estén grabadas, el juego usa la voz del celular de cada jugador.</p></div>
     <details style="margin-top:8px"><summary class="hint">Registro</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:180px;overflow:auto">${esc((v.log || []).join('\n'))}</pre></details>`;
 }
 VIEWS.viral = () => {
@@ -869,6 +872,7 @@ const ACT = {
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
+  vfVoces: guard(async () => { VS = await api('/api/viral/voces-glory', {}); toast('🎙️ Grabando las voces de GLORY BROWN…'); render(); }),
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
   vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),
   vfLink: el => { const u = VS.url + '/?' + (el.dataset.g ? 'g=' + el.dataset.g + '&' : '') + 'src=' + encodeURIComponent(($('#vf-src')?.value || 'fb').trim().replace(/\s+/g, '-').slice(0, 40)); navigator.clipboard.writeText(u).then(() => toast('Enlace copiado: ' + u)); },

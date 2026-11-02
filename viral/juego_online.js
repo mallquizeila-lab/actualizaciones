@@ -27,7 +27,7 @@ function crear({ db, q, q1, run, revisar, apodo }) {
   function nuevaSala(modo, privada) { const id = crypto.randomBytes(6).toString('hex'); let codigo = null; if (privada) do { codigo = crypto.randomBytes(3).toString('hex').toUpperCase(); } while ([...salas.values()].some(x => x.codigo === codigo)); const s = { id, modo, codigo, estado: 'esperando', jugadores: [], creada: Date.now(), activo: Date.now() }; salas.set(id, s); return s; }
   function sentar(s, b) {
     const libre = [...Array(tam(s.modo)).keys()].find(i => !s.jugadores.some(j => j.asiento === i)); if (libre === undefined) return null;
-    const j = { asiento: libre, tok: crypto.randomBytes(12).toString('hex'), nombre: apodo(b.nombre) || 'Jugador', trofeos: Math.max(0, Math.min(99999, +b.trofeos || 0)), mazo: Array.isArray(b.mazo) ? b.mazo.slice(0, 8).map(String) : [], niveles: typeof b.niveles === 'object' && b.niveles ? Object.fromEntries(Object.entries(b.niveles).slice(0, 20).map(([k, v]) => [String(k).slice(0, 12), Math.max(1, Math.min(5, +v || 1))])) : {}, clan: String(b.clan || '').slice(0, 30), jid: jugadorId(b) };
+    const j = { asiento: libre, tok: crypto.randomBytes(12).toString('hex'), nombre: apodo(b.nombre) || 'Jugador', trofeos: Math.max(0, Math.min(99999, +b.trofeos || 0)), mazo: Array.isArray(b.mazo) ? b.mazo.slice(0, 8).map(x => String(x).slice(0, 40)) : [], niveles: typeof b.niveles === 'object' && b.niveles ? Object.fromEntries(Object.entries(b.niveles).slice(0, 12).map(([k, v]) => [String(k).slice(0, 40), Math.max(1, Math.min(10, +v || 1))])) : {}, clan: String(b.clan || '').slice(0, 30), jid: jugadorId(b) };
     s.jugadores.push(j); s.activo = Date.now(); return j;
   }
   function empezar(s, conBots) {

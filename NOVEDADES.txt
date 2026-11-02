@@ -1,3 +1,13 @@
+v7.16.0 — 👑 GLORY BROWN: El Choque de los Reinos
+- Duelo de Torres se transforma en GLORY BROWN, en homenaje a la abuelita: intro con la Reina, logo y estilo propio.
+- 127 cartas originales (90 tropas, 21 hechizos, 15 estructuras y la Reina Glory Brown, Legendaria Real) con estadísticas, rarezas, habilidades e historia.
+- 7 mundos y 21 arenas (Reino del Alba, Bosque Esmeralda, Imperio de las Arenas, Islas Celestiales, Reino de las Sombras, Dominio de Hielo y Reino del Dragón), cada uno con su escenario.
+- La Reina: Luz de Amor, Rayo Dorado, Escudo Real y Corazón de Abuelita, con presentación especial y la frase "Su legado vive en cada reino y su luz nunca se apagará". Se desbloquea al ganar 3 batallas.
+- Los personajes hablan entre sí en la batalla: se provocan y se responden, cada uno con su voz. En ShortForge (📣 Página viral) hay un botón para grabar las 983 frases con las voces de tu biblioteca.
+- Cofres (madera, plata, oro, mágico y real), cofre gratis cada 4 horas, cofre de coronas, fragmentos y niveles de carta del 1 al 10.
+- Colección con filtros por mundo, rareza y tipo; carta de presentación de cada personaje con botón para compartir su imagen en redes.
+- Campaña por las 21 arenas, batalla en línea 1 vs 1 y 2 vs 2, con amigos, contra la máquina y clanes.
+
 v7.15.1 — Duelo de Torres con arte épico y sin cuelgues
 - Arreglado: la partida podía congelarse en la liga Bronce (el mazo del rival quedaba incompleto). Además, ahora la partida nunca se congela aunque ocurra un error.
 - Arte nuevo estilo épico: guerreros con armadura, ojos que brillan, capas del color del equipo, escudos y armas detalladas.

@@ -58,6 +58,7 @@
     mundo: { bpm: 104, base: 53, prog: [[0, 4, 7], [2, 6, 9], [9, 12, 16], [7, 11, 14]], esc: [0, 2, 4, 6, 7, 9, 11, 12, 14], arp: 'triangle', lead: 'square', semilla: 21 },
     espacio: { bpm: 84, base: 52, prog: [[0, 4, 11], [5, 9, 16], [9, 12, 19], [7, 11, 17]], esc: [0, 4, 7, 11, 12, 16, 19], arp: 'sine', lead: 'sine', semilla: 5 },
     batalla: { bpm: 132, base: 50, prog: [[0, 3, 7], [8, 12, 15], [5, 8, 12], [7, 11, 14]], esc: [0, 2, 3, 5, 7, 8, 11, 12, 14], arp: 'sawtooth', lead: 'square', semilla: 17 },
+    reina: { bpm: 88, base: 55, prog: [[0, 4, 7], [9, 12, 16], [5, 9, 12], [7, 11, 14]], esc: [0, 2, 4, 7, 9, 12, 14, 16, 19], arp: 'triangle', lead: 'sine', semilla: 33 },
     arcade: { bpm: 128, base: 52, prog: [[0, 3, 7], [8, 12, 15], [3, 7, 10], [10, 14, 17]], esc: [0, 3, 5, 7, 10, 12, 15], arp: 'square', lead: 'square', semilla: 11 },
   };
   let M = null;

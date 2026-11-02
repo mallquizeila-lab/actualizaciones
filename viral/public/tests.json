@@ -102,9 +102,9 @@
    "id": "arcade-batalla",
    "juego": "batalla",
    "cat": "juegos",
-   "e": "⚔️",
-   "t": "Duelo de Torres",
-   "d": "Batallas de cartas en tiempo real: 1 vs 1, 2 vs 2 en línea, clanes con chat, trofeos y ligas.",
+   "e": "👑",
+   "t": "GLORY BROWN: El Choque de los Reinos",
+   "d": "127 cartas, 7 mundos y 21 arenas. Batallas en vivo 1 vs 1 y 2 vs 2, clanes y la Reina Glory Brown.",
    "min": 4,
    "tipo": "arcade"
   },
