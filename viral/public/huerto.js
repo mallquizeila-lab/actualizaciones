@@ -21,7 +21,7 @@
     caracol: { n: 'Caracol blindado', hp: 460, vel: .17, desde: 3, pts: 20, d: 'Su caparazón aguanta mucho.' },
     langosta: { n: 'Langosta', hp: 300, vel: .42, desde: 7, pts: 25, d: 'Rápida: salta sobre tu primer defensor.' },
     escarabajo: { n: 'Escarabajo tanque', hp: 880, vel: .16, desde: 11, pts: 40, d: 'Blindado y muy resistente.' },
-    polilla: { n: 'Polilla nocturna', hp: 170, vel: .5, desde: 15, pts: 20, d: 'Vuela por encima de las murallas y las bombas.' },
+    polilla: { n: 'Polilla nocturna', hp: 150, vel: .36, desde: 15, pts: 20, d: 'Vuela por encima de las murallas y las bombas.' },
     topo: { n: 'Topo excavador', hp: 420, vel: .19, desde: 18, pts: 30, d: 'Cava por debajo y sale a mitad de tu huerto.' },
     rata: { n: 'Rata jefa', hp: 3000, vel: .14, desde: 5, pts: 120, d: 'La jefa: enorme y voraz.' },
   };
@@ -63,7 +63,7 @@
     const carril = () => carriles[Math.floor(r() * carriles.length)];
     const total = Math.round(5 + n * 1.3), normal = Math.round(total * .6), ev = [];
     let t = n < 10 ? 18 : 24;
-    for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
+    for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(n >= 24 ? 4.3 : 3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
     t += 7; const ola = t;
     for (let i = normal; i < total; i++) ev.push({ t: t + r() * (10 + n * .4), tipo: elegir(), c: carril() });
     if (n % 5 === 0 || n > 20) ev.push({ t: t + 4, tipo: 'rata', c: carriles[Math.floor(carriles.length / 2)] });
