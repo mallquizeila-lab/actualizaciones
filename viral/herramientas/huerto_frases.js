@@ -12,10 +12,11 @@ const VOCES = {
   rata: ['es-MX-JorgeNeural', -6, -45], polilla: ['es-PE-CamilaNeural', 18, 35], topo: ['es-CL-LorenzoNeural', 5, -10],
   hongo: ['es-PE-CamilaNeural', 5, 15], choclo: ['es-PE-AlexNeural', 8, 5], coco: ['es-ES-AlvaroNeural', -10, -30], aji: ['es-MX-DaliaNeural', 25, 30], limon: ['es-CO-SalomeNeural', 5, 10],
   pina: ['es-VE-PaolaNeural', 10, 20], palta: ['es-AR-ElenaNeural', 5, 0], maracuya: ['es-CL-LorenzoNeural', 12, 10], cebolla: ['es-UY-ValentinaNeural', -5, 5], quinua: ['es-BO-SofiaNeural', 0, 5],
-  narrador: ['es-PE-AlexNeural', 5, 0],
+  narrador: ['es-PE-AlexNeural', 5, 0], gallina: ['es-MX-DaliaNeural', 22, 60],
 };
 const lista = [], add = (q, txt) => { const [edge, rate, pitch] = VOCES[q]; const id = idFrase(q, txt); if (!lista.some(f => f.id === id)) lista.push({ id, texto: txt, voz: { edge, rate, pitch } }); };
-for (const tipo of Object.keys(ENE)) { for (const t of FRASES.llega[tipo] || []) add(tipo, t); for (const t of [...FRASES.come, ...FRASES.muere, ...FRASES.entra]) add(tipo, t); }
+for (const tipo of Object.keys(ENE)) { for (const t of FRASES.llega[tipo] || []) add(tipo, t); for (const t of [...FRASES.come, ...FRASES.muere, ...FRASES.entra, ...FRASES.burla]) add(tipo, t); }
+for (const t of FRASES.gallina) add('gallina', t);
 for (const [k, l] of Object.entries(FRASES.def)) for (const t of l) add(k, t);
 for (const t of [...FRASES.gana, ...FRASES.pierde, '¡Cuidado! ¡Se viene una gran oleada!', '¡Triple!', '¡Imparable!', '¡Furia del huerto!']) add('narrador', t);
 add('aji', '¡Picanteee!');

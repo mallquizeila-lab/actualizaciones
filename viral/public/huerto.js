@@ -38,10 +38,12 @@
     muere: ['¡Noooo!', '¡Volveré!', '¡Me las pagarás!', '¡Auxilio!', '¡No es justo!', '¡Ay, mi pancita!', '¡Mamááá!'],
     entra: ['¡Jajaja, entré!', '¡Llegué a tu casa!', '¡Ganamos, ganamos!'],
     def: { choclo: ['¡Toma granos!', '¡Pum pum!', '¡A la carga!'], coco: ['¡No pasarás!', '¡Soy de piedra!'], aji: ['¡Picanteee!'], limon: ['¡Congélate!', '¡Fresquito!'], palta: ['¡Doble pepa!', '¡Ahí les va!'], hongo: ['¡Agüita fresca!', '¡Rocío para todos!'], pina: ['¡Sorpresa!', 'Shhh... escondida'], maracuya: ['¡Rayo maracuyá!', '¡Electrizante!'], cebolla: ['¡Te haré llorar!', '¡Lágrimas picantes!'], quinua: ['¡Los curo a todos!', '¡Fuerza andina!'] },
+    burla: ['¡Eres un pollito, ya te gané!', '¡Jajaja! ¡Ahora esta casa es mía!', '¡Llegué a la cocina! ¡Gané, gané!', '¡Muy lento, granjero! ¡Me comí tu almuerzo!'],
+    gallina: ['¡Cocoroco! ¡De mi casa nadie pasa!', '¡Pío pío, fuera de aquí!', '¡Cuidado, que llegó la gallina!'],
     gana: ['¡Huerto a salvo! ¡Eres un crack!', '¡Victoria! Las plagas salieron corriendo', '¡Ganaste! Tu huerto está feliz'],
     pierde: ['¡Oh no! Las plagas entraron a tu casa', '¡Nos ganaron esta vez! Inténtalo otra vez'],
   };
-  const VOZ = { gusano: { tono: 1.7, vel: 1.25 }, caracol: { tono: .6, vel: .85 }, langosta: { tono: 1.95, vel: 1.4 }, escarabajo: { tono: .35, vel: .9 }, rata: { tono: .1, vel: .95 }, polilla: { tono: 1.8, vel: 1.3 }, topo: { tono: .8, vel: 1 } };
+  const VOZ = { gusano: { tono: 1.7, vel: 1.25 }, caracol: { tono: .6, vel: .85 }, langosta: { tono: 1.95, vel: 1.4 }, escarabajo: { tono: .35, vel: .9 }, rata: { tono: .1, vel: .95 }, gallina: { tono: 1.9, vel: 1.35 }, polilla: { tono: 1.8, vel: 1.3 }, topo: { tono: .8, vel: 1 } };
   const azar = l => l[Math.floor(Math.random() * l.length)];
   // Voces grabadas con la biblioteca de ShortForge (si existen); si no, la voz del celular
   let MANI_H = null, ultVozH = 0, audioH = null;
@@ -363,7 +365,7 @@
     const cv = $('#cv'), X = cv.getContext('2d'); X.setTransform(dpr, 0, 0, dpr, 0, 0);
     const fondo = document.createElement('canvas'); fondo.width = W * dpr; fondo.height = H * dpr; pintarFondo(fondo.getContext('2d'));
     const cx = c => c * S + S / 2, cy = r => TOP + r * S + S / 2;
-    let agua = C.agua, vidas = 3, tj = 0, vel = 1, pausa = false, vivo = true, fin = false, sel = null, pala = false, raf, last = performance.now(), evI = 0, puntos = 0, shake = 0, rojo = 0, avisoOla = false, lluvia = 5, perdio = false, ultAviso = 0, tutorial = n === 1 ? 1 : 0, ultBarra = 0;
+    let agua = C.agua, vidas = 1, perdidos = 0, usadas = 0, gallinas = new Set(C.carriles), corren = [], tj = 0, vel = 1, pausa = false, vivo = true, fin = false, sel = null, pala = false, raf, last = performance.now(), evI = 0, puntos = 0, shake = 0, rojo = 0, avisoOla = false, lluvia = 5, perdio = false, ultAviso = 0, tutorial = n === 1 ? 1 : 0, ultBarra = 0;
     const defs = new Map(), enes = [], balas = [], gotas = [], parts = [], ondas = [], textos = [], cool = {}, caidos = [], rayos = []; let furia = 0, furiaT = 0;
     tipos.forEach(k => cool[k] = ['hongo', 'choclo', 'coco'].includes(k) ? 0 : DEF[k].carga * .5);
 
@@ -495,9 +497,10 @@
         if (blk && blk.k === 'pina' && blk.armado) { defs.delete(blk.key); explotar(blk.x, blk.y, S * .75, 1800, blk.c, 0); continue; }
         if (blk && e.tipo === 'langosta' && !e.saltado) { e.saltado = true; e.salto = .6; e.s0 = e.y; e.s1 = blk.y + S * .5; FX.son('swish'); continue; }
         if (blk && blk.k !== 'aji') { if (!e.come) { hablar(e, FRASES.come, .45); if (blk.k === 'coco' && !blk.hablo) { blk.hablo = 1; decir(blk, azar(FRASES.def.coco)); } } if (Math.random() < dt * 2) FX.son('comer'); e.come = true; blk.hp -= (e.tipo === 'rata' ? 240 : 110) * dt; blk.golpe = .12; if (Math.random() < dt * 5) chispas(blk.x, blk.y - S * .25, '#9be36b', 2, .5);
-          if (blk.hp <= 0) { defs.delete(blk.key); chispas(blk.x, blk.y, '#7a5a2a', 14); FX.son('choque'); FX.vibrar(30); } }
+          if (blk.hp <= 0) { perdidos++; defs.delete(blk.key); chispas(blk.x, blk.y, '#7a5a2a', 14); FX.son('choque'); FX.vibrar(30); } }
         else { e.come = false; e.y += ENE[e.tipo].vel * S * (e.lento > 0 ? .5 : 1) * dt; }
-        if (e.y > TOP + R * S + S * .1) { e.hp = 0; e.llego = 1; vidas--; rojo = 1; shake = .5; FX.son('perder'); burbuja(e.x, TOP + R * S - S * .2, azar(FRASES.entra)); voz(azar(FRASES.entra), e.tipo, { forzar: true }); FX.vibrar([120, 60, 120]); banner(vidas > 0 ? `💔 ¡Una plaga entró! Quedan ${vidas}` : '💔', S * .3, 1.8); if (vidas <= 0) { perder(); return; } }
+        if (e.y > TOP + R * S - S * .2 && gallinas.has(e.c)) { gallinas.delete(e.c); usadas++; corren.push({ c: e.c, y: TOP + R * S + S * .1, f: 0 }); const f = azar(FRASES.gallina); burbuja(cx(e.c), TOP + R * S - S * .3, f); voz(f, 'gallina', { forzar: true, cortar: true }); FX.son('salto'); FX.son('swish'); shake = .25; }
+        if (e.y > TOP + R * S + S * .1) { e.hp = 0; e.llego = 1; vidas = 0; rojo = 1; shake = .6; FX.son('perder'); const f = azar(FRASES.burla); e.burla = f; burbuja(e.x, TOP + R * S - S * .25, f); voz(f, e.tipo, { forzar: true, cortar: true }); FX.vibrar([150, 60, 150]); perder(e); return; }
       }
       for (let i = enes.length - 1; i >= 0; i--) { const e = enes[i]; if (e.hp <= 0) { if (!e.llego) { caidos.push({ e, v: .55 }); furia = Math.min(1, furia + ENE[e.tipo].pts / (e.tipo === 'rata' ? 120 : 260)); puntos += ENE[e.tipo].pts; chispas(e.x, e.y, '#c6f06a', 12); chispas(e.x, e.y, '#ffffff', 6, 1.4); FX.son('pop');
           if (Math.random() < (e.tipo === 'rata' ? 1 : .4)) { const f = azar(FRASES.muere); burbuja(e.x, e.y - S * .3, f); voz(f, e.tipo, { forzar: e.tipo === 'rata' }); }
@@ -505,6 +508,7 @@
           if (Math.random() < (e.tipo === 'rata' ? 1 : .1)) gotas.push({ x: e.x, y: e.y - S * .2, ty: e.y + S * .1, v: 9, val: e.tipo === 'rata' ? 5 : 1, moneda: 1, vuela: 0, cae: 2 });
           const ah = tj; racha.push(ah); while (racha.length && ah - racha[0] > 1.6) racha.shift();
           if (racha.length >= 2) { const k = racha.length, txt = k === 2 ? '¡DOBLE!' : k === 3 ? '¡TRIPLE!' : '¡IMPARABLE!'; textos.push({ txt, x: e.x, y: e.y - S * .5, tam: S * (.3 + k * .04), v: 1.1, max: 1.1 }); puntos += 15 * k; FX.son('combo'); if (k >= 3) voz(k === 3 ? '¡Triple!' : '¡Imparable!', 'narrador', { forzar: true, tono: 1.2 }); } } enes.splice(i, 1); } }
+      for (let i = corren.length - 1; i >= 0; i--) { const g = corren[i]; g.y -= S * 7 * dt; g.f += dt; for (const e of enes) if (e.hp > 0 && e.c === g.c && Math.abs(e.y - g.y) < S * .45) { e.hp = 0; chispas(e.x, e.y, '#fef3c7', 12, 1.2); textos.push({ txt: '¡PIO!', x: e.x, y: e.y - S * .3, tam: S * .26, v: .7, max: .7 }); FX.son('splat'); } if (Math.random() < dt * 30) parts.push({ x: cx(g.c) + (Math.random() - .5) * S * .3, y: g.y + S * .2, vx: (Math.random() - .5) * S / 40, vy: -Math.random() * S / 60, v: .5, max: .5, r: S * .03, c: '#fff7ed' }); if (g.y < TOP - S) corren.splice(i, 1); }
       for (const g of gotas) {
         if (g.vuela) { g.vuela += dt * 2.6; const p = Math.min(1, g.vuela), q = p * p; g.x = g.x0 + (S * .4 - g.x0) * q; g.y = g.y0 + (H + S * .3 - g.y0) * q; if (p >= 1) { if (g.moneda) { PERFIL.ganar(g.val); FX.son('moneda'); textos.push({ txt: `+${g.val} 🪙`, x: S * .8, y: H - S * .2, tam: S * .26, v: 1, max: 1 }); } else agua += g.val; g.fuera = 1; } continue; }
         if (g.y < g.ty) { g.y = Math.min(g.ty, g.y + S * g.cae * dt); if (g.x2 != null) g.x += (g.x2 - g.x) * Math.min(1, dt * 5); } else { g.v -= dt; if (g.v <= 0) g.fuera = 1; }
@@ -542,6 +546,10 @@
           globo(e, e.x, e.y - S * .62);
           if (e.hp < e.max) { const w = S * .5; X.fillStyle = 'rgba(0,0,0,.5)'; X.beginPath(); X.roundRect(e.x - w / 2, e.y - S * .55, w, 5, 3); X.fill(); X.fillStyle = e.hp / e.max > .5 ? '#4ade80' : e.hp / e.max > .25 ? '#facc15' : '#ef4444'; X.beginPath(); X.roundRect(e.x - w / 2, e.y - S * .55, w * Math.max(0, e.hp / e.max), 5, 3); X.fill(); } }
       }
+      { X.save(); X.textAlign = 'center'; X.textBaseline = 'middle'; const tg = performance.now() / 1000;
+        for (const c of gallinas) { X.font = `${S * .38}px sans-serif`; X.fillText('🐔', cx(c) + Math.sin(tg * 2 + c) * S * .03, TOP + R * S + S * .05 - Math.abs(Math.sin(tg * 3 + c * 1.7)) * S * .04); }
+        for (const g of corren) { X.save(); X.translate(cx(g.c), g.y); X.rotate(Math.sin(g.f * 30) * .15); X.font = `${S * .55}px sans-serif`; X.shadowColor = '#fde68a'; X.shadowBlur = 18; X.fillText('🐔', 0, 0); X.restore(); X.fillStyle = 'rgba(255,255,255,.35)'; X.fillRect(cx(g.c) - S * .2, g.y + S * .25, S * .4, S * .5); }
+        X.restore(); X.textBaseline = 'alphabetic'; }
       for (let i = caidos.length - 1; i >= 0; i--) { const c = caidos[i], e = c.e; c.v -= dt; if (c.v <= 0) { caidos.splice(i, 1); continue; } const p = 1 - c.v / .55; X.save(); X.globalAlpha = Math.max(0, 1 - p * 1.1); X.translate(e.x, e.y + S * .3); X.rotate(p * (e.c % 2 ? 1.4 : -1.4)); X.scale(1 - p * .4, 1 - p * .55); X.filter = 'grayscale(.6) brightness(1.3)'; dibP(e.tipo, X, 0, -S * .3, S, { t: e.t + e.f, frac: 0, come: false, salto: 0 }); X.restore(); X.filter = 'none'; }
       for (const b of balas) {
         { const tr = X.createLinearGradient(b.x, b.y, b.x, b.y + S * .55); tr.addColorStop(0, b.oro ? 'rgba(253,224,71,.85)' : b.tipo === 'hielo' ? 'rgba(165,243,252,.7)' : 'rgba(255,240,170,.55)'); tr.addColorStop(1, 'rgba(255,255,255,0)'); X.fillStyle = tr; X.beginPath(); X.moveTo(b.x - S * .05, b.y); X.lineTo(b.x + S * .05, b.y); X.lineTo(b.x, b.y + S * .55); X.fill(); }
@@ -565,7 +573,7 @@
       X.fillStyle = 'rgba(0,0,0,.45)'; X.beginPath(); X.roundRect(bx, by, bw, S * .17, S * .09); X.fill();
       const gr = X.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, '#a3e635'); gr.addColorStop(1, '#f97316'); X.fillStyle = gr; X.beginPath(); X.roundRect(bx + 2, by + 2, Math.max(0, (bw - 4) * prog), S * .17 - 4, S * .08); X.fill();
       X.font = `${S * .24}px sans-serif`; X.textAlign = 'center'; X.fillText('🚩', bx + bw * mo, by + S * .05); X.fillText('🐛', bx + bw * prog, by + S * .16);
-      X.font = `${S * .26}px sans-serif`; for (let i = 0; i < 3; i++) X.fillText(i < vidas ? '❤️' : '🖤', W - S * 1.35 + i * S * .42, by + S * .2);
+      X.font = `900 ${S * .24}px Figtree,sans-serif`; X.fillText('🐔', W - S * 1.15, by + S * .2); X.lineWidth = 4; X.strokeStyle = 'rgba(0,0,0,.6)'; X.strokeText('x' + gallinas.size, W - S * .62, by + S * .2); X.fillStyle = '#fff'; X.fillText('x' + gallinas.size, W - S * .62, by + S * .2);
       if (rojo > 0) { const vg = X.createRadialGradient(W / 2, H / 2, H * .2, W / 2, H / 2, H * .7); vg.addColorStop(0, 'rgba(255,0,0,0)'); vg.addColorStop(1, `rgba(255,0,40,${rojo * .5})`); X.fillStyle = vg; X.fillRect(0, 0, W, H); }
       if (pausa && !fin) { X.fillStyle = 'rgba(10,10,30,.55)'; X.fillRect(0, 0, W, H); X.font = `900 ${S * .5}px Figtree,sans-serif`; X.fillStyle = '#fff'; X.textAlign = 'center'; X.fillText('⏸ Pausa', W / 2, H / 2); }
     }
@@ -608,7 +616,7 @@
       FX.son('click'); };
     $('#vel').onclick = () => { vel = vel >= 3 ? 1 : vel + 1; $('#vel').textContent = '⏩ x' + vel; FX.son('click'); };
     $('#pau').onclick = () => { if (fin || pausa) return; pausa = true; FX.son('click');
-      modal(`<h2>⏸ Pausa</h2><p class="sub">${zonaDe(n).e} Nivel ${n} · ${'❤️'.repeat(vidas)}</p><button class="btn" id="seg">▶ Continuar</button><button class="btn alt" id="rei2">🔁 Reiniciar nivel</button><button class="btn alt" id="map2">🗺️ Volver al mapa</button>`, d => { d.onclick = e => { const id = e.target.id; if (id === 'seg' || e.target === d) { d.remove(); pausa = false; } if (id === 'rei2') { d.remove(); nivel(t, n); } if (id === 'map2') { d.remove(); vivo = false; mapa(t); } }; }); };
+      modal(`<h2>⏸ Pausa</h2><p class="sub">${zonaDe(n).e} Nivel ${n} · 🐔 x${gallinas.size}</p><button class="btn" id="seg">▶ Continuar</button><button class="btn alt" id="rei2">🔁 Reiniciar nivel</button><button class="btn alt" id="map2">🗺️ Volver al mapa</button>`, d => { d.onclick = e => { const id = e.target.id; if (id === 'seg' || e.target === d) { d.remove(); pausa = false; } if (id === 'rei2') { d.remove(); nivel(t, n); } if (id === 'map2') { d.remove(); vivo = false; mapa(t); } }; }); };
     $('#vm').onclick = () => { vivo = false; mapa(t); };
     const alSalir = () => { if (document.hidden && !fin && !pausa) $('#pau')?.click(); };
     document.addEventListener('visibilitychange', alSalir);
@@ -627,25 +635,25 @@
 
     function modal(html, fn) { const d = document.createElement('div'); d.className = 'modal'; d.innerHTML = `<div class="card" style="text-align:center">${html}</div>`; document.body.append(d); fn && fn(d); return d; }
     function ganar() {
-      fin = true; const e = vidas >= 3 ? 3 : vidas === 2 ? 2 : 1, pts = puntos + n * 100 + vidas * 150;
+      fin = true; const e = usadas === 0 && perdidos <= 1 ? 3 : usadas <= 1 && perdidos <= 4 ? 2 : 1, pts = puntos + n * 100 + gallinas.size * 100 + (e === 3 ? 300 : 0);
       try { PERFIL.partida('huerto', pts); PERFIL.nivelJuego('huerto', n, e); } catch (er) {}
       FX.pararMusica?.(); FX.son('nivel'); FX.confeti(); voz(azar(FRASES.gana), 'narrador', { forzar: true, cortar: true });
       post('/api/arcade/puntaje', { juego: 'huerto', puntos: Math.min(100000, pts), nombre: LS.get('chatNom') || 'Jugador', avatar: LS.get('chatAv') || 'a01', uid: VID }).catch(() => {});
       const prox = ORDEN.find(k => DEF[k].desde === n + 1) || Object.keys(ENE).find(k => ENE[k].desde === n + 1);
-      setTimeout(() => modal(`<div style="font-size:3rem;letter-spacing:6px">${'⭐'.repeat(e)}<span style="opacity:.25">${'⭐'.repeat(3 - e)}</span></div><h2>¡Huerto a salvo!</h2><p class="sub">Nivel ${n} superado · ${pts.toLocaleString('es-PE')} puntos · +${e * 5} 🪙${e < 3 ? '<br>Para 3 estrellas no dejes pasar ninguna plaga.' : ''}</p>
+      setTimeout(() => modal(`<div style="font-size:3rem;letter-spacing:6px">${'⭐'.repeat(e)}<span style="opacity:.25">${'⭐'.repeat(3 - e)}</span></div><h2>¡Huerto a salvo!</h2><p class="sub">Nivel ${n} superado · ${pts.toLocaleString('es-PE')} puntos · +${e * 5} 🪙${e < 3 ? '<br>Para 3 ⭐: que ninguna plaga llegue a las gallinas y no dejes que se coman tus defensores.' : ''}</p>
         ${prox ? `<div style="display:flex;align-items:center;gap:10px;justify-content:center;background:rgba(255,255,255,.06);border-radius:14px;padding:8px;margin:8px 0"><canvas data-px="${prox}" style="width:52px;height:52px"></canvas><small style="text-align:left">${DEF[prox] ? `En el siguiente nivel desbloqueas<br><b>${DEF[prox].n}</b>` : `En el siguiente nivel aparece<br><b>${ENE[prox].n}</b>`}</small></div>` : ''}
         ${n < TOTAL ? `<button class="btn" id="sig">▶ Nivel ${n + 1}</button>` : '<p>🏆 ¡Completaste los 30 niveles!</p>'}${e < 3 ? '<button class="btn alt" id="rei">🔁 Repetir por 3 ⭐</button>' : ''}<button class="btn alt" id="map">🗺️ Ver el mapa</button><button class="btn alt" id="comp">📣 Retar a un amigo</button>`, botones), 900);
     }
-    function perder() {
-      fin = true; FX.pararMusica?.(); voz(azar(FRASES.pierde), 'narrador', { forzar: true, cortar: true }); if (!perdio) { perdio = true; try { PERFIL.partida('huerto', puntos); } catch (er) {} }
-      setTimeout(() => modal(`<div style="font-size:3rem">🐛🏠</div><h2>¡Las plagas entraron a tu casa!</h2><p class="sub">Frenaste el ${Math.round((evI - enes.length) * 100 / C.ev.length)} % de las plagas del nivel ${n}.</p><button class="btn" id="mas">🛡️ Segunda oportunidad · 40 🪙</button><button class="btn alt" id="rei">🔁 Reintentar</button><button class="btn alt" id="map">🗺️ Mapa</button>`, botones), 700);
+    function perder(quien) {
+      fin = true; FX.pararMusica?.(); if (!quien) voz(azar(FRASES.pierde), 'narrador', { forzar: true, cortar: true }); if (!perdio) { perdio = true; try { PERFIL.partida('huerto', puntos); } catch (er) {} }
+      setTimeout(() => modal(`<canvas data-px="${quien?.tipo || 'gusano'}" style="width:96px;height:96px"></canvas><h2>¡${ENE[quien?.tipo || 'gusano'].n} entró a tu casa!</h2><p style="font-size:1.1rem;font-weight:800;margin:4px 0">“${quien?.burla || '¡Eres un pollito, ya te gané!'}”</p><p class="sub">Frenaste el ${Math.round((evI - enes.length) * 100 / C.ev.length)} % de las plagas del nivel ${n}.</p><button class="btn" id="mas">🛡️ Segunda oportunidad · 40 🪙</button><button class="btn alt" id="rei">🔁 Reintentar</button><button class="btn alt" id="map">🗺️ Mapa</button>`, botones), 1500);
     }
     function botones(d) {
-      d.querySelectorAll('[data-px]').forEach(c => { c.width = 52 * dpr; c.height = 52 * dpr; icono(c, c.dataset.px, 52); });
+      d.querySelectorAll('[data-px]').forEach(c => { const t = parseInt(c.style.width) || 52; c.width = t * dpr; c.height = t * dpr; icono(c, c.dataset.px, t); });
       d.onclick = e => { const id = e.target.id; if (!id) return;
         if (id === 'sig') { d.remove(); nivel(t, n + 1); } if (id === 'map') { d.remove(); vivo = false; mapa(t); } if (id === 'rei') { d.remove(); nivel(t, n); }
         if (id === 'mas') { if (!PERFIL.gastar(40)) return toast('No tienes suficientes monedas 🪙: juega misiones y otros juegos para ganar más'); d.remove();
-          for (const en of enes) if (en.y > TOP + S * (R - 3.5)) { en.hp = 0; chispas(en.x, en.y, '#fff3a0', 14); } ondas.push({ x: W / 2, y: TOP + R * S, r: 0, max: W * .8, v: .45 }); vidas = 1; fin = false; shake = .4; FX.son('ganar'); FX.musica?.('huerto'); FX.intensidad?.(2); }
+          for (const en of enes) if (en.y > TOP + S * (R - 3.5)) { en.hp = 0; chispas(en.x, en.y, '#fff3a0', 14); } ondas.push({ x: W / 2, y: TOP + R * S, r: 0, max: W * .8, v: .45 }); vidas = 1; gallinas = new Set(C.carriles); fin = false; shake = .4; FX.son('ganar'); FX.musica?.('huerto'); FX.intensidad?.(2); }
         if (id === 'comp') { const url = `${location.origin}/r/${t.id}?src=huerto`; if (navigator.share) navigator.share({ title: 'Huerto Defensor', text: `🌱 Ya voy en el nivel ${n + 1} de Huerto Defensor. ¿Me alcanzas?`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado'); } } };
     }
     window.__huerto = { estado: () => ({ agua, vidas, tj, enes: enes.length, defs: defs.size, fin, evI, total: C.ev.length, puntos }), plantar: (k, c, r) => { sel = k; const b = cv.getBoundingClientRect(); cv.dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + (c + .5) * S * b.width / W, clientY: b.top + (TOP + (r + .5) * S) * b.height / H, bubbles: true })); }, agua: v => agua = v, vista: () => ({ enes: enes.map(e => [e.c, Math.round((e.y - TOP) / S * 10) / 10, e.tipo]), defs: [...defs.values()].map(d => [d.k, d.c, d.r]) }), sinRecarga: () => { for (const k in cool) cool[k] = 0; }, rapido: k => vel = k, recogerTodo: () => gotas.forEach(g => !g.vuela && recoger(g)), cargarFuria: () => furia = 1, furia: () => furia }; // para pruebas
