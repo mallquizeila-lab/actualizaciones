@@ -15,9 +15,9 @@
   };
   const ENE = {
     gusano: { n: 'Gusano', hp: 190, vel: .21, desde: 1, pts: 10, d: 'Lento pero insistente.' },
-    caracol: { n: 'Caracol blindado', hp: 520, vel: .17, desde: 3, pts: 20, d: 'Su caparazón aguanta mucho.' },
+    caracol: { n: 'Caracol blindado', hp: 460, vel: .17, desde: 3, pts: 20, d: 'Su caparazón aguanta mucho.' },
     langosta: { n: 'Langosta', hp: 300, vel: .42, desde: 7, pts: 25, d: 'Rápida: salta sobre tu primer defensor.' },
-    escarabajo: { n: 'Escarabajo tanque', hp: 1100, vel: .16, desde: 11, pts: 40, d: 'Blindado y muy resistente.' },
+    escarabajo: { n: 'Escarabajo tanque', hp: 880, vel: .16, desde: 11, pts: 40, d: 'Blindado y muy resistente.' },
     rata: { n: 'Rata jefa', hp: 3000, vel: .14, desde: 5, pts: 120, d: 'La jefa: enorme y voraz.' },
   };
   const ORDEN = Object.keys(DEF);
@@ -48,9 +48,9 @@
     const carril = () => carriles[Math.floor(r() * carriles.length)];
     const total = Math.round(5 + n * 1.3), normal = Math.round(total * .6), ev = [];
     let t = 18;
-    for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(3, 10.5 - n * .22 - i * .12) * (.7 + r() * .6); }
+    for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
     t += 7; const ola = t;
-    for (let i = normal; i < total; i++) ev.push({ t: t + r() * (8 + n * .2), tipo: elegir(), c: carril() });
+    for (let i = normal; i < total; i++) ev.push({ t: t + r() * (10 + n * .4), tipo: elegir(), c: carril() });
     if (n % 5 === 0 || n > 20) ev.push({ t: t + 4, tipo: 'rata', c: carriles[Math.floor(carriles.length / 2)] });
     if (n > 25) ev.push({ t: t + 9, tipo: 'rata', c: carril() });
     ev.sort((a, b) => a.t - b.t);
