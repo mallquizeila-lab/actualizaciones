@@ -47,14 +47,14 @@
     const elegir = () => { let x = r() * tipos.reduce((a, k) => a + peso[k], 0); for (const k of tipos) { x -= peso[k]; if (x <= 0) return k; } return 'gusano'; };
     const carril = () => carriles[Math.floor(r() * carriles.length)];
     const total = Math.round(5 + n * 1.3), normal = Math.round(total * .6), ev = [];
-    let t = 18;
+    let t = n < 10 ? 18 : 24;
     for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
     t += 7; const ola = t;
     for (let i = normal; i < total; i++) ev.push({ t: t + r() * (10 + n * .4), tipo: elegir(), c: carril() });
     if (n % 5 === 0 || n > 20) ev.push({ t: t + 4, tipo: 'rata', c: carriles[Math.floor(carriles.length / 2)] });
     if (n > 25) ev.push({ t: t + 9, tipo: 'rata', c: carril() });
     ev.sort((a, b) => a.t - b.t);
-    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 15 ? 200 : 250 };
+    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 10 ? 200 : n < 20 ? 275 : 325 };
   }
 
   // ---------- Dibujo de personajes (todo vectorial, propio) ----------
