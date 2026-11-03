@@ -1,0 +1,106 @@
+{
+ "personajes": [
+  {
+   "id": "hongo",
+   "nombre": "Hongo Rocío",
+   "fondo": "magenta",
+   "prompt": "a friendly teal-capped mushroom with white spots and a cream stem, big kind eyes, tiny smile, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "choclo",
+   "nombre": "Choclo Lanzagranos",
+   "fondo": "magenta",
+   "prompt": "a brave corn cob warrior with golden kernels and green husk leaves like a cape, determined eyes, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "coco",
+   "nombre": "Coco Muralla",
+   "fondo": "magenta",
+   "prompt": "a tough hairy brown coconut with a stern frowning face and crossed arms, sturdy like a wall, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "aji",
+   "nombre": "Ají Explosivo",
+   "fondo": "magenta",
+   "prompt": "an angry red hot chili pepper with tiny flames on its head, fiery eyes, explosive attitude, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "limon",
+   "nombre": "Limón Helado",
+   "fondo": "magenta",
+   "prompt": "a cheerful round lime with frosty ice crystals on its peel, cool confident eyes, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "pina",
+   "nombre": "Piña Bomba",
+   "fondo": "magenta",
+   "prompt": "a mischievous pineapple with spiky green crown and a sneaky grin, holding a tiny fuse, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "palta",
+   "nombre": "Palta Doble",
+   "fondo": "magenta",
+   "prompt": "a heroic avocado half with a big brown seed belly, two little arms, strong pose, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "maracuya",
+   "nombre": "Maracuyá Eléctrica",
+   "fondo": "verde",
+   "prompt": "a purple passion fruit with a glowing yellow lightning bolt on top, electric sparks around it, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "cebolla",
+   "nombre": "Cebolla Llorona",
+   "fondo": "verde",
+   "prompt": "a purple red onion with green sprout hair, teary watery eyes, crying dramatically, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "quinua",
+   "nombre": "Quinua Curandera",
+   "fondo": "magenta",
+   "prompt": "a small quinoa plant spirit with a crown of orange and red grain clusters, gentle healer face, green leaves as arms, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "gusano",
+   "nombre": "Gusano",
+   "fondo": "magenta",
+   "prompt": "a sneaky green caterpillar worm with segmented body, mischievous hungry grin, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "caracol",
+   "nombre": "Caracol blindado",
+   "fondo": "magenta",
+   "prompt": "a slow snail wearing an armored spiral shell like a helmet, smug face, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "langosta",
+   "nombre": "Langosta",
+   "fondo": "magenta",
+   "prompt": "a fast green grasshopper locust with long jumping legs, cheeky expression, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "escarabajo",
+   "nombre": "Escarabajo tanque",
+   "fondo": "verde",
+   "prompt": "a big armored purple beetle like a tank, shiny shell, tough angry face, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "rata",
+   "nombre": "Rata jefa",
+   "fondo": "magenta",
+   "prompt": "a giant boss rat with grey fur, a small golden crown, sharp teeth and a villain grin, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "polilla",
+   "nombre": "Polilla nocturna",
+   "fondo": "magenta",
+   "prompt": "a fluffy brown night moth with big patterned wings spread, glowing eyes, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  },
+  {
+   "id": "topo",
+   "nombre": "Topo excavador",
+   "fondo": "magenta",
+   "prompt": "a mole digger with brown fur, pink star nose, big claws and a miner helmet with lamp, original character, high quality 3D animated movie style, detailed realistic textures, expressive face, full body, centered, facing the camera"
+  }
+ ]
+}
