@@ -41,6 +41,8 @@ create index if not exists ix_s_active on subscribers(active, country_code);
 create table if not exists campaigns (id integer primary key, created_at text default (datetime('now')), title text, body text, url text, image text,
   filters text, max_n integer, run_at text, status text, sent integer default 0, failed integer default 0, removed integer default 0, skipped integer default 0,
   clicks integer default 0, auto text, finished_at text);
+create table if not exists ref_codigos (uid text primary key, codigo text unique not null, created_at text default (datetime('now')));
+create table if not exists ref_altas (nuevo text primary key, codigo text not null, ipt text, created_at text default (datetime('now')), reclamado integer default 0);
 create table if not exists polls (id integer primary key, created_at text default (datetime('now')), question text, options text, active integer default 1);
 create table if not exists votes (poll_id integer, option integer, voter text, created_at text default (datetime('now')), primary key (poll_id, voter));
 create table if not exists settings (k text primary key, v text);
@@ -277,6 +279,22 @@ async function api(req, res, u) {
   if (P && limite(ip, 'api', 240)) return send(res, 429, { error: 'Demasiadas peticiones, espera un momento' });
 
   // ---- chat en vivo ----
+  // ---- Invitaciones: cada jugador tiene su código; gana premios cuando un amigo nuevo juega su primera partida ----
+  if (u.pathname.startsWith('/api/ref/') && P) {
+    if (limite(ip, 'ref', 60)) return send(res, 429, { error: 'Más despacio' });
+    const b = await json(req), uid = clip(b.uid, 40), acc = u.pathname.slice(9); if (!/^[a-z0-9]{8,40}$/.test(uid)) return send(res, 400, { error: 'Falta tu identificador' });
+    const miCodigo = () => { let f = q1('select codigo from ref_codigos where uid=?', uid); if (f) return f.codigo; for (let i = 0; i < 8; i++) { const c = Array.from(crypto.randomBytes(6), x => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[x % 32]).join(''); try { run('insert into ref_codigos(uid,codigo) values(?,?)', uid, c); return c; } catch (e) {} } return null; };
+    if (acc === 'yo') { const c = miCodigo(), t = q1('select count(*) n, coalesce(sum(reclamado=0),0) p from ref_altas where codigo=?', c); return send(res, 200, { codigo: c, total: t.n, pendientes: t.p }); }
+    if (acc === 'reclamar') { const c = miCodigo(), n = q1('select count(*) n from ref_altas where codigo=? and reclamado=0', c).n; run('update ref_altas set reclamado=1 where codigo=?', c); return send(res, 200, { reclamados: n }); }
+    if (acc === 'confirmar') {
+      const codigo = String(b.ref || '').toUpperCase(), dueno = q1('select uid from ref_codigos where codigo=?', codigo);
+      if (!/^[A-Z2-9]{6}$/.test(codigo) || !dueno || dueno.uid === uid) return send(res, 200, { ok: 0 });
+      if (q1('select 1 from ref_altas where nuevo=?', uid) || q1("select 1 from visitors where vid=? and created_at < datetime('now','-2 days') limit 1", uid)) return send(res, 200, { ok: 0 }); // solo jugadores nuevos
+      if (q1("select count(*) n from ref_altas where ipt=? and created_at>=datetime('now','-1 day')", ipCorta(ip)).n >= 3) return send(res, 200, { ok: 0 }); // freno a las trampas
+      run('insert into ref_altas(nuevo,codigo,ipt) values(?,?,?)', uid, codigo, ipCorta(ip)); return send(res, 200, { ok: 1 });
+    }
+    return send(res, 404, { error: 'No existe' });
+  }
   if (u.pathname === '/api/pro') {
     const cfg = getS('pro', {}); if (!cfg.on) return send(res, 200, { on: false, juegos: [] });
     const todos = await catalogoPro(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
@@ -528,7 +546,7 @@ http.createServer(async (req, res) => {
     if (m && JUEGO[m[1]]) {
       const [t, d] = JUEGO[m[1]], txt = clip(u.searchParams.get('t') || '', 120), img = fs.existsSync(path.join(PUB, 'og', m[1] + '.png')) ? `${PUBLIC_URL}/og/${m[1]}.png` : `${PUBLIC_URL}/og/general.png`;
       const reto = (/^\d{1,2}$/.test(u.searchParams.get('reto') || '') ? '&reto=' + u.searchParams.get('reto') : '') + (/^[a-f0-9]{6}$/.test(u.searchParams.get('mesa') || '') ? '&mesa=' + u.searchParams.get('mesa') : '');
-      const target = `/?g=${m[1]}&src=${encodeURIComponent(clip(u.searchParams.get('src') || 'compartido', 40))}${reto}`;
+      const target = `/?g=${m[1]}&src=${encodeURIComponent(clip(u.searchParams.get('src') || 'compartido', 40))}${reto}${/^[A-Z2-9]{6}$/.test(u.searchParams.get('ref') || '') ? '&ref=' + u.searchParams.get('ref') : ''}`;
       return send(res, 200, `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(t)}</title>
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(txt || t)}"><meta property="og:description" content="${esc(d)}">
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="${esc(PUBLIC_URL + u.pathname)}">
@@ -545,6 +563,11 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
+    if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
+    if (u.pathname === '/sitemap.xml') {
+      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2']];
+      return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
+    }
     const legal = /^\/(terminos|contacto|nosotros)\.html$/.exec(u.pathname);
     if (legal) return enviarHtml(req, res, paginaLegal(legal[1]), { 'cache-control': 'no-cache' });
     if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) if (/^[a-z0-9.-]+\.[a-z]{2,},\s*[\w-]+,\s*(DIRECT|RESELLER)(,\s*[\w]+)?$/i.test(l.trim())) lineas.push(l.trim()); return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }
@@ -566,12 +589,12 @@ http.createServer(async (req, res) => {
     if (u.pathname === '/glory' || u.pathname === '/glory/') { // GLORY BROWN como app instalable (su propio ícono y nombre)
       const t = CATALOGO.find(x => x.id === 'arcade-batalla') || { t: 'GLORY BROWN', d: '' }, img = `${PUBLIC_URL}/og/arcade-batalla.png`;
       const og = `<title>GLORY BROWN · El Choque de los Reinos</title><meta name="description" content="${esc(t.d)}"><meta property="og:type" content="website"><meta property="og:title" content="👑 GLORY BROWN · El Choque de los Reinos"><meta property="og:description" content="${esc(t.d)} ¡Juega gratis!"><meta property="og:url" content="${esc(PUBLIC_URL + '/glory')}"><meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}"><meta name="apple-mobile-web-app-title" content="GLORY BROWN"><link rel="apple-touch-icon" href="/glory/icono-192.png"><script>if (!/[?&]g=/.test(location.search)) history.replaceState(null, '', '/glory?g=arcade-batalla&src=app');</script>`;
-      return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
+      return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og + adsScript()), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
     }
     if (u.pathname === '/' || u.pathname === '/index.html') {
       const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
-      const titulo = t ? t.t : (getS('marca', null)?.titulo || '32 tests gratis: descubre algo nuevo de ti');
-      const desc = t ? `${t.d} Gratis, en ${t.min} min. ¿Te animas?` : 'Tests de personalidad, trivias, horóscopo y calculadoras. Gratis, en 1 a 3 minutos. ¿Te animas?';
+      const titulo = t ? t.t : (getS('marca', null)?.titulo || `${getS('marca', null)?.nombre ? getS('marca').nombre + ': ' : ''}Juegos y tests gratis · GLORY BROWN, Huerto Defensor y más`);
+      const desc = t ? `${t.d} Gratis${t.min ? `, en ${t.min} min` : ''}. ¿Te animas?` : 'Más de 60 juegos y tests gratis sin instalar: GLORY BROWN (batallas en línea 1 vs 1 y 2 vs 2), Huerto Defensor, Joyas, juegos con amigos, chat y clanes. ¡Entra y juega!';
       const img = `${PUBLIC_URL}/og/${t && fs.existsSync(path.join(PUB, 'og', t.id + '.png')) ? t.id : 'general'}.png`;
       const og = `<title>${esc(titulo)}</title>
 <meta name="description" content="${esc(desc)}">
@@ -580,7 +603,9 @@ http.createServer(async (req, res) => {
 <meta property="og:url" content="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
-<meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">`;
+<meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">
+<link rel="canonical" href="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
+<script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : { '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Juegos y tests gratis', url: PUBLIC_URL + '/', inLanguage: 'es' }).replace(/</g, '\\u003c')}</script>`;
       return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + adsScript()), { 'cache-control': 'no-cache' });
     }
     // Archivos de la página.

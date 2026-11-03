@@ -172,7 +172,7 @@
       d.onclick = async e => { const id = e.target.id; if (!id) return;
         if (id === 'sig') { d.remove(); nivel(t, n + 1); } if (id === 'map') { d.remove(); vivo = false; mapa(t); } if (id === 'rei') { d.remove(); nivel(t, n); }
         if (id === 'mas') { if (!PERFIL.gastar(40)) return toast('No tienes suficientes monedas 🪙: juega misiones y otros juegos para ganar más'); d.remove(); movs += 5; ocupado = false; hud(); }
-        if (id === 'comp') { const url = `${location.origin}/r/${t.id}?src=joyas`; if (navigator.share) navigator.share({ title: 'Joyas', text: `💎 Voy en el nivel ${n + 1} de Joyas. ¿Me alcanzas?`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado'); } } };
+        if (id === 'comp') { const url = `${location.origin}/r/${t.id}?src=joyas${window.REF?.() || ''}`; if (navigator.share) navigator.share({ title: 'Joyas', text: `💎 Voy en el nivel ${n + 1} de Joyas. ¿Me alcanzas?`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado'); } } };
     }
     // ---- entrada: arrastrar o tocar dos joyas ----
     let ini = null;

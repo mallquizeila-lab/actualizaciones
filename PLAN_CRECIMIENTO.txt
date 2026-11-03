@@ -1,0 +1,67 @@
+PLAN PARA HACER FAMOSA LA PLATAFORMA
+====================================
+La meta: que cada día llegue gente nueva, que se quede y que traiga a sus amigos.
+Lo que hace famosa a una página no es tener más funciones: es el ALCANCE. Este plan es para eso.
+
+YA ESTÁ LISTO EN LA PÁGINA (versión 7.28.0)
+--------------------------------------------
+  ✅ Invitaciones con premio: cada jugador tiene su código; gana 100 monedas por cada amigo
+     nuevo que juegue. El código va solo en todo lo que se comparte (WhatsApp, cartas de
+     GLORY BROWN, retos del Huerto y de Joyas). Tiene freno contra trampas.
+  ✅ Lista para Google: mapa del sitio (sitemap.xml), robots.txt, datos de cada juego para
+     el buscador y títulos nuevos ("Juegos y tests gratis · GLORY BROWN, Huerto Defensor y más").
+  ✅ Videos de batalla para compartir, torneo semanal, Pase Real, clanes, rankings por país.
+
+TU RUTINA (30 MINUTOS AL DÍA)
+------------------------------
+  1. ShortForge publica solo 2 a 3 videos diarios en TikTok, Reels y Shorts. Ideas que pegan:
+     - "La gallina que salvó mi huerto 🐔" (momentos chistosos del Huerto, con las voces).
+     - "Gané con la Reina Glory Brown en el último segundo" (videos de batalla de GLORY).
+     - "Este test adivinó mi personalidad 😳" (resultados de tests).
+     - La historia real: "Hice un juego en homenaje a mi abuelita". Es tu mejor video: es humano.
+  2. Responde comentarios los primeros 30 minutos de cada video (el algoritmo lo premia).
+  3. En cada video, la misma frase al final: "Juega gratis: <tu dominio>".
+
+EN LA PRIMERA SEMANA CON TU DOMINIO
+------------------------------------
+  1. Google Search Console (gratis): agrega tu dominio y envía <tu dominio>/sitemap.xml.
+     Así Google empieza a mostrar tus juegos cuando alguien los busca.
+  2. Bing Webmaster Tools: lo mismo (también alimenta a otros buscadores).
+  3. Crea las cuentas de la marca con el mismo nombre en TikTok, Instagram, YouTube,
+     Facebook y un grupo o canal de WhatsApp/Telegram para avisar torneos.
+
+CADA SEMANA
+-----------
+  - Torneo semanal de GLORY BROWN: anuncia al ganador en tus redes (con su permiso).
+  - Un "reto de la semana" en el Huerto (por ejemplo, "pasa el nivel 20 sin usar gallinas").
+  - Revisa en el panel de la página qué juegos y qué fuentes traen más gente, y haz más
+    videos de eso.
+
+CRECIMIENTO GRANDE (CUANDO PUEDAS)
+-----------------------------------
+  1. Creadores de contenido pequeños (de 10 mil a 100 mil seguidores) de tu país: que jueguen
+     GLORY BROWN en vivo. Puedes darles un código de invitación propio y medir cuánta gente traen.
+  2. Publicar GLORY BROWN y Huerto Defensor en Poki y CrazyGames (millones de jugadores
+     que conocen tu marca).
+  3. Torneos con premios reales pequeños (por ejemplo, saldo de celular) cuando haya ingresos.
+     Siempre con reglas claras, sin apuestas y sin pedir dinero para participar.
+  4. Play Store cuando ya tengas jugadores (los 12 probadores salen de tu comunidad).
+
+QUÉ MEDIR (EN EL PANEL DE LA PÁGINA)
+-------------------------------------
+  - Visitas por día y de dónde vienen (TikTok, WhatsApp, invitación, Google).
+  - Cuántos vuelven al día siguiente: si es poco, hay que mejorar el juego, no traer más gente.
+  - Amigos invitados: cuántos traen tus mejores jugadores.
+
+METAS REALISTAS
+---------------
+  Mes 1: 100 visitas al día · Mes 3: 1.000 al día · Mes 6: 10.000 al día.
+  Si un video se hace viral, puede llegar mucho más rápido: por eso la página ya está
+  preparada para aguantar miles de personas (ver ESCALAR_PAGINA.txt).
+
+LO QUE NUNCA HAY QUE HACER
+---------------------------
+  - Comprar seguidores, bots que comentan o compartir en grupos con perfiles falsos:
+    las redes y Google castigan las cuentas y se pierde todo.
+  - Copiar personajes o juegos de otras marcas.
+  - Prometer premios que no se van a entregar.

@@ -167,6 +167,22 @@ const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<':
 const toast = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 3200); };
 const SRC = (P.get('src') || LS.get('src') || 'directo').slice(0, 60); LS.set('src', SRC);
 let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) + Date.now().toString(36); LS.set('vid', VID); }
+// ---------- Invitaciones: tu código va en todo lo que compartes; ganas premios cuando un amigo nuevo juega ----------
+{ const r = (P.get('ref') || '').toUpperCase(); if (/^[A-Z2-9]{6}$/.test(r) && !LS.get('refDe') && r !== LS.get('miRef')) LS.set('refDe', r); }
+window.REF = () => LS.get('miRef') ? '&ref=' + LS.get('miRef') : '';
+const REFI = { d: null, cargando: null };
+const refCargar = () => REFI.cargando || (REFI.cargando = post('/api/ref/yo', { uid: VID }).then(d => { REFI.d = d; if (d.codigo) LS.set('miRef', d.codigo); return d; }).catch(() => null).finally(() => { setTimeout(() => { REFI.cargando = null; }, 30000); }));
+setInterval(() => { const de = LS.get('refDe'); if (de && !LS.get('refOk') && (window.PERFIL?.datos?.partidas || 0) >= 1) { LS.set('refOk', '1'); post('/api/ref/confirmar', { uid: VID, ref: de }).catch(() => {}); } }, 8000);
+function pintarRef() {
+  const box = document.getElementById('refBox'); if (!box) return; const d = REFI.d; if (!d?.codigo) return;
+  const url = `${location.origin}/?src=invitacion&ref=${d.codigo}`, txt = '🎮 Te invito a mi página de juegos gratis: GLORY BROWN, Huerto Defensor, tests y más. ¡Juega conmigo!';
+  box.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:2rem">👥</span><div style="flex:1"><b>Invita amigos y gana</b><br><small>Por cada amigo nuevo que juegue ganas <b>100 🪙</b>. Llevas <b>${d.total}</b> ${d.total === 1 ? 'amigo' : 'amigos'}.</small></div></div>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn" style="flex:1;margin:0;text-align:center;background:#22c55e" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt + ' ' + url)}">📲 WhatsApp</a><button class="btn alt" id="refComp" style="flex:1;margin:0">🔗 Compartir</button>${d.pendientes ? `<button class="btn" id="refRec" style="flex:1 1 100%;margin:0">🎁 Reclamar ${d.pendientes * 100} 🪙</button>` : ''}</div>`;
+  box.onclick = async e => {
+    if (e.target.id === 'refComp') { if (navigator.share) navigator.share({ title: 'Juega conmigo', text: txt, url }).catch(() => {}); else { navigator.clipboard?.writeText(url).catch(() => {}); toast('🔗 Enlace copiado: pégalo donde quieras'); } }
+    if (e.target.id === 'refRec') { const r = await post('/api/ref/reclamar', { uid: VID }).catch(() => null); if (r?.reclamados) { PERFIL.ganar(r.reclamados * 100); FX?.confeti?.(); toast(`🎁 +${r.reclamados * 100} 🪙 por invitar amigos`); } REFI.d = null; REFI.cargando = null; refCargar().then(pintarRef); }
+  };
+}
 let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); if (c.pro) window.pintarHub?.(); }).catch(() => {});
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 const pick = (a, h) => a[h % a.length];
@@ -413,7 +429,7 @@ function sala(t) {
     $('#emo').onclick = e => { if (e.target.tagName === 'BUTTON') { $('#txt').value += e.target.textContent; $('#txt').focus(); } };
     box.onclick = e => { const b = e.target.closest('[data-r]'); if (b && confirm('¿Reportar este mensaje por ofensivo o spam?')) { post('/api/chat/reportar', { id: +b.dataset.r, sala: t.sala }).catch(() => {}); b.closest('.m').style.opacity = .4; toast('Gracias, lo revisaremos'); } };
     $('#cambiar').onclick = () => { LS.set('chatOk', '0'); if (ES) ES.close(); sala(t); };
-    $('#compartirSala').onclick = e => { e.preventDefault(); const url = `${location.origin}/r/${t.id}?src=invitacion`; if (navigator.share) navigator.share({ title: t.t, text: `¡Entra a jugar conmigo! ${t.e} ${t.t}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: invítalos'); } };
+    $('#compartirSala').onclick = e => { e.preventDefault(); const url = `${location.origin}/r/${t.id}?src=invitacion${window.REF?.() || ''}`; if (navigator.share) navigator.share({ title: t.t, text: `¡Entra a jugar conmigo! ${t.e} ${t.t}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: invítalos'); } };
   });
 }
 // ---------- 🎲 Mesas de juego ----------
@@ -447,7 +463,7 @@ function mesa(t) {
       MES.addEventListener('chat', e => { const c = JSON.parse(e.data), d = document.createElement('div'); d.innerHTML = `${c.bot ? '🤖' : ''} <b>${escH(c.nombre)}:</b> ${escH(c.texto)}`; const x = $('#mch'); if (x) { x.append(d); x.scrollTop = x.scrollHeight; } });
       MES.onerror = () => { if (!M) { $('#est').textContent = 'Esta mesa ya no existe'; MES.close(); } };
       const jugar = async o => { const d = await api2('jugar', { id, ...o }); if (d.error) toast(d.error); };
-      const invitar = () => { const url = `${location.origin}/r/${t.id}?src=invitacion&mesa=${id}`; if (navigator.share) navigator.share({ title: t.t, text: `¡Juega ${t.t} conmigo! ${t.e}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: mándaselo a tus amigos'); } };
+      const invitar = () => { const url = `${location.origin}/r/${t.id}?src=invitacion${window.REF?.() || ''}&mesa=${id}`; if (navigator.share) navigator.share({ title: t.t, text: `¡Juega ${t.t} conmigo! ${t.e}`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado: mándaselo a tus amigos'); } };
       function pintar() {
         const yo = M.yo, turno = M.jugadores[M.turno];
         $('#jug').innerHTML = M.jugadores.map((j, i) => `<span class="${M.estado === 'jugando' && i === M.turno && M.juego !== 'impostor' ? 't' : ''} ${j.conectado ? '' : 'off'}">${avImg(j.avatar, 24)} ${escH(j.nombre)}${j.ficha ? ' ' + ({ X: '❌', O: '⭕', R: '🔴', A: '🟡' })[j.ficha] : ''}${j.puntos ? ` · ${j.puntos}` : ''}</span>`).join('');
@@ -588,7 +604,7 @@ function recomendar(r) {
   $('#recBox').innerHTML = `<div class="card"><h3>👉 Te puede gustar</h3><div class="recs">${recs.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}</b></button>`).join('')}</div></div>`;
   $('#recBox').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
 }
-function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido&t=${encodeURIComponent(r.compartir.slice(0, 110))}${r.reto != null ? '&reto=' + r.reto : ''}`; }
+function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido${window.REF?.() || ''}&t=${encodeURIComponent(r.compartir.slice(0, 110))}${r.reto != null ? '&reto=' + r.reto : ''}`; }
 function compartirBox(r) {
   const url = enlace(r), txt = r.compartir, e = encodeURIComponent;
   const box = document.createElement('div'); box.className = 'card';
@@ -749,6 +765,7 @@ window.pintarHub = function () {
   ${cfg.pro ? `<button class="joyban" data-g="pro" style="background:linear-gradient(120deg,#0f172a,#2563eb 50%,#06b6d4);box-shadow:0 10px 30px rgba(37,99,235,.35)"><span>🕹️</span><div><b>Juegos profesionales</b><small>Cientos de juegos de estudios de todo el mundo: carreras, acción, puzzles y más. Gratis.</small></div></button>` : ''}
   <button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
   <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button></div>
+  <div class="card" id="refBox" style="background:linear-gradient(120deg,rgba(34,197,94,.18),rgba(14,165,233,.14));padding:12px"></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
   ${PERFIL.usuario ? `<div style="margin-top:8px;font-size:.85rem;opacity:.9">👤 Conectado como <b>${escH(PERFIL.usuario)}</b> · <a href="#" id="hubSalir">Cerrar sesión</a></div>` : `<div style="background:linear-gradient(100deg,#7c3aed,#ec4899);border-radius:14px;padding:10px 12px;margin-top:10px"><b>👤 Crea tu usuario</b><br><small>Para entrar desde cualquier celular y seguir donde te quedaste: niveles, monedas, trofeos y clan.</small><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="hubCrear" style="margin:0;padding:8px">Crear usuario</button><button class="btn alt" id="hubEntrar" style="margin:0;padding:8px">Ya tengo usuario</button></div></div>`}
   <div class="chips"><span>🪙 ${D.monedas}</span><span>🔥 ${D.racha.n || 0} ${D.racha.n === 1 ? 'día' : 'días'}</span><span>🎮 ${D.partidas} ${D.partidas === 1 ? 'partida' : 'partidas'}</span><span>🏅 ${hechos}/${lg.length}</span></div>
@@ -758,6 +775,7 @@ window.pintarHub = function () {
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">${lg.map(x => `<span style="padding:4px 10px;border-radius:999px;font-size:.8rem;background:${x.ok ? 'linear-gradient(90deg,#ffd166,#ff7aa8)' : 'rgba(255,255,255,.07)'};color:${x.ok ? '#241a00' : 'inherit'};opacity:${x.ok ? 1 : .55}">${escH(x.txt)}</span>`).join('')}</div>
   <p class="sub" style="text-align:left;font-size:.85rem">Tu progreso se guarda solo en este navegador y en la nube. ${PERFIL.codigo ? `Tu código para seguir en otro celular: <b style="letter-spacing:2px;color:var(--gold)">${PERFIL.codigo}</b> (guárdalo, no lo compartas).` : 'Juega una partida para obtener tu código de respaldo.'}</p>
   <div style="display:flex;gap:6px"><input id="codRec" maxlength="8" placeholder="¿Tienes un código? Escríbelo" style="flex:1;margin:0;text-transform:uppercase"><button class="btn" id="btnRec" style="width:auto;margin:0;padding:8px 14px">Recuperar</button></div></details></div>`;
+  if (REFI.d) pintarRef(); else refCargar().then(pintarRef);
   h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g);
     if (e.target.id === 'hubCrear') return cuentaModal('crear'); if (e.target.id === 'hubEntrar') return cuentaModal('entrar');
     if (e.target.id === 'hubSalir') { e.preventDefault(); if (confirm('¿Cerrar sesión en este celular? Tu progreso queda guardado en tu usuario.')) { await PERFIL.salirCuenta(); toast('Sesión cerrada'); } return; }

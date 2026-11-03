@@ -1,3 +1,9 @@
+v7.28.0 — Crecimiento: invitaciones con premio y página lista para Google
+- 👥 Invita amigos y gana: cada jugador tiene su código y gana 100 🪙 por cada amigo nuevo que juegue su primera partida. Tarjeta en la portada con botón de WhatsApp y Compartir. El código va solo en todo lo que se comparte (WhatsApp, cartas de GLORY BROWN, retos del Huerto y de Joyas). Freno contra trampas: solo cuentan jugadores nuevos y máximo 3 por conexión al día.
+- 🔎 Lista para Google: robots.txt, mapa del sitio (sitemap.xml) con todos los juegos y tests, datos estructurados de cada juego, enlace canónico y títulos nuevos ("Juegos y tests gratis · GLORY BROWN, Huerto Defensor y más").
+- 💰 El código de AdSense también queda en la app de GLORY BROWN (/glory).
+- 📘 Plan nuevo PLAN_CRECIMIENTO.txt: rutina diaria, primera semana con dominio, torneos, creadores y metas.
+
 v7.27.0 — Juegos profesionales, Google AdSense y páginas legales
 - 🕹️ Nueva sección "Juegos profesionales": conecta el catálogo de un distribuidor (GameDistribution, GamePix o GameMonetize) desde el panel de la página → Ajustes. Muestra los juegos con buscador, categorías y pantalla completa. Los juegos traen sus anuncios y el distribuidor te paga una parte.
 - 💰 Google AdSense: pega tu ID de editor (ca-pub-…) en el panel y el código queda en todas las páginas. Se crea solo tu archivo /ads.txt (con espacio para las líneas que pida tu distribuidor).

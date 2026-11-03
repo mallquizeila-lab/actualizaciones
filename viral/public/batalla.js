@@ -135,7 +135,7 @@
     X.fillStyle = 'rgba(0,0,0,.6)'; X.fillRect(104, 900, 872, 156); X.fillStyle = '#fff'; X.font = '900 70px Georgia,serif'; X.fillText(c.n, W / 2, 985); X.fillStyle = R.color; X.font = '800 38px Figtree,sans-serif'; X.fillText(R.n.toUpperCase() + ' · ' + (G.mundos[c.m]?.n || 'Reina'), W / 2, 1035);
     X.fillStyle = '#fff'; X.font = '700 40px Figtree,sans-serif'; X.fillText(c.tipo === 'hechizo' ? `💜 ${c.c}  ·  ⚔️ ${c.dmg || c.valor || ''}` : `💜 ${c.c}   ❤️ ${c.hp}   ⚔️ ${c.dmg}`, W / 2, 1140);
     X.fillStyle = '#fde68a'; X.font = '800 44px Figtree,sans-serif'; X.fillText('¿Tienes esta carta? ¡Juega gratis!', W / 2, 1230); X.fillStyle = '#c4b5fd'; X.font = '600 32px Figtree,sans-serif'; X.fillText(location.host, W / 2, 1290);
-    const url = `${location.origin}/r/arcade-batalla?src=carta`;
+    const url = `${location.origin}/r/arcade-batalla?src=carta${window.REF?.() || ''}`;
     cv.toBlob(async b => { const f = new File([b], `glory-brown-${c.id}.png`, { type: 'image/png' });
       if (navigator.canShare?.({ files: [f] })) { try { await navigator.share({ files: [f], text: `👑 ¡Mira mi carta ${c.n} en GLORY BROWN! ${url}` }); return; } catch (e) {} }
       const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = f.name; a.click(); navigator.clipboard?.writeText(url); toast('🖼️ Imagen descargada. ¡Súbela a tus redes!'); }, 'image/png');
@@ -343,7 +343,7 @@
     $('#stage').onclick = async e => {
       if (e.target.id === 'cancelar') { clearInterval(tm); post('/api/duelo/salir', { sala: sala.sala, tok: sala.tok }).catch(() => {}); cerrarES(); lobby(t); }
       if (e.target.id === 'bots') post('/api/duelo/bots', { sala: sala.sala, tok: sala.tok });
-      if (e.target.id === 'compCod') { const txt = `⚔️ ¡Te reto en Duelo de Torres! Entra a ${location.origin}/?g=${t.id} → Con un amigo → código ${sala.codigo}`; if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else { navigator.clipboard?.writeText(txt); toast('Copiado'); } }
+      if (e.target.id === 'compCod') { const txt = `⚔️ ¡Te reto en Duelo de Torres! Entra a ${location.origin}/?g=${t.id}${window.REF?.() || ''} → Con un amigo → código ${sala.codigo}`; if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else { navigator.clipboard?.writeText(txt); toast('Copiado'); } }
       if (e.target.id === 'aClan') { const r2 = await post('/api/clan/chat', { ...datosJugador(), reto: sala.codigo }); toast(r2.error || '🛡️ Aviso enviado al chat del clan'); }
     };
     setParar(() => { clearInterval(tm); cerrarES(); post('/api/duelo/salir', { sala: sala.sala, tok: sala.tok }).catch(() => {}); });
