@@ -1,3 +1,8 @@
+v7.29.0 — Compartir con las redes de cada país
+- 🌎 La página detecta el país de cada visitante y muestra primero las redes que más se usan allí: Latinoamérica (WhatsApp, Facebook, Messenger), Estados Unidos y Canadá (Messenger, Facebook, mensaje de texto), Japón (LINE), Tailandia y Taiwán (LINE, Facebook), Rusia y vecinos (Telegram, VK), Ucrania (Telegram, Viber), Grecia y los Balcanes (Viber), China (Weibo), Filipinas (Messenger, Facebook, Viber), Europa y resto del mundo (WhatsApp, Facebook, Telegram, X).
+- 📘 Facebook aparece en casi todos los países.
+- Se usa en la tarjeta "Invita amigos y gana" y en la caja para compartir los resultados de tests y juegos. En computadora no se muestran las redes que solo funcionan en el celular (Messenger, Viber, mensaje de texto).
+
 v7.28.0 — Crecimiento: invitaciones con premio y página lista para Google
 - 👥 Invita amigos y gana: cada jugador tiene su código y gana 100 🪙 por cada amigo nuevo que juegue su primera partida. Tarjeta en la portada con botón de WhatsApp y Compartir. El código va solo en todo lo que se comparte (WhatsApp, cartas de GLORY BROWN, retos del Huerto y de Joyas). Freno contra trampas: solo cuentan jugadores nuevos y máximo 3 por conexión al día.
 - 🔎 Lista para Google: robots.txt, mapa del sitio (sitemap.xml) con todos los juegos y tests, datos estructurados de cada juego, enlace canónico y títulos nuevos ("Juegos y tests gratis · GLORY BROWN, Huerto Defensor y más").

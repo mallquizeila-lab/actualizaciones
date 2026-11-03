@@ -170,6 +170,29 @@ let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) +
 // ---------- Invitaciones: tu código va en todo lo que compartes; ganas premios cuando un amigo nuevo juega ----------
 { const r = (P.get('ref') || '').toUpperCase(); if (/^[A-Z2-9]{6}$/.test(r) && !LS.get('refDe') && r !== LS.get('miRef')) LS.set('refDe', r); }
 window.REF = () => LS.get('miRef') ? '&ref=' + LS.get('miRef') : '';
+// ---------- Redes para compartir según el país del visitante (las más usadas primero) ----------
+const MOVIL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const REDES_DEF = {
+  wa: ['💬', 'WhatsApp', '#22c55e', (u, t) => `https://wa.me/?text=${encodeURIComponent(t + ' ' + u)}`],
+  fb: ['📘', 'Facebook', '#1877f2', u => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`],
+  ms: ['📨', 'Messenger', '#a033ff', u => `fb-messenger://share?link=${encodeURIComponent(u)}`, 1],
+  tg: ['✈️', 'Telegram', '#229ed9', (u, t) => `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`],
+  x: ['✖️', 'X', '#111827', (u, t) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`],
+  line: ['🟩', 'LINE', '#06c755', u => `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(u)}`],
+  vk: ['🟦', 'VK', '#0077ff', u => `https://vk.com/share.php?url=${encodeURIComponent(u)}`],
+  viber: ['🟪', 'Viber', '#7360f2', (u, t) => `viber://forward?text=${encodeURIComponent(t + ' ' + u)}`, 1],
+  weibo: ['🔴', 'Weibo', '#e6162d', (u, t) => `https://service.weibo.com/share/share.php?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}`],
+  sms: ['💬', 'Mensaje', '#34c759', (u, t) => `sms:?&body=${encodeURIComponent(t + ' ' + u)}`, 1],
+};
+const REDES_PAIS = (() => { const m = {}, set = (l, cs) => cs.split(' ').forEach(c => m[c] = l);
+  set(['wa', 'fb', 'ms', 'tg', 'x'], 'PE MX CO AR CL EC BO PY UY CR GT HN SV NI PA DO PR CU');
+  set(['wa', 'fb', 'tg', 'x'], 'VE BR ES PT IT DE FR NL BE CH AT IE ID MY IN PK NG KE ZA EG SA AE TR MA DZ IL QA KW');
+  set(['ms', 'fb', 'sms', 'wa', 'x'], 'US CA'); set(['wa', 'fb', 'x', 'ms'], 'GB AU NZ');
+  set(['tg', 'vk', 'wa'], 'RU BY KZ UZ KG TJ AM AZ'); set(['tg', 'viber', 'fb'], 'UA MD'); set(['viber', 'fb', 'wa'], 'GR BG RS MK BA MM');
+  set(['line', 'x', 'fb'], 'JP'); set(['line', 'fb', 'ms'], 'TH TW'); set(['x', 'fb'], 'KR'); set(['weibo'], 'CN'); set(['ms', 'fb', 'viber'], 'PH'); set(['fb', 'ms'], 'VN'); set(['tg', 'wa'], 'IR');
+  return m; })();
+window.redesPais = () => (REDES_PAIS[cfg.pais] || ['wa', 'fb', 'tg', 'x']).filter(k => MOVIL || !REDES_DEF[k][4]);
+window.enlaceRed = (k, url, txt) => REDES_DEF[k][3](url, txt);
 const REFI = { d: null, cargando: null };
 const refCargar = () => REFI.cargando || (REFI.cargando = post('/api/ref/yo', { uid: VID }).then(d => { REFI.d = d; if (d.codigo) LS.set('miRef', d.codigo); return d; }).catch(() => null).finally(() => { setTimeout(() => { REFI.cargando = null; }, 30000); }));
 setInterval(() => { const de = LS.get('refDe'); if (de && !LS.get('refOk') && (window.PERFIL?.datos?.partidas || 0) >= 1) { LS.set('refOk', '1'); post('/api/ref/confirmar', { uid: VID, ref: de }).catch(() => {}); } }, 8000);
@@ -177,13 +200,13 @@ function pintarRef() {
   const box = document.getElementById('refBox'); if (!box) return; const d = REFI.d; if (!d?.codigo) return;
   const url = `${location.origin}/?src=invitacion&ref=${d.codigo}`, txt = '🎮 Te invito a mi página de juegos gratis: GLORY BROWN, Huerto Defensor, tests y más. ¡Juega conmigo!';
   box.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:2rem">👥</span><div style="flex:1"><b>Invita amigos y gana</b><br><small>Por cada amigo nuevo que juegue ganas <b>100 🪙</b>. Llevas <b>${d.total}</b> ${d.total === 1 ? 'amigo' : 'amigos'}.</small></div></div>
-    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn" style="flex:1;margin:0;text-align:center;background:#22c55e" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt + ' ' + url)}">📲 WhatsApp</a><button class="btn alt" id="refComp" style="flex:1;margin:0">🔗 Compartir</button>${d.pendientes ? `<button class="btn" id="refRec" style="flex:1 1 100%;margin:0">🎁 Reclamar ${d.pendientes * 100} 🪙</button>` : ''}</div>`;
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${redesPais().slice(0, 2).map(k => `<a class="btn" style="flex:1;margin:0;text-align:center;background:${REDES_DEF[k][2]};color:#fff" target="_blank" rel="noopener" href="${enlaceRed(k, url, txt)}">${REDES_DEF[k][0]} ${REDES_DEF[k][1]}</a>`).join('')}<button class="btn alt" id="refComp" style="flex:1;margin:0">🔗 Compartir</button>${d.pendientes ? `<button class="btn" id="refRec" style="flex:1 1 100%;margin:0">🎁 Reclamar ${d.pendientes * 100} 🪙</button>` : ''}</div>`;
   box.onclick = async e => {
     if (e.target.id === 'refComp') { if (navigator.share) navigator.share({ title: 'Juega conmigo', text: txt, url }).catch(() => {}); else { navigator.clipboard?.writeText(url).catch(() => {}); toast('🔗 Enlace copiado: pégalo donde quieras'); } }
     if (e.target.id === 'refRec') { const r = await post('/api/ref/reclamar', { uid: VID }).catch(() => null); if (r?.reclamados) { PERFIL.ganar(r.reclamados * 100); FX?.confeti?.(); toast(`🎁 +${r.reclamados * 100} 🪙 por invitar amigos`); } REFI.d = null; REFI.cargando = null; refCargar().then(pintarRef); }
   };
 }
-let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); if (c.pro) window.pintarHub?.(); }).catch(() => {});
+let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); if (c.pro) window.pintarHub?.(); else if (typeof pintarRef === 'function') pintarRef(); }).catch(() => {});
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 const pick = (a, h) => a[h % a.length];
 const hoy = () => new Date().toISOString().slice(0, 10);
@@ -609,13 +632,8 @@ function compartirBox(r) {
   const url = enlace(r), txt = r.compartir, e = encodeURIComponent;
   const box = document.createElement('div'); box.className = 'card';
   box.innerHTML = `<h3>📣 Compártelo y reta a tus amigos</h3><div class="share">
-    <a href="https://www.facebook.com/sharer/sharer.php?u=${e(url)}" target="_blank" rel="noopener"><span>📘</span>Facebook</a>
-    <a href="https://wa.me/?text=${e(txt + ' ' + url)}" target="_blank" rel="noopener"><span>💬</span>WhatsApp</a>
-    <button data-s="story"><span>📸</span>Instagram</button>
-    <button data-s="story"><span>🎵</span>TikTok</button>
-    <a href="https://t.me/share/url?url=${e(url)}&text=${e(txt)}" target="_blank" rel="noopener"><span>✈️</span>Telegram</a>
-    <a href="https://twitter.com/intent/tweet?text=${e(txt)}&url=${e(url)}" target="_blank" rel="noopener"><span>✖️</span>X</a>
-    <a href="fb-messenger://share?link=${e(url)}"><span>📨</span>Messenger</a>
+    ${(() => { const pr = redesPais(), resto = ['wa', 'fb', 'tg', 'x', 'ms'].filter(k => !pr.includes(k) && (MOVIL || !REDES_DEF[k][4])), a = k => `<a href="${enlaceRed(k, url, txt)}" target="_blank" rel="noopener"><span>${REDES_DEF[k][0]}</span>${REDES_DEF[k][1]}</a>`;
+      return pr.map(a).join('') + '<button data-s="story"><span>📸</span>Instagram</button><button data-s="story"><span>🎵</span>TikTok</button>' + resto.map(a).join(''); })()}
     <button data-s="native"><span>📤</span>Más</button><button data-s="copy"><span>🔗</span>Copiar</button></div>
     <p class="sub" style="margin:10px 0 0;font-size:.82rem">Instagram y TikTok: te damos una imagen lista para tu Historia o video.</p>`;
   const tgt = r.g === 'encuesta' ? $('#stage') : $('#shareBox'); tgt.append(box);
