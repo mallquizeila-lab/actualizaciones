@@ -1,3 +1,8 @@
+v7.32.0 — QR en los métodos de apoyo
+- 📷 Cada método de apoyo tiene el botón "Subir QR" (Yape, Plin, Binance, cripto…). Si subes el QR y dejas el número vacío, en la página solo se muestra el QR: tu número no se publica.
+- 🌐 En /apoyar el QR aparece grande con el botón "⬇️ Descargar QR" y los pasos: escanearlo desde otra pantalla o, si es el mismo celular, descargarlo y elegirlo desde la galería dentro de la app.
+- La imagen se achica sola antes de subirse y se revisa que sea una imagen válida (PNG, JPG o WEBP).
+
 v7.31.0 — Métodos de apoyo en ShortForge, ordenados y con pasos
 - 💛 Nueva sección en ShortForge → 📣 Página viral → "💛 Métodos de apoyo": agrega, nombra y ordena (↑ ↓) hasta 12 métodos. Botones rápidos para Yape, Plin, PayPal, Ko-fi, Mercado Pago, Buy Me a Coffee, Patreon, Binance Pay, transferencia bancaria, Nequi, Pix, Zelle, Bizum, Cash App, Venmo, Wise, USDT, Bitcoin, Ethereum, Solana y cualquier otro.
 - 3 tipos: enlace de pago, número o cuenta (con el nombre del titular para que la gente verifique) y criptomoneda (17 redes: USDT en TRON, BNB Chain, Ethereum, Solana y Polygon; USDC; BTC; ETH; BNB; SOL; TRX; LTC; DOGE; XRP; TON).

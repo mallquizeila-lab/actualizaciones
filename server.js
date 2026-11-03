@@ -256,7 +256,7 @@ async function api(u, q, U, r) {
   }
   if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
   if (u.startsWith('/api/viral')) {
-    const V = require('./lib/viral'), o = P ? await json(q) : {};
+    const V = require('./lib/viral'), o = P ? (u === '/api/viral/apoyo' ? JSON.parse((await body(q, 8e6)).toString() || '{}') : await json(q)) : {};
     if (u === '/api/viral') return V.estado();
     if (u === '/api/viral/encender' && P) { await V.encender(); return V.estado(); }
     if (u === '/api/viral/apagar' && P) { V.apagar(); return V.estado(); }

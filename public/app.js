@@ -289,7 +289,10 @@ function apoyoCard() {
       <button class="b ghost sm" data-act="apMover" data-i="${i}" data-d="-1" ${i ? '' : 'disabled'}>↑</button><button class="b ghost sm" data-act="apMover" data-i="${i}" data-d="1" ${i < AP.metodos.length - 1 ? '' : 'disabled'}>↓</button><button class="b ghost sm" data-act="apQuitar" data-i="${i}">✕</button></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${m.tipo === 'cripto' ? `<select data-k="red" style="margin:0">${(AP.redes || []).map(r => `<option ${m.red === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>` : ''}
       <input data-k="valor" value="${esc(m.valor || '')}" placeholder="${AP_TIPOS[m.tipo][2]}" style="flex:2;min-width:200px;margin:0">${m.tipo === 'numero' ? `<input data-k="titular" value="${esc(m.titular || '')}" placeholder="Nombre del titular (para que verifiquen)" style="flex:1;min-width:160px;margin:0">` : ''}
-      <input data-k="nota" value="${esc(m.nota || '')}" placeholder="Nota corta (opcional)" style="flex:1;min-width:160px;margin:0"></div></div>`;
+      <input data-k="nota" value="${esc(m.nota || '')}" placeholder="Nota corta (opcional, se ve en la página)" style="flex:1;min-width:160px;margin:0"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">${m.qr ? `<img src="${m.qr.startsWith('data:') ? m.qr : 'http://localhost:3300/apoyo-qr/' + m.qr}" alt="QR" style="width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line,#ddd)"><button class="b ghost sm" data-act="apQuitarQR" data-i="${i}">Quitar QR</button>` : ''}
+      <label class="b ghost sm" style="cursor:pointer;margin:0;display:inline-block;padding:6px 12px;border-radius:8px;border:1px solid var(--line,#ccc);background:rgba(124,58,237,.08);font-weight:700">📷 ${m.qr ? 'Cambiar' : 'Subir'} QR<input type="file" accept="image/png,image/jpeg,image/webp" data-qr="${i}" hidden></label>
+      <span class="hint" style="margin:0">${m.qr ? (m.valor ? 'Se mostrará el QR y el dato escrito.' : '🔒 Solo se mostrará el QR (sin tu número).') : 'Opcional: sube tu QR y deja el número vacío si no quieres publicarlo.'}</span></div></div>`;
   return `<div class="card" id="apCard"><h2>💛 Métodos de apoyo</h2><p class="hint">Así se verá en tu página <b>/apoyar</b>: cada método es un botón que, al tocarlo, muestra los pasos para apoyar. Ordénalos con ↑ ↓ (el primero es el más visible). ⚠️ Revisa dos veces cada número, dirección y red antes de guardar.</p>
     <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ap-on" style="width:auto" ${AP.on ? 'checked' : ''}> Mostrar "Apoya el proyecto" en la página</label>
     <label>Tu mensaje para la comunidad</label><textarea id="ap-msg" maxlength="1500" rows="4" placeholder="Cuenta tu historia con tus palabras…">${esc(AP.mensaje || '')}</textarea>
@@ -298,6 +301,10 @@ function apoyoCard() {
     <p style="margin-top:12px"><button class="b" data-act="apGuardar">💾 Guardar métodos</button> ${VS?.url ? `<a class="b ghost sm" href="${esc(VS.url)}/apoyar" target="_blank">Ver cómo queda</a>` : ''}</p></div>`;
 }
 document.addEventListener('input', e => { if (!AP || AP.error) return; const r = e.target.closest?.('.ap-row'); if (r && e.target.dataset.k) AP.metodos[+r.dataset.i][e.target.dataset.k] = e.target.value; if (e.target.id === 'ap-msg') AP.mensaje = e.target.value; if (e.target.id === 'ap-on') AP.on = e.target.checked; });
+// QR: se achica en el navegador (máx. 700 px) antes de enviarlo
+document.addEventListener('change', async e => { const i = e.target.dataset?.qr; if (i == null || !AP?.metodos?.[+i]) return; const f = e.target.files?.[0]; if (!f) return;
+  if (f.size > 8e6) return alert('La imagen es muy pesada'); try { const img = await createImageBitmap(f), k = Math.min(1, 700 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+    let d = c.toDataURL('image/png'); if (d.length > 700000) d = c.toDataURL('image/webp', .92); if (d.length > 790000) d = c.toDataURL('image/jpeg', .9); AP.metodos[+i].qr = d; render(); toast('📷 QR listo. No olvides Guardar.'); } catch (er) { alert('No pude leer esa imagen. Prueba con una captura en PNG o JPG.'); } });
 document.addEventListener('change', e => { if (!AP || AP.error) return; const r = e.target.closest?.('.ap-row'); if (r && e.target.dataset.k) AP.metodos[+r.dataset.i][e.target.dataset.k] = e.target.value; if (e.target.id === 'ap-on') AP.on = e.target.checked; });
 async function loadViral() {
   VS = await api('/api/viral'); VSt = Date.now();
@@ -905,9 +912,10 @@ const ACT = {
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
   apReload: () => { AP = null; render(); },
   apAgregar: b => { if (AP.metodos.length >= 12) return alert('Máximo 12 métodos'); const t = b.dataset.t; AP.metodos.push({ tipo: t, nombre: b.dataset.n === 'Otro' ? '' : b.dataset.n, valor: '', ...(t === 'cripto' ? { red: b.dataset.r || (AP.redes || [])[0] } : {}) }); render(); },
+  apQuitarQR: b => { delete AP.metodos[+b.dataset.i].qr; render(); },
   apQuitar: b => { AP.metodos.splice(+b.dataset.i, 1); render(); },
   apMover: b => { const i = +b.dataset.i, j = i + +b.dataset.d; if (j < 0 || j >= AP.metodos.length) return; [AP.metodos[i], AP.metodos[j]] = [AP.metodos[j], AP.metodos[i]]; render(); },
-  apGuardar: guard(async () => { const r = await api('/api/viral/apoyo', { on: AP.on, mensaje: AP.mensaje, metodos: AP.metodos.filter(m => String(m.valor || '').trim()) }); AP = { ...r, metodos: r.metodos || [] }; toast('💛 Métodos de apoyo guardados'); render(); }),
+  apGuardar: guard(async () => { const r = await api('/api/viral/apoyo', { on: AP.on, mensaje: AP.mensaje, metodos: AP.metodos.filter(m => String(m.valor || '').trim() || m.qr) }); AP = { ...r, metodos: r.metodos || [] }; toast('💛 Métodos de apoyo guardados'); render(); }),
   vfArte: guard(async () => { VS = await api('/api/viral/arte-glory', {}); toast('🎨 Creando las ilustraciones de GLORY BROWN…'); render(); }),
   vfVoces: guard(async () => { VS = await api('/api/viral/voces-glory', {}); toast('🎙️ Grabando las voces de GLORY BROWN…'); render(); }),
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
