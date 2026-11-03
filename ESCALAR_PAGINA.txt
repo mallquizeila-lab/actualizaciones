@@ -1,0 +1,70 @@
+CÓMO HACER QUE LA PÁGINA VIRAL AGUANTE MILES DE PERSONAS
+=========================================================
+
+1) LO QUE MEDIMOS (prueba de carga real, versión 7.26.0)
+---------------------------------------------------------
+Se simularon 100, 500 y 1000 personas a la vez (herramienta: viral/herramientas/prueba_carga.js).
+
+                                   Antes        Ahora
+  Cada visita (página + GLORY)     978 KB       238 KB   (4 veces menos)
+  Cada jugador en batalla          8 KB/s       3 KB/s   (casi 3 veces menos)
+  1000 jugadores en batalla        68 Mbit/s    28 Mbit/s de subida
+  Respuesta a una jugada (1000)    15 ms        15 ms
+  Procesador (1000 en batalla)     77 %         88 % de un núcleo
+
+Lo que se cambió:
+  - Los archivos se envían comprimidos (brotli o gzip) y se guardan en memoria.
+  - El celular no vuelve a descargar lo que ya tiene (caché de 1 año para archivos con versión).
+  - En las batallas en línea solo se envía lo que cambió, y cada 0,15 s en vez de 0,1 s
+    (el celular rellena el movimiento entre envíos, se sigue viendo fluido).
+
+Qué significa:
+  - Los juegos de un jugador (Huerto, Joyas, arcade) corren en el celular de cada persona:
+    tu PC casi no trabaja. Aguanta miles de visitas por hora.
+  - Las batallas en línea sí usan tu PC y tu internet. Con un internet de casa de 10 a 20 Mbit/s
+    de SUBIDA, aguanta unas 300 a 600 personas jugando en línea al mismo tiempo.
+  - Recuerda: de todos tus usuarios, normalmente solo el 1 al 5 % está conectado al mismo tiempo.
+
+2) ETAPA 1 — DIRECCIÓN FIJA CON TU DOMINIO (hazlo ya)
+------------------------------------------------------
+Por qué: la dirección temporal (trycloudflare.com) es para pruebas. Cambia cada vez que
+reinicias y tiene límite de conexiones. Con tu dominio, además, Cloudflare guarda las
+imágenes y los programas del juego en sus servidores de todo el mundo: tu PC deja de enviarlos.
+
+Costo: el dominio, unos 10 a 15 dólares al año. Lo demás es gratis.
+
+Pasos: en ShortForge → 📣 Página viral → "🔗 Dirección fija (tu dominio)". Ahí están los
+pasos uno por uno (comprar el dominio, crear el túnel en Cloudflare, pegar el token).
+
+3) ETAPA 2 — UN SERVIDOR EN LA NUBE (cuando pasen de unos cientos en línea)
+---------------------------------------------------------------------------
+Por qué: tu PC no tiene que estar prendida, y el internet del servidor es mucho más rápido.
+
+Opciones:
+  - Oracle Cloud "Always Free": tiene un servidor gratis para siempre (4 núcleos, 24 GB).
+    A veces no hay cupo en tu región y hay que intentar otro día.
+  - Un VPS de 5 a 12 dólares al mes (Hetzner, DigitalOcean, Vultr, Contabo).
+
+Qué se instala (Ubuntu):
+  1. Node.js 22 o más nuevo, y ffmpeg.
+  2. La carpeta "viral" de ShortForge (la página).
+  3. La página como servicio, para que arranque sola:
+       VIRAL_DATA=/srv/viral-datos PORT=3300 VIRAL_PASSWORD=<tu clave del panel> node server.js
+  4. El mismo túnel de Cloudflare con tu token:  cloudflared service install <TOKEN>
+     (así no hay que abrir puertos y sigue tu misma dirección).
+  5. Copiar tu base de datos (la carpeta de datos de la página) para no perder usuarios.
+
+Cuando llegues a esta etapa, pídeme el instalador automático para el servidor: lo dejo
+en un solo comando.
+
+4) ETAPA 3 — RUMBO A MILLONES
+------------------------------
+  - Varios servidores para las batallas en línea (cada uno con su grupo de salas).
+  - Base de datos en la nube (PostgreSQL) en vez del archivo local.
+  - Servidores en varias regiones (Perú, México, España...).
+  El costo crece con el tráfico, y los anuncios crecen igual.
+
+5) PARA VOLVER A MEDIR
+-----------------------
+  node viral/herramientas/prueba_carga.js http://localhost:3300 500 30
+  (500 = personas, 30 = segundos). Úsalo solo contra tu propia página.

@@ -1,3 +1,10 @@
+v7.26.0 — Página viral más liviana para miles de personas
+- ⚡ Prueba de carga real con 100, 500 y 1000 personas a la vez (resultados en ESCALAR_PAGINA.txt).
+- 🗜️ Los archivos de la página se envían comprimidos y se guardan en memoria: cada visita gasta 238 KB en vez de 978 KB (4 veces menos) y el celular no vuelve a descargar lo que ya tiene.
+- ⚔️ Batallas en línea de GLORY BROWN: solo se envía lo que cambió. Cada jugador gasta 3 KB/s en vez de 8 KB/s (casi 3 veces menos internet de subida), y se sigue viendo fluido.
+- 📘 Guía nueva ESCALAR_PAGINA.txt: dirección fija con tu dominio (etapa 1), servidor en la nube (etapa 2) y el camino hacia millones.
+- 🧪 Herramienta de prueba de carga: viral/herramientas/prueba_carga.js.
+
 v7.25.0 — Huerto Defensor: gallina guardiana y derrota al instante
 - 🐔 Cada carril tiene una gallina guardiana. La primera plaga que llega a la casa la despierta: sale corriendo por todo el carril gritando "¡Cocoroco! ¡De mi casa nadie pasa!" y se lleva a todas las plagas que encuentra. Sirve una sola vez por carril.
 - 🏠 Si una plaga entra por un carril sin gallina, pierdes al instante (antes había que dejar entrar 3). La plaga se burla con su voz: "¡Eres un pollito, ya te gané!", "¡Jajaja! ¡Ahora esta casa es mía!" y otras.

@@ -49,7 +49,18 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
     try { iniciarMotor(s); } catch (e) { console.error('GLORY motor:', e.message); }
   }
   // La partida la calcula el servidor: valida mazos, elixir, mano y lado del río; todos juegan con nivel de torneo 9.
-  function iniciarMotor(s) {
+  // Estado liviano: solo lo que cambió desde el envío anterior (y una foto completa cada ~2 s o cuando alguien se conecta)
+  function delta(s, d) {
+    const prev = s.ultE, ahora = new Map(), completo = !prev || s.completo || ++s.nEnv % 14 === 0; s.completo = false;
+    const cambios = []; for (const a of d.e) { const k = a.join(','); ahora.set(a[0], k); if (completo || prev.get(a[0]) !== k) cambios.push(a); }
+    const fuera = completo ? [] : [...prev.keys()].filter(id => !ahora.has(id)); s.ultE = ahora;
+    for (const nom of ['s', 'z', 'c']) { const k = JSON.stringify(d[nom]); if (!completo && s['ult_' + nom] === k) delete d[nom]; else s['ult_' + nom] = k; }
+    for (const nom of ['fx', 'so', 'tx', 'ha', 'vo']) if (Array.isArray(d[nom]) && !d[nom].length) delete d[nom];
+    if (!d.p?.length && !completo) delete d.p;
+    if (!completo) { d.e = cambios; d.g = fuera; d.dl = 1; }
+    return d;
+  }
+  function iniciarMotor(s) { s.nEnv = 0; s.ultE = null;
     GL = GL || cargarGlory(); const { G, CARTA, Motor } = GL, n4 = s.modo === '2v2', equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a;
     const arenaDe = tr => G.arenas.reduce((a, x, i) => tr >= x.trofeos ? i : a, 0), arenaI = arenaDe(Math.max(...s.jugadores.filter(j => !j.bot).map(j => j.trofeos), 0));
     const NIV = Object.fromEntries(G.cartas.map(c => [c.id, 9])), baraja = l => [...l].sort(() => Math.random() - .5);
@@ -63,7 +74,7 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
     let envT = 0, errores = 0;
     s.reloj = setInterval(() => {
       try { s.motor.paso(.05); } catch (e) { if (++errores < 3) console.error('GLORY paso:', e.message); }
-      if ((envT -= .05) <= 0 && !s.motor.S.fin) { envT = .1; const d = s.motor.foto(s.nuevos); s.nuevos = { fx: [], so: [], tx: [], ha: [], vo: [] }; emitir(s, 'estado', d); }
+      if ((envT -= .05) <= 0 && !s.motor.S.fin) { envT = .15; const d = delta(s, s.motor.foto(s.nuevos)); s.nuevos = { fx: [], so: [], tx: [], ha: [], vo: [] }; emitir(s, 'estado', d); }
       s.activo = Date.now(); if (Date.now() - s.inicio > 6 * 60000) s.motor.terminar();
     }, 50);
   }
@@ -222,7 +233,7 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
       const s = salas.get(u.searchParams.get('sala')), tok = String(u.searchParams.get('tok') || '');
       if (!s || !s.jugadores.some(j => j.tok === tok)) return send(res, 404, { error: 'Sala no encontrada' });
       res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache, no-transform', connection: 'keep-alive', 'x-accel-buffering': 'no' });
-      res.write('retry: 2000\n\n'); const c = { res, tok }; if (!subs.has(s.id)) subs.set(s.id, new Set()); subs.get(s.id).add(c);
+      res.write('retry: 2000\n\n'); const c = { res, tok }; if (!subs.has(s.id)) subs.set(s.id, new Set()); subs.get(s.id).add(c); s.completo = true;
       res.write(`event: sala\ndata: ${JSON.stringify(pub(s))}\n\n`); if (s.estado === 'jugando') res.write(`event: empieza\ndata: ${JSON.stringify(pub(s))}\n\n`);
       const ka = setInterval(() => { try { res.write(': ping\n\n'); } catch (e) {} }, 15000);
       req.on('close', () => { clearInterval(ka); subs.get(s.id)?.delete(c); const j = s.jugadores.find(x => x.tok === tok);

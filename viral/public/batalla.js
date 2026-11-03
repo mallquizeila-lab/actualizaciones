@@ -555,14 +555,14 @@
     // ---------- En línea: el servidor calcula la partida; aquí solo se dibuja ----------
     let mapa = new Map();
     function aplicarEstado(d) {
-      tiempo = d.t; extra = !!d.x; coronas = d.c; const vistos = new Set();
+      tiempo = d.t; extra = !!d.x; if (d.c) coronas = d.c; const vistos = new Set();
       for (const [id, team, cid, x, y, hp, max, fl] of d.e) { vistos.add(id); let e = mapa.get(id);
         if (!e) { e = { id, team, x, y, hp, max, t: Math.random() * 5, buf: {} }; if (cid === 'R' || cid === 'T') Object.assign(e, { torre: 1, rey: cid === 'R', r: cid === 'R' ? 1.9 : 1.5 }); else { const c = CARTA[cid]; if (!c) continue; Object.assign(e, { card: c, cid, r: c.r, aire: c.aire, estructura: c.tipo === 'estructura' }); } mapa.set(id, e); }
         if (hp < e.hp) e.flash = .15; e.tx = x; e.ty = y; e.hp = hp; e.max = max; e.buf.aturdido = fl & 1; e.nace = fl & 2 ? .5 : 0; e.at = fl & 4 ? .25 : 0; e.activo = !!(fl & 8); e.invis = fl & 32; e.buf.lento = fl & 64; e.buf.red = fl & 128; e.buf.furia = fl & 256; e.mueve = fl & 512 ? .15 : 0; }
-      for (const [id, e] of mapa) if (!vistos.has(id) && !e.torre) mapa.delete(id);
+      if (d.dl) { for (const id of d.g || []) { const e = mapa.get(id); if (e && !e.torre) mapa.delete(id); } } else for (const [id, e] of mapa) if (!vistos.has(id) && !e.torre) mapa.delete(id);
       ents = [...mapa.values()].filter(e => e.hp > 0 || e.torre);
-      proys = d.p.map(([tipo, x, y, tx, ty]) => ({ tipo, x, y, tx, ty, tgt: { x: tx, y: ty } })); zonas = d.z.map(([tipo, x, y, radio, col]) => ({ tipo, x, y, radio, col }));
-      d.s.forEach((s, i) => { if (!asientos[i]) return; asientos[i].mana = s[0]; asientos[i].mano = s[1]; asientos[i].cola = [s[2]]; });
+      proys = (d.p || []).map(([tipo, x, y, tx, ty]) => ({ tipo, x, y, tx, ty, tgt: { x: tx, y: ty } })); if (d.z) zonas = d.z.map(([tipo, x, y, radio, col]) => ({ tipo, x, y, radio, col }));
+      (d.s || []).forEach((s, i) => { if (!asientos[i]) return; asientos[i].mana = s[0]; asientos[i].mano = s[1]; asientos[i].cola = [s[2]]; });
       for (const f of d.fx || []) recibirEfecto(f); for (const s of (d.so || []).slice(0, 6)) FX.son(s);
       for (const [txt, o] of d.tx || []) recibirTexto(txt, o); for (const [tipo, team] of d.vo || []) recibirVoz(tipo, team);
       for (const [id, clave, i] of d.ha || []) recibirHabla(mapa.get(id), clave, i, true);

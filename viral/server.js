@@ -1,7 +1,7 @@
 // Página viral + base de visitantes + campañas de notificaciones push.
 // Sin servicios externos de base de datos: todo se guarda en data/viral.db (SQLite incorporado en Node 22.13+).
 // Privacidad: solo se guarda a quien acepta y declara ser mayor de 18; la IP se guarda recortada.
-const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
+const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto'), zlib = require('zlib');
 const [mayor, menor] = process.versions.node.split('.').map(Number);
 if (mayor < 22 || (mayor === 22 && menor < 5)) { console.error(`\nNecesitas Node.js 22.5 o más nuevo (tienes ${process.versions.node}). Descárgalo en https://nodejs.org (versión LTS) o en PowerShell: winget upgrade OpenJS.NodeJS.LTS\n`); process.exit(1); }
 let DatabaseSync;
@@ -188,6 +188,31 @@ const PUB = path.join(__dirname, 'public');
 function send(res, code, body, type = 'application/json; charset=utf-8', extra = {}) {
   res.writeHead(code, { 'content-type': type, 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', ...extra });
   res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
+}
+// Archivos en memoria, comprimidos una sola vez (brotli/gzip) y con ETag: el celular no vuelve a bajar lo que ya tiene.
+const CACHE_ARCH = new Map(), COMPRIMIBLE = /^(text\/|application\/(json|javascript|manifest\+json)|image\/svg)/;
+function archivo(req, res, f, type, extra = {}) {
+  let st; try { st = fs.statSync(f); } catch (e) { return send(res, 404, 'No encontrado', 'text/plain; charset=utf-8'); }
+  let c = CACHE_ARCH.get(f);
+  if (!c || c.mtime !== st.mtimeMs || c.size !== st.size) {
+    const raw = fs.readFileSync(f), zip = COMPRIMIBLE.test(type) && raw.length > 900;
+    c = { mtime: st.mtimeMs, size: st.size, raw, etag: '"' + crypto.createHash('sha1').update(raw).digest('base64').slice(0, 16) + '"',
+      br: null, gz: zip ? zlib.gzipSync(raw, { level: 7 }) : null };
+    // brotli (más chico) se prepara en segundo plano para no frenar a nadie; mientras tanto va gzip
+    if (zip) { const cc = c; zlib.brotliCompress(raw, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 10, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: raw.length } }, (e, b) => { if (!e) cc.br = b; }); }
+    if (raw.length < 8e6) { CACHE_ARCH.set(f, c); if (CACHE_ARCH.size > 600) CACHE_ARCH.delete(CACHE_ARCH.keys().next().value); }
+  }
+  const h = { 'content-type': type, 'x-content-type-options': 'nosniff', etag: c.etag, vary: 'Accept-Encoding', ...extra };
+  if (req.headers['if-none-match'] === c.etag) { res.writeHead(304, h); return res.end(); }
+  const ae = String(req.headers['accept-encoding'] || ''); let body = c.raw;
+  if (c.br && /\bbr\b/.test(ae)) { body = c.br; h['content-encoding'] = 'br'; } else if (c.gz && /gzip/.test(ae)) { body = c.gz; h['content-encoding'] = 'gzip'; }
+  h['content-length'] = body.length; res.writeHead(200, h); res.end(req.method === 'HEAD' ? undefined : body);
+}
+// HTML que cambia por pedido (la portada con sus etiquetas para redes): se comprime al vuelo.
+function enviarHtml(req, res, html, extra = {}) {
+  const ae = String(req.headers['accept-encoding'] || ''), h = { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', vary: 'Accept-Encoding', ...extra };
+  let body = Buffer.from(html); if (/gzip/.test(ae)) { body = zlib.gzipSync(body, { level: 6 }); h['content-encoding'] = 'gzip'; }
+  res.writeHead(200, h); res.end(body);
 }
 const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > 20000) { no(new Error('muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(new Error('JSON inválido')); } }); });
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
@@ -454,11 +479,11 @@ http.createServer(async (req, res) => {
     m = /^\/videos\/([a-f0-9]{16}\.mp4)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'videos', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'Este video ya expiró', 'text/plain'); return send(res, 200, fs.readFileSync(f), 'video/mp4', { 'content-disposition': `attachment; filename="glory-brown-${m[1]}"` }); }
     m = /^\/(arte|voces)\/huerto\/([a-z0-9_]{2,80}\.(?:webp|mp3)|manifest\.json)$/.exec(u.pathname);
-    if (m) { const f = path.join(DATA, m[1] + '_huerto', m[2]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), m[2].endsWith('.json') ? 'application/json' : m[2].endsWith('.mp3') ? 'audio/mpeg' : 'image/webp', { 'cache-control': m[2].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
+    if (m) { const f = path.join(DATA, m[1] + '_huerto', m[2]); return archivo(req, res, f, m[2].endsWith('.json') ? 'application/json' : m[2].endsWith('.mp3') ? 'audio/mpeg' : 'image/webp', { 'cache-control': m[2].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/arte\/glory\/([a-z0-9_]{2,80}\.webp|manifest\.json)$/.exec(u.pathname);
-    if (m) { const f = path.join(DATA, 'arte_glory', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), m[1].endsWith('.json') ? 'application/json' : 'image/webp', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
+    if (m) { const f = path.join(DATA, 'arte_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'image/webp', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/voces\/glory\/([a-z0-9_]{3,80}\.mp3|manifest\.json)$/.exec(u.pathname);
-    if (m) { const f = path.join(DATA, 'voces_glory', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
+    if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
     // Política de privacidad con tus datos (se completa en el panel → Ajustes; sobrevive a las actualizaciones).
@@ -494,15 +519,15 @@ http.createServer(async (req, res) => {
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
 <meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">`;
-      return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
+      return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og), { 'cache-control': 'no-cache' });
     }
     // Archivos de la página.
     let f = u.pathname === '/' ? '/index.html' : u.pathname === '/panel' ? '/panel.html' : u.pathname;
     f = path.normalize(path.join(PUB, decodeURIComponent(f)));
     if (!f.startsWith(PUB + path.sep) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) return send(res, 404, 'No encontrado', 'text/plain; charset=utf-8');
-    const ext = path.extname(f), extra = ext === '.html' ? { 'cache-control': 'no-cache' } : { 'cache-control': 'public, max-age=86400' };
+    const ext = path.extname(f), extra = ext === '.html' ? { 'cache-control': 'no-cache' } : { 'cache-control': u.searchParams.has('v') ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' };
     if (path.basename(f) === 'sw.js') extra['cache-control'] = 'no-cache';
     if (path.basename(f) === 'panel.html') extra['content-security-policy'] = "frame-ancestors 'self' http://localhost:* http://127.0.0.1:*";
-    return send(res, 200, fs.readFileSync(f), MIME[ext] || 'application/octet-stream', extra);
+    return archivo(req, res, f, MIME[ext] || 'application/octet-stream', extra);
   } catch (e) { console.error(e); if (!res.headersSent) send(res, 500, { error: 'Error interno' }); }
 }).listen(PORT, () => console.log(`Página viral en ${PUBLIC_URL}  ·  Panel: ${PUBLIC_URL}/panel`));
