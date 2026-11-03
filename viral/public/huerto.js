@@ -69,7 +69,7 @@
     if (n % 5 === 0 || n > 20) ev.push({ t: t + 4, tipo: 'rata', c: carriles[Math.floor(carriles.length / 2)] });
     if (n > 25) ev.push({ t: t + 9, tipo: 'rata', c: carril() });
     ev.sort((a, b) => a.t - b.t);
-    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 10 ? 200 : n < 20 ? 275 : 325 };
+    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 10 ? 200 : n < 20 ? 275 : n < 26 ? 325 : 400 };
   }
 
   // ---------- Dibujo de personajes (todo vectorial, propio) ----------
@@ -460,7 +460,7 @@
       for (const k in cool) cool[k] = Math.max(0, cool[k] - dt);
       while (evI < C.ev.length && C.ev[evI].t <= tj) { const e = C.ev[evI++], d = ENE[e.tipo]; enes.push({ tipo: e.tipo, c: e.c, x: cx(e.c), y: TOP - S * .45, hp: d.hp, max: d.hp, lento: 0, f: Math.random() * 9, t: 0, flash: 0, salto: 0, saltado: false, come: false }); const nueva = enes[enes.length - 1]; if (e.tipo === 'topo') { nueva.y = TOP + S * (2.2 + Math.random() * 1.6); chispas(nueva.x, nueva.y + S * .25, '#7a5a2a', 18, 1.2); FX.son('choque'); shake = Math.max(shake, .15); hablar(nueva, FRASES.llega.topo, .8); } if (e.tipo === 'rata') { banner('🐀 ¡Llegó la rata jefa!', S * .34); FX.son('jefe'); FX.musica?.('jefe'); setTimeout(() => hablar(nueva, FRASES.llega.rata, 1, true), 900); } else hablar(nueva, FRASES.llega[e.tipo], evI <= 2 ? 1 : .35); }
       if (!avisoOla && tj >= C.ola - 2) { avisoOla = true; banner('🚨 ¡Gran oleada!', S * .5, 2.6); FX.son('sirena'); FX.vibrar([60, 60, 60]); FX.intensidad?.(2); voz('¡Cuidado! ¡Se viene una gran oleada!', 'narrador', { forzar: true, cortar: true, tono: 1.1 }); }
-      lluvia -= dt; if (lluvia <= 0) { lluvia = 7 + Math.random() * 3.5; const c = C.carriles[Math.floor(Math.random() * C.carriles.length)]; const oro = Math.random() < .12; gotas.push({ x: cx(c) + (Math.random() - .5) * S * .4, y: -S * .3, ty: TOP + S * (.8 + Math.random() * (R - 1.8)), v: 11, val: oro ? 75 : 25, oro, vuela: 0, cae: .9 }); if (tutorial === 1) tutorial = 2; }
+      lluvia -= dt; if (lluvia <= 0) { lluvia = (n >= 20 ? 5.8 : 7) + Math.random() * 3.2; const c = C.carriles[Math.floor(Math.random() * C.carriles.length)]; const oro = Math.random() < .12; gotas.push({ x: cx(c) + (Math.random() - .5) * S * .4, y: -S * .3, ty: TOP + S * (.8 + Math.random() * (R - 1.8)), v: 11, val: oro ? 75 : 25, oro, vuela: 0, cae: .9 }); if (tutorial === 1) tutorial = 2; }
       for (const d of defs.values()) {
         d.t += dt; d.kick = Math.max(0, d.kick - dt * 5); d.nace = Math.max(0, d.nace - dt * 4); d.golpe = Math.max(0, (d.golpe || 0) - dt);
         if (d.k === 'hongo') { d.timer += dt; d.carga = d.timer / (d.prim ? 5 : 9.5); if (d.carga >= 1) { d.timer = 0; d.prim = false; d.kick = 1; gotas.push({ x: d.x, y: d.y - S * .3, ty: d.y + S * .1, x2: d.x + (Math.random() < .5 ? -1 : 1) * S * .28, v: 11, val: 25, vuela: 0, cae: 2.4 }); } }
