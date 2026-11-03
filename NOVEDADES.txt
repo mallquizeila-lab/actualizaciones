@@ -1,3 +1,15 @@
+v7.22.0 — Huerto Defensor más profesional y arreglo de GLORY BROWN
+- 🛠️ GLORY BROWN: con la pantalla completa, la pantalla de fin de batalla (premios y cofres) y otras ventanas quedaban escondidas detrás. Corregido.
+- 📱 Huerto Defensor a pantalla completa y más grande en el celular.
+- ⏸️ Menú de pausa de verdad: Continuar, Reiniciar nivel o Volver al mapa. Si sales de la app, el juego se pausa solo.
+- ⏩ Velocidad x1, x2 y x3.
+- 🔁 Botón "Repetir por 3 ⭐" al ganar sin todas las estrellas.
+- 🎵 La "Segunda oportunidad" ahora vuelve a poner la música (antes el nivel seguía en silencio).
+- ❤️ Los defensores muestran su barra de vida cuando los están comiendo.
+- 💥 Las plagas caen girando y se desvanecen al morir.
+- 🌱 Pasto con relieve y piedritas en el borde de los carriles.
+- 🧩 La barra de defensores ahora entra completa en la pantalla (antes había que deslizar).
+
 v7.21.0 — GLORY BROWN: batalla a pantalla completa con cámara cercana
 - 📱 La batalla ahora ocupa toda la pantalla del celular, sin marcos ni menús de la página.
 - 🎥 Cámara ajustada sola a cada pantalla: se acerca lo máximo posible para que la arena llene la pantalla de arriba abajo, viendo siempre las dos torres del rey.
