@@ -185,6 +185,17 @@ const V = {
   async ajustes() {
     const a = await api('ajustes');
     $('#main').innerHTML = `<div class="cols">
+    <div class="card"><h2>🎮 Juegos profesionales</h2><p class="hint">Miles de juegos de estudios profesionales en tu página, de forma legal. 1) Regístrate gratis como <b>publisher</b> en un distribuidor (GameDistribution, GamePix o GameMonetize) con tu dominio. 2) En su panel copia el enlace del <b>catálogo (feed) en JSON o RSS</b> y pégalo aquí. Ellos ponen sus anuncios en los juegos y te pagan una parte.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="g-on" style="width:auto" ${a.pro?.on ? 'checked' : ''}> Mostrar la sección en la página</label>
+      <label>Enlace del catálogo (feed)</label><input id="g-f" value="${esc(a.pro?.feed || '')}" placeholder="https://…">
+      <label>Plantilla del enlace del juego (solo si tu distribuidor la pide; usa {id})</label><input id="g-p" value="${esc(a.pro?.plantilla || '')}" placeholder="https://…/{id}/">
+      <p class="hint">${a.pro?.juegos ? `✅ ${n(a.pro.juegos)} juegos cargados.` : 'Todavía no hay juegos cargados.'}</p>
+      <p style="margin-top:10px"><button class="btn" id="g-go">Guardar y cargar juegos</button></p></div>
+    <div class="card"><h2>💰 Google AdSense</h2><p class="hint">Cuando Google te dé tu ID de editor (empieza con <b>ca-pub-</b>), pégalo aquí: el código de AdSense queda en todas las páginas y se crea tu archivo <a href="/ads.txt" target="_blank">/ads.txt</a>. En AdSense activa los <b>anuncios automáticos</b> y excluye la zona de los juegos si molestan.</p>
+      <label>ID de editor</label><input id="ad-c" value="${esc(a.ads?.client || '')}" placeholder="ca-pub-1234567890123456">
+      <label>Líneas extra para ads.txt (si tu distribuidor de juegos te las pide, una por línea)</label><textarea id="ad-x" placeholder="ejemplo.com, 12345, RESELLER">${esc(a.ads?.extra || '')}</textarea>
+      <p class="hint">Páginas que pide Google (ya creadas con tus datos de Privacidad): <a href="/terminos.html" target="_blank">Términos</a> · <a href="/contacto.html" target="_blank">Contacto</a> · <a href="/nosotros.html" target="_blank">Quiénes somos</a> · <a href="/privacidad.html" target="_blank">Privacidad</a></p>
+      <p style="margin-top:10px"><button class="btn" id="ad-go">Guardar</button></p></div>
     <div class="card"><h2>🎬 Video destacado</h2><p class="hint">Aparece en la página y después de cada resultado. Pon tu último Short o Reel.</p>
       <label>Enlace del video</label><input id="v-u" value="${esc(a.video?.url || '')}" placeholder="https://youtube.com/shorts/...">
       <label>Texto del botón</label><input id="v-t" value="${esc(a.video?.title || 'Mira el video de hoy')}" maxlength="80">
@@ -217,6 +228,8 @@ const V = {
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#g-go').onclick = () => api('ajustes', { pro: { on: $('#g-on').checked, feed: $('#g-f').value, plantilla: $('#g-p').value } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#ad-go').onclick = () => api('ajustes', { ads: { client: $('#ad-c').value, extra: $('#ad-x').value } }).then(ok, e => alert(e.message));
     $('#m-go').onclick = () => api('ajustes', { marca: { nombre: $('#m-n').value, eslogan: $('#m-e').value } }).then(ok, e => alert(e.message));
     $('#b-go').onclick = () => api('ajustes', { bienvenida: { on: $('#b-on').checked, title: $('#b-t').value, body: $('#b-b').value } }).then(ok, e => alert(e.message));
     $('#pr-go').onclick = () => api('ajustes', { priv: { nombre: $('#pr-n').value, ciudad: $('#pr-c').value, correo: $('#pr-m').value, plazo: $('#pr-p').value, codigo: $('#pr-k').value } }).then(ok, e => alert(e.message));

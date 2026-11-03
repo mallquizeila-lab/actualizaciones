@@ -214,6 +214,56 @@ function enviarHtml(req, res, html, extra = {}) {
   let body = Buffer.from(html); if (/gzip/.test(ae)) { body = zlib.gzipSync(body, { level: 6 }); h['content-encoding'] = 'gzip'; }
   res.writeHead(200, h); res.end(body);
 }
+// ---------- Juegos profesionales: catálogo de un distribuidor (GameDistribution, GamePix, GameMonetize…) ----------
+// En el panel se pega el enlace del catálogo (JSON o RSS) que da el distribuidor; aquí se lee y se ordena.
+let PRO = { t: 0, items: [], feed: '' };
+const textoP = v => String(v ?? '').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").trim();
+function normalizarJuego(g, plantilla) {
+  const pick = (...ks) => { for (const k of ks) { let v = k.split('.').reduce((o, x) => o?.[x], g); if (Array.isArray(v)) v = v[0]; if (v && typeof v === 'object') v = v.url || v.src || v.name || ''; if (v != null && v !== '') return v; } return ''; };
+  const t = textoP(pick('title', 'Title', 'name', 'Name', 'game_name')).slice(0, 80), id = String(pick('id', 'Id', 'namespace', 'Md5', 'md5', 'gameId', 'game_id', 'slug'));
+  let url = String(pick('url', 'Url', 'embed', 'embedUrl', 'embed_url', 'game_url', 'gameUrl', 'link', 'Link'));
+  if (!/^https:\/\//i.test(url) && plantilla && id) url = plantilla.replace('{id}', encodeURIComponent(id));
+  const img = String(pick('banner_image', 'image', 'Image', 'thumb', 'Thumb', 'thumbnail', 'Thumbnail', 'Asset', 'assets', 'images', 'icon', 'cover'));
+  const cat = textoP(pick('category', 'Category', 'categories', 'Categories', 'genre', 'tags')).split(/[,|]/)[0].trim().slice(0, 30);
+  if (!t || !/^https:\/\/[^\s"'<>]+$/i.test(url)) return null;
+  return { id: crypto.createHash('md5').update(url).digest('hex').slice(0, 12), t, u: url, img: /^https:\/\/[^\s"'<>]+$/i.test(img) ? img : '', cat: cat || 'Juegos', d: textoP(pick('description', 'Description', 'desc')).slice(0, 220), w: +pick('width', 'Width') || 0, h: +pick('height', 'Height') || 0 };
+}
+async function catalogoPro(forzar) {
+  const cfg = getS('pro', {}); if (!cfg.on || !cfg.feed) return [];
+  if (!forzar && PRO.feed === cfg.feed && Date.now() - PRO.t < 6 * 3600e3 && PRO.items.length) return PRO.items;
+  try {
+    const r = await fetch(cfg.feed, { signal: AbortSignal.timeout(25000), headers: { accept: 'application/json, application/rss+xml, application/xml, text/xml' } }); const txt = (await r.text()).slice(0, 12e6);
+    let lista = [];
+    try { const j = JSON.parse(txt); lista = Array.isArray(j) ? j : j.data?.items || j.data || j.items || j.games || j.results || Object.values(j).find(Array.isArray) || []; }
+    catch (e) { lista = [...txt.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(m => { const o = {}; for (const [, k, v] of m[1].matchAll(/<([a-zA-Z_:]+)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/\1>/g)) o[k.replace(/^.*:/, '')] = v; const im = /<(?:media:thumbnail|media:content|enclosure)[^>]*url="([^"]+)"/.exec(m[1]); if (im) o.image = im[1]; return o; }); }
+    const vistos = new Set(), items = lista.map(g => normalizarJuego(g, cfg.plantilla)).filter(g => g && !vistos.has(g.id) && vistos.add(g.id)).slice(0, 5000);
+    if (items.length) PRO = { t: Date.now(), items, feed: cfg.feed }; else console.error('Juegos pro: el catálogo no trajo juegos reconocibles');
+  } catch (e) { console.error('Juegos pro:', e.message); }
+  return PRO.items;
+}
+// ---------- Google AdSense ----------
+const adsCfg = () => getS('ads', {});
+const adsScript = () => { const c = adsCfg().client; return /^ca-pub-\d{10,20}$/.test(c || '') ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c}" crossorigin="anonymous"></script><meta name="google-adsense-account" content="${c}">` : ''; };
+// ---------- Páginas legales que pide Google (se llenan con tus datos del panel) ----------
+function paginaLegal(tipo) {
+  const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Nuestra página'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
+  const T = {
+    terminos: ['Términos de uso', `<p>Al usar ${sitio} aceptas estos términos. Si no estás de acuerdo, por favor no uses el sitio.</p>
+      <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p>
+      <h2>2. Edad</h2><p>Las funciones con cuenta, chat y clanes son para mayores de 18 años. Los menores deben usar el sitio con supervisión de un adulto.</p>
+      <h2>3. Convivencia</h2><p>No se permite publicar insultos, acoso, contenido sexual, violento o ilegal, datos personales, enlaces, teléfonos ni correos. Moderamos el chat y podemos suspender cuentas que no respeten estas reglas.</p>
+      <h2>4. Juegos de terceros</h2><p>Algunos juegos son de otros estudios y se muestran a través de distribuidores autorizados. Sus derechos pertenecen a sus autores.</p>
+      <h2>5. Anuncios</h2><p>El sitio es gratis gracias a la publicidad. Algunos anuncios los muestra Google u otros socios, que pueden usar cookies según su propia política.</p>
+      <h2>6. Contenido propio</h2><p>Los juegos, personajes, textos e imágenes propios de ${sitio} (incluido GLORY BROWN) están protegidos. No se pueden copiar ni vender sin permiso.</p>
+      <h2>7. Cambios</h2><p>Podemos actualizar estos términos. La versión vigente siempre está en esta página.</p>
+      <h2>8. Contacto</h2><p>${resp} · ${ciudad} · ${correo}</p>`],
+    contacto: ['Contacto', `<p>¿Tienes una pregunta, una idea o quieres reportar algo? Escríbenos.</p><p style="font-size:1.2rem"><b>📧 ${correo}</b></p><p>Responsable: ${resp} · ${ciudad}</p><p>Para pedir que borremos tus datos o tu cuenta, escribe a ese correo con el asunto <b>"Borrar mis datos"</b>. Respondemos en un máximo de 10 días hábiles.</p>`],
+    nosotros: ['Quiénes somos', `<p><b>${sitio}</b> es una plataforma latina de entretenimiento gratis: tests para conocerte, más de 60 juegos, juegos propios como <b>GLORY BROWN: El Choque de los Reinos</b> y <b>Huerto Defensor</b>, chat, clanes y torneos.</p>
+      <p>GLORY BROWN nació como homenaje a una abuelita muy querida: la Reina Glory Brown, que protege su reino con amor. Ese cariño es lo que queremos que se sienta en todo el sitio.</p>
+      <p>Creamos contenido nuevo cada semana, con identidad latina y en español, para que juegues sin instalar nada desde tu celular, tablet o computadora.</p><p>Responsable: ${resp} · ${ciudad} · ${correo}</p>`],
+  }[tipo];
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${T[0]} · ${sitio}</title>${adsScript()}<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:22px 18px 60px;line-height:1.6;color:#1f2937;background:#fafafa}h1{font-size:1.7rem}h2{font-size:1.1rem;margin-top:1.4em}a{color:#7c3aed}</style></head><body><p><a href="/">← Volver a ${sitio}</a></p><h1>${T[0]}</h1>${T[1]}<p style="margin-top:2em;font-size:.9rem"><a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/contacto.html">Contacto</a> · <a href="/nosotros.html">Quiénes somos</a></p></body></html>`;
+}
 const json = req => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > 20000) { no(new Error('muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(new Error('JSON inválido')); } }); });
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
@@ -227,6 +277,13 @@ async function api(req, res, u) {
   if (P && limite(ip, 'api', 240)) return send(res, 429, { error: 'Demasiadas peticiones, espera un momento' });
 
   // ---- chat en vivo ----
+  if (u.pathname === '/api/pro') {
+    const cfg = getS('pro', {}); if (!cfg.on) return send(res, 200, { on: false, juegos: [] });
+    const todos = await catalogoPro(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
+    const cats = Object.entries(todos.reduce((a, g) => (a[g.cat] = (a[g.cat] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => c);
+    const f = todos.filter(g => (!cat || g.cat === cat) && (!qq || g.t.toLowerCase().includes(qq)));
+    return send(res, 200, { on: true, total: f.length, cats, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
+  }
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (/^\/api\/(cuenta|clan|duelo|glory)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
@@ -234,7 +291,7 @@ async function api(req, res, u) {
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
     const subs = q1('select count(*) n from subscribers where active=1').n;
-    return send(res, 200, { marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    return send(res, 200, { marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/visit' && P) {
     const b = await json(req);
@@ -431,6 +488,8 @@ async function api(req, res, u) {
         const b = await json(req);
         if (b.video !== undefined) { const v = b.video?.url ? safeDest(b.video.url) : null; if (b.video?.url && !v) return send(res, 400, { error: 'El video debe ser de YouTube, Facebook, TikTok o Instagram' }); setS('video', v ? { url: v, title: clip(b.video.title, 80) || 'Mira el video' } : null); }
         if (b.priv) setS('priv', Object.fromEntries(['nombre', 'ciudad', 'correo', 'plazo', 'codigo'].map(k => [k, clip(b.priv[k], 120).trim()])));
+        if (b.pro) { const f = String(b.pro.feed || '').trim(), pl = String(b.pro.plantilla || '').trim(); if (f && !/^https:\/\/\S+$/.test(f)) return send(res, 400, { error: 'El enlace del catálogo debe empezar con https://' }); if (pl && !/^https:\/\/\S*\{id\}\S*$/.test(pl)) return send(res, 400, { error: 'La plantilla debe empezar con https:// y tener {id}' }); setS('pro', { on: !!b.pro.on, feed: f.slice(0, 600), plantilla: pl.slice(0, 300) }); PRO.t = 0; if (b.pro.on && f) { const n = (await catalogoPro(true)).length; if (!n) return send(res, 400, { error: 'Guardado, pero el catálogo no trajo juegos. Revisa el enlace (debe ser el "feed" JSON o RSS de tu distribuidor).' }); } }
+        if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 3000) }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
@@ -443,7 +502,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
@@ -486,6 +545,9 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
+    const legal = /^\/(terminos|contacto|nosotros)\.html$/.exec(u.pathname);
+    if (legal) return enviarHtml(req, res, paginaLegal(legal[1]), { 'cache-control': 'no-cache' });
+    if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) if (/^[a-z0-9.-]+\.[a-z]{2,},\s*[\w-]+,\s*(DIRECT|RESELLER)(,\s*[\w]+)?$/i.test(l.trim())) lineas.push(l.trim()); return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }
     // Política de privacidad con tus datos (se completa en el panel → Ajustes; sobrevive a las actualizaciones).
     if (u.pathname === '/privacidad.html') {
       const pv = getS('priv', {}), x = (v, d) => esc(v || d);
@@ -519,7 +581,7 @@ http.createServer(async (req, res) => {
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
 <meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">`;
-      return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og), { 'cache-control': 'no-cache' });
+      return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + adsScript()), { 'cache-control': 'no-cache' });
     }
     // Archivos de la página.
     let f = u.pathname === '/' ? '/index.html' : u.pathname === '/panel' ? '/panel.html' : u.pathname;

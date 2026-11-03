@@ -1,3 +1,9 @@
+v7.27.0 — Juegos profesionales, Google AdSense y páginas legales
+- 🕹️ Nueva sección "Juegos profesionales": conecta el catálogo de un distribuidor (GameDistribution, GamePix o GameMonetize) desde el panel de la página → Ajustes. Muestra los juegos con buscador, categorías y pantalla completa. Los juegos traen sus anuncios y el distribuidor te paga una parte.
+- 💰 Google AdSense: pega tu ID de editor (ca-pub-…) en el panel y el código queda en todas las páginas. Se crea solo tu archivo /ads.txt (con espacio para las líneas que pida tu distribuidor).
+- 📄 Páginas que pide Google, llenas con tus datos: Términos de uso, Contacto y Quiénes somos (además de Privacidad). Enlaces en el pie de la página.
+- 📘 Guía nueva GUIA_MONETIZAR.txt: dominio, distribuidor de juegos, AdSense, portales de juegos y apps, paso a paso.
+
 v7.26.0 — Página viral más liviana para miles de personas
 - ⚡ Prueba de carga real con 100, 500 y 1000 personas a la vez (resultados en ESCALAR_PAGINA.txt).
 - 🗜️ Los archivos de la página se envían comprimidos y se guardan en memoria: cada visita gasta 238 KB en vez de 978 KB (4 veces menos) y el celular no vuelve a descargar lo que ya tiene.

@@ -1,0 +1,54 @@
+GUÍA: GANAR DINERO CON LA PÁGINA Y LLEGAR A MÁS GENTE
+=====================================================
+Haz los pasos en este orden. Cada registro lo haces tú, con tus datos: nunca compartas
+contraseñas ni claves con nadie (ni en capturas de pantalla).
+
+PASO 0 — TU DOMINIO (obligatorio para todo lo demás)
+-----------------------------------------------------
+Google y los distribuidores de juegos NO aceptan la dirección temporal "trycloudflare.com".
+  1. Compra un dominio (~10 a 15 dólares al año), por ejemplo en Cloudflare.
+  2. En ShortForge → 📣 Página viral → "🔗 Dirección fija (tu dominio)" sigue los pasos.
+  3. Completa en el panel de la página (Ajustes → "📄 Política de privacidad") tu nombre,
+     ciudad y correo: con eso se llenan solas las páginas de Privacidad, Términos,
+     Contacto y Quiénes somos que pide Google.
+
+PASO 1 — JUEGOS PROFESIONALES EN TU PÁGINA
+-------------------------------------------
+  1. Regístrate gratis como "Publisher" (editor) en UNO de estos distribuidores:
+       - GameDistribution   - GamePix   - GameMonetize
+     Te pedirán tu dominio. Ellos revisan y aprueban la página.
+  2. En su panel busca el "feed" o "catálogo" de juegos (un enlace que termina en JSON o RSS).
+     Si te deja elegir cantidad, pide muchos (por ejemplo 500).
+  3. En el panel de tu página → Ajustes → "🎮 Juegos profesionales":
+     pega el enlace, marca "Mostrar la sección" y aprieta "Guardar y cargar juegos".
+  4. Si el distribuidor te pide agregar líneas a tu "ads.txt", pégalas en la tarjeta
+     "💰 Google AdSense" → "Líneas extra para ads.txt".
+  Los juegos traen sus propios anuncios y el distribuidor te paga una parte.
+
+PASO 2 — GOOGLE ADSENSE
+------------------------
+  Requisitos: ser mayor de 18 años, tener el dominio funcionando siempre (tu PC prendida
+  o el servidor en la nube), y contenido original (tus tests, GLORY BROWN, Huerto y la comunidad).
+  1. Entra a Google AdSense con tu cuenta de Google y agrega tu dominio.
+  2. Copia tu "ID de editor" (empieza con ca-pub-) y pégalo en el panel → Ajustes →
+     "💰 Google AdSense" → Guardar. Con eso el código de AdSense queda en todas las páginas
+     y se crea tu archivo ads.txt.
+  3. En AdSense aprieta "Solicitar revisión". Tarda de unos días a un par de semanas.
+  4. Cuando te aprueben: activa los "Anuncios automáticos" y excluye la zona de los juegos
+     si los anuncios molestan al jugar.
+  5. Si te rechazan, Google te dice el motivo: mándame la captura y lo corregimos.
+  Nota: si recibes visitas de Europa, Google pide un aviso de cookies certificado (CMP);
+  se activa desde AdSense → Privacidad y mensajes.
+
+PASO 3 — LLEVAR TUS JUEGOS A MILLONES DE JUGADORES (opcional, cuando quieras)
+-----------------------------------------------------------------------------
+  Poki y CrazyGames aceptan juegos de estudios independientes y comparten lo que ganan.
+  Publicar GLORY BROWN o Huerto Defensor ahí da a conocer tu marca. Pídeme la versión
+  especial para enviarla (cada portal tiene sus propias reglas técnicas).
+
+PASO 4 — APPS (más adelante, cuando haya más tráfico)
+-------------------------------------------------------
+  - Play Store (Android): cuenta de desarrollador de 25 dólares (pago único). A las cuentas
+    personales nuevas Google les ha pedido una prueba cerrada con 12 personas durante
+    14 días: con tus propios jugadores será fácil. Pídeme el paquete de la app.
+  - App Store (iPhone): 99 dólares al año y una Mac. Lo vemos cuando la plataforma crezca.

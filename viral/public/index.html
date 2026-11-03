@@ -145,7 +145,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
     <div id="stage"></div>
   </section>
 
-  <p class="small">Contenido solo de entretenimiento. Avatares: DiceBear (licencias libres). <a href="/privacidad.html">Privacidad</a> · <a href="#" id="unsub">No quiero más notificaciones</a></p>
+  <p class="small">Contenido solo de entretenimiento. Avatares: DiceBear (licencias libres). <a href="/privacidad.html">Privacidad</a> · <a href="/terminos.html">Términos</a> · <a href="/contacto.html">Contacto</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="#" id="unsub">No quiero más notificaciones</a></p>
 </main>
 
 <div class="modal" id="gate" hidden>
@@ -167,7 +167,7 @@ const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<':
 const toast = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 3200); };
 const SRC = (P.get('src') || LS.get('src') || 'directo').slice(0, 60); LS.set('src', SRC);
 let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) + Date.now().toString(36); LS.set('vid', VID); }
-let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); }).catch(() => {});
+let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); if (c.pro) window.pintarHub?.(); }).catch(() => {});
 const hash = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 const pick = (a, h) => a[h % a.length];
 const hoy = () => new Date().toISOString().slice(0, 10);
@@ -718,6 +718,26 @@ window.cuentaModal = function (modo = 'crear', alTerminar) {
     try { if (modo === 'crear') await PERFIL.crearCuenta(u, c); else await PERFIL.entrar(u, c); d.remove(); toast(modo === 'crear' ? `✅ ¡Listo, ${PERFIL.usuario}! Tu progreso está guardado` : `👋 ¡Hola de nuevo, ${PERFIL.usuario}!`); FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
     catch (er) { err.textContent = er.message || 'No se pudo. Inténtalo otra vez.'; e.target.disabled = false; } };
 };
+// ---------- Juegos profesionales (catálogo del distribuidor configurado en el panel) ----------
+JUEGO.pro = async function (cat = '', qq = '', pag = 0) {
+  stage(`<div class="card"><h2 style="margin:0 0 4px">🕹️ Juegos profesionales</h2><p class="sub" style="margin:0 0 8px">Juegos de estudios de todo el mundo, gratis y sin instalar.</p>
+    <input id="proQ" type="search" placeholder="🔎 Buscar un juego…" value="${escH(qq)}" style="margin:0 0 8px"><div id="proCats" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px"></div>
+    <div id="proLista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px"><p class="sub">Cargando juegos…</p></div><div id="proMas" style="text-align:center;margin-top:10px"></div></div>`);
+  let d; try { d = await (await fetch(`/api/pro?cat=${encodeURIComponent(cat)}&q=${encodeURIComponent(qq)}&p=${pag}`)).json(); } catch (e) { d = { juegos: [] }; }
+  if (!d.on) { $('#proLista').innerHTML = '<p class="sub">Esta sección aún no está disponible.</p>'; return; }
+  $('#proCats').innerHTML = ['', ...(d.cats || [])].map(c => `<button class="btn ${c === cat ? '' : 'alt'}" data-cat="${escH(c)}" style="width:auto;margin:0;padding:5px 12px;font-size:.8rem;white-space:nowrap">${c ? escH(c) : 'Todos'}</button>`).join('');
+  $('#proLista').innerHTML = d.juegos.length ? d.juegos.map(g => `<button data-pj="${g.id}" style="border:0;padding:0;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);cursor:pointer;color:inherit;text-align:left"><div style="aspect-ratio:1;background:#1e1b4b center/cover no-repeat${g.img ? `;background-image:url('${g.img.replace(/'/g, '%27')}')` : ''}"></div><small style="display:block;padding:5px 7px;font-weight:700;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(g.t)}</small></button>`).join('') : '<p class="sub">No encontramos juegos con ese nombre.</p>';
+  $('#proMas').innerHTML = `${pag > 0 ? '<button class="btn alt" id="proAnt" style="width:auto;display:inline-block;margin:0 4px">← Anteriores</button>' : ''}${(pag + 1) * 48 < d.total ? '<button class="btn alt" id="proSig" style="width:auto;display:inline-block;margin:0 4px">Ver más →</button>' : ''}`;
+  let tq; $('#proQ').oninput = e => { clearTimeout(tq); tq = setTimeout(() => JUEGO.pro(cat, e.target.value.trim(), 0), 450); };
+  $('#stage').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) return JUEGO.pro(c.dataset.cat, qq, 0);
+    if (e.target.id === 'proSig') return JUEGO.pro(cat, qq, pag + 1); if (e.target.id === 'proAnt') return JUEGO.pro(cat, qq, pag - 1);
+    const b = e.target.closest('[data-pj]'); if (!b) return; const g = d.juegos.find(x => x.id === b.dataset.pj); if (!g) return;
+    $('#stage').onclick = null; scrollTo(0, 0);
+    stage(`<div class="card" style="padding:8px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><button class="btn alt" id="proVolver" style="width:auto;margin:0;padding:6px 12px">← Juegos</button><b style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(g.t)}</b><button class="btn alt" id="proFull" style="width:auto;margin:0;padding:6px 12px">⛶</button></div>
+      <div id="proCaja" style="position:relative;width:100%;aspect-ratio:${g.w && g.h ? g.w + '/' + g.h : '16/10'};max-height:78vh;background:#000;border-radius:12px;overflow:hidden"><iframe src="${g.u.replace(/"/g, '%22')}" title="${escH(g.t)}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; fullscreen; gamepad; clipboard-write" allowfullscreen sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-pointer-lock allow-orientation-lock"></iframe></div>
+      ${g.d ? `<p class="sub" style="text-align:left;margin:8px 4px 0;font-size:.85rem">${escH(g.d)}</p>` : ''}<p class="sub" style="font-size:.72rem;margin:6px 0 0">Juego de un estudio externo, mostrado por un distribuidor autorizado.</p></div>`);
+    $('#proVolver').onclick = () => JUEGO.pro(cat, qq, pag); $('#proFull').onclick = () => { const c = $('#proCaja'); (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c); }; };
+};
 window.pintarHub = function () {
   const h = $('#hub'); if (!h || !window.PERFIL) return;
   const D = PERFIL.datos, nv = PERFIL.nivelDe(D.xp), a = PERFIL.xpPara(nv), b = PERFIL.xpPara(nv + 1), pct = Math.round((D.xp - a) * 100 / (b - a));
@@ -726,6 +746,7 @@ window.pintarHub = function () {
   const mis = PERFIL.misiones(), lg = PERFIL.logros(), hechos = lg.filter(x => x.ok).length;
   h.innerHTML = `<div class="banners"><button class="joyban" data-g="arcade-batalla" style="background:linear-gradient(120deg,#1e3a8a,#7c3aed 45%,#ef4444 85%);box-shadow:0 10px 30px rgba(239,68,68,.35)"><img src="/glory/reina_mini.webp" alt="" style="width:58px;height:58px;border-radius:50%;border:3px solid #fde047;box-shadow:0 0 16px #fde047;flex:0 0 58px"><div><b>👑 GLORY BROWN${D.juegos.batalla?.trofeos ? ' · 🏆 ' + D.juegos.batalla.trofeos : ''}</b><small>El Choque de los Reinos: 127 cartas, 7 mundos, batallas en vivo y la Reina de la Victoria.</small></div></button>
   <button class="joyban" data-g="arcade-mundo" style="background:linear-gradient(120deg,#1e1b4b,#7c3aed 45%,#ec4899 80%,#f59e0b);box-shadow:0 10px 30px rgba(124,58,237,.4)"><span>🌍</span><div><b>${D.juegos.mundo?.pos ? 'Vuelve a Islas Portal 3D' : 'Nuevo: Islas Portal 3D'}</b><small>Mundo 3D con portales, monedas y gente jugando en vivo. ${D.juegos.mundo?.pos ? 'Sigues donde te quedaste.' : '¡Entra ya!'}</small></div></button>
+  ${cfg.pro ? `<button class="joyban" data-g="pro" style="background:linear-gradient(120deg,#0f172a,#2563eb 50%,#06b6d4);box-shadow:0 10px 30px rgba(37,99,235,.35)"><span>🕹️</span><div><b>Juegos profesionales</b><small>Cientos de juegos de estudios de todo el mundo: carreras, acción, puzzles y más. Gratis.</small></div></button>` : ''}
   <button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
   <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
