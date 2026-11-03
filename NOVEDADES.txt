@@ -1,3 +1,8 @@
+v7.24.0 — NVIDIA de respaldo para crear imágenes
+- 🎨 Cuando se acaba el cupo gratis diario de Cloudflare, ShortForge sigue creando las ilustraciones (GLORY BROWN y Huerto Defensor) con NVIDIA, usando la misma clave NVIDIA que ya tienes en Ajustes. Usa FLUX.1 [schnell], que permite uso comercial.
+- Los videos siguen usando solo Cloudflare, para no gastar los créditos de NVIDIA en eso.
+- Los personajes de batalla de GLORY BROWN (que se copian de su ilustración) necesitan Cloudflare, porque NVIDIA no acepta imagen de referencia.
+
 v7.23.0 — Huerto Defensor: nuevos personajes, Furia, voces e ilustraciones
 - 🌱 3 defensores nuevos: Maracuyá Eléctrica (rayo que salta entre 3 plagas), Cebolla Llorona (lágrimas picantes que dañan alrededor) y Quinua Curandera (cura a los defensores cercanos).
 - 🐛 2 plagas nuevas: Polilla nocturna (vuela por encima de las murallas y las bombas) y Topo excavador (sale a mitad del huerto).
