@@ -276,6 +276,29 @@ VIEWS.calendario = () => {
 let chatMsgs = store.get('chat', []), chatBusy = false;
 // ---------- 📣 Página viral ----------
 let VS = null, VSt = 0;
+// ---- 💛 Métodos de apoyo (se guardan en la página viral) ----
+let AP = null, APcargando = false;
+const AP_TIPOS = { enlace: ['🔗', 'Enlace de pago', 'https://…'], numero: ['📱', 'Número o cuenta', 'Número, correo o cuenta'], cripto: ['🪙', 'Criptomoneda', 'Dirección de tu billetera'] };
+const AP_RAPIDOS = [['Yape', 'numero'], ['Plin', 'numero'], ['PayPal', 'enlace'], ['Ko-fi', 'enlace'], ['Mercado Pago', 'enlace'], ['Buy Me a Coffee', 'enlace'], ['Patreon', 'enlace'], ['Binance Pay', 'numero'], ['Transferencia bancaria', 'numero'], ['Nequi', 'numero'], ['Pix', 'numero'], ['Zelle', 'numero'], ['Bizum', 'numero'], ['Cash App', 'enlace'], ['Venmo', 'enlace'], ['Wise', 'enlace'], ['USDT', 'cripto', 'USDT (TRON · TRC20)'], ['Bitcoin', 'cripto', 'Bitcoin (BTC)'], ['Ethereum', 'cripto', 'Ethereum (ETH)'], ['Solana', 'cripto', 'Solana (SOL)'], ['Otro', 'enlace']];
+async function cargarApoyo() { if (APcargando) return; APcargando = true; try { AP = await api('/api/viral/apoyo'); AP.metodos = AP.metodos || []; } catch (e) { AP = { error: e.message }; } APcargando = false; if (tab === 'viral') render(); }
+function apoyoCard() {
+  if (!AP) { cargarApoyo(); return '<div class="card"><h2>💛 Métodos de apoyo</h2><p class="hint">Cargando…</p></div>'; }
+  if (AP.error) return `<div class="card"><h2>💛 Métodos de apoyo</h2><p class="hint">Para editar los métodos, la página viral tiene que estar encendida. (${esc(AP.error)})</p><button class="b sm" data-act="apReload">Reintentar</button></div>`;
+  const fila = (m, i) => `<div class="ap-row" data-i="${i}" style="border:1px solid var(--line,#ddd);border-radius:10px;padding:8px;margin:6px 0">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b>${i + 1}.</b><span title="${esc(AP_TIPOS[m.tipo][1])}">${AP_TIPOS[m.tipo][0]}</span><input data-k="nombre" value="${esc(m.nombre || '')}" placeholder="Nombre que verá la gente" style="flex:1;min-width:140px;margin:0">
+      <button class="b ghost sm" data-act="apMover" data-i="${i}" data-d="-1" ${i ? '' : 'disabled'}>↑</button><button class="b ghost sm" data-act="apMover" data-i="${i}" data-d="1" ${i < AP.metodos.length - 1 ? '' : 'disabled'}>↓</button><button class="b ghost sm" data-act="apQuitar" data-i="${i}">✕</button></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${m.tipo === 'cripto' ? `<select data-k="red" style="margin:0">${(AP.redes || []).map(r => `<option ${m.red === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>` : ''}
+      <input data-k="valor" value="${esc(m.valor || '')}" placeholder="${AP_TIPOS[m.tipo][2]}" style="flex:2;min-width:200px;margin:0">${m.tipo === 'numero' ? `<input data-k="titular" value="${esc(m.titular || '')}" placeholder="Nombre del titular (para que verifiquen)" style="flex:1;min-width:160px;margin:0">` : ''}
+      <input data-k="nota" value="${esc(m.nota || '')}" placeholder="Nota corta (opcional)" style="flex:1;min-width:160px;margin:0"></div></div>`;
+  return `<div class="card" id="apCard"><h2>💛 Métodos de apoyo</h2><p class="hint">Así se verá en tu página <b>/apoyar</b>: cada método es un botón que, al tocarlo, muestra los pasos para apoyar. Ordénalos con ↑ ↓ (el primero es el más visible). ⚠️ Revisa dos veces cada número, dirección y red antes de guardar.</p>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ap-on" style="width:auto" ${AP.on ? 'checked' : ''}> Mostrar "Apoya el proyecto" en la página</label>
+    <label>Tu mensaje para la comunidad</label><textarea id="ap-msg" maxlength="1500" rows="4" placeholder="Cuenta tu historia con tus palabras…">${esc(AP.mensaje || '')}</textarea>
+    ${AP.metodos.map(fila).join('') || '<p class="hint">Todavía no agregaste métodos.</p>'}
+    <p class="hint" style="margin:10px 0 4px">Agregar:</p><div style="display:flex;gap:6px;flex-wrap:wrap">${AP_RAPIDOS.map(([n, t, r]) => `<button class="b ghost sm" data-act="apAgregar" data-n="${esc(n)}" data-t="${t}" data-r="${esc(r || '')}">${AP_TIPOS[t][0]} ${esc(n)}</button>`).join('')}</div>
+    <p style="margin-top:12px"><button class="b" data-act="apGuardar">💾 Guardar métodos</button> ${VS?.url ? `<a class="b ghost sm" href="${esc(VS.url)}/apoyar" target="_blank">Ver cómo queda</a>` : ''}</p></div>`;
+}
+document.addEventListener('input', e => { if (!AP || AP.error) return; const r = e.target.closest?.('.ap-row'); if (r && e.target.dataset.k) AP.metodos[+r.dataset.i][e.target.dataset.k] = e.target.value; if (e.target.id === 'ap-msg') AP.mensaje = e.target.value; if (e.target.id === 'ap-on') AP.on = e.target.checked; });
+document.addEventListener('change', e => { if (!AP || AP.error) return; const r = e.target.closest?.('.ap-row'); if (r && e.target.dataset.k) AP.metodos[+r.dataset.i][e.target.dataset.k] = e.target.value; if (e.target.id === 'ap-on') AP.on = e.target.checked; });
 async function loadViral() {
   VS = await api('/api/viral'); VSt = Date.now();
   if (tab !== 'viral') return;
@@ -313,6 +336,7 @@ VIEWS.viral = () => {
   const v = VS || {};
   return `<h1>📣 Página viral</h1><p class="sub">Juegos para compartir (horóscopo, test de amor, ruleta…) que llevan gente a tus videos y juntan suscriptores para tus notificaciones.</p>
   <div class="card" id="vf-top">${viralTop()}</div>
+  ${apoyoCard()}
   <details class="card" ${v.fijo ? '' : 'open'}><summary><b>🔗 Dirección fija (tu dominio) — recomendado</b></summary>
     <ol class="steps" style="margin-top:8px">
       <li>Compra un dominio barato (ej. en Cloudflare, Namecheap o Porkbun, ~10 dólares al año) y agrégalo a tu cuenta de <b>Cloudflare</b> (la misma de las imágenes).</li>
@@ -879,6 +903,11 @@ const ACT = {
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
+  apReload: () => { AP = null; render(); },
+  apAgregar: b => { if (AP.metodos.length >= 12) return alert('Máximo 12 métodos'); const t = b.dataset.t; AP.metodos.push({ tipo: t, nombre: b.dataset.n === 'Otro' ? '' : b.dataset.n, valor: '', ...(t === 'cripto' ? { red: b.dataset.r || (AP.redes || [])[0] } : {}) }); render(); },
+  apQuitar: b => { AP.metodos.splice(+b.dataset.i, 1); render(); },
+  apMover: b => { const i = +b.dataset.i, j = i + +b.dataset.d; if (j < 0 || j >= AP.metodos.length) return; [AP.metodos[i], AP.metodos[j]] = [AP.metodos[j], AP.metodos[i]]; render(); },
+  apGuardar: guard(async () => { const r = await api('/api/viral/apoyo', { on: AP.on, mensaje: AP.mensaje, metodos: AP.metodos.filter(m => String(m.valor || '').trim()) }); AP = { ...r, metodos: r.metodos || [] }; toast('💛 Métodos de apoyo guardados'); render(); }),
   vfArte: guard(async () => { VS = await api('/api/viral/arte-glory', {}); toast('🎨 Creando las ilustraciones de GLORY BROWN…'); render(); }),
   vfVoces: guard(async () => { VS = await api('/api/viral/voces-glory', {}); toast('🎙️ Grabando las voces de GLORY BROWN…'); render(); }),
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),

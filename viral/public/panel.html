@@ -185,11 +185,10 @@ const V = {
   async ajustes() {
     const a = await api('ajustes');
     $('#main').innerHTML = `<div class="cols">
-    <div class="card"><h2>💛 Apoya el proyecto</h2><p class="hint">Página <a href="/apoyar" target="_blank">/apoyar</a> para aportes voluntarios. Pon solo los medios que quieras usar. Revisa bien cada dirección cripto y su red antes de guardar.</p>
+    <div class="card"><h2>💛 Apoya el proyecto</h2><p class="hint">Página <a href="/apoyar" target="_blank">/apoyar</a> para aportes voluntarios. Los <b>métodos de pago</b> (orden, nombres, enlaces, números y cripto) se editan en <b>ShortForge → 📣 Página viral → 💛 Métodos de apoyo</b>.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ap-on" style="width:auto" ${a.apoyo?.on ? 'checked' : ''}> Mostrar "Apoya el proyecto" en la página</label>
-      <label>Tu mensaje (si lo dejas vacío se usa uno de ejemplo)</label><textarea id="ap-m" maxlength="1500" placeholder="Cuenta tu historia con tus palabras…">${esc(a.apoyo?.mensaje || '')}</textarea>
-      ${[['kofi', 'Ko-fi', 'https://ko-fi.com/…'], ['paypal', 'PayPal', 'https://paypal.me/…'], ['bmac', 'Buy Me a Coffee', 'https://buymeacoffee.com/…'], ['patreon', 'Patreon', 'https://patreon.com/…'], ['mercadopago', 'Mercado Pago (enlace de pago)', 'https://link.mercadopago.com…'], ['otro', 'Otro enlace', 'https://…']].map(([k, nm, ph]) => `<label>${nm}</label><input id="ap-${k}" value="${esc(a.apoyo?.links?.[k] || '')}" placeholder="${ph}">`).join('')}
-      <label>Criptomonedas (hasta 3)</label>${[0, 1, 2].map(i => `<div class="row"><div><select id="apr-${i}"><option value="">— Red —</option>${(a.redesCripto || []).map(r => `<option ${a.apoyo?.cripto?.[i]?.red === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div><div><input id="apd-${i}" value="${esc(a.apoyo?.cripto?.[i]?.dir || '')}" placeholder="Dirección de tu billetera"></div></div>`).join('')}
+      <label>Tu mensaje</label><textarea id="ap-m" maxlength="1500" placeholder="Cuenta tu historia con tus palabras…">${esc(a.apoyo?.mensaje || '')}</textarea>
+      <p class="hint">Métodos actuales: ${(a.apoyo?.metodos || []).map((m, i) => `${i + 1}. ${esc(m.nombre)}`).join(' · ') || 'ninguno todavía'}</p>
       <p style="margin-top:10px"><button class="btn" id="ap-go">Guardar</button></p></div>
     <div class="card"><h2>🎮 Juegos profesionales</h2><p class="hint">Miles de juegos de estudios profesionales en tu página, de forma legal. 1) Regístrate gratis como <b>publisher</b> en un distribuidor (GameDistribution, GamePix o GameMonetize) con tu dominio. 2) En su panel copia el enlace del <b>catálogo (feed) en JSON o RSS</b> y pégalo aquí. Ellos ponen sus anuncios en los juegos y te pagan una parte.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="g-on" style="width:auto" ${a.pro?.on ? 'checked' : ''}> Mostrar la sección en la página</label>
@@ -234,7 +233,7 @@ const V = {
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
-    $('#ap-go').onclick = () => api('ajustes', { apoyo: { on: $('#ap-on').checked, mensaje: $('#ap-m').value, links: Object.fromEntries(['kofi', 'paypal', 'bmac', 'patreon', 'mercadopago', 'otro'].map(k => [k, $('#ap-' + k).value])), cripto: [0, 1, 2].map(i => ({ red: $('#apr-' + i).value, dir: $('#apd-' + i).value })) } }).then(ok, e => alert(e.message));
+    $('#ap-go').onclick = () => api('ajustes', { apoyo: { on: $('#ap-on').checked, mensaje: $('#ap-m').value } }).then(ok, e => alert(e.message));
     $('#g-go').onclick = () => api('ajustes', { pro: { on: $('#g-on').checked, feed: $('#g-f').value, plantilla: $('#g-p').value } }).then(() => ir('ajustes'), e => alert(e.message));
     $('#ad-go').onclick = () => api('ajustes', { ads: { client: $('#ad-c').value, extra: $('#ad-x').value } }).then(ok, e => alert(e.message));
     $('#m-go').onclick = () => api('ajustes', { marca: { nombre: $('#m-n').value, eslogan: $('#m-e').value } }).then(ok, e => alert(e.message));

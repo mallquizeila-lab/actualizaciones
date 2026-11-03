@@ -1,3 +1,9 @@
+v7.31.0 — Métodos de apoyo en ShortForge, ordenados y con pasos
+- 💛 Nueva sección en ShortForge → 📣 Página viral → "💛 Métodos de apoyo": agrega, nombra y ordena (↑ ↓) hasta 12 métodos. Botones rápidos para Yape, Plin, PayPal, Ko-fi, Mercado Pago, Buy Me a Coffee, Patreon, Binance Pay, transferencia bancaria, Nequi, Pix, Zelle, Bizum, Cash App, Venmo, Wise, USDT, Bitcoin, Ethereum, Solana y cualquier otro.
+- 3 tipos: enlace de pago, número o cuenta (con el nombre del titular para que la gente verifique) y criptomoneda (17 redes: USDT en TRON, BNB Chain, Ethereum, Solana y Polygon; USDC; BTC; ETH; BNB; SOL; TRX; LTC; DOGE; XRP; TON).
+- 🌐 En la página /apoyar cada método es un botón con su color que, al tocarlo, muestra los pasos a seguir y el botón para ir a pagar o copiar el número o la dirección. Aviso claro de usar solo la red indicada.
+- Tu mensaje para la comunidad también se edita desde ShortForge.
+
 v7.30.0 — Apoya el proyecto (aportes voluntarios)
 - 💛 Nueva página /apoyar con tu mensaje y las formas de apoyar que elijas: Ko-fi, PayPal, Buy Me a Coffee, Patreon, Mercado Pago, otro enlace y hasta 3 direcciones de criptomonedas (con su red y botón para copiar, y aviso para no enviar por otra red).
 - Tarjeta "💛 Apoya el proyecto" en la portada y enlace al pie de la página (solo si la activas).
