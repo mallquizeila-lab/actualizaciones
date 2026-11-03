@@ -61,7 +61,7 @@
     const tipos = Object.keys(ENE).filter(k => k !== 'rata' && ENE[k].desde <= n), peso = { gusano: 5, caracol: 3, langosta: 2, escarabajo: 1.5, polilla: 2, topo: 1.5 };
     const elegir = () => { let x = r() * tipos.reduce((a, k) => a + peso[k], 0); for (const k of tipos) { x -= peso[k]; if (x <= 0) return k; } return 'gusano'; };
     const carril = () => carriles[Math.floor(r() * carriles.length)];
-    const total = Math.round(5 + n * 1.3), normal = Math.round(total * .6), ev = [];
+    const total = Math.round(5 + Math.min(n, 20) * 1.3 + Math.max(0, n - 20) * .8), normal = Math.round(total * .6), ev = [];
     let t = n < 10 ? 18 : 24;
     for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(n >= 24 ? 4.3 : 3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
     t += 7; const ola = t;

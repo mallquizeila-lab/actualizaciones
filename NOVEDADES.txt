@@ -1,3 +1,15 @@
+v7.23.0 — Huerto Defensor: nuevos personajes, Furia, voces e ilustraciones
+- 🌱 3 defensores nuevos: Maracuyá Eléctrica (rayo que salta entre 3 plagas), Cebolla Llorona (lágrimas picantes que dañan alrededor) y Quinua Curandera (cura a los defensores cercanos).
+- 🐛 2 plagas nuevas: Polilla nocturna (vuela por encima de las murallas y las bombas) y Topo excavador (sale a mitad del huerto).
+- ⚡ Súper poder "Furia del Huerto": se carga eliminando plagas. Al usarlo, golpea a todas las plagas con una onda dorada y durante 6 segundos tus defensores disparan el triple de rápido con balas doradas.
+- 💥 Ataques más épicos: balas con estela, rayos eléctricos, ondas de colores y destellos.
+- 🎙️ Voces de tu biblioteca: en ShortForge → 📣 Página viral → "🌱 Crear voces e ilustraciones del Huerto". Graba 156 frases, cada personaje con su propia voz (narrador incluido).
+- 🎨 Personajes más reales: ese mismo botón crea con tu Cloudflare las 17 ilustraciones de los personajes, sin fondo, y el juego las usa en el campo y en las cartas. Mientras no estén, se ven los dibujos actuales.
+- 🏡 Cerco y casa nuevos: cerco de madera con postes y travesaños, casita de adobe con techo de tejas, chimenea, ventanas con luz y macetas con flores.
+- 📱 Se adapta a celular, tablet y PC: el tablero toma el mayor tamaño posible en cada pantalla.
+- 🧩 Barra moderna: el agua, la Furia y Quitar arriba, y los defensores en una o dos filas, siempre completos.
+- ⚖️ Dificultad revisada nivel por nivel con un robot que juega solo: más agua y más margen en los niveles altos, plagas blindadas un poco más débiles y la gran oleada más repartida.
+
 v7.22.0 — Huerto Defensor más profesional y arreglo de GLORY BROWN
 - 🛠️ GLORY BROWN: con la pantalla completa, la pantalla de fin de batalla (premios y cofres) y otras ventanas quedaban escondidas detrás. Corregido.
 - 📱 Huerto Defensor a pantalla completa y más grande en el celular.
