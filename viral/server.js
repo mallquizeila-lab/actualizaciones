@@ -247,6 +247,23 @@ async function catalogoPro(forzar) {
 const adsCfg = () => getS('ads', {});
 const adsScript = () => { const c = adsCfg().client; return /^ca-pub-\d{10,20}$/.test(c || '') ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c}" crossorigin="anonymous"></script><meta name="google-adsense-account" content="${c}">` : ''; };
 // ---------- Páginas legales que pide Google (se llenan con tus datos del panel) ----------
+// ---------- Apoya el proyecto: aportes voluntarios (enlaces y direcciones los pone el dueño en el panel) ----------
+const APOYO_LINKS = [['kofi', '☕ Ko-fi', '#29abe0'], ['paypal', '💙 PayPal', '#003087'], ['bmac', '🍪 Buy Me a Coffee', '#ffdd00'], ['patreon', '🧡 Patreon', '#ff424d'], ['mercadopago', '💳 Mercado Pago', '#009ee3'], ['otro', '🤝 Otra forma de apoyar', '#7c3aed']];
+const REDES_CRIPTO = ['USDT (TRON · TRC20)', 'USDT (BNB Chain · BEP20)', 'USDT (Ethereum · ERC20)', 'Bitcoin (BTC)', 'Ethereum (ETH)', 'BNB (BNB Chain)', 'Solana (SOL)', 'TRON (TRX)'];
+function paginaApoyo() {
+  const a = getS('apoyo', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'nuestra página');
+  const botones = APOYO_LINKS.filter(([k]) => a.links?.[k]).map(([k, n, c]) => `<a class="b" href="${esc(a.links[k])}" target="_blank" rel="noopener" style="background:${c};color:${k === 'bmac' ? '#111' : '#fff'}">${n}</a>`).join('');
+  const cripto = (a.cripto || []).map((c, i) => `<div class="c"><b>${esc(c.red)}</b><code id="c${i}">${esc(c.dir)}</code><button onclick="navigator.clipboard.writeText(document.getElementById('c${i}').textContent).then(()=>{this.textContent='¡Copiada! ✓'})">Copiar dirección</button></div>`).join('');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Apoya el proyecto · ${sitio}</title>${adsScript()}
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:22px 16px 60px;line-height:1.6;color:#f5f3ff;background:radial-gradient(circle at 50% 0,#4c1d95,#1e1b4b 60%,#0b0820)}a{color:#fde68a}h1{font-size:1.8rem;margin:.2em 0}.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;margin:14px 0}.b{display:block;text-align:center;font-weight:800;padding:13px;border-radius:14px;margin:8px 0;text-decoration:none;font-size:1.05rem}.c{background:rgba(0,0,0,.25);border-radius:12px;padding:10px;margin:8px 0}.c code{display:block;word-break:break-all;font-size:.85rem;margin:6px 0;color:#fde68a}.c button{border:0;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;background:#fde68a}.w{font-size:.85rem;opacity:.85}</style></head><body>
+<p><a href="/">← Volver a jugar</a></p><div style="text-align:center;font-size:3rem">💛</div><h1 style="text-align:center">Apoya el proyecto</h1>
+<div class="card"><p style="white-space:pre-line;margin:0">${esc(a.mensaje || `Hola 👋 ${sitio} es un proyecto independiente, hecho en Perú con mucho cariño: juegos y tests gratis para todos, sin instalar nada.\n\nSi te gusta lo que hacemos y quieres ayudarnos a seguir creando juegos nuevos, cualquier aporte, por pequeño que sea, es muy bienvenido. Y si no puedes, compartir la página con tus amigos también nos ayuda muchísimo. ¡Gracias de corazón!`)}</p></div>
+${botones ? `<div class="card"><h2 style="margin:0 0 6px;font-size:1.15rem">Formas de apoyar</h2>${botones}</div>` : ''}
+${cripto ? `<div class="card"><h2 style="margin:0 0 6px;font-size:1.15rem">Con criptomonedas</h2><p class="w">⚠️ Envía solo por la red indicada en cada dirección. Si usas otra red, el envío se pierde y no se puede recuperar.</p>${cripto}</div>` : ''}
+${!botones && !cripto ? '<div class="card"><p>Muy pronto podrás apoyarnos desde aquí. Mientras tanto, ¡compartir la página ya es una gran ayuda! 💛</p></div>' : ''}
+<div class="card w">Los aportes son <b>voluntarios</b> y no dan ventajas en los juegos: todo sigue siendo gratis para todos. Nunca te pediremos contraseñas ni datos de tu tarjeta fuera de las páginas oficiales de cada servicio.</div>
+<p style="text-align:center"><a href="/">🎮 Volver a jugar</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="/contacto.html">Contacto</a></p></body></html>`;
+}
 function paginaLegal(tipo) {
   const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Nuestra página'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
   const T = {
@@ -309,7 +326,7 @@ async function api(req, res, u) {
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
     const subs = q1('select count(*) n from subscribers where active=1').n;
-    return send(res, 200, { pais: geo(ip, req).country_code, marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    return send(res, 200, { pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/visit' && P) {
     const b = await json(req);
@@ -507,6 +524,9 @@ async function api(req, res, u) {
         if (b.video !== undefined) { const v = b.video?.url ? safeDest(b.video.url) : null; if (b.video?.url && !v) return send(res, 400, { error: 'El video debe ser de YouTube, Facebook, TikTok o Instagram' }); setS('video', v ? { url: v, title: clip(b.video.title, 80) || 'Mira el video' } : null); }
         if (b.priv) setS('priv', Object.fromEntries(['nombre', 'ciudad', 'correo', 'plazo', 'codigo'].map(k => [k, clip(b.priv[k], 120).trim()])));
         if (b.pro) { const f = String(b.pro.feed || '').trim(), pl = String(b.pro.plantilla || '').trim(); if (f && !/^https:\/\/\S+$/.test(f)) return send(res, 400, { error: 'El enlace del catálogo debe empezar con https://' }); if (pl && !/^https:\/\/\S*\{id\}\S*$/.test(pl)) return send(res, 400, { error: 'La plantilla debe empezar con https:// y tener {id}' }); setS('pro', { on: !!b.pro.on, feed: f.slice(0, 600), plantilla: pl.slice(0, 300) }); PRO.t = 0; if (b.pro.on && f) { const n = (await catalogoPro(true)).length; if (!n) return send(res, 400, { error: 'Guardado, pero el catálogo no trajo juegos. Revisa el enlace (debe ser el "feed" JSON o RSS de tu distribuidor).' }); } }
+        if (b.apoyo) { const links = {}; for (const [k] of APOYO_LINKS) { const v = String(b.apoyo.links?.[k] || '').trim(); if (v && !/^https:\/\/[^\s"'<>]{4,300}$/.test(v)) return send(res, 400, { error: 'Los enlaces de apoyo deben empezar con https://' }); if (v) links[k] = v; }
+          const cripto = []; for (const c of (Array.isArray(b.apoyo.cripto) ? b.apoyo.cripto : []).slice(0, 6)) { const dir = String(c.dir || '').trim(), red = String(c.red || ''); if (!dir) continue; if (!REDES_CRIPTO.includes(red)) return send(res, 400, { error: 'Elige la red de cada dirección' }); if (!/^[A-Za-z0-9:]{20,110}$/.test(dir)) return send(res, 400, { error: 'Revisa la dirección de ' + red + ': solo letras y números, sin espacios' }); cripto.push({ red, dir }); }
+          setS('apoyo', { on: !!b.apoyo.on, mensaje: clip(b.apoyo.mensaje, 1500), links, cripto }); }
         if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 3000) }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
@@ -520,7 +540,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: getS('apoyo', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
@@ -568,6 +588,7 @@ http.createServer(async (req, res) => {
       const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2']];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
     }
+    if (u.pathname === '/apoyar' || u.pathname === '/apoyar.html') return enviarHtml(req, res, paginaApoyo(), { 'cache-control': 'no-cache' });
     const legal = /^\/(terminos|contacto|nosotros)\.html$/.exec(u.pathname);
     if (legal) return enviarHtml(req, res, paginaLegal(legal[1]), { 'cache-control': 'no-cache' });
     if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) if (/^[a-z0-9.-]+\.[a-z]{2,},\s*[\w-]+,\s*(DIRECT|RESELLER)(,\s*[\w]+)?$/i.test(l.trim())) lineas.push(l.trim()); return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }

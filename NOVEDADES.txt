@@ -1,3 +1,8 @@
+v7.30.0 — Apoya el proyecto (aportes voluntarios)
+- 💛 Nueva página /apoyar con tu mensaje y las formas de apoyar que elijas: Ko-fi, PayPal, Buy Me a Coffee, Patreon, Mercado Pago, otro enlace y hasta 3 direcciones de criptomonedas (con su red y botón para copiar, y aviso para no enviar por otra red).
+- Tarjeta "💛 Apoya el proyecto" en la portada y enlace al pie de la página (solo si la activas).
+- Se configura en el panel de la página → Ajustes → "💛 Apoya el proyecto". Los aportes son voluntarios y no dan ventajas en los juegos.
+
 v7.29.0 — Compartir con las redes de cada país
 - 🌎 La página detecta el país de cada visitante y muestra primero las redes que más se usan allí: Latinoamérica (WhatsApp, Facebook, Messenger), Estados Unidos y Canadá (Messenger, Facebook, mensaje de texto), Japón (LINE), Tailandia y Taiwán (LINE, Facebook), Rusia y vecinos (Telegram, VK), Ucrania (Telegram, Viber), Grecia y los Balcanes (Viber), China (Weibo), Filipinas (Messenger, Facebook, Viber), Europa y resto del mundo (WhatsApp, Facebook, Telegram, X).
 - 📘 Facebook aparece en casi todos los países.
