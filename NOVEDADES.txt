@@ -1,3 +1,11 @@
+v7.25.0 — Huerto Defensor: gallina guardiana y derrota al instante
+- 🐔 Cada carril tiene una gallina guardiana. La primera plaga que llega a la casa la despierta: sale corriendo por todo el carril gritando "¡Cocoroco! ¡De mi casa nadie pasa!" y se lleva a todas las plagas que encuentra. Sirve una sola vez por carril.
+- 🏠 Si una plaga entra por un carril sin gallina, pierdes al instante (antes había que dejar entrar 3). La plaga se burla con su voz: "¡Eres un pollito, ya te gané!", "¡Jajaja! ¡Ahora esta casa es mía!" y otras.
+- ⭐ Nuevas estrellas: 3 si ninguna plaga llega a las gallinas y casi no pierdes defensores.
+- 🛡️ La "Segunda oportunidad" ahora también devuelve todas las gallinas.
+- 🎙️ 31 frases nuevas para grabar con tu biblioteca (gallina y burlas). En ShortForge aprieta "🌱 Completar voces e ilustraciones": solo graba las que faltan.
+- ✅ Revisión general: los 69 juegos de la página abren sin errores.
+
 v7.24.0 — NVIDIA de respaldo para crear imágenes
 - 🎨 Cuando se acaba el cupo gratis diario de Cloudflare, ShortForge sigue creando las ilustraciones (GLORY BROWN y Huerto Defensor) con NVIDIA, usando la misma clave NVIDIA que ya tienes en Ajustes. Usa FLUX.1 [schnell], que permite uso comercial.
 - Los videos siguen usando solo Cloudflare, para no gastar los créditos de NVIDIA en eso.
