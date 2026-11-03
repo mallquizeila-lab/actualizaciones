@@ -351,7 +351,7 @@
     function burbuja(x, y, txt) { textos.push({ txt, x, y, tam: S * .2, v: 1.5, max: 1.5, burbuja: 1 }); }
     const racha = [];
     function disparar(d, segundo) {
-      balas.push({ x: d.x, y: d.y - S * .3, c: d.c, tipo: d.k === 'limon' ? 'hielo' : d.k === 'palta' ? 'pepa' : 'grano', dmg: d.k === 'limon' ? 22 : 26 });
+      balas.push({ x: d.x, y: d.y - S * .3, c: d.c, tipo: d.k === 'limon' ? 'hielo' : d.k === 'palta' ? 'pepa' : 'grano', dmg: d.k === 'limon' ? 24 : 30 });
       d.kick = 1; if (d.k === 'palta' && !segundo) d.doble = .2;
     }
     function recoger(g) { g.vuela = .001; g.x0 = g.x; g.y0 = g.y; FX.son(g.moneda ? 'moneda' : g.oro ? 'combo' : 'pop'); if (g.oro) textos.push({ txt: '¡Gota dorada! +75', x: g.x, y: g.y - S * .3, tam: S * .22, v: 1.2, max: 1.2 }); FX.vibrar(8); if (tutorial === 2) tutorial = 3; }
@@ -364,7 +364,7 @@
       lluvia -= dt; if (lluvia <= 0) { lluvia = 7 + Math.random() * 3.5; const c = C.carriles[Math.floor(Math.random() * C.carriles.length)]; const oro = Math.random() < .12; gotas.push({ x: cx(c) + (Math.random() - .5) * S * .4, y: -S * .3, ty: TOP + S * (.8 + Math.random() * (R - 1.8)), v: 11, val: oro ? 75 : 25, oro, vuela: 0, cae: .9 }); if (tutorial === 1) tutorial = 2; }
       for (const d of defs.values()) {
         d.t += dt; d.kick = Math.max(0, d.kick - dt * 5); d.nace = Math.max(0, d.nace - dt * 4); d.golpe = Math.max(0, (d.golpe || 0) - dt);
-        if (d.k === 'hongo') { d.timer += dt; d.carga = d.timer / (d.prim ? 5 : 11); if (d.carga >= 1) { d.timer = 0; d.prim = false; d.kick = 1; gotas.push({ x: d.x, y: d.y - S * .3, ty: d.y + S * .1, x2: d.x + (Math.random() < .5 ? -1 : 1) * S * .28, v: 11, val: 25, vuela: 0, cae: 2.4 }); } }
+        if (d.k === 'hongo') { d.timer += dt; d.carga = d.timer / (d.prim ? 5 : 9.5); if (d.carga >= 1) { d.timer = 0; d.prim = false; d.kick = 1; gotas.push({ x: d.x, y: d.y - S * .3, ty: d.y + S * .1, x2: d.x + (Math.random() < .5 ? -1 : 1) * S * .28, v: 11, val: 25, vuela: 0, cae: 2.4 }); } }
         else if (d.k === 'aji') { d.timer += dt; if (d.timer >= .9) { FX.voz?.('¡Picanteee!', { forzar: true, tono: 1.6, vel: 1.3 }); explotar(d.x, d.y, S * 1.6, 1800, d.c, 1); defs.delete(d.key); } }
         else if (d.k === 'pina') { d.timer += dt; if (!d.armado && d.timer >= 12) { d.armado = true; chispas(d.x, d.y + S * .2, '#8b5a2b', 10); FX.son('click'); } }
         else if (d.k !== 'coco') {
