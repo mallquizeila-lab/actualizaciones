@@ -35,14 +35,14 @@
   function imgArte(c) { if (!IMG[c.id]) IMG[c.id] = new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = '/arte/glory/' + c.id + '.webp'; }); return IMG[c.id]; }
   function cubrir(X, im, x, y, w, h) { const s = Math.max(w / im.width, h / im.height), iw = im.width * s, ih = im.height * s; X.drawImage(im, x + (w - iw) / 2, y + (h - ih) * .3, iw, ih); }
   function ponerArte(cv, c, w, h) { if (!tieneArte(c)) return false; imgArte(c).then(im => { if (!im) { const r = GA.retrato(c, w, h); cv.width = r.width; cv.height = r.height; cv.getContext('2d').drawImage(r, 0, 0); return; } cv.width = w * 2; cv.height = h * 2; cubrir(cv.getContext('2d'), im, 0, 0, w * 2, h * 2); }); return true; }
-  function vocesManifest() { if (MANI !== null) return; MANI = {}; fetch('/voces/glory/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI = m.voces ? Object.fromEntries(m.voces.map(v => [v, 1])) : {}; }).catch(() => {}); }
+  function vocesManifest() { if (MANI !== null) return; MANI = {}; fetch('/voces/glory/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI = m.voces ? Object.fromEntries(m.voces.map(v => [v, 1])) : {}; MANI._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
   let ultVoz = 0;
   function decir(card, clave, i, forzar) {
     if (!card?.frases) return null; const lista = card.frases[clave]; if (!lista) return null; const arr = Array.isArray(lista) ? lista : [lista]; if (i == null) i = Math.floor(Math.random() * arr.length); const txt = arr[i % arr.length];
     const ahora = Date.now(); if (!forzar && ahora - ultVoz < 1700) return null; ultVoz = ahora;
     if (LS.get('arcSonido') === '0' || LS.get('arcVoz') === '0') return txt;
     const id = `${card.id}__${clave}${i % arr.length}`;
-    if (MANI && MANI[id] && (window.IDIOMA?.actual || 'es') === 'es') { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`/voces/glory/${id}.mp3`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
+    if (MANI && MANI[id] && (window.IDIOMA?.actual || 'es') === 'es') { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`/voces/glory/${id}.mp3${MANI._v || ''}`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
     else FX.voz?.(txt, { tono: card.voz?.tono ?? 1, vel: card.voz?.vel ?? 1.05, forzar: true, cortar: true });
     return txt;
   }
@@ -689,6 +689,7 @@
         if (f.tipo === 'corazon') { GA.brillo(X, x, y, f.r * k * (1.4 - a * .4), '#f43f5e', a * .8); X.font = `${k * 2.4 * (1.3 - a * .3)}px serif`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.globalAlpha = a; X.fillText('❤️', x, y - k * 2); X.globalAlpha = 1; X.textBaseline = 'alphabetic'; }
         if (f.tipo === 'emote') { const abajo = vt(f.team) === 0, ex = W / 2 + k * 3.5, ey = abajo ? H - k * 5.5 : k * 5.5; X.globalAlpha = Math.min(1, a * 3); X.fillStyle = '#fff'; X.beginPath(); X.roundRect(ex - k * .9, ey - k * .9, k * 1.8, k * 1.8, k * .4); X.fill(); X.font = `${k * 1.2}px serif`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(f.e, ex, ey + 2); X.textBaseline = 'alphabetic'; X.globalAlpha = 1; } }
       ambiente(dt, tt);
+      FX.cine?.(X, W, H, tt, [{ luz: 'calida', sol: [.9, -.05] }, { luz: 'calida', sol: [.15, -.05] }, { luz: 'atardecer', sol: [.85, -.05] }, { luz: 'fria', sol: [.5, -.1] }, { luz: 'niebla', rayos: false }, { luz: 'fria', sol: [.2, -.05] }, { luz: 'fuego', rayos: false }][mundoI] || {});
       for (const tx of textos) { X.globalAlpha = Math.min(1, tx.v / .3); X.font = `900 ${tx.tam}px Figtree,sans-serif`; X.textAlign = 'center'; X.lineWidth = 5; X.strokeStyle = 'rgba(30,10,40,.85)'; X.strokeText(tx.txt, tx.x, tx.y, W - 10); X.fillStyle = '#fde68a'; X.fillText(tx.txt, tx.x, tx.y, W - 10); } X.globalAlpha = 1;
       const cE = coronas[1 - miEquipo], cY = coronas[miEquipo];
       X.font = `900 ${k * .8}px Figtree,sans-serif`; X.textAlign = 'left'; X.fillStyle = '#fff'; X.lineWidth = 4; X.strokeStyle = 'rgba(0,0,0,.6)';

@@ -48,11 +48,11 @@
   // Voces grabadas con la biblioteca de ShortForge (si existen); si no, la voz del celular
   let MANI_H = null, ultVozH = 0, audioH = null;
   const idFrase = (q, txt) => { let h = 0; const t = q + '|' + txt; for (let i = 0; i < t.length; i++) h = (Math.imul(h, 31) + t.charCodeAt(i)) >>> 0; return q + '_' + h.toString(36); };
-  function cargarVocesH() { if (MANI_H) return; MANI_H = {}; fetch('/voces/huerto/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI_H = Object.fromEntries((m.voces || []).map(v => [v, 1])); }).catch(() => {}); }
+  function cargarVocesH() { if (MANI_H) return; MANI_H = {}; fetch('/voces/huerto/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI_H = Object.fromEntries((m.voces || []).map(v => [v, 1])); MANI_H._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
   function voz(txt, quien, o = {}) {
     const id = idFrase(quien, txt);
     if (MANI_H && MANI_H[id] && (window.IDIOMA?.actual || 'es') === 'es') { if (LS.get('arcVoz') === '0' || LS.get('arcSonido') === '0') return; const ahora = Date.now(); if (!o.forzar && ahora - ultVozH < 1800) return; ultVozH = ahora;
-      try { if (o.cortar && audioH) audioH.pause(); audioH = new Audio('/voces/huerto/' + id + '.mp3'); audioH.volume = .95; audioH.play().catch(() => {}); } catch (e) {} return; }
+      try { if (o.cortar && audioH) audioH.pause(); audioH = new Audio('/voces/huerto/' + id + '.mp3' + (MANI_H._v || '')); audioH.volume = .95; audioH.play().catch(() => {}); } catch (e) {} return; }
     FX.voz?.(txt, { ...(VOZ[quien] || {}), ...o });
   }
   const datos = () => PERFIL.datos.juegos.huerto || { nivel: 1, estrellas: {} };
@@ -567,6 +567,7 @@
       // Indicaciones del primer nivel
       if (tutorial === 1 && !defs.size) { const k = sel ? 'Toca una casilla del huerto' : 'Elige un defensor abajo 👇'; X.font = `900 ${S * .24}px Figtree,sans-serif`; X.textAlign = 'center'; X.lineWidth = 5; X.strokeStyle = 'rgba(0,0,0,.6)'; X.strokeText(k, W / 2, TOP + R * S * .55); X.fillStyle = '#fff'; X.fillText(k, W / 2, TOP + R * S * .55); }
       if (tutorial === 2 && gotas.some(g => !g.vuela)) { const g = gotas.find(g => !g.vuela), y = g.y - S * .45 + Math.sin(performance.now() / 150) * 4; X.font = `900 ${S * .22}px Figtree,sans-serif`; X.textAlign = 'center'; X.lineWidth = 5; X.strokeStyle = 'rgba(0,0,0,.6)'; X.strokeText('¡Tócala! 👆', g.x, y); X.fillStyle = '#fff'; X.fillText('¡Tócala! 👆', g.x, y); }
+      FX.cine?.(X, W, H, performance.now() / 1000, Z === 'noche' ? { luz: 'noche', rayos: false, nubes: false } : Z === 'andes' ? { luz: 'atardecer', sol: [.15, -.02] } : { luz: 'calida', sol: [.85, -.02] });
       for (const tx of textos) { if (tx.burbuja) { const o = { dice: { txt: tx.txt, v: tx.v } }; globo(o, tx.x, tx.y); continue; } const a = Math.min(1, tx.v / .35, (tx.max - tx.v) / .15 + .2), sc = tx.fijo ? 1 + Math.max(0, .25 - (tx.max - tx.v)) * 1.5 : 1; X.globalAlpha = Math.max(0, a); X.font = `900 ${tx.tam * sc}px Figtree,sans-serif`; X.textAlign = 'center'; X.lineWidth = Math.max(4, tx.tam * .16); X.strokeStyle = 'rgba(40,10,20,.75)'; X.strokeText(tx.txt, tx.x, tx.y, W * .94); X.fillStyle = '#fff'; X.fillText(tx.txt, tx.x, tx.y, W * .94); } X.globalAlpha = 1;
       X.restore();
       // HUD: avance del nivel y vidas

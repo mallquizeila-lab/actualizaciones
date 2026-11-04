@@ -310,6 +310,23 @@ async function abrir(g) {
   show('play'); if (JUEGO[g]) return JUEGO[g](); const t = TESTS.find(x => x.id === g); if (t) MOTOR[t.tipo](t); else show('home');
 }
 const stage = h => { $('#stage').innerHTML = h; };
+// 🔍 Tableros nítidos: los juegos de canvas (#cv) se dibujan a la resolución real de la pantalla (celulares con pantalla HD/Retina).
+// El juego sigue "viendo" el mismo tamaño de siempre (width/height), así su lógica y los toques no cambian.
+(() => { const P = HTMLCanvasElement.prototype, orig = P.getContext, dW = Object.getOwnPropertyDescriptor(P, 'width'), dH = Object.getOwnPropertyDescriptor(P, 'height');
+  P.getContext = function (tipo, ...r) {
+    const ctx = orig.call(this, tipo, ...r);
+    if (tipo !== '2d' || this.id !== 'cv' || this._hd || !ctx) return ctx;
+    const dpr = Math.min(3, Math.max(1, window.devicePixelRatio || 1)); this._hd = 1; if (dpr === 1) return ctx;
+    let w = dW.get.call(this), h = dH.get.call(this); const cv = this, st = ctx.setTransform.bind(ctx), rt = ctx.resetTransform?.bind(ctx);
+    const aplicar = () => { dW.set.call(cv, Math.round(w * dpr)); dH.set.call(cv, Math.round(h * dpr)); st(dpr, 0, 0, dpr, 0, 0); cv.style.width = w + 'px'; cv.style.maxWidth = '100%'; cv.style.height = 'auto'; cv.style.aspectRatio = w + ' / ' + h; };
+    Object.defineProperty(cv, 'width', { configurable: true, get: () => w, set: v => { w = +v; aplicar(); } });
+    Object.defineProperty(cv, 'height', { configurable: true, get: () => h, set: v => { h = +v; aplicar(); } });
+    ctx.setTransform = (a, ...b) => typeof a === 'object' ? st(a) : st(a * dpr, b[0] * dpr, b[1] * dpr, b[2] * dpr, b[3] * dpr, b[4] * dpr);
+    if (rt) ctx.resetTransform = () => st(dpr, 0, 0, dpr, 0, 0);
+    const gi = ctx.getImageData.bind(ctx); ctx.getImageData = (x, y, ww, hh, ...o) => gi(x * dpr, y * dpr, ww * dpr, hh * dpr, ...o);
+    aplicar(); return ctx;
+  };
+})();
 
 // ---------- Juegos ----------
 const JUEGO = {
@@ -578,7 +595,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=5'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=4'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=17'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=13'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=7'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=4'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=19'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=15'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {

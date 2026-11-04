@@ -100,13 +100,54 @@
   const LG = (window.IDIOMA?.actual || 'es');
   const elegirVoz = () => { try { const v = speechSynthesis.getVoices().filter(x => x.lang.toLowerCase().startsWith(LG)); vozEs = (LG === 'es' ? v.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) : LG === 'pt' ? v.find(x => /BR/i.test(x.lang)) : LG === 'en' ? v.find(x => /US|GB/i.test(x.lang)) : null) || v[0] || null; } catch (e) {} };
   if (window.speechSynthesis) { elegirVoz(); speechSynthesis.onvoiceschanged = elegirVoz; }
+  // Narrador grabado con voces naturales (ShortForge las graba en 3 tomas con acabado de estudio).
+  // En español: si la frase está grabada suena el audio (una toma al azar); si no, se queda callado
+  // (el texto ya se ve en pantalla) para no usar la voz robótica del celular. En otros idiomas usa la voz del celular.
+  let NARR = null, NVER = '', audN = null, ultToma = {};
+  const idN = t => { let h = 0; t = String(t).trim().toLowerCase(); for (let i = 0; i < t.length; i++) h = (Math.imul(h, 31) + t.charCodeAt(i)) >>> 0; return 'n_' + h.toString(36); };
+  const cargarNarr = () => { if (NARR) return; NARR = {}; fetch('/voces/juegos/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { NVER = m.ver || ''; for (const v of m.voces || []) { const k = v.replace(/_\d$/, ''); (NARR[k] = NARR[k] || []).push(v); } }).catch(() => {}); };
+  cargarNarr();
+  FX.tieneVoz = txt => !!(NARR && NARR[idN(txt)]);
+  FX.audio = (src, o = {}) => { try { if (o.cortar !== false) FX.callar(); audN = new Audio(src); audN.volume = o.vol ?? .95; audN.play().catch(() => {}); return audN; } catch (e) { return null; } };
   FX.voz = function (txt, o = {}) {
-    if (mute() || sinVoz() || !window.speechSynthesis) return false;
-    const ahora = Date.now(); if (!o.forzar && ahora - ultVoz < (o.espera ?? 2200)) return false; ultVoz = ahora;
-    if (LG !== 'es') { const tr = window.IDIOMA?.t(txt); if (!tr || tr === txt) return false; txt = tr; } // en otro idioma: habla la traducción (si todavía no está, se calla y la pide)
+    if (mute() || sinVoz()) return false;
+    const ahora = Date.now(); if (!o.forzar && ahora - ultVoz < (o.espera ?? 2200)) return false;
+    if (LG === 'es') {
+      const k = idN(txt), tomas = NARR && NARR[k]; if (!tomas) return false;
+      let t = tomas[Math.floor(Math.random() * tomas.length)]; if (tomas.length > 1 && t === ultToma[k]) t = tomas[(tomas.indexOf(t) + 1) % tomas.length]; ultToma[k] = t; // no repite la misma toma seguida
+      ultVoz = ahora; return !!FX.audio(`/voces/juegos/${t}.mp3${NVER ? '?v=' + NVER : ''}`);
+    }
+    if (!window.speechSynthesis) return false; ultVoz = ahora;
+    { const tr = window.IDIOMA?.t(txt); if (!tr || tr === txt) return false; txt = tr; } // en otro idioma: habla la traducción (si todavía no está, se calla y la pide)
     try { if (o.cortar || speechSynthesis.pending) speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = vozEs?.lang || window.IDIOMA?.codigoVoz || 'es-ES'; if (vozEs) u.voice = vozEs; u.pitch = o.tono ?? 1; u.rate = o.vel ?? 1.1; u.volume = o.vol ?? 1; speechSynthesis.speak(u); return true; } catch (e) { return false; }
   };
-  FX.callar = () => { try { speechSynthesis.cancel(); } catch (e) {} };
+  FX.callar = () => { try { speechSynthesis.cancel(); } catch (e) {} try { audN?.pause(); } catch (e) {} };
+
+  // ---------- 🎬 Luz de cine para los escenarios (GLORY BROWN, Huerto) ----------
+  // Sombras de nubes que pasan sobre el campo, rayos de sol que brillan, tono de color según el mundo y viñeta.
+  // Se dibuja encima del escenario y de los personajes, antes de los textos. Liviano: lo pesado se prepara una sola vez.
+  const CINE = {}; const TONO = { calida: ['#ffb347', .13], atardecer: ['#ff7a3d', .16], fria: ['#8fc0ff', .12], noche: ['#4c3fa8', .18], fuego: ['#ff5a1f', .16], niebla: ['#a78bfa', .12] };
+  FX.cine = (X, W, H, t, o = {}) => {
+    if (LS.get('arcCine') === '0' || FX._cineOff) return;
+    { const ah = performance.now(), d = FX._cineT ? ah - FX._cineT : 16; FX._cineT = ah; if (d < 500) { FX._cineM = (FX._cineM ?? 16) * .97 + d * .03; if (FX._cineM > 45 && (FX._cineN = (FX._cineN || 0) + 1) > 180) FX._cineOff = true; } } // celular lento: se apaga solo
+    const clave = W + 'x' + H + (o.sol || ''); let c = CINE[clave];
+    if (!c) { // viñeta y rayos se preparan una vez por tamaño
+      const mk = () => { const cv = document.createElement('canvas'); cv.width = Math.ceil(W); cv.height = Math.ceil(H); return cv; };
+      const vi = mk(), v = vi.getContext('2d'), g = v.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .78); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.42)'); v.fillStyle = g; v.fillRect(0, 0, W, H);
+      const ra = mk(), r = ra.getContext('2d'), [sx, sy] = o.sol || [.85, -.05], px = sx * W, py = sy * H;
+      for (let i = 0; i < 6; i++) { const an = Math.PI * (.55 + i * .09) + (sx < .5 ? -.6 : 0), L = Math.hypot(W, H) * 1.1, w = .05 + (i % 3) * .025;
+        const gr = r.createLinearGradient(px, py, px + Math.cos(an) * L, py + Math.sin(an) * L); gr.addColorStop(0, 'rgba(255,248,220,.55)'); gr.addColorStop(.6, 'rgba(255,248,220,.10)'); gr.addColorStop(1, 'rgba(255,248,220,0)');
+        r.fillStyle = gr; r.beginPath(); r.moveTo(px, py); r.lineTo(px + Math.cos(an - w) * L, py + Math.sin(an - w) * L); r.lineTo(px + Math.cos(an + w) * L, py + Math.sin(an + w) * L); r.closePath(); r.fill(); }
+      c = CINE[clave] = { vi, ra };
+    }
+    X.save();
+    if (o.nubes !== false) for (let i = 0; i < 3; i++) { // sombras de nubes
+      const R = Math.max(W, H) * (.32 + i * .08), x = ((t * (14 + i * 6) + i * W * .6) % (W + R * 2)) - R, y = H * (.2 + i * .3) + Math.sin(t * .2 + i) * H * .05;
+      const g = X.createRadialGradient(x, y, 0, x, y, R); g.addColorStop(0, 'rgba(10,15,40,.16)'); g.addColorStop(1, 'rgba(10,15,40,0)'); X.fillStyle = g; X.fillRect(x - R, y - R, R * 2, R * 2); }
+    if (o.rayos !== false) { X.globalCompositeOperation = 'lighter'; X.globalAlpha = .10 + .06 * Math.sin(t * .7) + .03 * Math.sin(t * 1.9); X.drawImage(c.ra, 0, 0, W, H); X.globalAlpha = 1; X.globalCompositeOperation = 'source-over'; }
+    const tn = TONO[o.luz || 'calida']; if (tn) { X.globalCompositeOperation = 'soft-light'; X.globalAlpha = tn[1] * 2.2; X.fillStyle = tn[0]; X.fillRect(0, 0, W, H); X.globalAlpha = 1; X.globalCompositeOperation = 'source-over'; }
+    X.drawImage(c.vi, 0, 0, W, H); X.restore();
+  };
 
   // ---------- Botones de música y voces ----------
   FX.botones = (estilo = '') => `<button onclick="FX.alternar('arcMusica', this, '🎵', '🎵̸')" title="Música" style="background:none;border:0;font-size:1.05rem;cursor:pointer;${LS.get('arcMusica') === '0' ? 'opacity:.35;' : ''}${estilo}">🎵</button><button onclick="FX.alternar('arcVoz', this)" title="Voces" style="background:none;border:0;font-size:1.05rem;cursor:pointer;${LS.get('arcVoz') === '0' ? 'opacity:.35;' : ''}${estilo}">🗣️</button>`;

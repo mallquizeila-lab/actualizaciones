@@ -1,3 +1,13 @@
+v7.43.0 — Voces naturales, tableros nítidos y luz de cine
+- 🎙️ Nuevo botón en ShortForge (Página viral): "🎙️ Voces naturales para todos los juegos". Graba con voces de Perú y México de tu biblioteca:
+  · el narrador de los juegos (Joyas, arcade, Islas 3D y los anuncios de GLORY BROWN) en 3 tomas distintas por frase, que se turnan para no sonar siempre igual;
+  · y vuelve a grabar las voces de los personajes de GLORY BROWN y Huerto Defensor.
+- 🎚️ Acabado de estudio en todas las voces: sin silencios al inicio, más cuerpo y claridad, compresión suave, un poquito de ambiente de sala y volumen parejo. Suenan mucho menos "leídas por una máquina".
+- 🔇 Adiós a la voz robótica del celular en español: si una frase todavía no está grabada, se ve como texto en pantalla pero no suena la voz robótica. (En otros idiomas se sigue usando la voz del celular.)
+- 🔍 Tableros nítidos: los juegos de tablero (Joyas, billar, gusanito, ladrillos, frutas, torre, penales, ludo y los demás) ahora se dibujan con la resolución real de la pantalla del celular. Antes se veían algo borrosos en pantallas HD.
+- 🎬 Luz de cine en GLORY BROWN y Huerto Defensor: rayos de sol que brillan, sombras de nubes que pasan sobre el campo, un tono de color para cada mundo (cálido, atardecer, frío, noche, fuego) y bordes oscurecidos. En celulares lentos se apaga sola para no trabar el juego.
+- Las voces regrabadas se actualizan solas en los celulares de los jugadores (sin esperar a que se borre la memoria del navegador).
+
 v7.42.0 — Yupitok en modo AAA: oscuro con neón
 - 🌌 Nuevo diseño oscuro con luces neón (cian, magenta y violeta) en toda la página: fondo espacial con auroras y piso de rejilla animado, logo y lema con brillo, nueva letra para títulos (Exo 2).
 - 🎮 Fichas de juegos como en los portales de consola: tarjeta oscura con línea neón, se elevan y brillan al pasar el dedo o el mouse, con un destello que las cruza.

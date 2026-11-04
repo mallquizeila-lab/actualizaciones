@@ -1,0 +1,73 @@
+{
+ "nota": "Frases que dice el narrador en los juegos. ShortForge las graba en 3 tomas (voces de Perú y México) con acabado de estudio. Si agregas una frase nueva con FX.voz, agrégala aquí con el mismo texto.",
+ "tomas": [
+  {
+   "edge": "es-PE-AlexNeural",
+   "rate": 6,
+   "pitch": 2
+  },
+  {
+   "edge": "es-MX-JorgeNeural",
+   "rate": 8,
+   "pitch": 0
+  },
+  {
+   "edge": "es-PE-CamilaNeural",
+   "rate": 6,
+   "pitch": 3
+  }
+ ],
+ "frases": [
+  "¡Nuevo récord personal! ¡Eres un crack!",
+  "¡Buena partida!",
+  "¡Bien jugado!",
+  "¡Casi casi! Otra más",
+  "¡Tú puedes superar eso!",
+  "¡Victoria! ¡Gloria para el reino!",
+  "¡Empate!",
+  "¡Derrota! La revancha será nuestra",
+  "¡Que empiece la batalla!",
+  "¡La reina despierta! ¡Defiendan el castillo!",
+  "¡Cuidado! Perdimos una torre",
+  "¡Torre destruida! ¡Bien hecho!",
+  "¡Tiempo extra!",
+  "¡Elixir doble!",
+  "¡Nueva arena desbloqueada: Campos del Alba!",
+  "¡Nueva arena desbloqueada: Castillo Dorado!",
+  "¡Nueva arena desbloqueada: Ciudadela del Sol!",
+  "¡Nueva arena desbloqueada: Claro de los Elfos!",
+  "¡Nueva arena desbloqueada: Raíces Ancestrales!",
+  "¡Nueva arena desbloqueada: Corazón Esmeralda!",
+  "¡Nueva arena desbloqueada: Oasis Perdido!",
+  "¡Nueva arena desbloqueada: Templo del Sol!",
+  "¡Nueva arena desbloqueada: Pirámide Eterna!",
+  "¡Nueva arena desbloqueada: Puerto de las Nubes!",
+  "¡Nueva arena desbloqueada: Jardines Flotantes!",
+  "¡Nueva arena desbloqueada: Trono del Cielo!",
+  "¡Nueva arena desbloqueada: Cementerio Olvidado!",
+  "¡Nueva arena desbloqueada: Fortaleza Sombría!",
+  "¡Nueva arena desbloqueada: Abismo Eterno!",
+  "¡Nueva arena desbloqueada: Lago Congelado!",
+  "¡Nueva arena desbloqueada: Picos de Cristal!",
+  "¡Nueva arena desbloqueada: Palacio Glacial!",
+  "¡Nueva arena desbloqueada: Forja Volcánica!",
+  "¡Nueva arena desbloqueada: Nido de Dragones!",
+  "¡Nueva arena desbloqueada: Arena Legendaria de Glory Brown!",
+  "¡Increíble!",
+  "¡Genial!",
+  "¡Bien!",
+  "¡Nivel superado!",
+  "¡Brillante!",
+  "¡Eres una máquina!",
+  "¡Uy! Te quedaste sin movimientos",
+  "De vuelta en la plaza",
+  "¡Bienvenido a Desierto de las Dunas!",
+  "¡Bienvenido a Bosque Encantado!",
+  "¡Bienvenido a Picos Nevados!",
+  "¡Bienvenido a Isla Volcán!",
+  "¡Bienvenido a Estación Lunar!",
+  "¡Reto superado! ¡Qué rápido eres!",
+  "¡Corre! Tienes sesenta segundos",
+  "¡Quema, quema!"
+ ]
+}

@@ -657,8 +657,10 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, m[1] + '_huerto', m[2]); return archivo(req, res, f, m[2].endsWith('.json') ? 'application/json' : m[2].endsWith('.mp3') ? 'audio/mpeg' : 'image/webp', { 'cache-control': m[2].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/arte\/glory\/([a-z0-9_]{2,80}\.webp|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'arte_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'image/webp', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
+    m = /^\/voces\/juegos\/(n_[a-z0-9]{1,9}_\d\.mp3|manifest\.json)$/.exec(u.pathname);
+    if (m) { const f = path.join(DATA, 'voces_juegos', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/voces\/glory\/([a-z0-9_]{3,80}\.mp3|manifest\.json)$/.exec(u.pathname);
-    if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
+    if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
     { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
