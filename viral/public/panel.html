@@ -226,6 +226,15 @@ const V = {
       <label>Enlace del video</label><input id="v-u" value="${esc(a.video?.url || '')}" placeholder="https://youtube.com/shorts/...">
       <label>Texto del botón</label><input id="v-t" value="${esc(a.video?.title || 'Mira el video de hoy')}" maxlength="80">
       <p style="margin-top:10px"><button class="btn" id="v-go">Guardar</button></p></div>
+    <div class="card"><h2>🔥 Aviso "No pierdas tu racha"</h2><p class="hint">Cada día a esta hora (Perú) avisa, con un mensaje personalizado, solo a quien tiene una racha de 2 días o más y todavía no entró ese día. Es de lo que más hace volver a la gente.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ra-on" style="width:auto" ${a.rachaAviso?.on !== false ? 'checked' : ''}> Activado</label>
+      <div class="row"><div><label>Hora</label><input id="ra-h" type="time" value="${esc(a.rachaAviso?.hora || '19:00')}"></div></div>
+      <p style="margin-top:10px"><button class="btn" id="ra-go">Guardar</button></p></div>
+    <div class="card"><h2>🎉 Hora feliz</h2><p class="hint">Un día a la semana, durante una hora, cada partida da monedas extra. Se avisa en la portada y con una notificación al empezar (si ese día no mandaste otra campaña). Crea una cita fija para jugar todos juntos.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="hf-on" style="width:auto" ${a.horaFeliz?.on !== false ? 'checked' : ''}> Activada</label>
+      <div class="row"><div><label>Día</label><select id="hf-d">${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((n, i) => `<option value="${i}" ${+(a.horaFeliz?.dia ?? 6) === i ? 'selected' : ''}>${n}</option>`).join('')}</select></div><div><label>Desde</label><input id="hf-a" type="time" value="${esc(a.horaFeliz?.desde || '20:00')}"></div><div><label>Hasta</label><input id="hf-b" type="time" value="${esc(a.horaFeliz?.hasta || '21:00')}"></div><div><label>🪙 extra por partida</label><input id="hf-x" type="number" min="5" max="100" value="${+(a.horaFeliz?.extra || 20)}"></div></div>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="hf-av" style="width:auto" ${a.horaFeliz?.aviso !== false ? 'checked' : ''}> Mandar notificación cuando empiece</label>
+      <p style="margin-top:10px"><button class="btn" id="hf-go">Guardar</button></p></div>
     <div class="card"><h2>🏆 Torneo de la semana</h2><p class="hint">Cada semana (lunes a domingo) un juego arcade distinto. Es gratis: nadie paga para entrar. El top 3 gana monedas del juego (500, 300 y 150) automáticamente. Si consigues un patrocinador, escribe aquí su premio (por ejemplo: "Recarga de S/ 20 de Tienda X") y aparecerá en la portada. Tú entregas ese premio al ganador.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="to-ca" style="width:auto" ${a.campeonesAviso !== false ? 'checked' : ''}> 👑 El día 1 de cada mes, avisar a los suscriptores "Ya están los campeones" (Salón de la Fama)</label>
       <label>👑 Redes de los campeones del mes visibles</label><select id="to-fd"><option value="0" ${a.famaDias === 7 ? '' : 'selected'}>Todo el mes siguiente (recomendado)</option><option value="7" ${a.famaDias === 7 ? 'selected' : ''}>Solo 7 días (del 1 al 7)</option></select>
@@ -261,6 +270,8 @@ const V = {
       <input id="t-n" type="number" min="1" max="10" value="${a.tope}"><p style="margin-top:10px"><button class="btn" id="t-go">Guardar</button></p></div></div>`;
     const ok = () => alert('Guardado ✓');
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
+    $('#ra-go').onclick = () => api('ajustes', { rachaAviso: { on: $('#ra-on').checked, hora: $('#ra-h').value } }).then(ok, e => alert(e.message));
+    $('#hf-go').onclick = () => api('ajustes', { horaFeliz: { on: $('#hf-on').checked, dia: +$('#hf-d').value, desde: $('#hf-a').value, hasta: $('#hf-b').value, extra: +$('#hf-x').value, aviso: $('#hf-av').checked } }).then(ok, e => alert(e.message));
     $('#to-go').onclick = () => api('ajustes', { torneo: { premio: $('#to-p').value }, campeonesAviso: $('#to-ca').checked, famaDias: +$('#to-fd').value }).then(ok, e => alert(e.message));
     $('#jd-go').onclick = () => api('ajustes', { juegoDia: { on: $('#jd-on').checked, hora: $('#jd-h').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));

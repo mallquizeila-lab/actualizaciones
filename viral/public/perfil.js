@@ -60,6 +60,7 @@
     partida(juego, puntos, extra = {}) {
       racha(); const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 };
       const record = puntos > J.record && J.partidas > 0; J.partidas++; J.ultimo = Date.now(); if (puntos > J.record) J.record = puntos; Object.assign(J, extra);
+      if (Date.now() < (window.HORA_FELIZ_FIN || 0)) { const ex = +window.HORA_FELIZ_EXTRA || 20; D.monedas += ex; setTimeout(() => aviso(`🎉 Hora feliz: +${ex} 🪙 extra`), 1800); } // monedas extra en la Hora feliz
       D.partidas++; sumarXp(10 + Math.min(40, Math.round(puntos / 50))); avanzar('jugar3'); avanzar('juegos2', 1, juego); if (record) avanzar('record1');
       logros(); guardar(); return { record };
     },

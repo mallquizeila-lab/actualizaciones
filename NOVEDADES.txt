@@ -1,3 +1,9 @@
+v7.53.0 — Aviso de racha, Hora feliz y app más visible
+- 🔥 Aviso "No pierdas tu racha": cada día a las 7 pm (Perú) llega una notificación personalizada ("🔥 ¡Llevas 5 días seguidos! Entra hoy y reclama tu premio del día 6: 80 🪙") solo a quien tiene racha de 2+ días y todavía no entró ese día. Se configura en el panel → Ajustes.
+- 🎉 Hora feliz: un día a la semana (por defecto sábado de 8 a 9 pm), cada partida da 20 🪙 extra. Banner en la portada (también avisa durante el día "Hoy es la Hora feliz") y notificación al empezar. Día, hora y monedas se cambian en el panel → Ajustes.
+- 📲 El botón "Instala Yupitok gratis · +100 🪙" ahora sale arriba en la portada (antes quedaba muy abajo en el celular) y hay un botón flotante "📲 App" siempre visible (se oculta dentro de los juegos).
+- ⚡ Más rápido: el logo pesa 5 veces menos (formato WebP) y el ícono de la app 4 veces menos.
+
 v7.52.0 — Lista para la revisión de AdSense
 - 🤖 Los robots de Google (búsqueda y AdSense) y de otros buscadores ven siempre la página original en español. Antes, como navegan en inglés, la página se les traducía sola al inglés y Google podía indexar Yupitok como una página en inglés.
 - 📝 Nueva sección "¿Qué es Yupitok?" al final de la portada, con texto propio: tus juegos (GLORY BROWN, Huerto Defensor, Joyas, Islas 3D), educativos y cristianos, juegos profesionales, premios y Salón de la Fama, con enlaces que Google puede seguir. AdSense pide contenido original y fácil de navegar.
