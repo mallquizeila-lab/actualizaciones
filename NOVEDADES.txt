@@ -1,3 +1,11 @@
+v7.40.0 — Amigos, chat privado y chats de grupo
+- 👥 Nueva sección "Amigos y chat privado" en la portada (para usuarios registrados): busca a tus amigos por su usuario, envía y acepta solicitudes, y mira quién está en línea.
+- 💬 Chat privado entre amigos y 👥 chats de grupo (hasta 20 personas): crea un grupo, agrega amigos y conversen para organizarse.
+- 🎮 Invitar a jugar desde el chat: elige el juego y, si quieres, el código de la sala (por ejemplo, GLORY BROWN con amigos); el amigo toca "▶ Jugar ahora".
+- 🔔 Avisos por notificación cuando te escriben, te invitan o te mandan solicitud (si la persona activa las notificaciones). Así crece tu lista de suscriptores para tus campañas.
+- 🛡️ Seguridad: solo se puede escribir a amigos; mismo filtro que el chat público (sin enlaces, teléfonos ni correos); bloquear y reportar. Los reportes llegan a tu panel y puedes suspender a quien no respete las reglas.
+- Globito rojo en la portada con los mensajes y solicitudes nuevas.
+
 v7.39.0 — Fotos de perfil, rivales automáticos y recordatorio de apoyo
 - 📷 Sube tu propia foto de perfil (botón "📷 Tu foto" al elegir avatar). Se recorta y achica sola, y se revisa con la IA de ShortForge antes de que la vean los demás. Nueva sección "📷 Fotos" en el panel de la página para aprobar o borrar fotos; con 3 reportes una foto se oculta hasta que la revises.
 - 🤖 Las partidas en línea nunca se quedan vacías: si no aparece otro jugador en unos segundos (GLORY BROWN 1 vs 1: 10 s; 2 vs 2: 18 s; Tres en raya y Cuatro en línea: 12 s), la partida empieza sola contra un rival de la computadora con nombre y avatar normales y un nivel parecido al tuyo. Al final de la partida se indica con 🤖, y está explicado en los Términos.

@@ -348,6 +348,8 @@ const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Ob
 
 const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
 const FOTOS = require('./fotos'), fotos = FOTOS.crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN });
+const amigos = require('./amigos').crear({ db, q, q1, run, revisar: require('./chat').revisar, valido: FOTOS.valido, catalogo: () => CATALOGO,
+  notificar: (vid, n) => { if (!VAPID) return; for (const r of q('select id, sub from subscribers where vid=? and active=1 order by id desc limit 3', vid)) webpush.sendNotification(JSON.parse(r.sub), JSON.stringify({ ...n, url: PUBLIC_URL + n.url, tag: 'amigos' }), { vapid: VAPID, TTL: 3600, urgency: 'high' }).catch(e => { if (e.statusCode === 404 || e.statusCode === 410) run('update subscribers set active=0 where id=?', r.id); }); } });
 const online = require('./juego_online').crear({ datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
@@ -390,6 +392,7 @@ async function api(req, res, u) {
     return send(res, 200, { on: true, total: f.length, cats, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
   }
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (/^\/api\/(amigos|dm|grupos)\//.test(u.pathname)) { const r = await amigos.http(req, res, u, { ip, json, send, limite, cuentaDeTok: online.cuentaDeTok }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/foto/')) { const r = await fotos.http(req, res, u, { ip, json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
   if (/^\/api\/(cuenta|clan|duelo|glory)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
@@ -520,6 +523,7 @@ async function api(req, res, u) {
     if (!admin(req)) return send(res, 401, { error: 'Inicia sesión' });
     if (P && req.headers['x-panel'] !== '1' && !req.headers['x-sf-token']) return send(res, 403, { error: 'Prohibido' }); // protección CSRF
     const r = u.pathname.slice(11), F = Object.fromEntries(u.searchParams);
+    if (r === 'reportes-dm' || r === 'suspender') { const ar = amigos.admin(r, P ? await json(req) : {}); if (ar) return send(res, 200, ar); }
     if (r === 'foto-ver') return fotos.verAdmin(req, res, String(F.id || ''), send, archivo);
     if (r === 'fotos' || r.startsWith('fotos/')) { const fr = fotos.admin(r, P ? await json(req) : {}); if (fr) return send(res, 200, fr); }
     if (r === 'chat' || r.startsWith('chat/')) { const cr = chat.admin(r, P ? await json(req) : {}, F); if (cr) return send(res, 200, cr); }

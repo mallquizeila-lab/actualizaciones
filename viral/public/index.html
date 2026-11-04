@@ -126,7 +126,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
   #hub>.banners .joyban{flex:none;width:auto;margin:0;min-height:120px}
   #hub>.hub-fe{grid-column:span 2}#hub>.hub-fe .joyban{min-height:150px}
   #hub>.hub-apoyo{grid-column:span 1;align-self:stretch}
-  #hub>#refBox{grid-column:span 1}
+  #hub>#refBox,#hub>.hub-amigos{grid-column:span 1}
   #hub>.card.hub{grid-column:span 2}
   #buscar{max-width:520px;display:block;margin:22px auto 10px!important}
   .cats{justify-content:center;flex-wrap:wrap}
@@ -828,6 +828,7 @@ window.pintarHub = function () {
     <button class="joyban" data-ircat="cristianos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#1e3a8a,#7c3aed 60%,#f59e0b);box-shadow:0 8px 24px rgba(124,58,237,.35)"><span style="font-size:1.8rem">✝️</span><div><b>Juegos cristianos</b><small>Trivias bíblicas, versículos y más</small></div></button>
     <button class="joyban" data-ircat="educativos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#065f46,#10b981 55%,#0ea5e9);box-shadow:0 8px 24px rgba(16,185,129,.35)"><span style="font-size:1.8rem">📚</span><div><b>Juegos educativos</b><small>Primaria, secundaria y universidad</small></div></button></div>
   ${cfg.apoyo ? `<a href="/apoyar" class="card hub-apoyo" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:10px 12px;background:linear-gradient(120deg,rgba(253,224,71,.16),rgba(244,114,182,.14))"><span style="font-size:1.8rem">💛</span><div style="flex:1"><b>Apoya el proyecto</b><br><small>Somos independientes. Si te gusta, puedes ayudarnos a seguir creando juegos.</small></div><span>›</span></a>` : ''}
+  <button class="card hub-amigos" data-amigos="1" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit;padding:12px;background:linear-gradient(120deg,rgba(124,58,237,.28),rgba(14,165,233,.18))"><span style="font-size:1.9rem;position:relative">👥<span data-amigos-badge hidden style="position:absolute;top:-4px;right:-8px;background:#ef4444;color:#fff;border-radius:999px;font-size:.65rem;padding:1px 6px;font-weight:900"></span></span><span style="flex:1"><b>Amigos y chat privado</b><br><small style="opacity:.85">Busca a tus amigos por usuario, chatea e invítalos a jugar.</small></span><span>›</span></button>
   <div class="card" id="refBox" style="background:linear-gradient(120deg,rgba(34,197,94,.18),rgba(14,165,233,.14));padding:12px"></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
   ${PERFIL.usuario ? `<div style="margin-top:8px;font-size:.85rem;opacity:.9">👤 Conectado como <b>${escH(PERFIL.usuario)}</b> · <a href="#" id="hubSalir">Cerrar sesión</a></div>` : `<div style="background:linear-gradient(100deg,#7c3aed,#ec4899);border-radius:14px;padding:10px 12px;margin-top:10px"><b>👤 Crea tu usuario</b><br><small>Para entrar desde cualquier celular y seguir donde te quedaste: niveles, monedas, trofeos y clan.</small><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="hubCrear" style="margin:0;padding:8px">Crear usuario</button><button class="btn alt" id="hubEntrar" style="margin:0;padding:8px">Ya tengo usuario</button></div></div>`}
@@ -838,14 +839,14 @@ window.pintarHub = function () {
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">${lg.map(x => `<span style="padding:4px 10px;border-radius:999px;font-size:.8rem;background:${x.ok ? 'linear-gradient(90deg,#ffd166,#ff7aa8)' : 'rgba(255,255,255,.07)'};color:${x.ok ? '#241a00' : 'inherit'};opacity:${x.ok ? 1 : .55}">${escH(x.txt)}</span>`).join('')}</div>
   <p class="sub" style="text-align:left;font-size:.85rem">Tu progreso se guarda solo en este navegador y en la nube. ${PERFIL.codigo ? `Tu código para seguir en otro celular: <b style="letter-spacing:2px;color:var(--gold)">${PERFIL.codigo}</b> (guárdalo, no lo compartas).` : 'Juega una partida para obtener tu código de respaldo.'}</p>
   <div style="display:flex;gap:6px"><input id="codRec" maxlength="8" placeholder="¿Tienes un código? Escríbelo" style="flex:1;margin:0;text-transform:uppercase"><button class="btn" id="btnRec" style="width:auto;margin:0;padding:8px 14px">Recuperar</button></div></details></div>`;
-  if (REFI.d) pintarRef(); else refCargar().then(pintarRef);
-  h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g); const ic = e.target.closest('[data-ircat]'); if (ic) return irCategoria(ic.dataset.ircat);
+  if (REFI.d) pintarRef(); else refCargar().then(pintarRef); setTimeout(() => window.AMIGOS?.revisar(), 300);
+  h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g); const ic = e.target.closest('[data-ircat]'); if (ic) return irCategoria(ic.dataset.ircat); if (e.target.closest('[data-amigos]')) return window.AMIGOS?.abrir();
     if (e.target.id === 'hubCrear') return cuentaModal('crear'); if (e.target.id === 'hubEntrar') return cuentaModal('entrar');
     if (e.target.id === 'hubSalir') { e.preventDefault(); if (confirm('¿Cerrar sesión en este celular? Tu progreso queda guardado en tu usuario.')) { await PERFIL.salirCuenta(); toast('Sesión cerrada'); } return; }
     if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
 };
 </script>
-<script src="/perfil.js?v=2"></script>
+<script src="/perfil.js?v=2"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
 <script>window.pintarHub?.(); window.__instalar = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__instalar = e; }); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});</script>
 </body>
 </html>
