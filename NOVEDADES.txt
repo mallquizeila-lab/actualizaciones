@@ -1,3 +1,8 @@
+v7.47.0 — Retos con nombre y "El juego del día"
+- ⚔️ "Supera mi récord": el enlace del reto ahora lleva el nombre de quien retó ("⚔️ José hizo 3200 puntos. ¿Lo superas?") y al terminar dice "¡Superaste a José!" o "José hizo 3200: ¡revancha!".
+- 🐛 Arreglado: el enlace del reto solo aceptaba puntajes de 1 o 2 cifras, así que los récords de los arcade (por ejemplo 3200) se perdían y el amigo no veía el reto.
+- 🔥 Nueva notificación automática "El juego del día" (panel → Ajustes): una al día, a la hora que elijas, con el juego profesional más jugado de la semana, con su imagen. No repite el mismo juego en 7 días y no se envía si ese día ya mandaste una campaña tuya.
+
 v7.46.0 — Los más jugados primero
 - 🔥 Los juegos profesionales más jugados de la semana salen primero en la lista, con 🔥 en el nombre, y en una fila "🔥 Los más jugados esta semana" (con su puesto #1, #2, #3…) arriba de la lista y en la portada.
 - Solo cuentan jugadas reales: una partida se cuenta cuando la persona juega al menos 30 segundos, y una sola vez por persona y juego cada 30 minutos. Así no suben juegos que no cargan ni se puede inflar el conteo.

@@ -224,6 +224,10 @@ const V = {
       <label>Enlace del video</label><input id="v-u" value="${esc(a.video?.url || '')}" placeholder="https://youtube.com/shorts/...">
       <label>Texto del botón</label><input id="v-t" value="${esc(a.video?.title || 'Mira el video de hoy')}" maxlength="80">
       <p style="margin-top:10px"><button class="btn" id="v-go">Guardar</button></p></div>
+    <div class="card"><h2>🔥 El juego del día (automático)</h2><p class="hint">Una notificación al día con el juego profesional más jugado de la semana (no repite el mismo en 7 días). Si ese día ya mandaste una campaña tuya, no se envía, para no cansar a tus suscriptores.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="jd-on" style="width:auto" ${a.juegoDia?.on ? 'checked' : ''}> Activado</label>
+      <div class="row"><div><label>Hora (Perú)</label><input id="jd-h" type="time" value="${esc(a.juegoDia?.hora || '19:30')}"></div></div>
+      <p style="margin-top:10px"><button class="btn" id="jd-go">Guardar</button></p></div>
     <div class="card"><h2>☀️ Horóscopo diario automático</h2><p class="hint">Cada día a esta hora (Perú) se envía a todos los suscriptores, personalizado con su signo.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="d-on" style="width:auto" ${a.diario.on ? 'checked' : ''}> Activado</label>
       <div class="row"><div><label>Hora</label><input id="d-h" type="time" value="${esc(a.diario.hora)}"></div></div>
@@ -250,6 +254,7 @@ const V = {
       <input id="t-n" type="number" min="1" max="10" value="${a.tope}"><p style="margin-top:10px"><button class="btn" id="t-go">Guardar</button></p></div></div>`;
     const ok = () => alert('Guardado ✓');
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
+    $('#jd-go').onclick = () => api('ajustes', { juegoDia: { on: $('#jd-on').checked, hora: $('#jd-h').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
     $('#lg-go').onclick = () => api('ajustes', { login: { google: $('#lg-g').value, facebook: $('#lg-f').value } }).then(ok, e => alert(e.message));

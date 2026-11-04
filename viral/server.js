@@ -187,7 +187,18 @@ async function reloj() {
     enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
   }
 }
-setInterval(() => reloj().catch(console.error), 30000).unref();
+// 🔥 Juego del día: una notificación al día con el juego más jugado de la semana (no repite el mismo en 7 días).
+// No se envía si ese día ya mandaste una campaña tuya, para no cansar a la gente.
+async function juegoDelDia() {
+  const jd = getS('juegoDia', { on: false, hora: '19:30' }); if (!jd.on || horaPeru() < jd.hora || getS('juegoDiaDia', '') === hoyPeru() || enviando.id) return;
+  if (q1("select 1 from campaigns where (auto is null or auto='') and date(created_at, '-5 hours') = ? and status in ('enviada','enviando','programada')", hoyPeru())) { setS('juegoDiaDia', hoyPeru()); return; }
+  if (!getS('pro', {}).on) return; const J7 = jugadas7(), usados = getS('juegoDiaUsados', []);
+  const g = (await proVisibles()).filter(x => !usados.includes(x.id)).map(x => ({ ...x, j: J7.get(x.id) || 0 })).sort((a, b) => b.j - a.j)[0]; if (!g) return;
+  setS('juegoDiaDia', hoyPeru()); setS('juegoDiaUsados', [g.id, ...usados].slice(0, 7));
+  const r = run("insert into campaigns(title,body,url,image,filters,max_n,run_at,status,auto) values(?,?,?,?,?,0,datetime('now'),'programada','juegoDia')", clip('🔥 El juego del día: ' + g.t, 80), g.j >= 10 ? `${g.j} partidas esta semana en Yupitok. ¿Te animas a probarlo? 🎮` : '¡Juego nuevo para ti! Gratis y sin instalar. Toca para jugar 🎮', '/juego/' + g.s + '?src=push', g.img || null, '{}');
+  enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
+}
+setInterval(() => reloj().then(() => juegoDelDia()).catch(console.error), 30000).unref();
 
 // ---------------- Servidor ----------------
 const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
@@ -684,6 +695,7 @@ async function api(req, res, u) {
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
+        if (b.juegoDia) setS('juegoDia', { on: !!b.juegoDia.on, hora: /^\d\d:\d\d$/.test(b.juegoDia.hora) ? b.juegoDia.hora : '19:30' });
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
           const ops = b.encuesta.options.map(x => clip(x, 60).trim()).filter(Boolean).slice(0, 6);
@@ -693,7 +705,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
@@ -718,7 +730,7 @@ http.createServer(async (req, res) => {
     m = /^\/r\/([a-z0-9-]+)$/.exec(u.pathname);
     if (m && JUEGO[m[1]]) {
       const [t, d] = JUEGO[m[1]], txt = clip(u.searchParams.get('t') || '', 120), img = fs.existsSync(path.join(PUB, 'og', m[1] + '.png')) ? `${PUBLIC_URL}/og/${m[1]}.png` : `${PUBLIC_URL}/og/general.png`;
-      const reto = (/^\d{1,2}$/.test(u.searchParams.get('reto') || '') ? '&reto=' + u.searchParams.get('reto') : '') + (/^[a-f0-9]{6}$/.test(u.searchParams.get('mesa') || '') ? '&mesa=' + u.searchParams.get('mesa') : '');
+      const deR = String(u.searchParams.get('de') || '').trim(), reto = (/^\d{1,7}$/.test(u.searchParams.get('reto') || '') ? '&reto=' + u.searchParams.get('reto') + (/^[\p{L}\p{N} ._-]{2,16}$/u.test(deR) ? '&de=' + encodeURIComponent(deR) : '') : '') + (/^[a-f0-9]{6}$/.test(u.searchParams.get('mesa') || '') ? '&mesa=' + u.searchParams.get('mesa') : '');
       const target = `/?g=${m[1]}&src=${encodeURIComponent(clip(u.searchParams.get('src') || 'compartido', 40))}${reto}${/^[A-Z2-9]{6}$/.test(u.searchParams.get('ref') || '') ? '&ref=' + u.searchParams.get('ref') : ''}`;
       return send(res, 200, `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(t)}</title>
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(txt || t)}"><meta property="og:description" content="${esc(d)}">
