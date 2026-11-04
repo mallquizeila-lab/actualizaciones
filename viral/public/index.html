@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!--OG--><script src="/i18n.js?v=3"></script><style>.gb-full #btnIdioma,.hd-full #btnIdioma{display:none}</style>
+<!--OG--><script src="/i18n.js?v=3"></script><style>.gb-full #btnIdioma,.hd-full #btnIdioma{display:none}
+</style>
 <meta name="theme-color" content="#1a1640">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.png">
@@ -115,6 +116,27 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 .mis{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.88rem}.mis .xpbar{flex:1;margin:0}.mis.ok{opacity:.6}
 .banners{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin:0 -2px}.banners .joyban{flex:0 0 86%;scroll-snap-align:start}
 .joyban{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:22px;padding:14px;margin:10px 0 4px;cursor:pointer;color:#fff;text-align:left;font:inherit;background:linear-gradient(120deg,#7b2ff7,#ff5fa2 55%,#ffb36b);box-shadow:0 10px 30px rgba(255,95,162,.35);position:relative;overflow:hidden}.joyban:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);animation:brillo 3s infinite}@keyframes brillo{from{transform:translateX(-100%)}to{transform:translateX(100%)}}.joyban span{font-size:2.6rem}.joyban b{font-size:1.15rem;display:block}.joyban small{opacity:.9}
+/* ---------- Computadora y tablet grande: usar todo el ancho, al estilo de los portales de juegos ---------- */
+@media (min-width:900px){
+  main{max-width:1280px;padding:28px 28px 60px}
+  #home>h1{font-size:2.6rem;text-align:center}#home>.sub{text-align:center}
+  #hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+  #hub>*{margin:0!important}
+  #hub>.banners{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;overflow:visible}
+  #hub>.banners .joyban{flex:none;width:auto;margin:0;min-height:120px}
+  #hub>.hub-fe{grid-column:span 2}#hub>.hub-fe .joyban{min-height:150px}
+  #hub>.hub-apoyo{grid-column:span 1;align-self:stretch}
+  #hub>#refBox{grid-column:span 1}
+  #hub>.card.hub{grid-column:span 2}
+  #buscar{max-width:520px;display:block;margin:22px auto 10px!important}
+  .cats{justify-content:center;flex-wrap:wrap}
+  #games{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:8px}
+  #games .game{min-height:170px}
+  #vivoCard,#videoCard,#pollCard{max-width:760px;margin-left:auto;margin-right:auto}
+  #play{max-width:640px;margin:0 auto}
+  .small{text-align:center}
+}
+@media (min-width:1400px){#games{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}}
 </style>
 </head>
 <body>
@@ -130,11 +152,11 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
   <header class="marca" id="marca" hidden></header>
   <section id="home">
     <h1>Descubre algo nuevo de ti</h1>
-    <p class="sub">Tests de personalidad, trivias y calculadoras. Gratis, en 1 a 3 minutos.</p>
+    <p class="sub">Más de 100 juegos, trivias y tests gratis: GLORY BROWN, Huerto Defensor, juegos educativos y cristianos. Sin instalar nada.</p>
     <div id="hub"></div>
     <div class="card vivo" id="vivoCard" hidden></div>
     <div class="card" id="videoCard" hidden></div>
-    <input id="buscar" type="search" placeholder="🔎 Buscar un test…" aria-label="Buscar un test" style="margin-bottom:10px">
+    <input id="buscar" type="search" placeholder="🔎 Buscar un juego o test…" aria-label="Buscar un juego o test" style="margin-bottom:10px">
     <div class="cats" id="cats"></div>
     <div class="cats" id="niveles" hidden></div>
     <div class="grid" id="games"><p class="sub">Cargando tests…</p></div>
@@ -787,10 +809,10 @@ window.pintarHub = function () {
   ${cfg.pro ? `<button class="joyban" data-g="pro" style="background:linear-gradient(120deg,#0f172a,#2563eb 50%,#06b6d4);box-shadow:0 10px 30px rgba(37,99,235,.35)"><span>🕹️</span><div><b>Juegos profesionales</b><small>Cientos de juegos de estudios de todo el mundo: carreras, acción, puzzles y más. Gratis.</small></div></button>` : ''}
   <button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
   <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px">
+  <div class="hub-fe" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px">
     <button class="joyban" data-ircat="cristianos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#1e3a8a,#7c3aed 60%,#f59e0b);box-shadow:0 8px 24px rgba(124,58,237,.35)"><span style="font-size:1.8rem">✝️</span><div><b>Juegos cristianos</b><small>Trivias bíblicas, versículos y más</small></div></button>
     <button class="joyban" data-ircat="educativos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#065f46,#10b981 55%,#0ea5e9);box-shadow:0 8px 24px rgba(16,185,129,.35)"><span style="font-size:1.8rem">📚</span><div><b>Juegos educativos</b><small>Primaria, secundaria y universidad</small></div></button></div>
-  ${cfg.apoyo ? `<a href="/apoyar" class="card" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:10px 12px;background:linear-gradient(120deg,rgba(253,224,71,.16),rgba(244,114,182,.14))"><span style="font-size:1.8rem">💛</span><div style="flex:1"><b>Apoya el proyecto</b><br><small>Somos independientes. Si te gusta, puedes ayudarnos a seguir creando juegos.</small></div><span>›</span></a>` : ''}
+  ${cfg.apoyo ? `<a href="/apoyar" class="card hub-apoyo" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:10px 12px;background:linear-gradient(120deg,rgba(253,224,71,.16),rgba(244,114,182,.14))"><span style="font-size:1.8rem">💛</span><div style="flex:1"><b>Apoya el proyecto</b><br><small>Somos independientes. Si te gusta, puedes ayudarnos a seguir creando juegos.</small></div><span>›</span></a>` : ''}
   <div class="card" id="refBox" style="background:linear-gradient(120deg,rgba(34,197,94,.18),rgba(14,165,233,.14));padding:12px"></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
   ${PERFIL.usuario ? `<div style="margin-top:8px;font-size:.85rem;opacity:.9">👤 Conectado como <b>${escH(PERFIL.usuario)}</b> · <a href="#" id="hubSalir">Cerrar sesión</a></div>` : `<div style="background:linear-gradient(100deg,#7c3aed,#ec4899);border-radius:14px;padding:10px 12px;margin-top:10px"><b>👤 Crea tu usuario</b><br><small>Para entrar desde cualquier celular y seguir donde te quedaste: niveles, monedas, trofeos y clan.</small><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="hubCrear" style="margin:0;padding:8px">Crear usuario</button><button class="btn alt" id="hubEntrar" style="margin:0;padding:8px">Ya tengo usuario</button></div></div>`}

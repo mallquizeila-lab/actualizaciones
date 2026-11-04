@@ -1,3 +1,8 @@
+v7.36.0 — La página aprovecha toda la pantalla en computadora
+- 🖥️ En computadoras y tablets grandes la página usa todo el ancho, al estilo de los grandes portales de juegos: los juegos destacados en una fila, debajo Cristianos, Educativos y Apoyo, luego tu perfil e "Invita amigos", y la lista de juegos en una cuadrícula ancha. En el celular se ve igual que antes.
+- 🛠️ Arreglada la tarjeta "Apoya el proyecto", que se veía subrayada y desordenada.
+- Nuevo subtítulo: "Más de 100 juegos, trivias y tests gratis…" y el buscador ahora dice "Buscar un juego o test".
+
 v7.35.0 — Voces y textos de los juegos en el idioma del visitante
 - 🗣️ Los personajes de GLORY BROWN y del Huerto hablan en el idioma del visitante (inglés, portugués, francés…), con una voz de ese idioma. Las frases se piden traducir apenas se abre el juego, así hablan desde la primera partida. En español siguen usando las voces grabadas con tu biblioteca.
 - 🎮 Los textos dibujados dentro de los juegos (carteles de batalla, nombres de cartas, mensajes del Huerto, globos de diálogo) también se traducen.
