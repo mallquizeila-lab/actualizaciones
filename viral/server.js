@@ -291,6 +291,7 @@ function validarMetodos(lista) {
   for (const m of (Array.isArray(lista) ? lista : []).slice(0, 12)) {
     const tipo = ['enlace', 'cripto', 'numero'].includes(m.tipo) ? m.tipo : null, valor = String(m.valor || '').trim(), nombre = clip(m.nombre, 40).trim(); if (!tipo) continue;
     const qr = guardarQR(m.qr); if (!valor && !qr) continue;
+    if (tipo !== 'cripto' && /^eyJ[\w-]{20,}|[A-Za-z0-9_-]{60,}/.test(valor)) throw new Error(`"${nombre}" tiene algo que parece una clave o token. Bórralo: se publicaría en la página.`);
     if (!nombre) throw new Error('Ponle un nombre a cada método (por ejemplo: Yape, PayPal, USDT)');
     if (tipo === 'enlace' && valor && !/^https:\/\/[^\s"'<>]{4,300}$/.test(valor)) throw new Error(`El enlace de "${nombre}" debe empezar con https://`);
     if (tipo === 'cripto' && !REDES_CRIPTO.includes(m.red)) throw new Error(`Elige la red de "${nombre}"`);

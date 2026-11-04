@@ -1,3 +1,7 @@
+v7.38.1 — Arreglo: guardar la dirección fija
+- 🛠️ El botón "Guardar" de 📣 Página viral → 🔗 Dirección fija no funcionaba (mostraba "Cannot read properties of null"): estaba ejecutando por error el guardado de "Mis voces". Corregido.
+- 🔒 Protección nueva: los métodos de apoyo no dejan guardar algo que parezca una clave o un token (por ejemplo, el token del túnel), porque esos datos se publican en la página.
+
 v7.38.0 — Imagen oficial de Yupitok
 - 👑 La imagen de Yupitok (la "Y" dorada con corona, los chicos gamers y "Juega · Aprende · Avanza") ahora es el ícono de la app, el logo de la portada y la imagen que aparece al compartir la página en WhatsApp y Facebook.
 - El archivo en alta calidad queda en viral/public/brand/yupitok-arte.webp para tus redes.

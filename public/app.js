@@ -355,7 +355,7 @@ VIEWS.viral = () => {
     <div class="row"><label>Token del túnel<input id="vf-tok" type="password" placeholder="${v.fijo ? '✓ guardado (pega otro para cambiarlo)' : 'eyJ...'}"></label>
       <label>Dirección de tu página<input id="vf-url" value="${esc(v.urlFija || '')}" placeholder="https://suerte.tudominio.com"></label>
       <label>Tu correo (lo piden las notificaciones)<input id="vf-mail" value="${esc(v.email || '')}" placeholder="tu@correo.com"></label></div>
-    <div class="btns"><button class="b sm" data-act="vfSave">Guardar</button>${v.fijo ? '<button class="b ghost sm" data-act="vfTemp">Volver a dirección temporal</button>' : ''}</div></details>
+    <div class="btns"><button class="b sm" data-act="vfDirSave">Guardar</button>${v.fijo ? '<button class="b ghost sm" data-act="vfTemp">Volver a dirección temporal</button>' : ''}</div></details>
   ${v.on && v.panel && v.estado === 'encendida' ? `<div class="card" style="padding:0;overflow:hidden"><iframe id="vf-frame" src="${esc(v.panel)}" style="width:100%;height:1400px;border:0;display:block" title="Panel de la página viral"></iframe></div>`
     : '<div class="card"><p class="hint">Cuando la página esté encendida, aquí verás el panel: visitantes por país y ciudad, suscriptores, campañas de notificaciones, encuesta del día y más.</p></div>'}
   ${v.on && v.url ? `<details class="card"><summary><b>🔗 Enlaces para compartir</b> <span class="hint">(cada test con su imagen para Facebook y WhatsApp)</span></summary>
@@ -915,14 +915,14 @@ const ACT = {
   apQuitarQR: b => { delete AP.metodos[+b.dataset.i].qr; render(); },
   apQuitar: b => { AP.metodos.splice(+b.dataset.i, 1); render(); },
   apMover: b => { const i = +b.dataset.i, j = i + +b.dataset.d; if (j < 0 || j >= AP.metodos.length) return; [AP.metodos[i], AP.metodos[j]] = [AP.metodos[j], AP.metodos[i]]; render(); },
-  apGuardar: guard(async () => { const r = await api('/api/viral/apoyo', { on: AP.on, mensaje: AP.mensaje, metodos: AP.metodos.filter(m => String(m.valor || '').trim() || m.qr) }); AP = { ...r, metodos: r.metodos || [] }; toast('💛 Métodos de apoyo guardados'); render(); }),
+  apGuardar: guard(async () => { if (AP.metodos.some(m => /^eyJ[\w-]{20,}|^(sk|pk|rk)[-_]|[A-Za-z0-9_-]{60,}/.test(String(m.valor || '').trim()) && m.tipo !== 'cripto')) throw new Error('⚠️ Uno de los métodos tiene algo que parece una clave o token (por ejemplo, el token del túnel). Bórralo: esos datos se publican en la página.'); const r = await api('/api/viral/apoyo', { on: AP.on, mensaje: AP.mensaje, metodos: AP.metodos.filter(m => String(m.valor || '').trim() || m.qr) }); AP = { ...r, metodos: r.metodos || [] }; toast('💛 Métodos de apoyo guardados'); render(); }),
   vfArte: guard(async () => { VS = await api('/api/viral/arte-glory', {}); toast('🎨 Creando las ilustraciones de GLORY BROWN…'); render(); }),
   vfVoces: guard(async () => { VS = await api('/api/viral/voces-glory', {}); toast('🎙️ Grabando las voces de GLORY BROWN…'); render(); }),
   vfOn: guard(async () => { VS = await api('/api/viral/encender', {}); toast('Encendiendo la página…'); render(); }),
   vfOff: guard(async () => { if (!confirm('¿Apagar la página viral? Nadie podrá entrar mientras esté apagada.')) return; VS = await api('/api/viral/apagar', {}); render(); }),
   vfLink: el => { const u = VS.url + '/?' + (el.dataset.g ? 'g=' + el.dataset.g + '&' : '') + 'src=' + encodeURIComponent(($('#vf-src')?.value || 'fb').trim().replace(/\s+/g, '-').slice(0, 40)); navigator.clipboard.writeText(u).then(() => toast('Enlace copiado: ' + u)); },
   vfCopy: el => navigator.clipboard.writeText(el.dataset.u).then(() => toast('Dirección copiada')),
-  vfSave: guard(async () => { const o = { url: $('#vf-url').value, email: $('#vf-mail').value }; if ($('#vf-tok').value.trim()) o.tokenTunel = $('#vf-tok').value; VS = await api('/api/viral/config', o); toast('Guardado ✓'); render(); }),
+  vfDirSave: guard(async () => { const o = { url: $('#vf-url').value, email: $('#vf-mail').value }; if ($('#vf-tok').value.trim()) o.tokenTunel = $('#vf-tok').value; VS = await api('/api/viral/config', o); toast('Guardado ✓'); render(); }),
   vfTemp: guard(async () => { if (!confirm('¿Quitar la dirección fija y usar una temporal?')) return; VS = await api('/api/viral/config', { tokenTunel: '', url: '' }); render(); }),
   radarScan: guard(async el => { el.disabled = true; el.textContent = '📡 Buscando… (1 o 2 minutos)'; try { await api('/api/radar', { channelId: el.dataset.id }); toast('Radar actualizado'); } finally { await refresh(true); } }),
   radarJob: guard(async el => { await api('/api/jobs', { channelId: el.dataset.id, topics: el.dataset.t }); toast('Video agregado a la cola ✓'); await refresh(true); }),
