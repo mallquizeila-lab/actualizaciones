@@ -1,3 +1,7 @@
+v7.38.0 — Imagen oficial de Yupitok
+- 👑 La imagen de Yupitok (la "Y" dorada con corona, los chicos gamers y "Juega · Aprende · Avanza") ahora es el ícono de la app, el logo de la portada y la imagen que aparece al compartir la página en WhatsApp y Facebook.
+- El archivo en alta calidad queda en viral/public/brand/yupitok-arte.webp para tus redes.
+
 v7.37.0 — Nace Yupitok: ¡Juega, ríe, aprende y gana!
 - 🎉 La página ahora se llama Yupitok, con logo propio: una "Y" con los brazos arriba de alegría, que también es un control de juego.
 - Nuevo lema en la portada: "¡Juega, ríe, aprende y gana!".
