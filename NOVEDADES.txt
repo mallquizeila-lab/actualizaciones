@@ -1,3 +1,9 @@
+v7.48.0 — Torneo de la semana
+- 🏆 Nuevo "Torneo de la semana" en la portada: cada semana (lunes a domingo, hora Perú) un juego arcade distinto (Gusanito, Bloques, Frutas, Ladrillos, Vuela, Corredor, Torre, 2048). Muestra el top 3, cuántos días quedan, tu mejor puntaje y tu puesto, y un botón "▶ Jugar el torneo".
+- 🪙 Premios automáticos para el top 3: 500, 300 y 150 monedas del juego. Se cobran solos al entrar a la página la semana siguiente (una sola vez).
+- 🎁 Premio de patrocinador opcional: en el panel → Ajustes → "🏆 Torneo de la semana" escribes el premio (por ejemplo, una recarga de una tienda) y aparece en la portada. Tú lo entregas al ganador.
+- Es gratis: nadie paga para participar (no es apuesta). Las reglas quedaron en los Términos.
+
 v7.47.0 — Retos con nombre y "El juego del día"
 - ⚔️ "Supera mi récord": el enlace del reto ahora lleva el nombre de quien retó ("⚔️ José hizo 3200 puntos. ¿Lo superas?") y al terminar dice "¡Superaste a José!" o "José hizo 3200: ¡revancha!".
 - 🐛 Arreglado: el enlace del reto solo aceptaba puntajes de 1 o 2 cifras, así que los récords de los arcade (por ejemplo 3200) se perdían y el amigo no veía el reto.

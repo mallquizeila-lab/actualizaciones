@@ -51,6 +51,7 @@ create table if not exists perfiles (id text primary key, codigo text unique, da
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
+create table if not exists torneo_premios (semana text, uid text, puesto integer, monedas integer, reclamado integer default 0, primary key (semana, uid));
 create table if not exists pro_rep (id text, iph text, created_at text default (datetime('now')), primary key (id, iph));
 create table if not exists pro_oculto (id text primary key, motivo text, created_at text default (datetime('now')));
 create table if not exists errores (firma text primary key, msg text, src text, ruta text, ua text, n integer default 1, primero text default (datetime('now')), ultimo text default (datetime('now')));
@@ -276,6 +277,19 @@ async function catalogoPro(forzar) {
 // Juegos ocultos (reportados como "no carga" o escondidos por el dueño) y descripción en español
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
+// ---------- Torneo de la semana ----------
+const TORNEO_JUEGOS = ['gusanito', 'bloques', 'frutas', 'ladrillos', 'vuela', 'corredor', 'torre', 'n2048'], TORNEO_PREMIOS = [500, 300, 150];
+function torneoSemana(delta = 0) {
+  const ahora = Date.now() - 5 * 3600e3 + delta * 7 * 864e5, d = new Date(ahora), dia = (d.getUTCDay() + 6) % 7;
+  const lunes = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dia), ini = lunes + 5 * 3600e3, fin = ini + 7 * 864e5; // en UTC
+  const iso = t => new Date(t).toISOString().slice(0, 19).replace('T', ' '), n = Math.floor(lunes / (7 * 864e5));
+  return { semana: new Date(lunes).toISOString().slice(0, 10), juego: TORNEO_JUEGOS[((n % TORNEO_JUEGOS.length) + TORNEO_JUEGOS.length) % TORNEO_JUEGOS.length], desde: iso(ini), hasta: iso(fin), fin };
+}
+function torneoCerrar(A) { // guarda el top 3 de una semana ya terminada (una sola vez)
+  if (Date.now() < A.fin || q1('select 1 from torneo_premios where semana=?', A.semana)) return;
+  q(`select uid, max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid order by p desc limit 3`, A.juego, A.desde, A.hasta)
+    .forEach((r, i) => run('insert or ignore into torneo_premios(semana, uid, puesto, monedas) values(?,?,?,?)', A.semana, r.uid, i + 1, TORNEO_PREMIOS[i]));
+}
 // 🔥 Jugadas reales de cada juego (cuenta solo si la persona jugó al menos 30 segundos), últimos 7 días
 let JUG = { t: 0, m: new Map() };
 const jugadas7 = () => { if (Date.now() - JUG.t > 5 * 60000) { JUG = { t: Date.now(), m: new Map(q("select id, sum(n) n from pro_jugadas where dia >= date('now','-7 days') group by id").map(r => [r.id, r.n])) }; } return JUG.m; };
@@ -367,7 +381,7 @@ function paginaLegal(tipo) {
   const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Yupitok'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
   const T = {
     terminos: ['Términos de uso', `<p>Al usar ${sitio} aceptas estos términos. Si no estás de acuerdo, por favor no uses el sitio.</p>
-      <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p>
+      <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p><p><b>Torneo de la semana:</b> participar es gratis y no requiere ninguna compra. Los premios en monedas son del juego y no tienen valor en dinero. Si hay un premio de un patrocinador, se indica en la portada y lo entrega ${resp} al ganador, que debe tener 18 años o más; se puede descalificar a quien haga trampa.</p>
       <h2>2. Edad</h2><p>Las funciones con cuenta, chat y clanes son para mayores de 18 años. Los menores deben usar el sitio con supervisión de un adulto.</p>
       <h2>3. Convivencia</h2><p>No se permite publicar insultos, acoso, contenido sexual, violento o ilegal, datos personales, enlaces, teléfonos ni correos. Moderamos el chat y podemos suspender cuentas que no respeten estas reglas.</p>
       <h2>4. Partidas en línea</h2><p>Si cuando buscas una partida en línea no hay otros jugadores disponibles, después de unos segundos juegas contra un rival controlado por la computadora. Al final de la partida te lo indicamos con 🤖.</p>
@@ -521,6 +535,20 @@ async function api(req, res, u) {
     return send(res, 200, { total, claves: Object.fromEntries(filas.map(x => [x.clave, x.n])) });
   }
   // Ranking del día de los juegos arcade.
+  // 🏆 Torneo de la semana: un juego arcade distinto cada semana (lunes a domingo, hora Perú). Gratis: sin entrada pagada.
+  // Premios en monedas del juego para el top 3 (y, si quieres, un premio de un patrocinador que pones en el panel).
+  if (u.pathname === '/api/torneo' || (u.pathname === '/api/torneo/premio' && P)) {
+    const T = torneoSemana(), uidh = c => crypto.createHash('sha256').update(String(c || '')).digest('hex').slice(0, 16);
+    if (u.pathname === '/api/torneo/premio') { // reclama el premio de la semana pasada (si quedaste en el top 3)
+      const b = await json(req), uh = uidh(b.uid); if (!b.uid) return send(res, 400, { error: 'Falta uid' });
+      const A = torneoSemana(-1); torneoCerrar(A);
+      const p = q1('select * from torneo_premios where semana=? and uid=? and reclamado=0', A.semana, uh); if (!p) return send(res, 200, { monedas: 0 });
+      run('update torneo_premios set reclamado=1 where semana=? and uid=?', A.semana, uh); return send(res, 200, { monedas: p.monedas, puesto: p.puesto, juego: A.juego });
+    }
+    const top = q(`select nombre, avatar, max(puntos) puntos from arcade where juego=? and created_at>=? and created_at<? group by uid order by puntos desc limit 10`, T.juego, T.desde, T.hasta);
+    let yo = null; const uq = u.searchParams.get('uid'); if (uq) { const uh = uidh(uq), m = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', T.juego, uh, T.desde, T.hasta)?.p; if (m != null) yo = { puntos: m, puesto: q1(`select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?`, T.juego, T.desde, T.hasta, m).n + 1 }; }
+    return send(res, 200, { juego: T.juego, termina: T.fin, top, yo, premios: TORNEO_PREMIOS, patrocinador: clip(getS('torneo', {}).premio || '', 140) });
+  }
   if (u.pathname === '/api/arcade/puntaje' && P) {
     const TOPE = { gusanito: 3000, rompecabezas: 1000, memoria: 1000, buscaminas: 1000, n2048: 300000, billar: 160, ludo: 200, bloques: 200000, frutas: 200000, colores: 2000, torre: 1000, palabra: 600, sudoku: 1000, ladrillos: 50000, vuela: 2000, corredor: 200000, flechas: 5000, joyas: 100000, huerto: 100000, batalla: 100000, ahorcado: 5000, sopa: 1000, ppt: 200, reflejos: 1000, tuberias: 1000, penales: 500, calculo: 3000, simon: 2000, topos: 2000, color: 2000 };
     const b = await json(req), jg = String(b.juego || ''), pts = Math.round(+b.puntos || 0);
@@ -695,6 +723,7 @@ async function api(req, res, u) {
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
+        if (b.torneo) setS('torneo', { premio: clip(b.torneo.premio || '', 140) });
         if (b.juegoDia) setS('juegoDia', { on: !!b.juegoDia.on, hora: /^\d\d:\d\d$/.test(b.juegoDia.hora) ? b.juegoDia.hora : '19:30' });
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
@@ -705,7 +734,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
