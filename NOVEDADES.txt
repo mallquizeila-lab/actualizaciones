@@ -1,3 +1,8 @@
+v7.55.0 — Guías y trucos (contenido para Google)
+- 📝 Nueva sección "Guías y trucos" (yupitok.com/guias) con 5 guías originales: cómo ganar en GLORY BROWN (10 consejos), guía completa de Huerto Defensor (defensores, plagas y trucos), los mejores juegos gratis sin instalar, juegos para aprender las tablas de multiplicar, y cómo ganar monedas (premio diario, Hora feliz, torneo y Salón de la Fama).
+- Cada guía tiene botón "▶ Jugar ahora gratis", "Más guías", datos estructurados de artículo para Google y entra sola al sitemap. Este tipo de contenido propio ayuda a aparecer en Google y a que AdSense apruebe y pague mejor.
+- Enlace a las guías en la sección "¿Qué es Yupitok?" de la portada.
+
 v7.54.0 — Tarjeta de récord para compartir
 - 📸 Al terminar una partida, nuevo botón grande "📸 Imagen de mi récord para WhatsApp e Historias": crea una tarjeta vertical estilo neón con la mascota de Yupitok, el juego, tu puntaje gigante en dorado, tu nombre, "⚔️ ¿Me ganas?" y yupitok.com.
 - Si eres el líder del mes dice "👑 LÍDER DEL MES"; si es tu mejor puntaje, "🏅 NUEVO RÉCORD".
