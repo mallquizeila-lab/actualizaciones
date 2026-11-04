@@ -3,8 +3,8 @@
   "short_name": "Yupitok",
   "start_url": "/?src=app",
   "display": "standalone",
-  "background_color": "#1e1b4b",
-  "theme_color": "#7c3aed",
+  "background_color": "#06051a",
+  "theme_color": "#0c0830",
   "icons": [
     {
       "src": "/icon.png",
@@ -17,5 +17,14 @@
       "type": "image/png"
     }
   ],
-  "description": "Más de 100 juegos y tests gratis: GLORY BROWN, Huerto Defensor, educativos y cristianos."
+  "description": "Más de 100 juegos y tests gratis: GLORY BROWN, Huerto Defensor, educativos y cristianos.",
+  "id": "/",
+  "scope": "/",
+  "orientation": "any",
+  "lang": "es",
+  "categories": [
+    "games",
+    "entertainment",
+    "education"
+  ]
 }

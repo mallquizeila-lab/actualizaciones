@@ -1,3 +1,9 @@
+v7.51.0 — Instala Yupitok como app
+- 📲 Nuevo botón en la portada "Instala Yupitok gratis · +100 🪙". En Android abre la ventana oficial de Chrome para instalar con un toque; en iPhone (y otros navegadores) muestra los pasos ("Compartir → Agregar a inicio" en Safari).
+- 🎁 La primera vez que alguien abre Yupitok instalado en su pantalla de inicio recibe 100 🪙.
+- El botón desaparece cuando ya está instalada, y "Ahora no" lo oculta por 7 días.
+- Mejoras en la ficha de la app (colores oscuros, categorías juegos/entretenimiento/educación), lista para subirla a Google Play más adelante.
+
 v7.50.2 — AdSense más fácil de configurar
 - 💰 En el panel → Ajustes → "Google AdSense": si pegas el código completo de Google (el <script> con tu ca-pub) en cualquiera de los dos cuadros, la página saca sola tu ID de editor (ca-pub-…) y descarta el resto. Las líneas de GamePix del ads.txt quedan intactas.
 
