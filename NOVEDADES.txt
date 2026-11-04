@@ -1,3 +1,11 @@
+v7.34.0 — La página en el idioma de cada visitante
+- 🌐 La página detecta el idioma del celular o la computadora del visitante y se muestra en ese idioma: español, inglés, portugués, francés, italiano, alemán, ruso, japonés, coreano, chino, indonesio o turco.
+- Botón "🌐" abajo a la derecha para elegir otro idioma (se esconde durante las batallas a pantalla completa).
+- Traducción automática con tu IA de ShortForge: cada texto se traduce UNA sola vez y queda guardado para siempre; las siguientes visitas cargan al instante y no gastan IA. Tope de 6000 textos nuevos por día (ajustable con I18N_MAX_DIA).
+- Se traducen la portada, los menús, los tests, las trivias, los juegos educativos y cristianos, los botones y las páginas de Apoyo, Términos, Contacto y Quiénes somos. Los mensajes de las personas en los chats NO se traducen.
+- Por ahora siguen en español: las voces de los personajes y los textos dibujados dentro de algunos juegos (por ejemplo, los carteles de las batallas).
+- Requiere que ShortForge esté abierto en tu PC (es quien traduce). Lo ya traducido funciona siempre.
+
 v7.33.0 — Juegos educativos (por nivel) y juegos cristianos
 - ✝️📚 Dos botones nuevos en la portada: "Juegos cristianos" y "Juegos educativos".
 - 📚 21 juegos educativos separados por nivel:

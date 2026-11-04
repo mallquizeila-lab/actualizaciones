@@ -1,7 +1,7 @@
 // ShortForge: fábrica de videos verticales para varios canales (YouTube Shorts, TikTok y Reels).
 // Abre http://localhost:3200 después de iniciar con start.bat.
 const http = require('http'), fs = require('fs'), path = require('path');
-const { E, setKeys, run, ff, uid, DATA, ROOT } = require('./lib/util');
+const { E, setKeys, run, ff, uid, DATA, ROOT, parseJSON } = require('./lib/util');
 const { db, saveAll, channel, job } = require('./lib/store');
 const ai = require('./lib/ai');
 const tts = require('./lib/tts');
@@ -255,6 +255,18 @@ async function api(u, q, U, r) {
     publish.saveTokens(); return { ok: 1 };
   }
   if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
+  // Traducciones para la página viral (la pide la propia página desde esta PC, con la clave local)
+  if (u === '/api/traducir' && P) {
+    const tok = require('crypto').createHash('sha256').update('sf-local:' + (E.VIRAL_PASSWORD || '')).digest('hex');
+    if (!E.VIRAL_PASSWORD || q.headers['x-sf-token'] !== tok) throw new Error('No autorizado');
+    const o = await json(q), NOMBRES = { en: 'English', pt: 'Brazilian Portuguese', fr: 'French', it: 'Italian', de: 'German', ru: 'Russian', ja: 'Japanese', ko: 'Korean', zh: 'Simplified Chinese', id: 'Indonesian', tr: 'Turkish' };
+    const idioma = NOMBRES[o.lang]; if (!idioma) throw new Error('Idioma no soportado');
+    const textos = (Array.isArray(o.textos) ? o.textos : []).slice(0, 40).map(x => String(x).slice(0, 400)); if (!textos.length) return { t: [] };
+    const r = await ai.ask([{ role: 'system', content: `You translate the interface and game texts of a Spanish (Latin American) website with free games, quizzes and Bible games into ${idioma}. Rules: return ONLY JSON like {"t":["…"]} with exactly ${textos.length} items in the same order. Keep emojis, numbers, placeholders like {0}, HTML tags, punctuation style and line breaks. Do not translate brand names: GLORY BROWN, ShortForge, Yape, Plin, WhatsApp, Facebook, TikTok. Keep translations short and natural for a game interface. Bible verses: use the wording of a well-known public-domain or common Bible translation in ${idioma}. If a text is already in ${idioma} or has no translatable words, return it unchanged.` }, { role: 'user', content: JSON.stringify(textos) }], { json: true, max: 6000 });
+    const j = parseJSON(r.text) || {}, t = Array.isArray(j.t) ? j.t : Array.isArray(j) ? j : [];
+    if (t.length !== textos.length) throw new Error('La IA no devolvió todas las traducciones');
+    return { t: t.map((x, i) => String(x ?? textos[i]).slice(0, 800)) };
+  }
   if (u.startsWith('/api/viral')) {
     const V = require('./lib/viral'), o = P ? (u === '/api/viral/apoyo' ? JSON.parse((await body(q, 8e6)).toString() || '{}') : await json(q)) : {};
     if (u === '/api/viral') return V.estado();

@@ -41,6 +41,7 @@ create index if not exists ix_s_active on subscribers(active, country_code);
 create table if not exists campaigns (id integer primary key, created_at text default (datetime('now')), title text, body text, url text, image text,
   filters text, max_n integer, run_at text, status text, sent integer default 0, failed integer default 0, removed integer default 0, skipped integer default 0,
   clicks integer default 0, auto text, finished_at text);
+create table if not exists i18n (lang text not null, src text not null, dst text not null, created_at text default (datetime('now')), primary key (lang, src));
 create table if not exists ref_codigos (uid text primary key, codigo text unique not null, created_at text default (datetime('now')));
 create table if not exists ref_altas (nuevo text primary key, codigo text not null, ipt text, created_at text default (datetime('now')), reclamado integer default 0);
 create table if not exists polls (id integer primary key, created_at text default (datetime('now')), question text, options text, active integer default 1);
@@ -243,6 +244,24 @@ async function catalogoPro(forzar) {
   } catch (e) { console.error('Juegos pro:', e.message); }
   return PRO.items;
 }
+// ---------- Traducción automática (la hace ShortForge con tu IA; aquí se guarda para siempre) ----------
+const IDIOMAS = ['en', 'pt', 'fr', 'it', 'de', 'ru', 'ja', 'ko', 'zh', 'id', 'tr'];
+const enCurso = new Map(); let usoHoy = { d: '', n: 0 };
+async function traducirFaltan(lang, textos) {
+  const hoy = new Date().toISOString().slice(0, 10); if (usoHoy.d !== hoy) usoHoy = { d: hoy, n: 0 };
+  if (!E.SF_URL || !LOCAL_TOKEN || usoHoy.n > (+E.I18N_MAX_DIA || 6000)) return {};
+  const prom = {}, out = {}, pedir = [];
+  for (const t of textos) { const k = lang + '|' + t; if (enCurso.has(k)) prom[t] = enCurso.get(k); else pedir.push(t); }
+  for (let i = 0; i < pedir.length; i += 30) {
+    const lote = pedir.slice(i, i + 30);
+    const pr = fetch(E.SF_URL + '/api/traducir', { method: 'POST', headers: { 'content-type': 'application/json', 'x-sf-token': LOCAL_TOKEN }, body: JSON.stringify({ lang, textos: lote }), signal: AbortSignal.timeout(60000) })
+      .then(r => r.ok ? r.json() : null).then(j => { const m = {}; (j?.t || []).forEach((d, k) => { if (d && lote[k]) { m[lote[k]] = d; try { run('insert or ignore into i18n(lang,src,dst) values(?,?,?)', lang, lote[k], String(d).slice(0, 800)); } catch (e) {} } }); usoHoy.n += lote.length; return m; }).catch(() => ({}));
+    for (const t of lote) { prom[t] = pr.then(m => m[t]); enCurso.set(lang + '|' + t, prom[t]); }
+    pr.finally(() => { for (const t of lote) enCurso.delete(lang + '|' + t); });
+  }
+  for (const t of textos) { const v = await prom[t]; if (v) out[t] = v; }
+  return out;
+}
 // ---------- Google AdSense ----------
 const adsCfg = () => getS('ads', {});
 const adsScript = () => { const c = adsCfg().client; return /^ca-pub-\d{10,20}$/.test(c || '') ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c}" crossorigin="anonymous"></script><meta name="google-adsense-account" content="${c}">` : ''; };
@@ -301,7 +320,7 @@ function paginaApoyo() {
 <div class="card"><p style="white-space:pre-line;margin:0">${esc(a.mensaje || `Hola 👋 ${mk.nombre || 'Nuestra página'} es un proyecto independiente, hecho en Perú con mucho cariño: juegos y tests gratis para todos, sin instalar nada.\n\nSi te gusta lo que hacemos y quieres ayudarnos a seguir creando juegos nuevos, cualquier aporte, por pequeño que sea, es muy bienvenido. Y si no puedes, compartir la página con tus amigos también nos ayuda muchísimo. ¡Gracias de corazón!`)}</p></div>
 ${met.length ? `<div class="card"><h2 style="margin:0 0 4px;font-size:1.15rem">Elige cómo apoyar</h2><p class="w" style="margin:0">Toca una opción y sigue los pasos.</p>${bloques}</div>` : '<div class="card"><p>Muy pronto podrás apoyarnos desde aquí. Mientras tanto, ¡compartir la página ya es una gran ayuda! 💛</p></div>'}
 <div class="card w">Los aportes son <b>voluntarios</b> y no dan ventajas en los juegos: todo sigue siendo gratis para todos. Nunca te pediremos contraseñas, códigos ni datos de tu tarjeta fuera de las apps y páginas oficiales de cada servicio.</div>
-<p style="text-align:center"><a href="/">🎮 Volver a jugar</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="/contacto.html">Contacto</a></p></body></html>`;
+<p style="text-align:center"><a href="/">🎮 Volver a jugar</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="/contacto.html">Contacto</a></p><script src="/i18n.js?v=1"></script></body></html>`;
 }
 function paginaLegal(tipo) {
   const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Nuestra página'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
@@ -320,7 +339,7 @@ function paginaLegal(tipo) {
       <p>GLORY BROWN nació como homenaje a una abuelita muy querida: la Reina Glory Brown, que protege su reino con amor. Ese cariño es lo que queremos que se sienta en todo el sitio.</p>
       <p>Creamos contenido nuevo cada semana, con identidad latina y en español, para que juegues sin instalar nada desde tu celular, tablet o computadora.</p><p>Responsable: ${resp} · ${ciudad} · ${correo}</p>`],
   }[tipo];
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${T[0]} · ${sitio}</title>${adsScript()}<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:22px 18px 60px;line-height:1.6;color:#1f2937;background:#fafafa}h1{font-size:1.7rem}h2{font-size:1.1rem;margin-top:1.4em}a{color:#7c3aed}</style></head><body><p><a href="/">← Volver a ${sitio}</a></p><h1>${T[0]}</h1>${T[1]}<p style="margin-top:2em;font-size:.9rem"><a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/contacto.html">Contacto</a> · <a href="/nosotros.html">Quiénes somos</a></p></body></html>`;
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${T[0]} · ${sitio}</title>${adsScript()}<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:22px 18px 60px;line-height:1.6;color:#1f2937;background:#fafafa}h1{font-size:1.7rem}h2{font-size:1.1rem;margin-top:1.4em}a{color:#7c3aed}</style></head><body><p><a href="/">← Volver a ${sitio}</a></p><h1>${T[0]}</h1>${T[1]}<p style="margin-top:2em;font-size:.9rem"><a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/contacto.html">Contacto</a> · <a href="/nosotros.html">Quiénes somos</a></p><script src="/i18n.js?v=1"></script></body></html>`;
 }
 const json = (req, max = 20000) => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > max) { no(new Error('muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(new Error('JSON inválido')); } }); });
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
@@ -335,6 +354,15 @@ async function api(req, res, u) {
   if (P && limite(ip, 'api', 240)) return send(res, 429, { error: 'Demasiadas peticiones, espera un momento' });
 
   // ---- chat en vivo ----
+  // ---- Idiomas: la página se traduce sola. Cada texto se traduce UNA vez (con la IA de ShortForge) y queda guardado ----
+  if (u.pathname === '/api/i18n' && P) {
+    if (limite(ip, 'i18n', 90)) return send(res, 429, { error: 'Más despacio' });
+    const b = await json(req, 60000), lang = String(b.lang || ''); if (!IDIOMAS.includes(lang)) return send(res, 400, { error: 'Idioma no soportado' });
+    const textos = [...new Set((Array.isArray(b.textos) ? b.textos : []).map(x => String(x)).filter(x => x.length <= 400 && /\p{L}{2,}/u.test(x)))].slice(0, 60);
+    const out = {}, faltan = []; for (const t of textos) { const f = q1('select dst from i18n where lang=? and src=?', lang, t); if (f) out[t] = f.dst; else faltan.push(t); }
+    if (faltan.length) { const nuevos = await traducirFaltan(lang, faltan); Object.assign(out, nuevos); }
+    return send(res, 200, { t: out });
+  }
   // ---- Invitaciones: cada jugador tiene su código; gana premios cuando un amigo nuevo juega su primera partida ----
   if (u.pathname.startsWith('/api/ref/') && P) {
     if (limite(ip, 'ref', 60)) return send(res, 429, { error: 'Más despacio' });
@@ -622,6 +650,8 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': 'public, max-age=86400' }); }
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
+    { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
+      if (req.headers['if-none-match'] === et) { res.writeHead(304, { etag: et }); return res.end(); } const gz = /gzip/.test(req.headers['accept-encoding'] || ''); return send(res, 200, gz ? zlib.gzipSync(cuerpo) : cuerpo, 'application/json; charset=utf-8', { etag: et, 'cache-control': 'no-cache', vary: 'Accept-Encoding', ...(gz ? { 'content-encoding': 'gzip' } : {}) }); } }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
       const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2']];
