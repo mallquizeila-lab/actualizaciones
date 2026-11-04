@@ -1,3 +1,8 @@
+v7.52.0 — Lista para la revisión de AdSense
+- 🤖 Los robots de Google (búsqueda y AdSense) y de otros buscadores ven siempre la página original en español. Antes, como navegan en inglés, la página se les traducía sola al inglés y Google podía indexar Yupitok como una página en inglés.
+- 📝 Nueva sección "¿Qué es Yupitok?" al final de la portada, con texto propio: tus juegos (GLORY BROWN, Huerto Defensor, Joyas, Islas 3D), educativos y cristianos, juegos profesionales, premios y Salón de la Fama, con enlaces que Google puede seguir. AdSense pide contenido original y fácil de navegar.
+- 🎮 Las páginas propias de los juegos de GamePix (/juego/…) ya no cargan AdSense: esos juegos traen sus propios anuncios, y así Google evalúa tu cuenta por tu contenido propio.
+
 v7.51.1 — "Miles de juegos"
 - 🎮 La portada, la descripción para Google, la app y "Quiénes somos" ahora dicen "Miles de juegos, trivias y tests gratis" (antes decía "más de 100").
 

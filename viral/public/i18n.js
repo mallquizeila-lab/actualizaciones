@@ -6,6 +6,8 @@
   const NOMBRES = { es: 'Español', en: 'English', pt: 'Português', fr: 'Français', it: 'Italiano', de: 'Deutsch', ru: 'Русский', ja: '日本語', ko: '한국어', zh: '中文', id: 'Bahasa Indonesia', tr: 'Türkçe' };
   const BANDERA = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷', fr: '🇫🇷', it: '🇮🇹', de: '🇩🇪', ru: '🇷🇺', ja: '🇯🇵', ko: '🇰🇷', zh: '🇨🇳', id: '🇮🇩', tr: '🇹🇷' };
   let L = null; try { L = localStorage.getItem('lang'); } catch (e) {}
+  // Los robots de Google (búsqueda y AdSense) y otros buscadores ven siempre la página original en español
+  if (/bot|crawl|spider|slurp|Mediapartners|Google-|APIs-Google|AdsBot|facebookexternalhit|Lighthouse|Chrome-Lighthouse/i.test(navigator.userAgent)) L = 'es';
   if (!NOMBRES[L]) L = (navigator.languages || [navigator.language || 'es']).map(x => String(x).toLowerCase().slice(0, 2)).find(x => NOMBRES[x]) || 'es';
   document.documentElement.lang = L;
   const D = new Map(), HECHOS = new Set(), pend = new Map(), FALLO = new Map(); // FALLO: textos sin traducción todavía (se reintenta en 30 s)
