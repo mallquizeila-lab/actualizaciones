@@ -617,7 +617,7 @@ async function api(req, res, u) {
           if (b.apoyo.metodos !== undefined) { try { metodos = validarMetodos(b.apoyo.metodos); } catch (e) { return send(res, 400, { error: e.message }); } }
           setS('apoyo', { on: b.apoyo.on !== undefined ? !!b.apoyo.on : !!prev.on, mensaje: b.apoyo.mensaje !== undefined ? clip(b.apoyo.mensaje, 1500) : (prev.mensaje || ''), metodos }); }
         if (b.login) { const g = String(b.login.google || '').trim(), f = String(b.login.facebook || '').trim(); if (g && !/^[\w-]+\.apps\.googleusercontent\.com$/.test(g)) return send(res, 400, { error: 'El ID de cliente de Google termina en .apps.googleusercontent.com' }); if (f && !/^\d{8,20}$/.test(f)) return send(res, 400, { error: 'El ID de la app de Facebook son solo números' }); setS('login', { google: g, facebook: f }); }
-        if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 3000) }); }
+        if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 120000) }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
@@ -689,7 +689,7 @@ http.createServer(async (req, res) => {
     if (u.pathname === '/apoyar' || u.pathname === '/apoyar.html') return enviarHtml(req, res, paginaApoyo(), { 'cache-control': 'no-cache' });
     const legal = /^\/(terminos|contacto|nosotros|borrar-datos)\.html$/.exec(u.pathname);
     if (legal) return enviarHtml(req, res, paginaLegal(legal[1]), { 'cache-control': 'no-cache' });
-    if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) if (/^[a-z0-9.-]+\.[a-z]{2,},\s*[\w-]+,\s*(DIRECT|RESELLER)(,\s*[\w]+)?$/i.test(l.trim())) lineas.push(l.trim()); return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }
+    if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) { const t = l.trim(); if (/^[a-z0-9.-]+\.[a-z]{2,}\s*,\s*[\w.:-]+\s*,\s*(DIRECT|RESELLER)\s*(,\s*[\w.-]+)?\s*(#.*)?$/i.test(t) || /^(OWNERDOMAIN|MANAGERDOMAIN|CONTACT|SUBDOMAIN|INVENTORYPARTNERDOMAIN)\s*=\s*[^\s<>]+$/i.test(t) || /^#[^<>]{0,200}$/.test(t)) lineas.push(t); } return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }
     // Política de privacidad con tus datos (se completa en el panel → Ajustes; sobrevive a las actualizaciones).
     if (u.pathname === '/privacidad.html') {
       const pv = getS('priv', {}), x = (v, d) => esc(v || d);
