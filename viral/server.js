@@ -51,6 +51,9 @@ create table if not exists perfiles (id text primary key, codigo text unique, da
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
+create table if not exists pro_tiempo (mes text, uid text, juego text, min integer default 0, primary key (mes, uid, juego));
+create table if not exists pro_jugador (uid text primary key, nombre text, avatar text);
+create table if not exists pro_dia (uid text, dia text, min integer default 0, primary key (uid, dia));
 create table if not exists campeones (mes text, juego text, puesto integer, uid text, nombre text, avatar text, puntos integer, primary key (mes, juego, puesto));
 create table if not exists campeon_red (uid text primary key, cuenta integer, usuario_yupi text, red text, usuario text, estado text default 'pendiente', created_at text default (datetime('now')));
 create table if not exists torneo_premios (semana text, uid text, puesto integer, monedas integer, reclamado integer default 0, primary key (semana, uid));
@@ -299,8 +302,13 @@ const topMes = (juego, M, n = 3) => q(`select uid, nombre, avatar, max(puntos) p
 function mesCerrar(M) { // guarda el top 3 de cada juego de un mes ya terminado (una sola vez)
   if (Date.now() < M.fin || getS('mesCerrado', '') >= M.mes) return;
   for (const { juego } of q('select distinct juego from arcade where created_at>=? and created_at<?', M.desde, M.hasta)) topMes(juego, M).forEach((r, i) => run('insert or ignore into campeones(mes, juego, puesto, uid, nombre, avatar, puntos) values(?,?,?,?,?,?,?)', M.mes, juego, i + 1, r.uid, r.nombre, r.avatar, r.puntos));
+  topJugadores(M.mes, 3).forEach((r, i) => run('insert or ignore into campeones(mes, juego, puesto, uid, nombre, avatar, puntos) values(?,?,?,?,?,?,?)', M.mes, 'jugador', i + 1, r.uid, r.nombre, r.avatar, r.min));
+  for (const { juego } of q('select juego from pro_tiempo where mes=? group by juego having sum(min) >= 30', M.mes)) { const f = fanDe(M.mes, juego); if (f) run('insert or ignore into campeones(mes, juego, puesto, uid, nombre, avatar, puntos) values(?,?,?,?,?,?,?)', M.mes, juego, 1, f.uid, f.nombre, f.avatar, f.min); }
   setS('mesCerrado', M.mes);
 }
+// 🎮 Tiempo jugado en los juegos profesionales (no podemos ver sus puntajes, pero sí cuánto juega cada persona)
+const topJugadores = (mes, n = 10) => q(`select t.uid, coalesce(j.nombre, 'Jugador') nombre, coalesce(j.avatar, 'a01') avatar, sum(t.min) min from pro_tiempo t left join pro_jugador j on j.uid=t.uid where t.mes=? group by t.uid order by min desc limit ?`, mes, n);
+const fanDe = (mes, juego) => q1(`select t.uid, coalesce(j.nombre, 'Jugador') nombre, coalesce(j.avatar, 'a01') avatar, t.min from pro_tiempo t left join pro_jugador j on j.uid=t.uid where t.mes=? and t.juego=? order by t.min desc limit 1`, mes, juego);
 // Las redes de los ganadores se ven todo el mes siguiente, o solo los primeros 7 días si así lo eliges en el panel
 const diasFama = () => getS('famaDias', 0) === 7 ? 7 : 0, finFama = () => diasFama() ? mesPeru().ini + 7 * 864e5 : mesPeru().fin, semanaFama = () => Date.now() < finFama();
 const redDe = uid => { if (!semanaFama()) return null; const r = q1("select red, usuario from campeon_red where uid=? and estado='ok'", uid); return r && REDES_OK[r.red] ? { red: REDES_OK[r.red][0], usuario: r.usuario, url: REDES_OK[r.red][1](r.usuario) } : null; };
@@ -321,6 +329,9 @@ function torneoCerrar(A) { // guarda el top 3 de una semana ya terminada (una so
 // 🔥 Jugadas reales de cada juego (cuenta solo si la persona jugó al menos 30 segundos), últimos 7 días
 let JUG = { t: 0, m: new Map() };
 const jugadas7 = () => { if (Date.now() - JUG.t > 5 * 60000) { JUG = { t: Date.now(), m: new Map(q("select id, sum(n) n from pro_jugadas where dia >= date('now','-7 days') group by id").map(r => [r.id, r.n])) }; } return JUG.m; };
+// ⭐ Los mejores: primero los más jugados en Yupitok esta semana; se completa con los mejores de GamePix (su ranking de calidad)
+const topPro = async (n = 12) => { const J7 = jugadas7(), todos = await proVisibles(), jug = todos.filter(g => (J7.get(g.id) || 0) >= 3).map(g => ({ ...g, j: J7.get(g.id) })).sort((a, b) => b.j - a.j);
+  const ya = new Set(jug.map(g => g.id)); return [...jug, ...todos.filter(g => !ya.has(g.id)).map(g => ({ ...g, j: J7.get(g.id) || 0 }))].slice(0, n); };
 const proVisibles = async () => { const oc = proOcultos(), t = await catalogoPro(); return oc.size ? t.filter(g => !oc.has(g.id)) : t; };
 // Traduce de a poco las descripciones de los juegos al español (una sola vez; queda guardado)
 setInterval(async () => { try { if (!getS('pro', {}).on) return; const t = await catalogoPro(); const falta = [];
@@ -484,9 +495,26 @@ async function api(req, res, u) {
     run("insert into pro_jugadas(id, dia, n) values(?, date('now'), 1) on conflict(id, dia) do update set n = n + 1", id); JUG.m.set(id, (JUG.m.get(id) || 0) + 1);
     return send(res, 200, { ok: 1 });
   }
+  if (u.pathname === '/api/pro/tiempo' && P) { // +1 minuto jugado (el navegador lo manda cada minuto mientras se juega de verdad)
+    const b = await json(req), id = String(b.id || ''), uq = String(b.uid || ''); if (!/^[a-f0-9]{12}$/.test(id) || !/^[a-z0-9]{8,40}$/.test(uq)) return send(res, 400, { error: 'Datos no válidos' });
+    const uh = crypto.createHash('sha256').update(uq).digest('hex').slice(0, 16), dia = hoyPeru();
+    if (limite('t:' + uh, 'proT', 1, 50000) || limite(ip, 'proTi', 90, 3600000)) return send(res, 200, { ok: 0 });
+    if ((q1('select min from pro_dia where uid=? and dia=?', uh, dia)?.min || 0) >= 240) return send(res, 200, { ok: 0, tope: 1 }); // máximo 4 horas al día
+    run("insert into pro_dia(uid, dia, min) values(?,?,1) on conflict(uid, dia) do update set min = min + 1", uh, dia);
+    run("insert into pro_tiempo(mes, uid, juego, min) values(?,?,?,1) on conflict(mes, uid, juego) do update set min = min + 1", mesPeru().mes, uh, id);
+    const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = FOTOS.valido(b.avatar) ? b.avatar : 'a01';
+    run('insert into pro_jugador(uid, nombre, avatar) values(?,?,?) on conflict(uid) do update set nombre=excluded.nombre, avatar=excluded.avatar', uh, nombre, avatar);
+    return send(res, 200, { ok: 1 });
+  }
+  if (u.pathname === '/api/pro/jugadores') { // jugador del mes (tiempo total) y fan #1 de un juego
+    const M = mesPeru(), A = mesPeru(-1); mesCerrar(A); const id = String(u.searchParams.get('id') || '');
+    const ant = q("select * from campeones where mes=? and juego='jugador' order by puesto", A.mes).map(r => ({ ...sinUid(r), red: redDe(r.uid) }));
+    const fan = /^[a-f0-9]{12}$/.test(id) ? fanDe(M.mes, id) : null, fanAnt = /^[a-f0-9]{12}$/.test(id) ? q1('select * from campeones where mes=? and juego=? and puesto=1', A.mes, id) : null;
+    return send(res, 200, { mes: M.nombre, mesAnterior: A.nombre, lideres: topJugadores(M.mes, 3).map(sinUid), campeones: ant, fan: fan ? sinUid(fan) : null, fanAnterior: fanAnt ? { ...sinUid(fanAnt), red: redDe(fanAnt.uid) } : null }, undefined, { 'cache-control': 'public, max-age=60' });
+  }
   if (u.pathname === '/api/pro/top') { // los más jugados de la semana (para la portada)
     if (!getS('pro', {}).on) return send(res, 200, { top: [] });
-    const J7 = jugadas7(), top = (await proVisibles()).filter(g => (J7.get(g.id) || 0) >= 3).map(g => ({ ...g, j: J7.get(g.id) })).sort((a, b) => b.j - a.j).slice(0, 12);
+    const top = await topPro(16);
     return send(res, 200, { top }, undefined, { 'cache-control': 'public, max-age=300' });
   }
   if (u.pathname === '/api/pro/reportar' && P) { // "Este juego no carga": con 3 personas distintas se oculta hasta que lo revises
@@ -511,7 +539,7 @@ async function api(req, res, u) {
     const cats = Object.entries(todos.reduce((a, g) => (a[g.cat] = (a[g.cat] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => c);
     const J7 = jugadas7(), orden = new Map(todos.map((g, i) => [g.id, i])), conJ = g => ({ ...g, j: J7.get(g.id) || 0 });
     const f = todos.filter(g => (!cat || g.cat === cat) && (!qq || g.t.toLowerCase().includes(qq))).map(conJ).sort((a, b) => (b.j >= 3 ? b.j : 0) - (a.j >= 3 ? a.j : 0) || orden.get(a.id) - orden.get(b.id));
-    const top = !qq && !cat && pag === 0 ? todos.map(conJ).filter(g => g.j >= 3).sort((a, b) => b.j - a.j).slice(0, 12) : [];
+    const top = !qq && !cat && pag === 0 ? await topPro(12) : [];
     return send(res, 200, { on: true, total: f.length, cats, top, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
   }
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
@@ -872,15 +900,18 @@ http.createServer(async (req, res) => {
     }
     if (u.pathname === '/campeones' || u.pathname === '/campeones.html') { // 👑 Salón de la Fama
       const A = mesPeru(-1), M = mesPeru(); mesCerrar(A); const sitio = getS('marca', null)?.nombre || 'Yupitok';
-      const tit = jg => { const t = CATALOGO.find(x => x.id === 'arcade-' + jg); return t ? `${t.e} ${t.t.split(':')[0]}` : jg; };
-      const camp = q('select * from campeones where mes=? order by juego, puesto', A.mes), porJ = {}; for (const r of camp) (porJ[r.juego] = porJ[r.juego] || []).push(r);
+      const PM = new Map((getS('pro', {}).on ? await catalogoPro() : []).map(g => [g.id, g])), esPro = jg => /^[a-f0-9]{12}$/.test(jg), unidad = jg => jg === 'jugador' || esPro(jg) ? ' min' : '';
+      const tit = jg => { if (jg === 'jugador') return '🎮 Jugador del mes (tiempo jugado en Yupitok)'; if (esPro(jg)) return '🕹️ Fan #1 de ' + (PM.get(jg)?.t || 'un juego'); const t = CATALOGO.find(x => x.id === 'arcade-' + jg); return t ? `${t.e} ${t.t.split(':')[0]}` : jg; };
+      const enlaceJ = jg => jg === 'jugador' ? '/?g=pro' : esPro(jg) ? (PM.get(jg) ? '/juego/' + PM.get(jg).s : '/?g=pro') : '/?g=arcade-' + jg;
+      const camp = q("select * from campeones where mes=? order by (juego='jugador') desc, juego, puesto", A.mes), porJ = {}; for (const r of camp) (porJ[r.juego] = porJ[r.juego] || []).push(r);
+      const jugMes = topJugadores(M.mes, 3);
       const lideres = q('select distinct juego from arcade where created_at>=? and created_at<?', M.desde, M.hasta).map(r => ({ juego: r.juego, top: topMes(r.juego, M, 1)[0] })).filter(x => x.top).sort((a, b) => tit(a.juego).localeCompare(tit(b.juego)));
-      const fila = (r, med) => { const red = redDe(r.uid); return `<div class="f"><span>${med} <b>${esc(r.nombre)}</b>${red ? ` · <a href="${esc(red.url)}" target="_blank" rel="nofollow ugc noopener noreferrer">${esc(red.red)}: @${esc(red.usuario)}</a>` : ''}</span><b>${r.puntos}</b></div>`; };
+      const fila = (r, med) => { const red = redDe(r.uid); return `<div class="f"><span>${med} <b>${esc(r.nombre)}</b>${red ? ` · <a href="${esc(red.url)}" target="_blank" rel="nofollow ugc noopener noreferrer">${esc(red.red)}: @${esc(red.usuario)}</a>` : ''}</span><b>${r.puntos}${unidad(r.juego)}</b></div>`; };
       const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>👑 Salón de la Fama · Campeones de ${A.nombre} · ${esc(sitio)}</title><meta name="description" content="Los mejores jugadores de ${esc(sitio)}: campeones de ${A.nombre} y líderes de ${M.nombre} en cada juego. ¿Te atreves a quitarles el trono?"><link rel="canonical" href="${esc(PUBLIC_URL + '/campeones')}"><meta property="og:title" content="👑 Campeones de ${A.nombre} en ${esc(sitio)}"><meta property="og:description" content="¿Te atreves a quitarles el trono? Juega gratis."><meta property="og:image" content="${esc(PUBLIC_URL + '/og/general.png')}">${adsScript()}
 <style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:22px 16px 60px;color:#f3f0ff;background:radial-gradient(circle at 15% 0,rgba(255,61,240,.22),transparent 40%),radial-gradient(circle at 90% 20%,rgba(34,230,255,.18),transparent 45%),radial-gradient(circle at 50% 0,#25106b,#0c0830 55%,#04030f) fixed}a{color:#22e6ff}h1{text-shadow:0 0 14px rgba(255,61,240,.6);text-align:center}.card{background:rgba(14,11,40,.78);border:1px solid rgba(34,230,255,.3);border-radius:18px;padding:14px;margin:12px 0}.f{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)}.btn{display:block;text-align:center;padding:14px;border-radius:12px;background:linear-gradient(90deg,#22e6ff,#8b5cf6,#ff3df0);color:#fff;font-weight:800;text-decoration:none;margin-top:16px}</style></head><body>
 <p><a href="/">← Volver a jugar</a></p><h1>👑 Salón de la Fama</h1><p style="text-align:center">Los mejores de cada juego. Los campeones del mes ganan un lugar aquí para siempre y muestran su red social para que los sigas.</p>
-<h2>🏆 Campeones de ${A.nombre}</h2>${Object.keys(porJ).length ? Object.entries(porJ).map(([jg, l]) => `<div class="card"><b><a href="/?g=arcade-${esc(jg)}" style="color:inherit">${esc(tit(jg))}</a></b>${l.map(r => fila(r, ['🥇', '🥈', '🥉'][r.puesto - 1])).join('')}</div>`).join('') : `<p>El primer Salón de la Fama se arma al terminar ${A.nombre === M.nombre ? 'este mes' : M.nombre}. ¡Todavía puedes ser campeón!</p>`}
-<h2>🔥 Líderes de ${M.nombre} (en vivo)</h2>${lideres.map(x => `<div class="card"><b><a href="/?g=arcade-${esc(x.juego)}" style="color:inherit">${esc(tit(x.juego))}</a></b><div class="f"><span>👑 <b>${esc(x.top.nombre)}</b></span><b>${x.top.puntos}</b></div></div>`).join('') || '<p>Nadie ha jugado este mes todavía. ¡Sé el primero!</p>'}
+<h2>🏆 Campeones de ${A.nombre}</h2>${Object.keys(porJ).length ? Object.entries(porJ).map(([jg, l]) => `<div class="card"><b><a href="${esc(enlaceJ(jg))}" style="color:inherit">${esc(tit(jg))}</a></b>${l.map(r => fila(r, ['🥇', '🥈', '🥉'][r.puesto - 1])).join('')}</div>`).join('') : `<p>El primer Salón de la Fama se arma al terminar ${A.nombre === M.nombre ? 'este mes' : M.nombre}. ¡Todavía puedes ser campeón!</p>`}
+<h2>🔥 Líderes de ${M.nombre} (en vivo)</h2>${jugMes.length ? `<div class="card"><b>🎮 Jugador del mes (tiempo jugado)</b>${jugMes.map((r, i) => `<div class="f"><span>${['🥇', '🥈', '🥉'][i]} <b>${esc(r.nombre)}</b></span><b>${r.min} min</b></div>`).join('')}</div>` : ''}${lideres.map(x => `<div class="card"><b><a href="/?g=arcade-${esc(x.juego)}" style="color:inherit">${esc(tit(x.juego))}</a></b><div class="f"><span>👑 <b>${esc(x.top.nombre)}</b></span><b>${x.top.puntos}</b></div></div>`).join('') || '<p>Nadie ha jugado este mes todavía. ¡Sé el primero!</p>'}
 <a class="btn" href="/">🎮 Jugar y quitarles el trono</a><p style="font-size:.8rem;opacity:.7;margin-top:16px">Las redes sociales las ponen los mismos campeones y se revisan antes de mostrarse. Si ves algo que no corresponde, escríbenos desde <a href="/contacto.html">Contacto</a>.</p><script src="/i18n.js?v=3"></script></body></html>`;
       return enviarHtml(req, res, html, { 'cache-control': 'public, max-age=120' });
     }

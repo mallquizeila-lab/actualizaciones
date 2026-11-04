@@ -1,3 +1,10 @@
+v7.50.0 — Los mejores juegos primero y campeones también en GamePix
+- ⭐ Los mejores juegos de GamePix son lo primero que se ve en la portada (justo después del premio diario): fila grande "🔥 Los más jugados" con su puesto #1, #2, #3… Primero van los más jugados en Yupitok esta semana y se completa con los mejores de GamePix (su ranking de calidad), así nunca está vacía.
+- 🎮 Campeones también en los juegos de GamePix: como esos juegos no nos mandan los puntajes, se mide el tiempo jugado de verdad (solo cuenta con la pantalla visible y después de tocar el juego; máximo 4 horas al día).
+  · "🎮 Jugador del mes": el top 3 de los que más juegan entra al Salón de la Fama y puede mostrar su red social, igual que los campeones de los juegos propios.
+  · "👑 Fan #1" de cada juego de GamePix: aparece arriba del juego ("Fan #1 de octubre: Reina (320 min) · TikTok @reina").
+- En la lista de juegos se ve quién es el Jugador del mes y cómo entrar al Salón de la Fama.
+
 v7.49.0 — Campeones del mes y Salón de la Fama
 - 👑 En cada juego propio (arcade, Joyas, Huerto…) aparece arriba "👑 Campeón de octubre: Ana (2800) · TikTok @ana" y "🏆 Líder de noviembre: Luis (2100)". Así todos saben a quién hay que ganarle.
 - 🏆 Nueva página "Salón de la Fama" (yupitok.com/campeones): los campeones (top 3) de cada juego del mes pasado, para siempre, y los líderes del mes en vivo. Entra al sitemap para Google.
