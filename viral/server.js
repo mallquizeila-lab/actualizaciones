@@ -51,6 +51,8 @@ create table if not exists perfiles (id text primary key, codigo text unique, da
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
+create table if not exists campeones (mes text, juego text, puesto integer, uid text, nombre text, avatar text, puntos integer, primary key (mes, juego, puesto));
+create table if not exists campeon_red (uid text primary key, cuenta integer, usuario_yupi text, red text, usuario text, estado text default 'pendiente', created_at text default (datetime('now')));
 create table if not exists torneo_premios (semana text, uid text, puesto integer, monedas integer, reclamado integer default 0, primary key (semana, uid));
 create table if not exists pro_rep (id text, iph text, created_at text default (datetime('now')), primary key (id, iph));
 create table if not exists pro_oculto (id text primary key, motivo text, created_at text default (datetime('now')));
@@ -199,7 +201,16 @@ async function juegoDelDia() {
   const r = run("insert into campaigns(title,body,url,image,filters,max_n,run_at,status,auto) values(?,?,?,?,?,0,datetime('now'),'programada','juegoDia')", clip('🔥 El juego del día: ' + g.t, 80), g.j >= 10 ? `${g.j} partidas esta semana en Yupitok. ¿Te animas a probarlo? 🎮` : '¡Juego nuevo para ti! Gratis y sin instalar. Toca para jugar 🎮', '/juego/' + g.s + '?src=push', g.img || null, '{}');
   enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
 }
-setInterval(() => reloj().then(() => juegoDelDia()).catch(console.error), 30000).unref();
+// 👑 El día 1 de cada mes (desde el mediodía): aviso "Ya están los campeones" (si ese día no mandaste otra campaña tuya)
+async function avisoCampeones() {
+  if (getS('campeonesAviso', true) === false || enviando.id) return; const hoy = hoyPeru(), A = mesPeru(-1);
+  if (hoy.slice(8) !== '01' || horaPeru() < '12:00' || getS('campeonesAvisoMes', '') === A.mes) return; mesCerrar(A);
+  setS('campeonesAvisoMes', A.mes); if (!q1('select 1 from campeones where mes=?', A.mes)) return;
+  if (q1("select 1 from campaigns where (auto is null or auto='') and date(created_at, '-5 hours') = ?", hoy)) return;
+  const r = run("insert into campaigns(title,body,url,filters,max_n,run_at,status,auto) values(?,?,?,?,0,datetime('now'),'programada','campeones')", `👑 ¡Ya están los campeones de ${A.nombre}!`, '¿Quién reina en tu juego favorito? Mira el Salón de la Fama y quítales el trono 🎮', '/campeones?src=push', '{}');
+  enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
+}
+setInterval(() => reloj().then(() => juegoDelDia()).then(() => avisoCampeones()).catch(console.error), 30000).unref();
 
 // ---------------- Servidor ----------------
 const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
@@ -277,6 +288,23 @@ async function catalogoPro(forzar) {
 // Juegos ocultos (reportados como "no carga" o escondidos por el dueño) y descripción en español
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
+// ---------- 👑 Campeones del mes (por juego; el top 3 puede mostrar su red social, aprobada por el dueño) ----------
+const MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const REDES_OK = { tiktok: ['TikTok', u => 'https://www.tiktok.com/@' + u], instagram: ['Instagram', u => 'https://www.instagram.com/' + u], youtube: ['YouTube', u => 'https://www.youtube.com/@' + u], facebook: ['Facebook', u => 'https://www.facebook.com/' + u], x: ['X', u => 'https://x.com/' + u], twitch: ['Twitch', u => 'https://www.twitch.tv/' + u], kick: ['Kick', u => 'https://kick.com/' + u] };
+function mesPeru(delta = 0) {
+  const d = new Date(Date.now() - 5 * 3600e3), y = d.getUTCFullYear(), m = d.getUTCMonth() + delta, a = Date.UTC(y, m, 1), b = Date.UTC(y, m + 1, 1), iso = t => new Date(t + 5 * 3600e3).toISOString().slice(0, 19).replace('T', ' ');
+  return { mes: new Date(a).toISOString().slice(0, 7), nombre: MESES_ES[new Date(a).getUTCMonth()], desde: iso(a), hasta: iso(b), ini: a + 5 * 3600e3, fin: b + 5 * 3600e3 };
+}
+const topMes = (juego, M, n = 3) => q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and created_at>=? and created_at<? group by uid order by puntos desc limit ?`, juego, M.desde, M.hasta, n);
+function mesCerrar(M) { // guarda el top 3 de cada juego de un mes ya terminado (una sola vez)
+  if (Date.now() < M.fin || getS('mesCerrado', '') >= M.mes) return;
+  for (const { juego } of q('select distinct juego from arcade where created_at>=? and created_at<?', M.desde, M.hasta)) topMes(juego, M).forEach((r, i) => run('insert or ignore into campeones(mes, juego, puesto, uid, nombre, avatar, puntos) values(?,?,?,?,?,?,?)', M.mes, juego, i + 1, r.uid, r.nombre, r.avatar, r.puntos));
+  setS('mesCerrado', M.mes);
+}
+// Las redes de los ganadores se ven todo el mes siguiente, o solo los primeros 7 días si así lo eliges en el panel
+const diasFama = () => getS('famaDias', 0) === 7 ? 7 : 0, finFama = () => diasFama() ? mesPeru().ini + 7 * 864e5 : mesPeru().fin, semanaFama = () => Date.now() < finFama();
+const redDe = uid => { if (!semanaFama()) return null; const r = q1("select red, usuario from campeon_red where uid=? and estado='ok'", uid); return r && REDES_OK[r.red] ? { red: REDES_OK[r.red][0], usuario: r.usuario, url: REDES_OK[r.red][1](r.usuario) } : null; };
+const sinUid = r => { const { uid, ...x } = r; return x; };
 // ---------- Torneo de la semana ----------
 const TORNEO_JUEGOS = ['gusanito', 'bloques', 'frutas', 'ladrillos', 'vuela', 'corredor', 'torre', 'n2048'], TORNEO_PREMIOS = [500, 300, 150];
 function torneoSemana(delta = 0) {
@@ -381,7 +409,7 @@ function paginaLegal(tipo) {
   const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Yupitok'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
   const T = {
     terminos: ['Términos de uso', `<p>Al usar ${sitio} aceptas estos términos. Si no estás de acuerdo, por favor no uses el sitio.</p>
-      <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p><p><b>Torneo de la semana:</b> participar es gratis y no requiere ninguna compra. Los premios en monedas son del juego y no tienen valor en dinero. Si hay un premio de un patrocinador, se indica en la portada y lo entrega ${resp} al ganador, que debe tener 18 años o más; se puede descalificar a quien haga trampa.</p>
+      <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p><p><b>Torneo de la semana:</b> participar es gratis y no requiere ninguna compra. Los premios en monedas son del juego y no tienen valor en dinero. Si hay un premio de un patrocinador, se indica en la portada y lo entrega ${resp} al ganador, que debe tener 18 años o más; se puede descalificar a quien haga trampa.</p><p><b>Campeones del mes:</b> el top 3 de cada juego aparece en el Salón de la Fama con su apodo y puntaje. Si quiere, puede mostrar su usuario de una red social: lo revisamos antes de publicarlo, puede quitarlo cuando quiera y no publicamos cuentas ofensivas, de apuestas o engañosas.</p>
       <h2>2. Edad</h2><p>Las funciones con cuenta, chat y clanes son para mayores de 18 años. Los menores deben usar el sitio con supervisión de un adulto.</p>
       <h2>3. Convivencia</h2><p>No se permite publicar insultos, acoso, contenido sexual, violento o ilegal, datos personales, enlaces, teléfonos ni correos. Moderamos el chat y podemos suspender cuentas que no respeten estas reglas.</p>
       <h2>4. Partidas en línea</h2><p>Si cuando buscas una partida en línea no hay otros jugadores disponibles, después de unos segundos juegas contra un rival controlado por la computadora. Al final de la partida te lo indicamos con 🤖.</p>
@@ -535,6 +563,28 @@ async function api(req, res, u) {
     return send(res, 200, { total, claves: Object.fromEntries(filas.map(x => [x.clave, x.n])) });
   }
   // Ranking del día de los juegos arcade.
+  if (u.pathname === '/api/campeon') { // líder del mes y campeones del mes pasado de un juego
+    const jg = String(u.searchParams.get('juego') || ''); if (!/^[a-z0-9]{2,20}$/.test(jg)) return send(res, 400, { error: 'Juego no válido' });
+    const M = mesPeru(), A = mesPeru(-1); mesCerrar(A);
+    const ant = q('select * from campeones where mes=? and juego=? order by puesto', A.mes, jg).map(r => ({ ...sinUid(r), red: redDe(r.uid) }));
+    return send(res, 200, { mes: M.nombre, mesAnterior: A.nombre, lideres: topMes(jg, M).map(sinUid), campeones: ant }, undefined, { 'cache-control': 'public, max-age=60' });
+  }
+  if (u.pathname === '/api/campeon/yo' && P) { // ¿soy campeón del mes pasado? (para invitarlo a poner su red)
+    const b = await json(req), uh = crypto.createHash('sha256').update(String(b.uid || '')).digest('hex').slice(0, 16), A = mesPeru(-1); mesCerrar(A);
+    const lista = q('select juego, puesto, puntos from campeones where mes=? and uid=? order by puesto', A.mes, uh), r = q1('select red, usuario, estado from campeon_red where uid=?', uh);
+    return send(res, 200, { mes: A.nombre, lista: semanaFama() ? lista : [], red: r || null, hasta: finFama(), redes: Object.fromEntries(Object.entries(REDES_OK).map(([k, v]) => [k, v[0]])) });
+  }
+  if (u.pathname === '/api/campeon/red' && P) { // el campeón pone (o quita) su red social; la aprueba el dueño en el panel
+    if (limite(ip, 'campRed', 10, 3600000)) return send(res, 429, { error: 'Más despacio' });
+    const b = await json(req), uh = crypto.createHash('sha256').update(String(b.uid || '')).digest('hex').slice(0, 16), c = online.cuentaDeTok(b.tok);
+    if (!c) return send(res, 401, { error: 'Primero entra a tu usuario de Yupitok' });
+    if (b.borrar) { run('delete from campeon_red where uid=?', uh); return send(res, 200, { ok: 1 }); }
+    const A = mesPeru(-1); mesCerrar(A); if (!q1('select 1 from campeones where mes=? and uid=?', A.mes, uh)) return send(res, 403, { error: 'Solo los campeones del mes pasado pueden poner su red' }); if (!semanaFama()) return send(res, 403, { error: 'La semana de fama ya terminó. ¡Gana este mes para volver a salir!' });
+    const red = String(b.red || ''), us = String(b.usuario || '').trim().replace(/^@/, '');
+    if (!REDES_OK[red]) return send(res, 400, { error: 'Elige una red' }); if (!/^[A-Za-z0-9._-]{2,30}$/.test(us)) return send(res, 400, { error: 'Escribe solo tu usuario (sin @ ni enlaces)' });
+    run("insert or replace into campeon_red(uid, cuenta, usuario_yupi, red, usuario, estado) values(?,?,?,?,?,'pendiente')", uh, c.id, c.usuario, red, us);
+    return send(res, 200, { ok: 1, estado: 'pendiente' });
+  }
   // 🏆 Torneo de la semana: un juego arcade distinto cada semana (lunes a domingo, hora Perú). Gratis: sin entrada pagada.
   // Premios en monedas del juego para el top 3 (y, si quieres, un premio de un patrocinador que pones en el panel).
   if (u.pathname === '/api/torneo' || (u.pathname === '/api/torneo/premio' && P)) {
@@ -560,7 +610,8 @@ async function api(req, res, u) {
     const top = q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy);
     const mio = q1(`select max(puntos) p from arcade where juego=? and uid=? and date(created_at,'-5 hours')=?`, jg, uidh, hoy).p;
     const puesto = q1(`select count(*) n from (select uid, max(puntos) p from arcade where juego=? and date(created_at,'-5 hours')=? group by uid) where p > ?`, jg, hoy, mio).n + 1;
-    return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto });
+    const MM = mesPeru(), mioMes = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', jg, uidh, MM.desde, MM.hasta).p, mesPuesto = q1('select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?', jg, MM.desde, MM.hasta, mioMes).n + 1;
+    return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto, mesPuesto, mes: MM.nombre });
   }
   // Progreso del jugador (nivel, monedas, niveles de Joyas…): se guarda por navegador y se recupera con un código.
   if (u.pathname === '/api/mundo/mov' && P) { // Mundo 3D: posición de cada jugador (en memoria) y la de los demás del mismo mundo
@@ -638,6 +689,8 @@ async function api(req, res, u) {
     if (r === 'pro-mostrar' && P) { const b = await json(req), id = String(b.id || ''); run('delete from pro_oculto where id=?', id); run('delete from pro_rep where id=?', id); return send(res, 200, { ok: 1 }); }
     if (r === 'pro-ocultar' && P) { const b = await json(req), id = String(b.id || ''); if (/^[a-f0-9]{12}$/.test(id)) run("insert or replace into pro_oculto(id, motivo) values(?, 'Ocultado por el dueño')", id); return send(res, 200, { ok: 1 }); }
     if (r === 'errores') return send(res, 200, { errores: q('select * from errores order by ultimo desc limit 100') });
+    if (r === 'redes-campeones') return send(res, 200, { redes: q("select uid, usuario_yupi, red, usuario, estado, created_at from campeon_red order by (estado='pendiente') desc, created_at desc limit 100").map(x => ({ ...x, url: REDES_OK[x.red] ? REDES_OK[x.red][1](x.usuario) : '' })) });
+    if (r === 'redes-campeones/estado' && P) { const b = await json(req); if (['ok', 'rechazado'].includes(b.estado)) run('update campeon_red set estado=? where uid=?', b.estado, String(b.uid || '')); return send(res, 200, { ok: 1 }); }
     if (r === 'errores-borrar' && P) { run('delete from errores'); return send(res, 200, { ok: 1 }); }
     if (r === 'fotos' || r.startsWith('fotos/')) { const fr = fotos.admin(r, P ? await json(req) : {}); if (fr) return send(res, 200, fr); }
     if (r === 'chat' || r.startsWith('chat/')) { const cr = chat.admin(r, P ? await json(req) : {}, F); if (cr) return send(res, 200, cr); }
@@ -724,6 +777,8 @@ async function api(req, res, u) {
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
         if (b.torneo) setS('torneo', { premio: clip(b.torneo.premio || '', 140) });
+        if (b.campeonesAviso !== undefined) setS('campeonesAviso', !!b.campeonesAviso);
+        if (b.famaDias !== undefined) setS('famaDias', +b.famaDias === 7 ? 7 : 0);
         if (b.juegoDia) setS('juegoDia', { on: !!b.juegoDia.on, hora: /^\d\d:\d\d$/.test(b.juegoDia.hora) ? b.juegoDia.hora : '19:30' });
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
@@ -734,7 +789,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), campeonesAviso: getS('campeonesAviso', true), famaDias: getS('famaDias', 0), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });
@@ -787,7 +842,7 @@ http.createServer(async (req, res) => {
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
       const juegosPro = getS('pro', {}).on ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
-      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...juegosPro];
+      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/campeones', '0.7'], ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...juegosPro];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
     }
     { const mq = /^\/apoyo-qr\/([a-f0-9]{20}\.(png|jpg|webp))$/.exec(u.pathname); if (mq) return archivo(req, res, path.join(QR_DIR, mq[1]), mq[2] === 'jpg' ? 'image/jpeg' : 'image/' + mq[2], { 'cache-control': 'public, max-age=31536000, immutable' }); }
@@ -814,6 +869,20 @@ http.createServer(async (req, res) => {
       const t = CATALOGO.find(x => x.id === 'arcade-batalla') || { t: 'GLORY BROWN', d: '' }, img = `${PUBLIC_URL}/og/arcade-batalla.png`;
       const og = `<title>GLORY BROWN · El Choque de los Reinos</title><meta name="description" content="${esc(t.d)}"><meta property="og:type" content="website"><meta property="og:title" content="👑 GLORY BROWN · El Choque de los Reinos"><meta property="og:description" content="${esc(t.d)} ¡Juega gratis!"><meta property="og:url" content="${esc(PUBLIC_URL + '/glory')}"><meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}"><meta name="apple-mobile-web-app-title" content="GLORY BROWN"><link rel="apple-touch-icon" href="/glory/icono-192.png"><script>if (!/[?&]g=/.test(location.search)) history.replaceState(null, '', '/glory?g=arcade-batalla&src=app');</script>`;
       return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og + adsScript()), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
+    }
+    if (u.pathname === '/campeones' || u.pathname === '/campeones.html') { // 👑 Salón de la Fama
+      const A = mesPeru(-1), M = mesPeru(); mesCerrar(A); const sitio = getS('marca', null)?.nombre || 'Yupitok';
+      const tit = jg => { const t = CATALOGO.find(x => x.id === 'arcade-' + jg); return t ? `${t.e} ${t.t.split(':')[0]}` : jg; };
+      const camp = q('select * from campeones where mes=? order by juego, puesto', A.mes), porJ = {}; for (const r of camp) (porJ[r.juego] = porJ[r.juego] || []).push(r);
+      const lideres = q('select distinct juego from arcade where created_at>=? and created_at<?', M.desde, M.hasta).map(r => ({ juego: r.juego, top: topMes(r.juego, M, 1)[0] })).filter(x => x.top).sort((a, b) => tit(a.juego).localeCompare(tit(b.juego)));
+      const fila = (r, med) => { const red = redDe(r.uid); return `<div class="f"><span>${med} <b>${esc(r.nombre)}</b>${red ? ` · <a href="${esc(red.url)}" target="_blank" rel="nofollow ugc noopener noreferrer">${esc(red.red)}: @${esc(red.usuario)}</a>` : ''}</span><b>${r.puntos}</b></div>`; };
+      const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>👑 Salón de la Fama · Campeones de ${A.nombre} · ${esc(sitio)}</title><meta name="description" content="Los mejores jugadores de ${esc(sitio)}: campeones de ${A.nombre} y líderes de ${M.nombre} en cada juego. ¿Te atreves a quitarles el trono?"><link rel="canonical" href="${esc(PUBLIC_URL + '/campeones')}"><meta property="og:title" content="👑 Campeones de ${A.nombre} en ${esc(sitio)}"><meta property="og:description" content="¿Te atreves a quitarles el trono? Juega gratis."><meta property="og:image" content="${esc(PUBLIC_URL + '/og/general.png')}">${adsScript()}
+<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:22px 16px 60px;color:#f3f0ff;background:radial-gradient(circle at 15% 0,rgba(255,61,240,.22),transparent 40%),radial-gradient(circle at 90% 20%,rgba(34,230,255,.18),transparent 45%),radial-gradient(circle at 50% 0,#25106b,#0c0830 55%,#04030f) fixed}a{color:#22e6ff}h1{text-shadow:0 0 14px rgba(255,61,240,.6);text-align:center}.card{background:rgba(14,11,40,.78);border:1px solid rgba(34,230,255,.3);border-radius:18px;padding:14px;margin:12px 0}.f{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)}.btn{display:block;text-align:center;padding:14px;border-radius:12px;background:linear-gradient(90deg,#22e6ff,#8b5cf6,#ff3df0);color:#fff;font-weight:800;text-decoration:none;margin-top:16px}</style></head><body>
+<p><a href="/">← Volver a jugar</a></p><h1>👑 Salón de la Fama</h1><p style="text-align:center">Los mejores de cada juego. Los campeones del mes ganan un lugar aquí para siempre y muestran su red social para que los sigas.</p>
+<h2>🏆 Campeones de ${A.nombre}</h2>${Object.keys(porJ).length ? Object.entries(porJ).map(([jg, l]) => `<div class="card"><b><a href="/?g=arcade-${esc(jg)}" style="color:inherit">${esc(tit(jg))}</a></b>${l.map(r => fila(r, ['🥇', '🥈', '🥉'][r.puesto - 1])).join('')}</div>`).join('') : `<p>El primer Salón de la Fama se arma al terminar ${A.nombre === M.nombre ? 'este mes' : M.nombre}. ¡Todavía puedes ser campeón!</p>`}
+<h2>🔥 Líderes de ${M.nombre} (en vivo)</h2>${lideres.map(x => `<div class="card"><b><a href="/?g=arcade-${esc(x.juego)}" style="color:inherit">${esc(tit(x.juego))}</a></b><div class="f"><span>👑 <b>${esc(x.top.nombre)}</b></span><b>${x.top.puntos}</b></div></div>`).join('') || '<p>Nadie ha jugado este mes todavía. ¡Sé el primero!</p>'}
+<a class="btn" href="/">🎮 Jugar y quitarles el trono</a><p style="font-size:.8rem;opacity:.7;margin-top:16px">Las redes sociales las ponen los mismos campeones y se revisan antes de mostrarse. Si ves algo que no corresponde, escríbenos desde <a href="/contacto.html">Contacto</a>.</p><script src="/i18n.js?v=3"></script></body></html>`;
+      return enviarHtml(req, res, html, { 'cache-control': 'public, max-age=120' });
     }
     { const mj = /^\/juego\/([a-z0-9-]{0,80}?)-?([a-f0-9]{12})\/?$/.exec(u.pathname); if (mj) { // 🕹️ Página propia de cada juego profesional (para que Google la encuentre)
       const todos = getS('pro', {}).on ? await proVisibles() : [], g = todos.find(x => x.id === mj[2]);

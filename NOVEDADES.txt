@@ -1,3 +1,11 @@
+v7.49.0 — Campeones del mes y Salón de la Fama
+- 👑 En cada juego propio (arcade, Joyas, Huerto…) aparece arriba "👑 Campeón de octubre: Ana (2800) · TikTok @ana" y "🏆 Líder de noviembre: Luis (2100)". Así todos saben a quién hay que ganarle.
+- 🏆 Nueva página "Salón de la Fama" (yupitok.com/campeones): los campeones (top 3) de cada juego del mes pasado, para siempre, y los líderes del mes en vivo. Entra al sitemap para Google.
+- 📣 Premio de los campeones: pueden poner su usuario de TikTok, Instagram, YouTube, Facebook, X, Twitch o Kick y se muestra todo el mes siguiente (o solo 7 días, según elijas en Ajustes → Torneo). Necesitan usuario registrado, se acepta solo el @usuario (sin enlaces) y tú lo apruebas en Moderación antes de que se vea.
+- 🔥 Al terminar una partida: "👑 ¡Eres el líder de noviembre!" o "Vas #2 del mes", y el botón de compartir dice "Soy el líder de Gusanito en Yupitok. ¿Me quitas el trono?" con el reto.
+- 🔔 El día 1 de cada mes, notificación automática "👑 ¡Ya están los campeones de octubre!" (se puede apagar en Ajustes → Torneo; no sale si ese día mandaste otra campaña).
+- Reglas agregadas a los Términos.
+
 v7.48.0 — Torneo de la semana
 - 🏆 Nuevo "Torneo de la semana" en la portada: cada semana (lunes a domingo, hora Perú) un juego arcade distinto (Gusanito, Bloques, Frutas, Ladrillos, Vuela, Corredor, Torre, 2048). Muestra el top 3, cuántos días quedan, tu mejor puntaje y tu puesto, y un botón "▶ Jugar el torneo".
 - 🪙 Premios automáticos para el top 3: 500, 300 y 150 monedas del juego. Se cobran solos al entrar a la página la semana siguiente (una sola vez).
