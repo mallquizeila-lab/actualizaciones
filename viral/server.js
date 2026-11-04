@@ -50,6 +50,7 @@ create table if not exists settings (k text primary key, v text);
 create table if not exists perfiles (id text primary key, codigo text unique, data text, updated_at text default (datetime('now')));
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
+create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
 create table if not exists pro_rep (id text, iph text, created_at text default (datetime('now')), primary key (id, iph));
 create table if not exists pro_oculto (id text primary key, motivo text, created_at text default (datetime('now')));
 create table if not exists errores (firma text primary key, msg text, src text, ruta text, ua text, n integer default 1, primero text default (datetime('now')), ultimo text default (datetime('now')));
@@ -264,6 +265,9 @@ async function catalogoPro(forzar) {
 // Juegos ocultos (reportados como "no carga" o escondidos por el dueño) y descripción en español
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
+// 🔥 Jugadas reales de cada juego (cuenta solo si la persona jugó al menos 30 segundos), últimos 7 días
+let JUG = { t: 0, m: new Map() };
+const jugadas7 = () => { if (Date.now() - JUG.t > 5 * 60000) { JUG = { t: Date.now(), m: new Map(q("select id, sum(n) n from pro_jugadas where dia >= date('now','-7 days') group by id").map(r => [r.id, r.n])) }; } return JUG.m; };
 const proVisibles = async () => { const oc = proOcultos(), t = await catalogoPro(); return oc.size ? t.filter(g => !oc.has(g.id)) : t; };
 // Traduce de a poco las descripciones de los juegos al español (una sola vez; queda guardado)
 setInterval(async () => { try { if (!getS('pro', {}).on) return; const t = await catalogoPro(); const falta = [];
@@ -421,6 +425,17 @@ async function api(req, res, u) {
     }
     return send(res, 404, { error: 'No existe' });
   }
+  if (u.pathname === '/api/pro/jugar' && P) { // una jugada real (el navegador la manda tras 30 s de juego); 1 por persona y juego cada 30 min
+    const b = await json(req), id = String(b.id || ''); if (!/^[a-f0-9]{12}$/.test(id)) return send(res, 400, { error: 'Juego no válido' });
+    if (limite(ip + ':' + id, 'proJ', 1, 30 * 60000) || limite(ip, 'proJt', 40, 3600000)) return send(res, 200, { ok: 0 });
+    run("insert into pro_jugadas(id, dia, n) values(?, date('now'), 1) on conflict(id, dia) do update set n = n + 1", id); JUG.m.set(id, (JUG.m.get(id) || 0) + 1);
+    return send(res, 200, { ok: 1 });
+  }
+  if (u.pathname === '/api/pro/top') { // los más jugados de la semana (para la portada)
+    if (!getS('pro', {}).on) return send(res, 200, { top: [] });
+    const J7 = jugadas7(), top = (await proVisibles()).filter(g => (J7.get(g.id) || 0) >= 3).map(g => ({ ...g, j: J7.get(g.id) })).sort((a, b) => b.j - a.j).slice(0, 12);
+    return send(res, 200, { top }, undefined, { 'cache-control': 'public, max-age=300' });
+  }
   if (u.pathname === '/api/pro/reportar' && P) { // "Este juego no carga": con 3 personas distintas se oculta hasta que lo revises
     if (limite(ip, 'proRep', 10, 3600000)) return send(res, 429, { error: 'Más despacio' });
     const b = await json(req), id = String(b.id || ''); if (!/^[a-f0-9]{12}$/.test(id)) return send(res, 400, { error: 'Juego no válido' });
@@ -441,8 +456,10 @@ async function api(req, res, u) {
     const cfg = getS('pro', {}); if (!cfg.on) return send(res, 200, { on: false, juegos: [] });
     const todos = await proVisibles(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
     const cats = Object.entries(todos.reduce((a, g) => (a[g.cat] = (a[g.cat] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => c);
-    const f = todos.filter(g => (!cat || g.cat === cat) && (!qq || g.t.toLowerCase().includes(qq)));
-    return send(res, 200, { on: true, total: f.length, cats, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
+    const J7 = jugadas7(), orden = new Map(todos.map((g, i) => [g.id, i])), conJ = g => ({ ...g, j: J7.get(g.id) || 0 });
+    const f = todos.filter(g => (!cat || g.cat === cat) && (!qq || g.t.toLowerCase().includes(qq))).map(conJ).sort((a, b) => (b.j >= 3 ? b.j : 0) - (a.j >= 3 ? a.j : 0) || orden.get(a.id) - orden.get(b.id));
+    const top = !qq && !cat && pag === 0 ? todos.map(conJ).filter(g => g.j >= 3).sort((a, b) => b.j - a.j).slice(0, 12) : [];
+    return send(res, 200, { on: true, total: f.length, cats, top, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
   }
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (/^\/api\/(amigos|dm|grupos)\//.test(u.pathname)) { const r = await amigos.http(req, res, u, { ip, json, send, limite, cuentaDeTok: online.cuentaDeTok }); if (r !== false) return; }
@@ -763,7 +780,7 @@ http.createServer(async (req, res) => {
       if (u.pathname !== '/juego/' + g.s) { res.writeHead(301, { location: '/juego/' + g.s }); return res.end(); }
       const sitio = getS('marca', null)?.nombre || 'Yupitok', d = descEs(g), titulo = `${g.t}: juega gratis online · ${sitio}`, url = PUBLIC_URL + '/juego/' + g.s;
       const desc = (d ? d.replace(/\s+/g, ' ').slice(0, 150) + ' ' : '') + `Juego de ${g.cat.toLowerCase()} gratis, sin instalar, en celular y PC.`;
-      const rel = todos.filter(x => x.cat === g.cat && x.id !== g.id).slice(0, 12);
+      const J7r = jugadas7(), rel = todos.filter(x => x.cat === g.cat && x.id !== g.id).sort((a, b) => (J7r.get(b.id) || 0) - (J7r.get(a.id) || 0)).slice(0, 12);
       const og = `<title>${esc(titulo)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(url)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(sitio)}"><meta property="og:title" content="${esc(g.t)} · ¡Juega gratis!"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">${g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(g.img)}">` : ''}<meta property="og:locale" content="es_LA">
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'VideoGame', name: g.t, description: d || desc, url, image: g.img || undefined, genre: g.cat, inLanguage: 'es', isAccessibleForFree: true, gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web', publisher: { '@type': 'Organization', name: sitio } }).replace(/</g, '\\u003c')}</script>
