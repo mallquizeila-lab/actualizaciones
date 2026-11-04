@@ -162,3 +162,16 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 #mapa:after{content:'';position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(30,10,90,.35),rgba(10,5,40,.15) 50%,rgba(30,10,90,.3));mix-blend-mode:multiply}
 #mapa button[data-n]{z-index:4!important}
 #mapa button[data-n]:not([disabled]){box-shadow:0 0 18px rgba(34,230,255,.6),0 6px 14px rgba(0,0,0,.4)!important}
+
+/* Escenarios pintados con IA detrás de cada juego (con acercamiento lento de cine) */
+#play.con-escena:before{content:'';position:fixed;inset:-4%;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(6,5,26,.35),rgba(6,5,26,.55) 45%,rgba(6,5,26,.85)),var(--escena) center/cover no-repeat;
+  animation:escenaCine 38s ease-in-out infinite alternate;will-change:transform}
+@keyframes escenaCine{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-1.5%,-1%)}}
+#play.con-escena #stage>.card,#play.con-escena #stage .card{background:rgba(10,8,32,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+@media (prefers-reduced-motion:reduce){#play.con-escena:before{animation:none}}
+#play.con-escena:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;
+  background-image:radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,.8),transparent),radial-gradient(1.5px 1.5px at 70% 60%,rgba(190,240,255,.8),transparent),radial-gradient(2px 2px at 40% 80%,rgba(255,220,250,.7),transparent),radial-gradient(1.5px 1.5px at 85% 20%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 10% 70%,rgba(255,240,200,.7),transparent);
+  background-size:340px 420px;animation:motas 26s linear infinite}
+@keyframes motas{from{background-position:0 0}to{background-position:40px -420px}}
+@media (prefers-reduced-motion:reduce){#play.con-escena:after{animation:none}}

@@ -1,0 +1,255 @@
+{
+ "nota": "Fondos pintados con IA para cada mundo y juego. ShortForge los crea con tu cuenta de Cloudflare (botón 'Escenarios pintados con IA').",
+ "escenas": [
+  {
+   "id": "glory_0",
+   "prompt": "Beautiful vertical background scene: golden sunrise kingdom with white castles, green meadows and blue banners, soft morning light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_1",
+   "prompt": "Beautiful vertical background scene: enchanted emerald forest with giant trees, glowing mushrooms and sun rays through the leaves, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_2",
+   "prompt": "Beautiful vertical background scene: desert empire with ancient sandstone temples, palm oasis and warm golden sunset, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_3",
+   "prompt": "Beautiful vertical background scene: floating sky islands above the clouds with waterfalls and bright blue sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_4",
+   "prompt": "Beautiful vertical background scene: misty shadow realm with dark purple sky, twisted trees and glowing violet crystals, mysterious but not scary, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_5",
+   "prompt": "Beautiful vertical background scene: frozen ice kingdom with snowy mountains, ice castles and northern lights, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "glory_6",
+   "prompt": "Beautiful vertical background scene: volcanic dragon lands with lava rivers, obsidian rocks and orange glowing sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "huerto_dia",
+   "prompt": "Beautiful vertical background scene: sunny Peruvian Andean farm field with corn crops, green terraces and blue sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "huerto_noche",
+   "prompt": "Beautiful vertical background scene: peaceful Peruvian farm at night with corn crops, full moon, stars and fireflies, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "huerto_andes",
+   "prompt": "Beautiful vertical background scene: Andean mountain farm at sunset with terraces, snowy peaks and warm orange sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "joyas_0",
+   "prompt": "Beautiful vertical background scene: magical crystal cave full of glowing colorful gems, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "joyas_1",
+   "prompt": "Beautiful vertical background scene: candy kingdom with pastel sweets hills and lollipop trees, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "joyas_2",
+   "prompt": "Beautiful vertical background scene: underwater coral reef with pearls, bubbles and sun rays from the surface, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "joyas_3",
+   "prompt": "Beautiful vertical background scene: golden sky temple among the clouds with shining jewels, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "joyas_4",
+   "prompt": "Beautiful vertical background scene: outer space nebula with colorful planets and sparkling stars, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "mundo_plaza",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: magical plaza sky at twilight with purple and peach clouds and glowing portals far away, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "mundo_desierto",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: bright desert sky with sand dunes on the horizon and wispy clouds, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "mundo_bosque",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: enchanted forest sky at dusk with tall pine silhouettes and teal glow, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "mundo_nieve",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: snowy mountain peaks under a clear bright blue sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "mundo_volcan",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: volcanic island horizon with red smoky sky and distant erupting volcano, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "mundo_luna",
+   "prompt": "Seamless 360 degree equirectangular panorama of the sky and distant horizon: starry deep space with the Earth rising on the horizon of a grey moon, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "horizontal"
+  },
+  {
+   "id": "arcade_bloques",
+   "prompt": "Beautiful vertical background scene: retro arcade neon city at night with falling colorful blocks in the sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_frutas",
+   "prompt": "Beautiful vertical background scene: tropical fruit market jungle with bright colors, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_colores",
+   "prompt": "Beautiful vertical background scene: colorful paint studio with splashes of rainbow paint, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_torre",
+   "prompt": "Beautiful vertical background scene: tall stacking tower construction site above the clouds, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_palabra",
+   "prompt": "Beautiful vertical background scene: cozy library with floating letters and warm lamps, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_sudoku",
+   "prompt": "Beautiful vertical background scene: calm zen japanese garden with stone paths, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_penales",
+   "prompt": "Beautiful vertical background scene: football stadium at night with bright floodlights and green pitch, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_ahorcado",
+   "prompt": "Beautiful vertical background scene: old western town at sunset, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_sopa",
+   "prompt": "Beautiful vertical background scene: cozy kitchen with alphabet soup steam and warm light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_ppt",
+   "prompt": "Beautiful vertical background scene: playful cartoon arena with giant rock, paper and scissors statues, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_reflejos",
+   "prompt": "Beautiful vertical background scene: futuristic neon reaction training room, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_tuberias",
+   "prompt": "Beautiful vertical background scene: steampunk factory with copper pipes and steam, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_calculo",
+   "prompt": "Beautiful vertical background scene: school classroom with chalkboard full of math, warm light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_simon",
+   "prompt": "Beautiful vertical background scene: glowing electronic music stage with four colored lights, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_topos",
+   "prompt": "Beautiful vertical background scene: green garden lawn with molehills and flowers, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_color",
+   "prompt": "Beautiful vertical background scene: bright abstract world of floating colored shapes, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_ladrillos",
+   "prompt": "Beautiful vertical background scene: retro space arcade with neon bricks floating in space, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_vuela",
+   "prompt": "Beautiful vertical background scene: blue sky with fluffy clouds and green pipes on the ground, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_corredor",
+   "prompt": "Beautiful vertical background scene: endless road through a colorful city at sunset, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_flechas",
+   "prompt": "Beautiful vertical background scene: rhythm dance stage with glowing arrows and disco lights, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_gusanito",
+   "prompt": "Beautiful vertical background scene: lush green garden with apples on the grass, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_ludo",
+   "prompt": "Beautiful vertical background scene: cozy game room with wooden table and warm lamp light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_billar",
+   "prompt": "Beautiful vertical background scene: elegant pool hall with green table glow and warm hanging lamps, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_rompecabezas",
+   "prompt": "Beautiful vertical background scene: cozy desk with puzzle pieces and warm sunlight, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_memoria",
+   "prompt": "Beautiful vertical background scene: magical card table with sparkles, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_buscaminas",
+   "prompt": "Beautiful vertical background scene: grassy field with flags under a clear sky, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "arcade_n2048",
+   "prompt": "Beautiful vertical background scene: minimal warm wooden tiles background with soft light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "aula_edu",
+   "prompt": "Beautiful vertical background scene: bright friendly school classroom with globe, books and big windows, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  },
+  {
+   "id": "aula_fe",
+   "prompt": "Beautiful vertical background scene: peaceful biblical landscape with green hills, olive trees, a calm sea and soft heavenly light, digital painting, rich detailed game environment art, cinematic lighting, depth and atmosphere, no characters, no people, no text, no logos, family-friendly",
+   "formato": "vertical"
+  }
+ ]
+}

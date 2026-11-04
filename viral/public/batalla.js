@@ -5,7 +5,7 @@
   const AN = 18, AL = 32, RIO0 = 15, RIO1 = 17, PUENTES = [3.5, 14.5];
   let G = null, CARTA = {}, GA = null;
   const cargar = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
-  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=4'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); if (window.IDIOMA && IDIOMA.actual !== 'es') { const todas = []; const rec = o => typeof o === 'string' ? todas.push(o) : o && typeof o === 'object' && Object.values(o).forEach(rec); G.cartas.forEach(c => rec(c.frases)); IDIOMA.precargar(todas); } }
+  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=5'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); if (window.IDIOMA && IDIOMA.actual !== 'es') { const todas = []; const rec = o => typeof o === 'string' ? todas.push(o) : o && typeof o === 'object' && Object.values(o).forEach(rec); G.cartas.forEach(c => rec(c.frases)); IDIOMA.precargar(todas); } }
   const azar = l => l[Math.floor(Math.random() * l.length)];
   const RZ = () => G.rarezas;
   const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
@@ -176,6 +176,7 @@
   const datosJugador = () => { const J = D(); return { uid: VID, tok: PERFIL.tok, nombre: LS.get('chatNom') || PERFIL.usuario || 'Jugador', avatar: LS.get('chatAv') || 'a01', trofeos: J.trofeos, mazo: J.mazo, niveles: Object.fromEntries(J.mazo.map(k => [k, nivelDe(k)])), clan: J.clan || '' }; };
   let TAB = 'batalla';
   function lobby(t, tab) {
+    try { window.ESC?.poner('glory_' + (G.arenas[arenaDe(J.trofeos)]?.mundo ?? 0)); } catch (e) {}
     salir(); registrar(t.id); $('#stage').onclick = null; if (tab) TAB = tab; estilos();
     if (!G) { stage('<div class="card cargando"><div class="sp"></div><p>Abriendo los reinos…</p></div>'); listo().then(() => lobby(t)).catch(() => stage('<div class="card"><h2>No se pudo cargar GLORY BROWN</h2><p class="sub">Revisa tu conexión.</p></div>')); return; }
     const J = D(); if (!J.intro) return intro(() => lobby(t));
@@ -472,7 +473,7 @@
     if (!G) return listo().then(() => batalla(t, cfg));
     const J = D(), B = G.balance, dpr = Math.min(2, devicePixelRatio || 1), ON = cfg.online || null, n4 = cfg.modo === '2v2';
     const miAsiento = ON ? ON.asiento : 0, equipoDe = a => n4 ? (a < 2 ? 0 : 1) : a, miEquipo = equipoDe(miAsiento), anfitrion = !ON, voltear = miEquipo === 1;
-    const arenaI = cfg.campana ?? (ON ? arenaDe(ON.jugadores?.[0]?.trofeos || 0) : arenaDe(J.trofeos)), arena = G.arenas[arenaI], mundoI = arena.mundo, variante = arenaI % 3;
+    const arenaI = cfg.campana ?? (ON ? arenaDe(ON.jugadores?.[0]?.trofeos || 0) : arenaDe(J.trofeos)), arena = G.arenas[arenaI], mundoI = arena.mundo, variante = arenaI % 3; window.ESC?.poner('glory_' + mundoI);
     // Batalla a pantalla completa: la arena ocupa todo el alto disponible, como en los juegos de celular
     document.body.classList.add('gb-full'); if (!document.getElementById('gbFullCss')) { const st = document.createElement('style'); st.id = 'gbFullCss'; st.textContent = '.gb-full #play{position:fixed;inset:0;z-index:40;margin:0;max-width:none;width:100%;background:radial-gradient(circle at 50% 30%,#3b0764,#0b0820 75%);overflow-y:auto;overflow-x:hidden;padding:0}.gb-full #back,.gb-full .marca{display:none!important}.gb-full #stage{max-width:520px;margin:0 auto;padding:0}.gb-full #stage .gb-bat{padding:4px 4px 6px;border:0;border-radius:0;background:transparent;box-shadow:none}.gb-full #cv{border:0!important;border-radius:10px!important}'; document.head.appendChild(st); }
     const ancho = Math.min(innerWidth, 520) - 8, k = Math.max(14, Math.min(ancho / AN, (innerHeight - 168) / AL)), W = AN * k, H = AL * k;
@@ -638,10 +639,17 @@
       if (e.hp / e.max < .33 && Math.random() < .2) efectos.push({ tipo: 'humo', x: e.x + (Math.random() - .5), y: e.y, vx: (Math.random() - .5) * .4, vy: 0, v: 1.2, max: 1.2, r: .45, alto: 3 });
     }
     let fpsN = 0, fpsT = 0;
+    let vivosAntes = new Map(), vivosAhora = new Map();
     function dibujar(dt) {
       const tt = performance.now() / 1000;
       for (const f of efectos) { f.v -= dt; if (f.vx) { f.x += f.vx * dt; f.y += f.vy * dt; } } efectos = efectos.filter(f => f.v > 0);
       for (const tx of textos) tx.v -= dt; textos = textos.filter(x => x.v > 0); shake = Math.max(0, shake - dt);
+      for (const e of ents) { if (!e.card || e.torre) continue; // polvo al caminar y humo con chispas al caer
+        const mov = e.mueve > 0 || Math.abs((e.tx ?? e.x) - (e.__ox ?? e.x)) + Math.abs((e.ty ?? e.y) - (e.__oy ?? e.y)) > .01; e.__ox = e.tx ?? e.x; e.__oy = e.ty ?? e.y;
+        if (e.hp > 0 && mov && !e.aire && !e.estructura && efectos.length < 160 && Math.random() < dt * 5) efectos.push({ tipo: 'humo', x: e.x + (Math.random() - .5) * .4, y: e.y + .35, vx: (Math.random() - .5) * .4, vy: -.1, v: .35, max: .5, r: .16, alto: 0 });
+        if (e.hp > 0) vivosAhora.set(e.id ?? e, e); }
+      for (const [id, e] of vivosAntes) if (!vivosAhora.has(id) && efectos.length < 200) for (let i = 0; i < 9; i++) { const an = i / 9 * Math.PI * 2; efectos.push({ tipo: 'humo', x: e.x, y: e.y, vx: Math.cos(an) * 1.6, vy: Math.sin(an) * .8, v: .55, max: .7, r: .3 }); efectos.push({ tipo: 'chispa', x: e.x, y: e.y, vx: Math.cos(an) * 3, vy: Math.sin(an) * 2 - 1, v: .4, max: .45, team: e.team }); }
+      vivosAntes = vivosAhora; vivosAhora = new Map();
       for (const e of ents) { if (e.dice) e.dice.v -= dt; if (!anfitrion) { if (e.tx != null) { e.x += (e.tx - e.x) * Math.min(1, dt * 10); e.y += (e.ty - e.y) * Math.min(1, dt * 10); } e.t = (e.t || 0) + dt; e.flash = Math.max(0, (e.flash || 0) - dt); } }
       X.save(); if (shake > 0) X.translate((Math.random() - .5) * k * shake, (Math.random() - .5) * k * shake);
       if (G3) { G3.render(ents, proys, dt, tt); X.drawImage(G3.canvas, 0, 0, W, H); fpsN++; fpsT += dt; if (fpsT > 4) { if (fpsN / fpsT < 22 && LS.get('gb3dq') !== '0') LS.set('gb3dq', '0'); fpsN = fpsT = 0; } } else { X.drawImage(fondo, 0, 0, W, H); rio(tt); }

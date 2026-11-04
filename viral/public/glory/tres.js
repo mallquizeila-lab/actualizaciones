@@ -278,7 +278,11 @@
         let o = modelos.get(e.id); if (!o) { o = modelo(e); modelos.set(e.id, o); o.__px = e.x; o.__py = e.y; o.rotation.y = (e.team ? 0 : Math.PI); }
         const cae = e.nace > 0 ? Math.max(0, e.nace - .5) * 2 : 0, alto = e.aire ? 2.1 : 0;
         o.position.set(e.x - 9, alto + cae * 6, e.y - 16);
-        const dx = e.x - o.__px, dy = e.y - o.__py; if (o.userData.fam === 'sprite') { o.__px = e.x; o.__py = e.y; const sc = e.flash > 0 ? 1.1 : 1; o.scale.setScalar(sc); o.visible = !(e.invis && e.team !== (voltear ? 1 : 0)); animarSprite(o, e, t, dt, dx); continue; } if (Math.hypot(dx, dy) > .004) { const obj = Math.atan2(dx, dy); let d = obj - o.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); o.rotation.y += d * Math.min(1, dt * 10); } o.__px = e.x; o.__py = e.y;
+        const dx = e.x - o.__px, dy = e.y - o.__py;
+        { const dl = Math.hypot(dx, dy); if (dl > .002) { o.__nx = dx / dl; o.__ny = dy / dl; } const nx = o.__nx ?? 0, ny = o.__ny ?? (e.team ? 1 : -1); // dirección hacia donde avanza
+          o.__emb = e.at > 0 ? Math.min(1, (o.__emb || 0) + dt * 10) : Math.max(0, (o.__emb || 0) - dt * 4); // embestida al atacar
+          const kb = Math.min(1, (e.flash || 0) / .15); o.__kb = Math.max(kb, (o.__kb || 0) - dt * 6); // retroceso al recibir golpe
+          const off = o.__emb * .28 - o.__kb * .32; o.position.x += nx * off; o.position.z += ny * off; o.position.y += o.__kb * .12; } if (o.userData.fam === 'sprite') { o.__px = e.x; o.__py = e.y; const sc = e.flash > 0 ? 1.1 : 1; o.scale.setScalar(sc); o.visible = !(e.invis && e.team !== (voltear ? 1 : 0)); animarSprite(o, e, t, dt, dx); continue; } if (Math.hypot(dx, dy) > .004) { const obj = Math.atan2(dx, dy); let d = obj - o.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); o.rotation.y += d * Math.min(1, dt * 10); } o.__px = e.x; o.__py = e.y;
         const sc = e.flash > 0 ? 1.12 : e.at > 0 ? 1.06 : 1; o.scale.setScalar(o.__base * sc); o.visible = !(e.invis && e.team !== (voltear ? 1 : 0));
         animar(o, e, t, dt);
       }

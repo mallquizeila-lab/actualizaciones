@@ -1,3 +1,11 @@
+v7.44.0 — Escenarios pintados con IA y juegos con más vida
+- 🏞️ Nuevo botón en ShortForge (Página viral): "🏞️ Escenarios pintados con IA". Pinta con tu cuenta de Cloudflare 50 fondos: los 7 mundos de GLORY BROWN, las 3 zonas del Huerto, 5 mundos de Joyas (cambian cada 20 niveles), 6 cielos panorámicos para las Islas 3D, uno para cada juego arcade y el aula (educativos y cristianos). Si se acaba el cupo gratis del día, sigue solo al día siguiente.
+- 🎬 Cada juego muestra su escenario de fondo con un acercamiento lento tipo cine y lucecitas flotando.
+- ⚔️ GLORY BROWN: los personajes levantan polvo al caminar, se lanzan hacia adelante al atacar, retroceden al recibir un golpe y al caer dejan una nube de humo con chispas.
+- 🌱 Huerto: las plagas levantan tierra al caminar y se aplastan y retroceden al recibir un golpe.
+- 💎 Joyas: el tablero deja ver el escenario, las joyas "respiran" suavemente y aparecen destellos de brillo.
+- 🌍 Islas 3D: cielo pintado alrededor (gira con la cámara), nubes que pasan y aves volando.
+
 v7.43.0 — Voces naturales, tableros nítidos y luz de cine
 - 🎙️ Nuevo botón en ShortForge (Página viral): "🎙️ Voces naturales para todos los juegos". Graba con voces de Perú y México de tu biblioteca:
   · el narrador de los juegos (Joyas, arcade, Islas 3D y los anuncios de GLORY BROWN) en 3 tomas distintas por frase, que se turnan para no sonar siempre igual;

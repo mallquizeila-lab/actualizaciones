@@ -319,6 +319,7 @@
 
   // ---------- Mapa de niveles ----------
   function mapa(t) {
+    window.ESC?.poner('huerto_dia');
     salir(); registrar(t.id); $('#stage').onclick = null; FX.musica?.('huerto'); cargarVocesH(); cargarArteH();
     if (window.IDIOMA && IDIOMA.actual !== 'es') { const todas = []; const rec = o => typeof o === 'string' ? todas.push(o) : Object.values(o).forEach(rec); rec(FRASES); IDIOMA.precargar(todas); }
     const J = datos(), act = Math.min(J.nivel || 1, TOTAL), est = J.estrellas || {}, totE = Object.values(est).reduce((a, b) => a + b, 0);
@@ -351,6 +352,7 @@
     const C = cfg(n), tipos = desbloq(n), dpr = Math.min(2, devicePixelRatio || 1);
     document.body.classList.add('hd-full'); if (!document.getElementById('hdFullCss')) { const st = document.createElement('style'); st.id = 'hdFullCss'; st.textContent = '.hd-bar{margin:6px auto 0;display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.35)}.hd-top{display:flex;gap:6px;align-items:stretch}.hd-agua{flex:1.3;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#1e3a8a);color:#fff;font-weight:900;font-size:1.05rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}.hd-poder,.hd-pala{flex:1;position:relative;overflow:hidden;border-radius:12px;color:#fff;font-weight:900;font-size:.85rem;padding:7px 4px;cursor:pointer;border:1px solid rgba(255,255,255,.2)}.hd-poder{background:linear-gradient(135deg,#a16207,#451a03);border-color:rgba(253,224,71,.5)}.hd-poder i{position:absolute;left:0;top:0;bottom:0;width:0;height:auto!important;background:linear-gradient(90deg,rgba(253,224,71,.55),rgba(250,204,21,.85))}.hd-poder span,.hd-pala span{position:relative}.hd-pala{background:linear-gradient(135deg,#475569,#1e293b)}.hd-cartas{display:grid;gap:5px}.hd-carta{position:relative;border-radius:13px;border:1px solid rgba(255,255,255,.22);background:linear-gradient(180deg,rgba(134,239,172,.22),rgba(20,83,45,.55));padding:3px 0 2px;color:#fff;cursor:pointer;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s}.hd-carta canvas{width:100%;max-width:56px;aspect-ratio:1;height:auto;display:block;margin:0 auto;pointer-events:none}.hd-carta small{display:block;font-weight:900;font-size:.72rem;pointer-events:none;text-align:center}.hd-carta i{position:absolute;left:0;right:0;top:0;height:0;background:rgba(0,0,0,.62);pointer-events:none}'+'.hd-full #play{position:fixed;inset:0;z-index:40;margin:0;max-width:none;width:100%;background:radial-gradient(circle at 50% 20%,#14532d,#052e16 80%);overflow-y:auto;overflow-x:hidden;padding:0}.hd-full #back,.hd-full .marca{display:none!important}.hd-full #stage{max-width:780px;margin:0 auto;padding:0}.hd-full #stage>.card{background:transparent;border:0;box-shadow:none;padding:4px!important;margin:0}.hd-btn{width:auto!important;margin:0!important;padding:6px 11px!important;font-size:.9rem!important;border-radius:12px!important;background:rgba(0,0,0,.35)!important;border:1px solid rgba(255,255,255,.2)!important;color:#fff!important;font-weight:800}'; document.head.appendChild(st); }
     const filas = desbloq(n).length <= 7 ? 1 : 2, ancho = Math.min(innerWidth, 760) - 10, S = Math.floor(Math.max(46, Math.min(ancho / L, (innerHeight - 118 - filas * 74) / 8.5))), W = S * L, TOP = S * .75, BOT = S * .75, Z = zonaDe(n).k, H = TOP + R * S + BOT;
+    window.ESC?.poner('huerto_' + Z);
     const chico = 'width:auto;margin:0;padding:5px 10px;font-size:.85rem';
     stage(`<div class="card" style="padding:8px;user-select:none;-webkit-user-select:none">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin:0 auto 6px;max-width:${W}px"><button class="btn alt hd-btn" id="vm">🗺️</button><b style="white-space:nowrap">${zonaDe(n).e} Nivel ${n}</b><span style="display:flex;gap:4px;align-items:center">${FX.botones ? FX.botones() : ''}<button class="btn alt hd-btn" id="vel">⏩ x1</button><button class="btn alt hd-btn" id="pau" aria-label="Pausa">❚❚</button></span></div>
@@ -447,7 +449,7 @@
       ondas.push({ x, y, r: 0, max: S * (ancho ? 1.6 : .9), v: .45 }); shake = .45; FX.son('explosion'); FX.vibrar(90); textos.push({ txt: '¡BUM!', x, y: y - S * .2, tam: S * .5, v: .9, max: .9 });
       for (let i = 0; i < 34; i++) { const a = Math.random() * 7, v = (1.5 + Math.random() * 4) * S / 50; parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, v: .5 + Math.random() * .5, max: 1, r: S * (.04 + Math.random() * .06), c: ['#fff3a0', '#ffb703', '#fb5607', '#ff006e'][i % 4] }); }
     }
-    const herir = (e, d) => { e.hp -= d; e.flash = 1; };
+    const herir = (e, d) => { e.hp -= d; e.flash = 1; e.kb = 1; };
     const decir = (o, txt, dur = 1.8) => { o.dice = { txt, v: dur }; };
     function hablar(e, lista, prob = 1, forzar = false) { if (Math.random() > prob) return; const txt = azar(lista); decir(e, txt); voz(txt, e.tipo, { forzar }); }
     function burbuja(x, y, txt) { textos.push({ txt, x, y, tam: S * .2, v: 1.5, max: 1.5, burbuja: 1 }); }
@@ -499,7 +501,7 @@
         if (blk && e.tipo === 'langosta' && !e.saltado) { e.saltado = true; e.salto = .6; e.s0 = e.y; e.s1 = blk.y + S * .5; FX.son('swish'); continue; }
         if (blk && blk.k !== 'aji') { if (!e.come) { hablar(e, FRASES.come, .45); if (blk.k === 'coco' && !blk.hablo) { blk.hablo = 1; decir(blk, azar(FRASES.def.coco)); } } if (Math.random() < dt * 2) FX.son('comer'); e.come = true; blk.hp -= (e.tipo === 'rata' ? 240 : 110) * dt; blk.golpe = .12; if (Math.random() < dt * 5) chispas(blk.x, blk.y - S * .25, '#9be36b', 2, .5);
           if (blk.hp <= 0) { perdidos++; defs.delete(blk.key); chispas(blk.x, blk.y, '#7a5a2a', 14); FX.son('choque'); FX.vibrar(30); } }
-        else { e.come = false; e.y += ENE[e.tipo].vel * S * (e.lento > 0 ? .5 : 1) * dt; }
+        else { e.come = false; e.y += ENE[e.tipo].vel * S * (e.lento > 0 ? .5 : 1) * dt; if (e.tipo !== 'polilla' && parts.length < 140 && Math.random() < dt * 4) parts.push({ x: e.x + (Math.random() - .5) * S * .3, y: e.y + S * .22, vx: (Math.random() - .5) * .4, vy: -S / 160, v: .35, max: .5, r: S * .035, c: 'rgba(160,120,70,.55)' }); }
         if (e.y > TOP + R * S - S * .2 && gallinas.has(e.c)) { gallinas.delete(e.c); usadas++; corren.push({ c: e.c, y: TOP + R * S + S * .1, f: 0 }); const f = azar(FRASES.gallina); burbuja(cx(e.c), TOP + R * S - S * .3, f); voz(f, 'gallina', { forzar: true, cortar: true }); FX.son('salto'); FX.son('swish'); shake = .25; }
         if (e.y > TOP + R * S + S * .1) { e.hp = 0; e.llego = 1; vidas = 0; rojo = 1; shake = .6; FX.son('perder'); const f = azar(FRASES.burla); e.burla = f; burbuja(e.x, TOP + R * S - S * .25, f); voz(f, e.tipo, { forzar: true, cortar: true }); FX.vibrar([150, 60, 150]); perder(e); return; }
       }
@@ -541,7 +543,10 @@
         if (it.d) { const d = it.d, sc = 1 - d.nace * .7; X.save(); X.translate(d.x, d.y + S * .3); X.scale(sc, sc); X.translate(-d.x, -(d.y + S * .3)); if (d.golpe > 0) X.translate(Math.sin(performance.now() / 20) * S * .02, 0);
           dibD(d.k, X, d.x, d.y, S, { t: d.t, f: d.f, kick: d.kick, frac: d.hp / d.max, armado: d.armado, timer: d.timer, carga: d.carga || 0 }); X.restore(); if (d.hp < d.max && d.k !== 'aji') { const w = S * .55, f = Math.max(0, d.hp / d.max); X.fillStyle = 'rgba(0,0,0,.55)'; X.beginPath(); X.roundRect(d.x - w / 2, d.y + S * .36, w, 5, 3); X.fill(); X.fillStyle = f > .5 ? '#4ade80' : f > .25 ? '#facc15' : '#ef4444'; X.beginPath(); X.roundRect(d.x - w / 2, d.y + S * .36, w * f, 5, 3); X.fill(); } globo(d, d.x, d.y - S * .5); }
         else { const e = it.e; if (e.flash > .4) X.filter = 'brightness(1.9)';
-          dibP(e.tipo, X, e.x + (e.come ? Math.sin(e.t * 14) * S * .015 : 0), e.y - (e.tipo === 'polilla' ? S * (.18 + Math.sin(e.t * 3) * .05) : 0), S, { t: e.t + e.f, frac: e.hp / e.max, come: e.come, salto: e.salto });
+          e.kb = Math.max(0, (e.kb || 0) - dt * 5); const kb = e.kb, ex = e.x + (e.come ? Math.sin(e.t * 14) * S * .015 : 0), ey = e.y - (e.tipo === 'polilla' ? S * (.18 + Math.sin(e.t * 3) * .05) : 0) - kb * S * .12;
+          if (kb > 0) { X.save(); X.translate(ex, ey + S * .3); X.scale(1 + kb * .12, 1 - kb * .14); X.translate(-ex, -(ey + S * .3)); }
+          dibP(e.tipo, X, ex, ey, S, { t: e.t + e.f, frac: e.hp / e.max, come: e.come, salto: e.salto });
+          if (kb > 0) X.restore();
           X.filter = 'none';
           if (e.lento > 0) { X.fillStyle = 'rgba(140,220,255,.32)'; X.beginPath(); X.ellipse(e.x, e.y, S * .32, S * .4, 0, 0, 7); X.fill(); X.fillStyle = '#e8fbff'; for (let k = 0; k < 3; k++) { const a = e.t * 2 + k * 2.1; X.beginPath(); X.arc(e.x + Math.cos(a) * S * .3, e.y + Math.sin(a) * S * .3, S * .025, 0, 7); X.fill(); } }
           globo(e, e.x, e.y - S * .62);

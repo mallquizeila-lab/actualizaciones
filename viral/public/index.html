@@ -302,10 +302,18 @@ $('#niveles').onclick = e => { const b = e.target.closest('[data-nv]'); if (b) {
 window.irCategoria = (c, n = 'todos') => { cat = c; nivel = n; $('#buscar').value = ''; pintarHome(); $('#cats').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
-$('#back').onclick = () => { if (window.ARCADE) ARCADE.salir(); if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
+$('#back').onclick = () => { ESC.quitar(); if (window.ARCADE) ARCADE.salir(); if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
 function show(id) { $('#home').hidden = id !== 'home'; $('#play').hidden = id !== 'play'; scrollTo(0, 0); if (id === 'home') window.pintarHub?.(); }
+// 🏞️ Escenarios pintados con IA (los crea ShortForge). Cada juego muestra su fondo detrás, con un acercamiento lento de cine.
+window.ESC = (() => { let M = null, V = ''; const listo = fetch('/arte/escenas/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { M = new Set(m.arte || []); V = m.ver || ''; }).catch(() => { M = new Set(); });
+  const url = id => M && id && M.has(id) ? `/arte/escenas/${id}.webp?v=${V}` : null;
+  const aplicar = id => { const pl = document.getElementById('play'), u = url(id); if (!pl) return; if (!u) { pl.classList.remove('con-escena'); pl.style.removeProperty('--escena'); return; } const img = new Image(); img.onload = () => { if (pl.dataset.escena !== id) return; pl.style.setProperty('--escena', `url("${u}")`); pl.classList.add('con-escena'); }; img.src = u; };
+  return { listo, url, poner(id) { const pl = document.getElementById('play'); if (pl) pl.dataset.escena = id || ''; listo.then(() => aplicar(id)); }, quitar() { this.poner(null); } };
+})();
+const escenaDe = g => /^arcade-(batalla|huerto|joyas|mundo)$/.test(g) ? undefined : g.startsWith('arcade-') ? 'arcade_' + g.slice(7) : g.startsWith('edu-') ? 'aula_edu' : g.startsWith('fe-') ? 'aula_fe' : null;
 async function abrir(g) {
   if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el resultado 🙏');
+  { const e = escenaDe(g); if (e !== undefined) ESC.poner(e); else ESC.quitar(); }
   history.replaceState(null, '', '?g=' + g + (SRC !== 'directo' ? '&src=' + encodeURIComponent(SRC) : ''));
   show('play'); if (JUEGO[g]) return JUEGO[g](); const t = TESTS.find(x => x.id === g); if (t) MOTOR[t.tipo](t); else show('home');
 }
@@ -595,7 +603,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=7'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=4'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=19'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=15'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=7'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=5'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=20'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=3'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=16'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
@@ -879,6 +887,6 @@ window.pintarHub = function () {
 </script>
 <script src="/perfil.js?v=3"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
 <script>window.pintarHub?.(); window.__instalar = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__instalar = e; }); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});</script>
-<link rel="stylesheet" href="/neon.css?v=1">
+<link rel="stylesheet" href="/neon.css?v=2">
 </body>
 </html>

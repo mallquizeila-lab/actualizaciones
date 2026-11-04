@@ -17,7 +17,7 @@
 
   // ---------- Mapa de niveles ----------
   function mapa(t) {
-    salir(); registrar(t.id);
+    salir(); registrar(t.id); window.ESC?.poner('joyas_0');
     const J = PERFIL.datos.juegos.joyas || { nivel: 1, estrellas: {} }, act = Math.min(J.nivel || 1, TOTAL), est = J.estrellas || {};
     const H = 96, W = Math.min(($('#stage').clientWidth || 360) - 10, 460), pos = n => ({ x: W / 2 + Math.sin(n * .9) * W * .3, y: (TOTAL - n) * H + 60 });
     stage(`<div class="card" style="padding:12px;position:sticky;top:6px;z-index:5"><div style="display:flex;justify-content:space-between;align-items:center"><b>💎 Joyas</b><span>🪙 ${PERFIL.datos.monedas} · ⭐ ${Object.values(est).reduce((a, b) => a + b, 0)}</span></div>
@@ -32,7 +32,7 @@
 
   // ---------- Un nivel ----------
   function nivel(t, n) {
-    salir(); scrollTo(0, 0);
+    salir(); scrollTo(0, 0); window.ESC?.poner('joyas_' + Math.min(4, Math.floor((n - 1) / 20)));
     const C = cfg(n), W = cuadro(), S = W / N;
     stage(`<div class="card" style="padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><button class="btn alt" id="vm" style="width:auto;margin:0;padding:4px 10px;font-size:.8rem">🗺️ Mapa</button><b>Nivel ${n}</b><span style="display:flex;align-items:center;gap:2px">${FX.botones ? FX.botones() : ""}</span><span>🪙 <b id="mon">${PERFIL.datos.monedas}</b></span></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px"><div style="text-align:center;background:rgba(255,255,255,.08);border-radius:12px;padding:6px 12px"><small class="sub" style="margin:0">Movimientos</small><div id="mv" style="font:900 1.6rem Figtree,sans-serif">${C.movs}</div></div>
@@ -69,12 +69,16 @@
       if (s === 'b') { x.strokeStyle = '#fff'; x.lineWidth = 3; x.shadowColor = '#fff'; x.shadowBlur = 14; x.beginPath(); x.arc(cx, cy, r * .95, 0, 7); x.stroke(); x.shadowBlur = 0; x.lineWidth = 1; }
     };
     const arcoiris = (cx, cy, r) => { const gr = x.createConicGradient ? x.createConicGradient(Date.now() / 400, cx, cy) : null; if (gr) { COL.forEach((c, k) => gr.addColorStop(k / 6, c[0])); gr.addColorStop(1, COL[0][0]); x.fillStyle = gr; } else x.fillStyle = '#fff'; x.beginPath(); x.arc(cx, cy, r * .9, 0, 7); x.fill(); x.fillStyle = 'rgba(255,255,255,.8)'; x.beginPath(); x.arc(cx - r * .25, cy - r * .3, r * .2, 0, 7); x.fill(); };
+    let brillos = [];
     const dibujar = () => {
-      const bg = x.createLinearGradient(0, 0, 0, W); bg.addColorStop(0, '#2a1f6e'); bg.addColorStop(1, '#16113d'); x.fillStyle = bg; x.fillRect(0, 0, W, W);
+      x.clearRect(0, 0, W, W); const bg = x.createLinearGradient(0, 0, 0, W); bg.addColorStop(0, 'rgba(42,31,110,.80)'); bg.addColorStop(1, 'rgba(22,17,61,.88)'); x.fillStyle = bg; x.fillRect(0, 0, W, W); const tJ = performance.now() / 1000;
       for (let i = 0; i < N * N; i++) { const r = Math.floor(i / N), c = i % N; x.fillStyle = (r + c) % 2 ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.09)'; x.fillRect(c * S, r * S, S, S);
         if (hielo[i]) { x.fillStyle = hielo[i] > 1 ? 'rgba(170,220,255,.75)' : 'rgba(170,220,255,.45)'; x.beginPath(); x.roundRect(c * S + 2, r * S + 2, S - 4, S - 4, 8); x.fill(); x.strokeStyle = 'rgba(255,255,255,.6)'; x.stroke(); } }
       if (sel !== null) { x.strokeStyle = '#fff'; x.lineWidth = 3; x.strokeRect((sel % N) * S + 2, Math.floor(sel / N) * S + 2, S - 4, S - 4); x.lineWidth = 1; }
-      for (let i = 0; i < N * N; i++) { const p = g[i]; if (!p || p.sc <= 0) continue; const cx = (i % N) * S + S / 2 + p.ox, cy = Math.floor(i / N) * S + S / 2 + p.oy; x.save(); x.translate(cx, cy); x.scale(p.sc, p.sc); if (p.s === 'c') arcoiris(0, 0, S * .42); else forma(p.t, 0, 0, S * .4, p.s); x.restore(); }
+      for (let i = 0; i < N * N; i++) { const p = g[i]; if (!p || p.sc <= 0) continue; const cx = (i % N) * S + S / 2 + p.ox, cy = Math.floor(i / N) * S + S / 2 + p.oy, resp = 1 + Math.sin(tJ * 2.2 + i * .7) * .025; x.save(); x.translate(cx, cy); x.scale(p.sc * resp, p.sc * resp); if (p.s === 'c') arcoiris(0, 0, S * .42); else forma(p.t, 0, 0, S * .4, p.s); x.restore(); }
+      // destellos de brillo al azar sobre las joyas
+      if (Math.random() < .06) { const i = Math.floor(Math.random() * N * N); if (g[i]) brillos.push({ x: (i % N) * S + S * (.3 + Math.random() * .2), y: Math.floor(i / N) * S + S * (.25 + Math.random() * .2), v: 1 }); }
+      brillos = brillos.filter(b => (b.v -= .035) > 0); x.save(); x.globalCompositeOperation = 'lighter'; for (const b of brillos) { const a = Math.sin(b.v * Math.PI), L = S * .32 * a; x.globalAlpha = a; x.fillStyle = '#fff'; x.beginPath(); x.moveTo(b.x, b.y - L); x.quadraticCurveTo(b.x, b.y, b.x + L, b.y); x.quadraticCurveTo(b.x, b.y, b.x, b.y + L); x.quadraticCurveTo(b.x, b.y, b.x - L, b.y); x.quadraticCurveTo(b.x, b.y, b.x, b.y - L); x.fill(); } x.restore(); x.globalAlpha = 1;
       parts = parts.filter(q => q.v-- > 0); for (const q of parts) { q.x += q.vx; q.y += q.vy; q.vy += .25; x.globalAlpha = q.v / 30; x.fillStyle = q.c; x.beginPath(); x.arc(q.x, q.y, q.r, 0, 7); x.fill(); } x.globalAlpha = 1;
       textos = textos.filter(q => q.v-- > 0); for (const q of textos) { q.y -= .8; x.globalAlpha = Math.min(1, q.v / 20); x.fillStyle = '#fff'; x.font = `900 ${q.tam}px Figtree,sans-serif`; x.textAlign = 'center'; x.strokeStyle = 'rgba(0,0,0,.5)'; x.lineWidth = 4; x.strokeText(q.txt, q.x, q.y); x.fillText(q.txt, q.x, q.y); x.lineWidth = 1; } x.globalAlpha = 1;
     };

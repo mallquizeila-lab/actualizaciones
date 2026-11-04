@@ -135,6 +135,7 @@
     }
 
     // ---------- Construcción de cada mundo ----------
+    let nubes = [], aves = [], texNube = null;
     let mundo = 'plaza', grupo = null, cielo, colis = [], plats = [], monedas = [], gemas = [], portales = [], orbe = null, parts = null, partV = null, lava = null, cristal = null;
     function construir(m) {
       if (grupo) { scene.remove(grupo); grupo.traverse(o => { o.geometry?.dispose(); if (o.material) { o.material.map?.dispose(); o.material.dispose(); } }); }
@@ -147,6 +148,8 @@
         vertexShader: 'varying vec3 p; void main(){ p = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
         fragmentShader: 'uniform vec3 a; uniform vec3 b; uniform vec3 c; varying vec3 p; void main(){ float h = p.y; vec3 col = h > 0.15 ? mix(b, a, smoothstep(0.15, 0.8, h)) : mix(c, b, smoothstep(-0.05, 0.15, h)); gl_FragColor = vec4(col, 1.0); }' });
       cielo = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), sky); grupo.add(cielo);
+      // cielo pintado con IA (si ShortForge ya lo creó): panorama alrededor, gira con la cámara como un cielo de verdad
+      { const u = window.ESC?.url('mundo_' + m), mm = m; scene.background = null; if (u) new THREE.TextureLoader().load(u, tx => { if (mundo !== mm || !cielo) { tx.dispose(); return; } if ('colorSpace' in tx) tx.colorSpace = THREE.SRGBColorSpace; else tx.encoding = THREE.sRGBEncoding; const mat = new THREE.MeshBasicMaterial({ map: tx, side: THREE.BackSide, depthWrite: false, fog: false }); tx.mapping = THREE.UVMapping; cielo.material.dispose(); cielo.material = mat; }); }
       if (['plaza', 'luna', 'volcan', 'bosque'].includes(m)) { const n = 900, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const a = r() * Math.PI * 2, b = r() * Math.PI * .45, R = 380; pos.set([Math.cos(a) * Math.cos(b) * R, Math.sin(b) * R + 20, Math.sin(a) * Math.cos(b) * R], i * 3); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); grupo.add(new THREE.Points(g, new THREE.PointsMaterial({ color: '#ffffff', size: 1.6, sizeAttenuation: false, fog: false, transparent: true, opacity: m === 'bosque' ? .5 : .9 }))); }
       // terreno con colores por vértice
       const geo = new THREE.PlaneGeometry(240, 240, 110, 110); geo.rotateX(-Math.PI / 2);
@@ -197,6 +200,14 @@
         const ya = J.mon.por[m] || [];
         for (let i = 0; i < 25; i++) { const [x, z] = i < 6 ? [Math.sin(i * .5) * 2.5, 5 + i * 3.2] : lugar(12, 80); if (!ya.includes(i)) moneda(x, alt(m, x, z) + 1.1, z, i, 1); }
         if (ya.includes('g')) { const g = monedas.find(c => c.i === 'g'); if (g) { grupo.remove(g.me); monedas = monedas.filter(c => c !== g); } }
+        // nubes que pasan y aves volando (más vida en el cielo)
+        nubes = []; aves = [];
+        if (m !== 'luna') { const tex = texNube || (texNube = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d'); for (let i = 0; i < 9; i++) { const cx = 50 + Math.random() * 156, cy = 64 + (Math.random() - .5) * 30, R = 26 + Math.random() * 30, gr = x.createRadialGradient(cx, cy, 0, cx, cy, R); gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = gr; x.fillRect(0, 0, 256, 128); } return new THREE.CanvasTexture(c); })());
+          const tinte = m === 'volcan' ? 0x6b4040 : m === 'bosque' ? 0xd8f5e0 : m === 'plaza' ? 0xffd9e8 : 0xffffff;
+          for (let i = 0; i < 14; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: tinte, transparent: true, opacity: m === 'volcan' ? .5 : .75, depthWrite: false, fog: false })); const sc = 40 + r() * 50; sp.scale.set(sc, sc / 2, 1); sp.position.set((r() - .5) * 600, 70 + r() * 60, (r() - .5) * 600); sp.__v = 1.5 + r() * 2.5; grupo.add(sp); nubes.push(sp); } }
+        if (m !== 'luna' && m !== 'volcan') for (let i = 0; i < 7; i++) { const av = new THREE.Group(), mt = new THREE.MeshBasicMaterial({ color: 0x1f2937, side: THREE.DoubleSide, fog: false });
+          for (const q of [-1, 1]) { const ala = new THREE.Mesh(new THREE.PlaneGeometry(1.4, .45), mt); ala.position.x = q * .7; ala.name = q < 0 ? 'i' : 'd'; av.add(ala); }
+          av.__r = 30 + r() * 60; av.__h = 28 + r() * 25; av.__a = r() * 7; av.__v = .15 + r() * .15; av.__f = r() * 7; grupo.add(av); aves.push(av); }
         // partículas del ambiente
         const n = m === 'nieve' ? 700 : 260, pos = new Float32Array(n * 3); partV = new Float32Array(n);
         for (let i = 0; i < n; i++) { pos.set([(r() - .5) * 120, r() * 30, (r() - .5) * 120], i * 3); partV[i] = .5 + r(); }
@@ -378,6 +389,8 @@
       if (cristal) { cristal.rotation.y = t * .8; cristal.position.y = 4 + Math.sin(t * 1.4) * .4; }
       if (orbe) { const s = 1 + Math.sin(t * 4) * .1; orbe.scale.setScalar(s); }
       if (lava) lava.material.emissiveIntensity = .75 + Math.sin(t * 2) * .2;
+      for (const n of nubes) { n.position.x += n.__v * .016 * 4; if (n.position.x > 320) n.position.x = -320; }
+      for (const av of aves) { av.__a += av.__v * .016; const x = Math.cos(av.__a) * av.__r, z = Math.sin(av.__a) * av.__r; av.position.set(x, av.__h + Math.sin(t + av.__f) * 2, z); av.rotation.y = -av.__a; const fl = Math.sin(t * 9 + av.__f) * .6; av.children[0].rotation.z = fl; av.children[1].rotation.z = -fl; }
       if (parts) { const P = parts.geometry.attributes.position, a = P.array;
         for (let i = 0; i < partV.length; i++) { const k = i * 3;
           if (mundo === 'nieve') { a[k + 1] -= partV[i] * dt * 2.5; a[k] += Math.sin(t + i) * dt * .5; if (a[k + 1] < 0) a[k + 1] = 30; }
