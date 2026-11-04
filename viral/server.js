@@ -442,7 +442,7 @@ function paginaLegal(tipo) {
       B.onclick=async()=>{if(C.value.trim().toUpperCase()!=='BORRAR'){alert('Escribe BORRAR para confirmar');return}B.disabled=true;
         const r=await fetch('/api/cuenta/borrar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({tok,uid:g('vid'),confirmar:'BORRAR'})}).then(x=>x.json()).catch(()=>({error:'Sin conexión'}));
         if(r.ok){try{['perfilTok','perfilUsuario','perfilCodigo','miFoto'].forEach(k=>localStorage.removeItem(k))}catch(e){}E.textContent='✅ Listo: tu cuenta y tus datos fueron borrados.';C.hidden=B.hidden=true}else{E.textContent='❌ '+(r.error||'No se pudo borrar');B.disabled=false}}})();</script>`],
-    nosotros: ['Quiénes somos', `<p><b>${sitio}</b> es una plataforma latina de entretenimiento gratis: tests para conocerte, más de 60 juegos, juegos propios como <b>GLORY BROWN: El Choque de los Reinos</b> y <b>Huerto Defensor</b>, chat, clanes y torneos.</p>
+    nosotros: ['Quiénes somos', `<p><b>${sitio}</b> es una plataforma latina de entretenimiento gratis: tests para conocerte, miles de juegos, juegos propios como <b>GLORY BROWN: El Choque de los Reinos</b> y <b>Huerto Defensor</b>, chat, clanes y torneos.</p>
       <p>GLORY BROWN nació como homenaje a una abuelita muy querida: la Reina Glory Brown, que protege su reino con amor. Ese cariño es lo que queremos que se sienta en todo el sitio.</p>
       <p>Creamos contenido nuevo cada semana, con identidad latina y en español, para que juegues sin instalar nada desde tu celular, tablet o computadora.</p><p>Responsable: ${resp} · ${ciudad} · ${correo}</p>`],
   }[tipo];
@@ -942,7 +942,7 @@ ${rel.length ? `<h2 style="font-size:1.1rem;margin:16px 0 8px">Más juegos de ${
     if (u.pathname === '/' || u.pathname === '/index.html') {
       const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
       const titulo = t ? t.t : (getS('marca', null)?.titulo || `${getS('marca', null)?.nombre || 'Yupitok'}: juegos y tests gratis · ¡Juega, ríe, aprende y gana!`);
-      const desc = t ? `${t.d} Gratis${t.min ? `, en ${t.min} min` : ''}. ¿Te animas?` : 'Más de 60 juegos y tests gratis sin instalar: GLORY BROWN (batallas en línea 1 vs 1 y 2 vs 2), Huerto Defensor, Joyas, juegos con amigos, chat y clanes. ¡Entra y juega!';
+      const desc = t ? `${t.d} Gratis${t.min ? `, en ${t.min} min` : ''}. ¿Te animas?` : 'Miles de juegos y tests gratis sin instalar: GLORY BROWN (batallas en línea 1 vs 1 y 2 vs 2), Huerto Defensor, Joyas, juegos con amigos, chat y clanes. ¡Entra y juega!';
       const img = `${PUBLIC_URL}/og/${t && fs.existsSync(path.join(PUB, 'og', t.id + '.png')) ? t.id : 'general'}.png`;
       const og = `<title>${esc(titulo)}</title>
 <meta name="description" content="${esc(desc)}">

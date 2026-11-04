@@ -1,3 +1,6 @@
+v7.51.1 — "Miles de juegos"
+- 🎮 La portada, la descripción para Google, la app y "Quiénes somos" ahora dicen "Miles de juegos, trivias y tests gratis" (antes decía "más de 100").
+
 v7.51.0 — Instala Yupitok como app
 - 📲 Nuevo botón en la portada "Instala Yupitok gratis · +100 🪙". En Android abre la ventana oficial de Chrome para instalar con un toque; en iPhone (y otros navegadores) muestra los pasos ("Compartir → Agregar a inicio" en Safari).
 - 🎁 La primera vez que alguien abre Yupitok instalado en su pantalla de inicio recibe 100 🪙.
