@@ -64,7 +64,16 @@ function crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN }) {
     if (r === 'fotos/borrar' && ID.test(b.id || '')) { run("update fotos set estado='rechazada', motivo='Borrada por el administrador' where id=?", b.id); aprobadas.delete(b.id); try { fs.rmSync(archivo(b.id), { force: true }); } catch (e) {} return { ok: 1 }; }
     return null;
   }
-  return { http, admin, verAdmin };
+  // Guarda una foto que viene de otro lado (por ejemplo, la foto de Google o Facebook al iniciar sesión)
+  async function guardarBuffer(buf, uid) {
+    if (!buf || buf.length < 200 || buf.length > 3e6) return null;
+    let webp = null;
+    try { webp = await new Promise((ok, no) => { const p = require('child_process').spawn('ffmpeg', ['-loglevel', 'error', '-i', 'pipe:0', '-vf', 'scale=256:256:force_original_aspect_ratio=increase,crop=256:256', '-f', 'webp', '-quality', '85', 'pipe:1']); const out = []; p.stdout.on('data', d => out.push(d)); p.on('error', no); p.on('close', c => c === 0 ? ok(Buffer.concat(out)) : no(new Error('ffmpeg'))); p.stdin.on('error', () => {}); p.stdin.end(buf); }); } catch (e) {}
+    const data = webp && webp.length > 100 ? webp : buf, id = 'f' + crypto.createHash('sha1').update(data).digest('hex').slice(0, 16);
+    fs.writeFileSync(archivo(id), data); if (!q1('select 1 from fotos where id=?', id)) run('insert into fotos(id, uid) values(?,?)', id, crypto.createHash('sha256').update(String(uid || '')).digest('hex'));
+    moderar(id); return id;
+  }
+  return { http, admin, verAdmin, guardarBuffer };
 }
 // Un avatar es válido si es uno de los ilustrados (a01…a48) o una foto aprobada
 const valido = a => /^a\d\d$/.test(a || '') || (ID.test(a || '') && aprobadas.has(a));

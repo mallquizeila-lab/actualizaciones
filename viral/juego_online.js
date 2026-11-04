@@ -9,7 +9,7 @@ function cargarGlory() {
   return { G, CARTA, Motor: require('./public/glory/motor.js') };
 }
 
-function crear({ db, q, q1, run, revisar, apodo, datos }) {
+function crear({ db, q, q1, run, revisar, apodo, datos, social = () => ({}), guardarFoto = async () => null }) {
   const VIDEOS = path.join(datos || __dirname, 'videos'); let G_MUNDOS = ['Reino del Alba', 'Bosque Esmeralda', 'Imperio de las Arenas', 'Islas Celestiales', 'Reino de las Sombras', 'Dominio de Hielo', 'Reino del Dragón'];
   db.exec(`
     create table if not exists glory_semana (semana text, jugador text, nombre text, pais text, puntos integer default 0, victorias integer default 0, partidas integer default 0, primary key (semana, jugador));
@@ -23,6 +23,7 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
     create table if not exists clan_chat (id integer primary key, clan_id integer, nombre text, avatar text, texto text, tipo text default 'msg', extra text, created_at text default (datetime('now')));
     create index if not exists i_clan_chat on clan_chat(clan_id, id);
   `);
+  for (const col of ['avatar text', 'suspendido integer default 0', 'vid text', 'google_sub text', 'fb_id text']) { try { db.exec('alter table cuentas add column ' + col); } catch (e) {} }
   const sha = s => crypto.createHash('sha256').update(s).digest('hex');
   const hashClave = (clave, sal) => crypto.scryptSync(String(clave), sal, 32).toString('hex');
   const cuentaDeTok = tok => tok && /^[a-f0-9]{48}$/.test(tok) ? q1('select c.* from sesiones s join cuentas c on c.id=s.cuenta_id where s.tok=?', tok) : null;
@@ -113,6 +114,43 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
       if (b.data && typeof b.data === 'object') { const d = JSON.stringify(b.data); if (d.length < 30000) run("insert into perfiles(id, codigo, data) values(?,?,?) on conflict(id) do update set data=excluded.data, updated_at=datetime('now')", pid, crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6), d); }
       const tok = crypto.randomBytes(24).toString('hex'); run('insert into sesiones(tok, cuenta_id) values(?,?)', tok, info.lastInsertRowid);
       return send(res, 200, { ok: 1, tok, usuario });
+    }
+    // ===== Continuar con Google / Facebook =====
+    if (r === '/api/cuenta/social' && P) {
+      if (limite(ip, 'social', 20, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera unos minutos.' });
+      const b = await json(req), cfg = social(); let ps = null;
+      try {
+        if (b.proveedor === 'google') {
+          if (!cfg.google) return send(res, 400, { error: 'El inicio con Google aún no está activado' });
+          const t = await (await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(String(b.credential || '')), { signal: AbortSignal.timeout(15000) })).json();
+          if (t.aud !== cfg.google || !['accounts.google.com', 'https://accounts.google.com'].includes(t.iss) || !t.sub || +t.exp * 1000 < Date.now()) return send(res, 401, { error: 'No se pudo verificar tu cuenta de Google' });
+          ps = { campo: 'google_sub', id: String(t.sub), nombre: t.given_name || t.name || 'Jugador', foto: t.picture };
+        } else if (b.proveedor === 'facebook') {
+          if (!cfg.facebook) return send(res, 400, { error: 'El inicio con Facebook aún no está activado' });
+          const at = encodeURIComponent(String(b.accessToken || '')), app = await (await fetch('https://graph.facebook.com/app?access_token=' + at, { signal: AbortSignal.timeout(15000) })).json();
+          if (String(app.id) !== String(cfg.facebook)) return send(res, 401, { error: 'No se pudo verificar tu cuenta de Facebook' });
+          const me = await (await fetch('https://graph.facebook.com/me?fields=id,first_name,name,picture.width(256).height(256)&access_token=' + at, { signal: AbortSignal.timeout(15000) })).json();
+          if (!me.id) return send(res, 401, { error: 'No se pudo verificar tu cuenta de Facebook' });
+          ps = { campo: 'fb_id', id: String(me.id), nombre: me.first_name || me.name || 'Jugador', foto: me.picture?.data?.is_silhouette ? null : me.picture?.data?.url };
+        } else return send(res, 400, { error: 'Proveedor no válido' });
+      } catch (e) { return send(res, 502, { error: 'No hay conexión con ' + (b.proveedor === 'google' ? 'Google' : 'Facebook') + '. Intenta de nuevo.' }); }
+      let c = q1(`select * from cuentas where ${ps.campo}=?`, ps.id), nueva = false;
+      const ya = cuentaDeTok(b.tok);
+      if (!c && ya) { run(`update cuentas set ${ps.campo}=? where id=?`, ps.id, ya.id); c = q1('select * from cuentas where id=?', ya.id); } // vincula a la cuenta con la que ya entró
+      if (!c) { // cuenta nueva con su nombre y su progreso actual
+        let base = String(apodo(ps.nombre) || 'Jugador').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 14) || 'Jugador'; if (base.length < 3) base += 'gamer';
+        let usuario = base; for (let i = 0; q1('select 1 from cuentas where usuario=?', usuario) && i < 50; i++) usuario = base + (Math.floor(Math.random() * 900) + 100);
+        let pid = sha('perfil:' + String(b.uid || '')).slice(0, 24); if (q1('select 1 from cuentas where perfil_id=?', pid)) pid = sha('perfil:' + ps.campo + ps.id).slice(0, 24);
+        const sal = crypto.randomBytes(16).toString('hex'), info = run(`insert into cuentas(usuario, sal, hash, perfil_id, ${ps.campo}) values(?,?,?,?,?)`, usuario, sal, hashClave(crypto.randomBytes(24).toString('hex'), sal), pid, ps.id);
+        if (b.data && typeof b.data === 'object') { const d = JSON.stringify(b.data); if (d.length < 30000) run("insert into perfiles(id, codigo, data) values(?,?,?) on conflict(id) do update set data=excluded.data, updated_at=datetime('now')", pid, crypto.randomBytes(4).toString('hex').toUpperCase(), d); }
+        c = q1('select * from cuentas where id=?', info.lastInsertRowid); nueva = true;
+      }
+      if (c.suspendido) return send(res, 403, { error: 'Esta cuenta está suspendida' });
+      let avatar = null; // su foto de perfil de Google/Facebook (se revisa antes de mostrarse a los demás)
+      if (ps.foto && /^https:\/\//.test(ps.foto) && (nueva || !/^f/.test(c.avatar || ''))) { try { const im = await fetch(ps.foto, { signal: AbortSignal.timeout(15000) }); if (im.ok) avatar = await guardarFoto(Buffer.from(await im.arrayBuffer()), b.uid); } catch (e) {} if (avatar) run('update cuentas set avatar=? where id=?', avatar, c.id); }
+      const tok = crypto.randomBytes(24).toString('hex'); run('insert into sesiones(tok, cuenta_id) values(?,?)', tok, c.id);
+      const f = q1('select data from perfiles where id=?', c.perfil_id);
+      return send(res, 200, { ok: 1, tok, usuario: c.usuario, nueva, avatar, data: !nueva && f ? JSON.parse(f.data) : null });
     }
     if (r === '/api/cuenta/entrar' && P) {
       const b = await json(req), usuario = String(b.usuario || '').trim().slice(0, 30);

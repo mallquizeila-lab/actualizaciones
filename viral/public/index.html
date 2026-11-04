@@ -776,16 +776,30 @@ testsP.then(() => { if (P.get('g') && (JUEGO[P.get('g')] || TESTS.some(t => t.id
 
 // ---------- Mi progreso: nivel, monedas, racha, "Continuar jugando", misiones y logros ----------
 // ---------- Usuario del jugador (para entrar desde cualquier celular) ----------
+// 🔐 Continuar con Google / Facebook
+const cargarScript = src => new Promise((ok, no) => { if (document.querySelector(`script[src="${src}"]`)) return ok(); const sc = document.createElement('script'); sc.src = src; sc.async = true; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
+async function loginSocial(proveedor, cred, d, alTerminar) {
+  try { const r = await PERFIL.entrarSocial(proveedor, cred); d?.remove(); toast(r.nueva ? `✅ ¡Bienvenido, ${r.usuario}! Tu usuario está listo` : `👋 ¡Hola de nuevo, ${r.usuario}!`); FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
+  catch (er) { const e = d?.querySelector('#cuErr'); if (e) e.textContent = er.message; else toast(er.message); } }
+async function botonesSocial(d, alTerminar) {
+  const L = cfg.login || {}, box = d.querySelector('#cuSocial'); if (!box || (!L.google && !L.facebook)) return;
+  if (L.google) { try { await cargarScript('https://accounts.google.com/gsi/client'); google.accounts.id.initialize({ client_id: L.google, callback: r => loginSocial('google', { credential: r.credential }, d, alTerminar), ux_mode: 'popup' });
+    const g = document.createElement('div'); g.style.cssText = 'display:flex;justify-content:center;margin:4px 0'; box.append(g); google.accounts.id.renderButton(g, { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', locale: (window.IDIOMA?.actual || 'es'), width: 280 }); } catch (e) {} }
+  if (L.facebook) { const b = document.createElement('button'); b.className = 'btn'; b.style.cssText = 'background:#1877f2;color:#fff;margin:6px 0'; b.textContent = '📘 Continuar con Facebook'; box.append(b);
+    b.onclick = async () => { try { if (!window.FB) { await cargarScript('https://connect.facebook.net/es_LA/sdk.js'); FB.init({ appId: L.facebook, version: 'v19.0', xfbml: false }); }
+      FB.login(r => { if (r.authResponse?.accessToken) loginSocial('facebook', { accessToken: r.authResponse.accessToken }, d, alTerminar); }, { scope: 'public_profile' }); } catch (e) { toast('No se pudo abrir Facebook'); } }; }
+  box.insertAdjacentHTML('beforeend', '<p class="small" style="text-align:center;margin:8px 0;opacity:.75">— o con un usuario y contraseña —</p>');
+}
 window.cuentaModal = function (modo = 'crear', alTerminar) {
   const d = document.createElement('div'); d.className = 'modal';
   const pinta = () => { d.innerHTML = `<div class="card"><h2>${modo === 'crear' ? '👤 Crea tu usuario' : '🔑 Entra con tu usuario'}</h2>
-    <p class="sub" style="text-align:left">${modo === 'crear' ? 'Tu progreso actual (niveles, monedas, trofeos) quedará guardado en tu usuario. Así podrás entrar desde cualquier celular.' : 'Se cargará el progreso guardado en tu usuario.'}</p>
+    <p class="sub" style="text-align:left">${modo === 'crear' ? 'Tu progreso actual (niveles, monedas, trofeos) quedará guardado en tu usuario. Así podrás entrar desde cualquier celular.' : 'Se cargará el progreso guardado en tu usuario.'}</p><div id="cuSocial"></div>
     <input id="cuU" maxlength="18" placeholder="Usuario (sin espacios)" autocomplete="username" style="margin-bottom:8px"><input id="cuC" type="password" maxlength="100" placeholder="Contraseña (mínimo 6)" autocomplete="${modo === 'crear' ? 'new-password' : 'current-password'}" style="margin-bottom:8px">
     ${modo === 'crear' ? '<input id="cuC2" type="password" maxlength="100" placeholder="Repite la contraseña" autocomplete="new-password" style="margin-bottom:8px"><p class="small" style="text-align:left;margin:0 0 6px">No uses tu nombre real ni la contraseña de tu correo o Facebook. Guárdala bien: no pedimos correo.</p>' : ''}
     <p id="cuErr" style="color:#ff8a8a;min-height:1em;margin:4px 0"></p>
     <button class="btn" id="cuOk">${modo === 'crear' ? 'Crear mi usuario' : 'Entrar'}</button><button class="btn alt" id="cuCambia">${modo === 'crear' ? 'Ya tengo usuario' : 'Crear un usuario nuevo'}</button><button class="btn alt" id="cuNo">Ahora no</button></div>`; };
-  pinta(); document.body.append(d);
-  d.onclick = async e => { const id = e.target.id; if (id === 'cuNo') return d.remove(); if (id === 'cuCambia') { modo = modo === 'crear' ? 'entrar' : 'crear'; return pinta(); }
+  pinta(); document.body.append(d); botonesSocial(d, alTerminar);
+  d.onclick = async e => { const id = e.target.id; if (id === 'cuNo') return d.remove(); if (id === 'cuCambia') { modo = modo === 'crear' ? 'entrar' : 'crear'; pinta(); return botonesSocial(d, alTerminar); }
     if (id !== 'cuOk') return; const u = $('#cuU').value.trim(), c = $('#cuC').value, err = $('#cuErr');
     if (u.length < 3) return err.textContent = 'Escribe un usuario de al menos 3 letras'; if (c.length < 6) return err.textContent = 'La contraseña debe tener al menos 6 caracteres';
     if (modo === 'crear' && c !== $('#cuC2').value) return err.textContent = 'Las contraseñas no coinciden';
@@ -846,7 +860,7 @@ window.pintarHub = function () {
     if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
 };
 </script>
-<script src="/perfil.js?v=2"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
+<script src="/perfil.js?v=3"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
 <script>window.pintarHub?.(); window.__instalar = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__instalar = e; }); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});</script>
 </body>
 </html>

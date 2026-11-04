@@ -1,0 +1,49 @@
+GUÍA: "CONTINUAR CON GOOGLE" Y "CONTINUAR CON FACEBOOK" EN YUPITOK
+=================================================================
+Requisito: tu página ya debe abrir en https://yupitok.com
+Solo vas a copiar dos "ID públicos". NUNCA pegues en la página claves secretas
+("Client secret" de Google o "App secret" de Facebook): no hacen falta.
+
+-------------------------------------------------------------
+A) GOOGLE (gratis, unos 10 minutos)
+-------------------------------------------------------------
+1. Entra a https://console.cloud.google.com con tu cuenta de Google.
+2. Arriba: "Seleccionar proyecto" → "Proyecto nuevo" → nombre: Yupitok → Crear.
+3. Menú → "APIs y servicios" → "Pantalla de consentimiento de OAuth" (o "Google Auth Platform"):
+   - Tipo de usuario: Externo.
+   - Nombre de la app: Yupitok · Correo de asistencia: el tuyo.
+   - Logo: el ícono de Yupitok (opcional).
+   - Dominios autorizados: yupitok.com
+   - Enlaces: https://yupitok.com/privacidad.html y https://yupitok.com/terminos.html
+   - Permisos (scopes): deja solo los básicos (email, profile, openid).
+   - Publica la app ("Publicar app" / "En producción").
+4. "APIs y servicios" → "Credenciales" → "Crear credenciales" → "ID de cliente de OAuth":
+   - Tipo de aplicación: Aplicación web · Nombre: Yupitok
+   - Orígenes autorizados de JavaScript: https://yupitok.com  y  https://www.yupitok.com
+   - Crear.
+5. Copia el "ID de cliente" (termina en .apps.googleusercontent.com).
+6. En el panel de tu página → Ajustes → "🔐 Continuar con Google / Facebook" → pégalo → Guardar.
+
+-------------------------------------------------------------
+B) FACEBOOK (gratis; Facebook puede pedir verificar tu cuenta)
+-------------------------------------------------------------
+1. Entra a https://developers.facebook.com → "Mis apps" → "Crear app".
+2. Caso de uso: "Autenticar y solicitar datos de usuarios con Inicio de sesión con Facebook".
+3. Nombre: Yupitok · Correo: el tuyo.
+4. En la app: "Configuración de la app" → "Básica":
+   - Dominios de la app: yupitok.com
+   - URL de la política de privacidad: https://yupitok.com/privacidad.html
+   - URL de las condiciones: https://yupitok.com/terminos.html
+   - Agrega la plataforma "Sitio web": https://yupitok.com
+5. "Inicio de sesión con Facebook" → Configuración → "URI de redireccionamiento de OAuth válidos": https://yupitok.com/
+   y activa "Inicio de sesión con el SDK de JavaScript". Dominios permitidos: yupitok.com
+6. Pon la app en modo "En vivo" (Live). Solo pedimos el perfil público (nombre y foto), que no necesita revisión especial.
+7. Copia el "Identificador de la app" (App ID, solo números) y pégalo en el panel de tu página → Guardar.
+
+-------------------------------------------------------------
+¿QUÉ PASA CUANDO ALGUIEN ENTRA CON GOOGLE O FACEBOOK?
+-------------------------------------------------------------
+- Se crea su usuario con su nombre (sin espacios) y se guarda su progreso.
+- Su foto de perfil se trae sola y se revisa con la IA antes de mostrarse a los demás.
+- Si ya tenía usuario y había iniciado sesión, se vincula a esa misma cuenta.
+- Nunca recibimos su contraseña de Google o Facebook.

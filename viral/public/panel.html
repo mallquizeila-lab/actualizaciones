@@ -194,6 +194,10 @@ const V = {
   async ajustes() {
     const a = await api('ajustes');
     $('#main').innerHTML = `<div class="cols">
+    <div class="card"><h2>🔐 Continuar con Google / Facebook</h2><p class="hint">Para que la gente entre con un toque y aparezca su foto y su nombre. Necesitas tu dominio funcionando. Los pasos están en la guía <b>GUIA_LOGIN_SOCIAL.txt</b> de ShortForge. Aquí solo van los ID públicos (nunca pegues claves secretas).</p>
+      <label>ID de cliente de Google</label><input id="lg-g" value="${esc(a.login?.google || '')}" placeholder="123456789-abc.apps.googleusercontent.com">
+      <label>ID de la app de Facebook</label><input id="lg-f" value="${esc(a.login?.facebook || '')}" placeholder="1234567890123456">
+      <p style="margin-top:10px"><button class="btn" id="lg-go">Guardar</button></p></div>
     <div class="card"><h2>💛 Apoya el proyecto</h2><p class="hint">Página <a href="/apoyar" target="_blank">/apoyar</a> para aportes voluntarios. Los <b>métodos de pago</b> (orden, nombres, enlaces, números y cripto) se editan en <b>ShortForge → 📣 Página viral → 💛 Métodos de apoyo</b>.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ap-on" style="width:auto" ${a.apoyo?.on ? 'checked' : ''}> Mostrar "Apoya el proyecto" en la página</label>
       <label>Tu mensaje</label><textarea id="ap-m" maxlength="1500" placeholder="Cuenta tu historia con tus palabras…">${esc(a.apoyo?.mensaje || '')}</textarea>
@@ -242,6 +246,7 @@ const V = {
     $('#v-go').onclick = () => api('ajustes', { video: { url: $('#v-u').value.trim(), title: $('#v-t').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#lg-go').onclick = () => api('ajustes', { login: { google: $('#lg-g').value, facebook: $('#lg-f').value } }).then(ok, e => alert(e.message));
     $('#ap-go').onclick = () => api('ajustes', { apoyo: { on: $('#ap-on').checked, mensaje: $('#ap-m').value } }).then(ok, e => alert(e.message));
     $('#g-go').onclick = () => api('ajustes', { pro: { on: $('#g-on').checked, feed: $('#g-f').value, plantilla: $('#g-p').value } }).then(() => ir('ajustes'), e => alert(e.message));
     $('#ad-go').onclick = () => api('ajustes', { ads: { client: $('#ad-c').value, extra: $('#ad-x').value } }).then(ok, e => alert(e.message));

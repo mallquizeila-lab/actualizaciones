@@ -46,6 +46,9 @@
     get datos() { return D; }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara,
     async crearCuenta(u, clave) { const r = await post('/api/cuenta/crear', { uid: VID, tok, usuario: u, clave, data: D }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); if (!LS.get('chatNom')) LS.set('chatNom', usuario); guardar(); return usuario; },
     async entrar(u, clave) { const r = await post('/api/cuenta/entrar', { usuario: u, clave }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); LS.set('chatNom', usuario); if (r.data) D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); return usuario; },
+    // Continuar con Google / Facebook (el servidor verifica y crea o vincula la cuenta)
+    async entrarSocial(proveedor, cred) { const r = await post('/api/cuenta/social', { proveedor, ...cred, uid: VID, tok, data: D }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); LS.set('chatNom', usuario);
+      if (r.avatar) { LS.set('miFoto', r.avatar); LS.set('chatAv', r.avatar); } if (r.data) D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); if (r.nueva) guardar(); window.pintarHub?.(); return r; },
     async salirCuenta() { clearTimeout(tg); await post('/api/perfil', { uid: VID, tok, data: D }).catch(() => {}); post('/api/cuenta/salir', { tok }).catch(() => {}); tok = null; usuario = null; LS.set('perfilTok', ''); LS.set('perfilUsuario', ''); D = base(); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); },
     // fin de una partida de cualquier juego
     partida(juego, puntos, extra = {}) {

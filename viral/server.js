@@ -350,7 +350,7 @@ const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTriv
 const FOTOS = require('./fotos'), fotos = FOTOS.crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN });
 const amigos = require('./amigos').crear({ db, q, q1, run, revisar: require('./chat').revisar, valido: FOTOS.valido, catalogo: () => CATALOGO,
   notificar: (vid, n) => { if (!VAPID) return; for (const r of q('select id, sub from subscribers where vid=? and active=1 order by id desc limit 3', vid)) webpush.sendNotification(JSON.parse(r.sub), JSON.stringify({ ...n, url: PUBLIC_URL + n.url, tag: 'amigos' }), { vapid: VAPID, TTL: 3600, urgency: 'high' }).catch(e => { if (e.statusCode === 404 || e.statusCode === 410) run('update subscribers set active=0 where id=?', r.id); }); } });
-const online = require('./juego_online').crear({ datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
+const online = require('./juego_online').crear({ social: () => getS('login', {}), guardarFoto: (buf, uid) => fotos.guardarBuffer(buf, uid), datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
@@ -400,7 +400,7 @@ async function api(req, res, u) {
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
     const subs = q1('select count(*) n from subscribers where active=1').n;
-    return send(res, 200, { pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    return send(res, 200, { pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, login: getS('login', {}), marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/visit' && P) {
     const b = await json(req);
@@ -604,6 +604,7 @@ async function api(req, res, u) {
         if (b.apoyo) { const prev = getS('apoyo', {}); let metodos = metodosApoyo(prev);
           if (b.apoyo.metodos !== undefined) { try { metodos = validarMetodos(b.apoyo.metodos); } catch (e) { return send(res, 400, { error: e.message }); } }
           setS('apoyo', { on: b.apoyo.on !== undefined ? !!b.apoyo.on : !!prev.on, mensaje: b.apoyo.mensaje !== undefined ? clip(b.apoyo.mensaje, 1500) : (prev.mensaje || ''), metodos }); }
+        if (b.login) { const g = String(b.login.google || '').trim(), f = String(b.login.facebook || '').trim(); if (g && !/^[\w-]+\.apps\.googleusercontent\.com$/.test(g)) return send(res, 400, { error: 'El ID de cliente de Google termina en .apps.googleusercontent.com' }); if (f && !/^\d{8,20}$/.test(f)) return send(res, 400, { error: 'El ID de la app de Facebook son solo números' }); setS('login', { google: g, facebook: f }); }
         if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 3000) }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
@@ -617,7 +618,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });

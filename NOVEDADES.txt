@@ -1,3 +1,10 @@
+v7.41.0 — Continuar con Google / Facebook
+- 🔐 Nuevos botones "Continuar con Google" y "📘 Continuar con Facebook" al crear o entrar a tu usuario: un toque y listo, sin contraseña. Si la persona ya jugaba como invitado, su progreso (niveles, monedas, trofeos) queda guardado en su cuenta.
+- 📷 Al entrar con Google o Facebook se usa su foto de perfil (pasa por la misma revisión de fotos) y su nombre para crear el usuario.
+- ⚙️ En el panel de la página: nueva tarjeta "🔐 Continuar con Google / Facebook" para pegar el ID de cliente de Google y el ID de la app de Facebook (son datos públicos, nunca pegues secretos). Mientras estén vacíos, los botones no aparecen.
+- 📄 Guía paso a paso en GUIA_LOGIN_SOCIAL.txt para crear esos IDs gratis.
+- La verificación se hace en el servidor con Google y Facebook (no se confía en el navegador).
+
 v7.40.1 — Moderación en el panel
 - 🛡️ La pestaña "📷 Fotos" del panel de la página ahora se llama "🛡️ Moderación": además de las fotos, muestra los reportes de chats privados y de grupo (quién reportó, a quién y los últimos mensajes) con un botón para suspender o quitar la suspensión.
 
