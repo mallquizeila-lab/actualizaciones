@@ -800,7 +800,12 @@ async function api(req, res, u) {
           if (b.apoyo.metodos !== undefined) { try { metodos = validarMetodos(b.apoyo.metodos); } catch (e) { return send(res, 400, { error: e.message }); } }
           setS('apoyo', { on: b.apoyo.on !== undefined ? !!b.apoyo.on : !!prev.on, mensaje: b.apoyo.mensaje !== undefined ? clip(b.apoyo.mensaje, 1500) : (prev.mensaje || ''), metodos }); }
         if (b.login) { const g = String(b.login.google || '').trim(), f = String(b.login.facebook || '').trim(); if (g && !/^[\w-]+\.apps\.googleusercontent\.com$/.test(g)) return send(res, 400, { error: 'El ID de cliente de Google termina en .apps.googleusercontent.com' }); if (f && !/^\d{8,20}$/.test(f)) return send(res, 400, { error: 'El ID de la app de Facebook son solo números' }); setS('login', { google: g, facebook: f }); }
-        if (b.ads) { const c = String(b.ads.client || '').trim(); if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' }); setS('ads', { client: c, extra: clip(b.ads.extra, 120000) }); }
+        if (b.ads) { // si pegan el código completo de Google en cualquiera de los dos cuadros, se saca solo el ca-pub y se descarta el resto
+          let c = String(b.ads.client || '').trim(), ex = String(b.ads.extra || ''); const enEx = /ca-pub-\d{10,20}/.exec(ex), enC = /ca-pub-\d{10,20}/.exec(c);
+          if (enC) c = enC[0]; else if (!c && enEx) c = enEx[0];
+          if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' });
+          ex = ex.replace(/<script[\s\S]*?<\/script>/gi, '\n').replace(/<[^>]*>/g, '\n');
+          setS('ads', { client: c, extra: clip(ex, 120000) }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));

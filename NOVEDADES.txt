@@ -1,3 +1,6 @@
+v7.50.2 — AdSense más fácil de configurar
+- 💰 En el panel → Ajustes → "Google AdSense": si pegas el código completo de Google (el <script> con tu ca-pub) en cualquiera de los dos cuadros, la página saca sola tu ID de editor (ca-pub-…) y descarta el resto. Las líneas de GamePix del ads.txt quedan intactas.
+
 v7.50.1 — Un toque y a jugar
 - ⚡ En la fila "🔥 Los más jugados / ⭐ Los mejores juegos" de la portada, un solo toque abre el juego al instante (sin cargar otra página ni apretar "Jugar ahora"). Al volver, regresas a la portada.
 
