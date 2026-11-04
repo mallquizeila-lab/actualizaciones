@@ -302,7 +302,7 @@ function validarMetodos(lista) {
 }
 const COLOR_APOYO = n => { const x = n.toLowerCase(); return /yape/.test(x) ? '#742284' : /plin/.test(x) ? '#00b5e2' : /paypal/.test(x) ? '#003087' : /ko-?fi/.test(x) ? '#29abe0' : /patreon/.test(x) ? '#ff424d' : /mercado/.test(x) ? '#009ee3' : /coffee/.test(x) ? '#ffdd00' : /nequi/.test(x) ? '#da0081' : /pix/.test(x) ? '#32bcad' : /zelle/.test(x) ? '#6d1ed4' : /bizum/.test(x) ? '#05c3dd' : /binance/.test(x) ? '#f0b90b' : /cash ?app/.test(x) ? '#00d632' : /venmo/.test(x) ? '#008cff' : /wise/.test(x) ? '#9fe870' : /banco|bcp|interbank|bbva|scotia|transfer/.test(x) ? '#0f766e' : /usdt|tether/.test(x) ? '#26a17b' : /btc|bitcoin/.test(x) ? '#f7931a' : /eth/.test(x) ? '#627eea' : /sol/.test(x) ? '#9945ff' : '#7c3aed'; };
 function paginaApoyo() {
-  const a = getS('apoyo', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'nuestra página'), met = metodosApoyo(a);
+  const a = getS('apoyo', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Yupitok'), met = metodosApoyo(a);
   const paso = (n, t) => `<li><b>${n}.</b> ${t}</li>`;
   const bloques = met.map((m, i) => {
     const col = COLOR_APOYO(m.nombre + ' ' + (m.red || '')), osc = ['#ffdd00', '#f0b90b', '#9fe870'].includes(col) ? '#111' : '#fff', nota = m.nota ? `<p class="w">${esc(m.nota)}</p>` : '';
@@ -317,13 +317,13 @@ function paginaApoyo() {
 <style>body{font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:22px 16px 60px;line-height:1.6;color:#f5f3ff;background:radial-gradient(circle at 50% 0,#4c1d95,#1e1b4b 60%,#0b0820)}a{color:#fde68a}h1{font-size:1.8rem;margin:.2em 0}.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;margin:14px 0}.m{margin:10px 0;border-radius:14px;overflow:hidden;background:rgba(0,0,0,.25)}.m summary{list-style:none;cursor:pointer;font-weight:800;padding:14px;font-size:1.08rem;display:flex;justify-content:space-between}.m summary::after{content:'▾'}.m[open] summary::after{content:'▴'}.m summary::-webkit-details-marker{display:none}.in{padding:6px 14px 14px}.in ol{list-style:none;padding:0;margin:6px 0}.in li{margin:5px 0}.ir{display:block;box-sizing:border-box;width:100%;text-align:center;font-weight:800;padding:12px;border-radius:12px;margin-top:8px;text-decoration:none;border:0;font-size:1rem;cursor:pointer}code{display:block;word-break:break-all;font-size:.95rem;margin:8px 0;color:#fde68a;background:rgba(0,0,0,.3);padding:8px;border-radius:8px}.w{font-size:.85rem;opacity:.85}.qr{background:#fff;border-radius:14px;padding:12px;margin-top:10px;text-align:center}.qr img{max-width:100%;width:260px;height:auto;display:block;margin:0 auto}.qr .ir{border:1px solid #ddd}</style>
 <script>function cp(id,b){navigator.clipboard.writeText(document.getElementById(id).textContent).then(function(){b.textContent='¡Copiado! ✓';setTimeout(function(){b.textContent=b.textContent.replace('¡Copiado! ✓','Copiado ✓')},1500)})}</script></head><body>
 <p><a href="/">← Volver a jugar</a></p><div style="text-align:center;font-size:3rem">💛</div><h1 style="text-align:center">Apoya el proyecto</h1>
-<div class="card"><p style="white-space:pre-line;margin:0">${esc(a.mensaje || `Hola 👋 ${mk.nombre || 'Nuestra página'} es un proyecto independiente, hecho en Perú con mucho cariño: juegos y tests gratis para todos, sin instalar nada.\n\nSi te gusta lo que hacemos y quieres ayudarnos a seguir creando juegos nuevos, cualquier aporte, por pequeño que sea, es muy bienvenido. Y si no puedes, compartir la página con tus amigos también nos ayuda muchísimo. ¡Gracias de corazón!`)}</p></div>
+<div class="card"><p style="white-space:pre-line;margin:0">${esc(a.mensaje || `Hola 👋 ${mk.nombre || 'Yupitok'} es un proyecto independiente, hecho en Perú con mucho cariño: juegos y tests gratis para todos, sin instalar nada.\n\nSi te gusta lo que hacemos y quieres ayudarnos a seguir creando juegos nuevos, cualquier aporte, por pequeño que sea, es muy bienvenido. Y si no puedes, compartir la página con tus amigos también nos ayuda muchísimo. ¡Gracias de corazón!`)}</p></div>
 ${met.length ? `<div class="card"><h2 style="margin:0 0 4px;font-size:1.15rem">Elige cómo apoyar</h2><p class="w" style="margin:0">Toca una opción y sigue los pasos.</p>${bloques}</div>` : '<div class="card"><p>Muy pronto podrás apoyarnos desde aquí. Mientras tanto, ¡compartir la página ya es una gran ayuda! 💛</p></div>'}
 <div class="card w">Los aportes son <b>voluntarios</b> y no dan ventajas en los juegos: todo sigue siendo gratis para todos. Nunca te pediremos contraseñas, códigos ni datos de tu tarjeta fuera de las apps y páginas oficiales de cada servicio.</div>
 <p style="text-align:center"><a href="/">🎮 Volver a jugar</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="/contacto.html">Contacto</a></p><script src="/i18n.js?v=3"></script></body></html>`;
 }
 function paginaLegal(tipo) {
-  const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Nuestra página'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
+  const pv = getS('priv', {}), mk = getS('marca', {}), sitio = esc(mk.nombre || 'Yupitok'), resp = esc(pv.nombre || 'el responsable del sitio'), correo = esc(pv.correo || 'el correo de contacto de la página'), ciudad = esc(pv.ciudad || 'Perú');
   const T = {
     terminos: ['Términos de uso', `<p>Al usar ${sitio} aceptas estos términos. Si no estás de acuerdo, por favor no uses el sitio.</p>
       <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p>
@@ -684,19 +684,19 @@ http.createServer(async (req, res) => {
     }
     if (u.pathname === '/' || u.pathname === '/index.html') {
       const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
-      const titulo = t ? t.t : (getS('marca', null)?.titulo || `${getS('marca', null)?.nombre ? getS('marca').nombre + ': ' : ''}Juegos y tests gratis · GLORY BROWN, Huerto Defensor y más`);
+      const titulo = t ? t.t : (getS('marca', null)?.titulo || `${getS('marca', null)?.nombre || 'Yupitok'}: juegos y tests gratis · ¡Juega, ríe, aprende y gana!`);
       const desc = t ? `${t.d} Gratis${t.min ? `, en ${t.min} min` : ''}. ¿Te animas?` : 'Más de 60 juegos y tests gratis sin instalar: GLORY BROWN (batallas en línea 1 vs 1 y 2 vs 2), Huerto Defensor, Joyas, juegos con amigos, chat y clanes. ¡Entra y juega!';
       const img = `${PUBLIC_URL}/og/${t && fs.existsSync(path.join(PUB, 'og', t.id + '.png')) ? t.id : 'general'}.png`;
       const og = `<title>${esc(titulo)}</title>
 <meta name="description" content="${esc(desc)}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(getS('marca', null)?.nombre || 'Tests virales')}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(getS('marca', null)?.nombre || 'Yupitok')}">
 <meta property="og:title" content="${esc(titulo)}"><meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
 <meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">
 <link rel="canonical" href="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
-<script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : { '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Juegos y tests gratis', url: PUBLIC_URL + '/', inLanguage: 'es' }).replace(/</g, '\\u003c')}</script>`;
+<script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : { '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', inLanguage: 'es' }).replace(/</g, '\\u003c')}</script>`;
       return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + adsScript()), { 'cache-control': 'no-cache' });
     }
     // Archivos de la página.

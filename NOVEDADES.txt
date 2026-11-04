@@ -1,3 +1,11 @@
+v7.37.0 — Nace Yupitok: ¡Juega, ríe, aprende y gana!
+- 🎉 La página ahora se llama Yupitok, con logo propio: una "Y" con los brazos arriba de alegría, que también es un control de juego.
+- Nuevo lema en la portada: "¡Juega, ríe, aprende y gana!".
+- Nuevo ícono de la app instalable (nombre: Yupitok) y nueva imagen para cuando compartes la página en WhatsApp y Facebook.
+- Título en Google: "Yupitok: juegos y tests gratis · ¡Juega, ríe, aprende y gana!". Las páginas de Apoyo, Términos, Contacto y Quiénes somos ya dicen Yupitok.
+- Los archivos del logo están en viral/public/brand (para tus fotos de perfil en redes).
+- Puedes cambiar el nombre cuando quieras en el panel de la página → Ajustes → Tu marca.
+
 v7.36.0 — La página aprovecha toda la pantalla en computadora
 - 🖥️ En computadoras y tablets grandes la página usa todo el ancho, al estilo de los grandes portales de juegos: los juegos destacados en una fila, debajo Cristianos, Educativos y Apoyo, luego tu perfil e "Invita amigos", y la lista de juegos en una cuadrícula ancha. En el celular se ve igual que antes.
 - 🛠️ Arreglada la tarjeta "Apoya el proyecto", que se veía subrayada y desordenada.

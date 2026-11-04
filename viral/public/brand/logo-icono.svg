@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c3aed"/><stop offset=".55" stop-color="#ec4899"/><stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="y" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#3b0764" flood-opacity=".45"/></filter>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#f)"/>
+  <circle cx="400" cy="112" r="70" fill="#fff" opacity=".12"/>
+  <circle cx="96" cy="430" r="90" fill="#fff" opacity=".08"/>
+  <!-- La "Y": dos brazos levantados de alegría ("¡Yupi!") que forman un control de juego -->
+  <g filter="url(#s)">
+    <path d="M140 118 L218 258 L218 380 Q218 404 242 404 L270 404 Q294 404 294 380 L294 258 L372 118 Q384 96 360 96 L330 96 Q314 96 306 110 L256 204 L206 110 Q198 96 182 96 L152 96 Q128 96 140 118 Z" fill="url(#y)"/>
+    <!-- botones del control -->
+    <circle cx="256" cy="330" r="17" fill="#ec4899"/>
+  </g>
+  <!-- chispas -->
+  <path d="M404 228 l10 26 26 10 -26 10 -10 26 -10 -26 -26 -10 26 -10 z" fill="#fff"/>
+  <path d="M110 220 l7 17 17 7 -17 7 -7 17 -7 -17 -17 -7 17 -7 z" fill="#fde68a"/>
+</svg>
