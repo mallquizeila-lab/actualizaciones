@@ -1,0 +1,164 @@
+/* ============================================================
+   🌌 Yupitok · Tema AAA oscuro con neón
+   Se carga al final de la página, así que manda sobre los estilos
+   anteriores de la portada y de los juegos (sin tocar su lógica).
+   ============================================================ */
+:root{
+  --bg:#06051a;--surface:#100d2c;--surface2:#171340;--line:#2a2466;--text:#f3f0ff;--muted:#a9a3d6;
+  --gold:#ffd23f;--pink:#ff3df0;--violet:#8b5cf6;--ok:#2bffb1;
+  --neon-c:#22e6ff;--neon-m:#ff3df0;--neon-v:#8b5cf6;--neon-g:#2bffb1;--neon-y:#ffd23f;
+  --glass:rgba(14,11,40,.78);--glow-c:0 0 18px rgba(34,230,255,.45);--glow-m:0 0 18px rgba(255,61,240,.45);
+  --fx:'Exo 2',Figtree,system-ui,sans-serif;
+}
+body{background:var(--bg);font-family:Figtree,system-ui,sans-serif}
+h1,h2,h3,.chathead b,.marca b,.pct{font-family:var(--fx);letter-spacing:.01em}
+h2,h3{font-weight:800}
+::selection{background:var(--neon-m);color:#fff}
+*{scrollbar-color:#3a2f8a transparent;scrollbar-width:thin}
+
+/* ---------- Fondo: espacio oscuro, auroras neón y piso de rejilla ---------- */
+#fondo{background:radial-gradient(1100px 650px at 50% -12%,#25106b 0%,#0c0830 48%,#04030f 100%)}
+#fondo .a1{background:#6d28d9;opacity:.42}
+#fondo .a2{background:#ff1fd1;opacity:.30}
+#fondo .a3{background:#00d5ff;opacity:.30}
+#fondo .a4{background:#2bffb1;opacity:.12}
+#fondo .grano{background-image:radial-gradient(rgba(150,220,255,.10) 1px,transparent 1px);background-size:30px 30px}
+#fondo:after{content:'';position:absolute;left:-50%;right:-50%;bottom:-6vh;height:46vh;
+  background-image:linear-gradient(rgba(34,230,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,61,240,.22) 1px,transparent 1px);
+  background-size:56px 56px;transform:perspective(420px) rotateX(62deg);transform-origin:50% 100%;
+  mask-image:linear-gradient(to top,#000 0%,transparent 85%);-webkit-mask-image:linear-gradient(to top,#000 0%,transparent 85%);
+  animation:neonPiso 6s linear infinite;opacity:.55}
+@keyframes neonPiso{to{background-position:0 56px,0 0}}
+#fondo .ic{filter:drop-shadow(0 0 10px rgba(34,230,255,.55)) saturate(1.2)}
+
+/* ---------- Portada ---------- */
+#home>h1 img{filter:drop-shadow(0 0 18px rgba(255,61,240,.45)) drop-shadow(0 0 32px rgba(34,230,255,.25))}
+.lema{color:#fff!important;text-shadow:0 0 10px var(--neon-m),0 0 22px rgba(255,61,240,.6);font-family:var(--fx);letter-spacing:.03em}
+.sub{color:var(--muted)}
+
+/* Tarjetas de vidrio oscuro con borde neón */
+.card{background:var(--glass);border:1px solid rgba(139,92,246,.35);border-radius:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px rgba(34,230,255,.05)}
+.card.hub{position:relative;border-color:rgba(34,230,255,.35);box-shadow:0 14px 40px rgba(0,0,0,.55),0 0 24px rgba(34,230,255,.12)}
+.hubtop img{border-color:var(--neon-c)!important;box-shadow:0 0 14px rgba(34,230,255,.6)}
+.lvl{background:linear-gradient(90deg,var(--neon-c),var(--neon-m));color:#05031a;box-shadow:var(--glow-c)}
+.xpbar{background:rgba(255,255,255,.08)}
+.xpbar i,.prog i,.bar i,.reloj i{background:linear-gradient(90deg,var(--neon-c),var(--neon-v),var(--neon-m))!important;box-shadow:0 0 10px rgba(34,230,255,.6)}
+.chips span{background:rgba(34,230,255,.08);border:1px solid rgba(34,230,255,.25)}
+.hub-amigos,.hub-apoyo{border-color:rgba(255,61,240,.35)!important;transition:transform .18s,box-shadow .18s}
+.hub-amigos:hover,.hub-apoyo:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(255,61,240,.35)}
+
+/* Banners de los juegos estrella: oscurecidos, con borde neón y brillo que pasa */
+.joyban{border:1px solid rgba(255,255,255,.18);isolation:isolate;transition:transform .2s,box-shadow .2s,filter .2s}
+.joyban:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(4,3,15,.10),rgba(4,3,15,.55))}
+.joyban>*{position:relative;z-index:1}
+.joyban:hover,.joyban:focus-visible{transform:translateY(-3px) scale(1.01);filter:saturate(1.25) brightness(1.08);
+  box-shadow:0 0 0 1px rgba(34,230,255,.7),0 0 26px rgba(34,230,255,.45),0 0 60px rgba(255,61,240,.25)!important}
+.joyban b{text-shadow:0 0 12px rgba(255,255,255,.45)}
+.cont button{background:linear-gradient(160deg,rgba(76,29,149,.85),rgba(15,12,44,.9));border:1px solid rgba(255,61,240,.35);transition:transform .15s,box-shadow .15s}
+.cont button:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(255,61,240,.4)}
+
+/* Buscador y categorías */
+#buscar,input[type=text],input[type=password],input[type=date],input[type=search],input[type=number],select,textarea{
+  background:rgba(10,8,32,.85)!important;border:1px solid rgba(34,230,255,.28)!important;color:var(--text);border-radius:12px}
+#buscar:focus,input:focus,select:focus,textarea:focus{outline:none;border-color:var(--neon-c)!important;box-shadow:0 0 0 3px rgba(34,230,255,.18),var(--glow-c)}
+input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{outline-color:var(--neon-c)}
+.cats button{background:rgba(14,11,40,.8);border:1px solid rgba(139,92,246,.4);color:#cfc8ff;font-family:var(--fx);letter-spacing:.02em;transition:all .15s}
+.cats button:hover{border-color:var(--neon-c);color:#fff}
+.cats button.on{background:linear-gradient(90deg,var(--neon-c),var(--neon-v));border-color:transparent;color:#05031a;box-shadow:var(--glow-c)}
+
+/* Fichas de juegos: tarjeta oscura con línea neón arriba y brillo al pasar */
+.game{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(23,19,64,.92),rgba(10,8,30,.95))!important;
+  border:1px solid rgba(139,92,246,.30)!important;border-radius:18px;box-shadow:0 10px 26px rgba(0,0,0,.5);transition:transform .18s,box-shadow .18s,border-color .18s}
+.game:before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon-c),var(--neon-m),transparent);opacity:.8}
+.game:after{content:'';position:absolute;inset:-40% auto -40% -60%;width:40%;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);transition:left .5s;pointer-events:none}
+.game:hover,.game:focus-visible{transform:translateY(-4px);border-color:rgba(34,230,255,.75)!important;box-shadow:0 0 0 1px rgba(34,230,255,.35),0 0 26px rgba(34,230,255,.35),0 16px 34px rgba(0,0,0,.6)}
+.game:hover:after{left:120%}
+.game .e{filter:drop-shadow(0 0 10px rgba(255,255,255,.25))}
+.game b{font-family:var(--fx);letter-spacing:.01em}
+.game .meta{color:var(--neon-c);text-shadow:0 0 8px rgba(34,230,255,.5)}
+.badge{background:var(--neon-m);box-shadow:var(--glow-m)}
+
+/* Botones */
+.btn{border:0;background:linear-gradient(90deg,var(--neon-c),var(--neon-v) 55%,var(--neon-m));color:#fff;text-shadow:0 1px 3px rgba(5,3,26,.7);font-family:var(--fx);font-weight:800;letter-spacing:.03em;
+  box-shadow:0 0 18px rgba(34,230,255,.35),0 6px 18px rgba(0,0,0,.45);transition:transform .12s,box-shadow .15s,filter .15s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1);box-shadow:0 0 26px rgba(255,61,240,.5),0 8px 22px rgba(0,0,0,.5)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.alt{background:rgba(10,8,32,.6);color:var(--text);border:1px solid rgba(139,92,246,.55);box-shadow:none}
+.btn.alt:hover{border-color:var(--neon-c);box-shadow:var(--glow-c)}
+.envio button{background:linear-gradient(90deg,var(--neon-c),var(--neon-m));color:#fff;text-shadow:0 1px 3px rgba(5,3,26,.7);box-shadow:var(--glow-c)}
+.back{color:#cfc8ff;font-family:var(--fx)}.back:hover{color:var(--neon-c);text-shadow:0 0 8px rgba(34,230,255,.6)}
+
+/* Tests y trivias */
+.opt{background:rgba(16,13,44,.9);border:1px solid rgba(139,92,246,.35);border-radius:14px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.opt:hover{border-color:var(--neon-c);box-shadow:0 0 16px rgba(34,230,255,.3);transform:translateX(3px)}
+.prog,.bar,.reloj{background:rgba(255,255,255,.07)}
+.pct{color:#fff;text-shadow:0 0 14px var(--neon-m),0 0 34px rgba(255,61,240,.5)}
+.big{filter:drop-shadow(0 0 18px rgba(255,255,255,.3))}
+.res .tip{background:rgba(34,230,255,.07);border-left-color:var(--neon-c)}
+.dato b,.res .sec b{color:var(--neon-c)}
+.reto{background:linear-gradient(90deg,var(--neon-m),var(--neon-v),var(--neon-c));color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);box-shadow:var(--glow-m)}
+.share a,.share button{background:rgba(16,13,44,.9);border:1px solid rgba(139,92,246,.35);transition:box-shadow .15s,border-color .15s}
+.share a:hover,.share button:hover{border-color:var(--neon-c);box-shadow:var(--glow-c)}
+.wheel{border-color:var(--neon-c);box-shadow:0 0 30px rgba(34,230,255,.5)}
+.pal{background:rgba(16,13,44,.9);border-color:var(--neon-m)}
+
+/* Ventanas */
+.modal{background:rgba(3,2,12,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal .card{border-color:rgba(34,230,255,.4);box-shadow:0 0 0 1px rgba(255,61,240,.15),0 0 40px rgba(139,92,246,.35),0 20px 60px rgba(0,0,0,.7)}
+.toast{background:rgba(10,8,32,.95);color:#fff;border:1px solid var(--neon-c);box-shadow:var(--glow-c)}
+.cargando .sp{border-color:rgba(255,255,255,.1);border-top-color:var(--neon-c);box-shadow:0 0 16px rgba(34,230,255,.4)}
+
+/* Chat en vivo y mesas */
+.vivo{background:linear-gradient(135deg,#3b0a4f,#120a33)!important;border:1px solid rgba(255,61,240,.45)!important;box-shadow:0 0 30px rgba(255,61,240,.25)}
+.salas button{background:rgba(10,8,32,.6);border-color:rgba(255,61,240,.35);transition:box-shadow .15s}.salas button:hover{box-shadow:var(--glow-m)}
+.msgsv,.mchat,.gbox{background:rgba(10,8,32,.85);border-color:rgba(139,92,246,.35)}
+.m .tx{background:rgba(30,24,80,.95)}.m.yo .tx{background:linear-gradient(135deg,#5b21b6,#a21caf)}
+.m .tx b,.mchat b{color:var(--neon-c)}
+.t3 button{background:rgba(16,13,44,.95);border:1px solid rgba(139,92,246,.4);color:var(--neon-m);text-shadow:0 0 14px var(--neon-m)}
+.t3 button.o{color:var(--neon-c);text-shadow:0 0 14px var(--neon-c)}
+.t3 button.w{background:rgba(43,255,177,.18);box-shadow:inset 0 0 0 2px var(--neon-g)}
+.c4{background:linear-gradient(180deg,#14106a,#0a0838);box-shadow:0 0 0 1px rgba(34,230,255,.4),0 0 30px rgba(34,230,255,.2)}
+.c4 i{background:#05041a;box-shadow:inset 0 2px 6px rgba(0,0,0,.8)}
+.c4 i.R{background:radial-gradient(circle at 35% 30%,#ff9df7,var(--neon-m));box-shadow:0 0 12px var(--neon-m)}
+.c4 i.A{background:radial-gradient(circle at 35% 30%,#b6f7ff,var(--neon-c));box-shadow:0 0 12px var(--neon-c)}
+.c4col button{background:rgba(16,13,44,.95);border:1px solid rgba(139,92,246,.35)}
+.jug span{background:rgba(16,13,44,.95);border-color:rgba(139,92,246,.35)}.jug span.t{border-color:var(--neon-c);box-shadow:var(--glow-c)}
+
+/* ---------- Dentro de los juegos ---------- */
+#stage>.card:first-child,#stage .card{background:var(--glass)}
+/* Juegos de canvas (arcade, joyas…): marco neón alrededor del tablero */
+#stage canvas{box-shadow:0 0 0 1px rgba(34,230,255,.55),0 0 26px rgba(34,230,255,.28),0 0 60px rgba(255,61,240,.15),0 14px 34px rgba(0,0,0,.6)}
+/* GLORY BROWN */
+.gb-panel{border-color:rgba(34,230,255,.45)!important;box-shadow:0 0 26px rgba(34,230,255,.18),0 10px 30px rgba(0,0,0,.55)!important}
+.gb-tabs{background:rgba(5,4,20,.94)!important;border-color:rgba(255,61,240,.45)!important;box-shadow:0 0 20px rgba(255,61,240,.25)}
+.gb-tabs .on{box-shadow:inset 0 0 0 1px var(--neon-c),0 0 14px rgba(34,230,255,.45)!important;color:#fff!important}
+.gb-btn{box-shadow:0 5px 0 #7a4a00,0 0 22px rgba(255,210,63,.45)!important}
+/* Huerto Defensor */
+.hd-bar{border-color:rgba(43,255,177,.4)!important;box-shadow:0 0 22px rgba(43,255,177,.18)}
+.hd-carta{box-shadow:0 0 0 1px rgba(43,255,177,.25)}
+/* Mundo 3D */
+.m3g,.m3b{border-color:rgba(34,230,255,.45)!important;box-shadow:0 0 16px rgba(34,230,255,.2)}
+#m3carga{background:radial-gradient(circle at 50% 30%,#2a0e6e,#05041a)!important}
+/* Amigos y chat privado */
+.am-box{background:linear-gradient(180deg,#120d36,#05041a)!important;border-color:rgba(34,230,255,.35)!important;box-shadow:0 0 40px rgba(139,92,246,.35),0 20px 60px rgba(0,0,0,.7)!important}
+.am-row{background:rgba(255,255,255,.04)!important;border:1px solid rgba(139,92,246,.2)}
+.am-btn{background:linear-gradient(90deg,var(--neon-v),var(--neon-m))}
+
+/* Botón de idioma */
+#btnIdioma{background:rgba(10,8,32,.9)!important;border:1px solid rgba(34,230,255,.5)!important;box-shadow:var(--glow-c)!important;color:#fff!important}
+
+@media (min-width:900px){
+  #hub>.card.hub{background:linear-gradient(135deg,rgba(23,19,64,.9),rgba(10,8,30,.92))}
+}
+@media (prefers-reduced-motion:reduce){
+  #fondo:after{animation:none}
+  .game,.joyban,.btn,.opt{transition:none}
+  .game:hover,.joyban:hover{transform:none}
+}
+
+/* Mapas de niveles (Joyas, Huerto): marco neón y tono de atardecer */
+#mapa{position:relative;box-shadow:0 0 0 1px rgba(34,230,255,.5),0 0 30px rgba(34,230,255,.25),0 0 70px rgba(255,61,240,.15)!important}
+#mapa:after{content:'';position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(30,10,90,.35),rgba(10,5,40,.15) 50%,rgba(30,10,90,.3));mix-blend-mode:multiply}
+#mapa button[data-n]{z-index:4!important}
+#mapa button[data-n]:not([disabled]){box-shadow:0 0 18px rgba(34,230,255,.6),0 6px 14px rgba(0,0,0,.4)!important}

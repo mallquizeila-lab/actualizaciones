@@ -1,3 +1,11 @@
+v7.42.0 — Yupitok en modo AAA: oscuro con neón
+- 🌌 Nuevo diseño oscuro con luces neón (cian, magenta y violeta) en toda la página: fondo espacial con auroras y piso de rejilla animado, logo y lema con brillo, nueva letra para títulos (Exo 2).
+- 🎮 Fichas de juegos como en los portales de consola: tarjeta oscura con línea neón, se elevan y brillan al pasar el dedo o el mouse, con un destello que las cruza.
+- ✨ Banners de los juegos estrella, botones, categorías, buscador, ventanas, chat, avisos y barras de progreso con el mismo estilo neón.
+- 🕹️ Dentro de los juegos: marco neón en todos los tableros (gusanito, billar, 2048, buscaminas y el resto de arcade), tests y trivias, Tres en raya y Cuatro en línea con fichas que brillan, GLORY BROWN, Huerto Defensor, Islas 3D y Amigos con bordes neón. El mapa de Joyas ahora es nocturno y los mapas de niveles tienen marco y botones brillantes.
+- 💛 La página "Apoya el proyecto" también con el nuevo estilo.
+- Respeta "reducir movimiento" del celular (sin animaciones para quien lo pida).
+
 v7.41.0 — Continuar con Google / Facebook
 - 🔐 Nuevos botones "Continuar con Google" y "📘 Continuar con Facebook" al crear o entrar a tu usuario: un toque y listo, sin contraseña. Si la persona ya jugaba como invitado, su progreso (niveles, monedas, trofeos) queda guardado en su cuenta.
 - 📷 Al entrar con Google o Facebook se usa su foto de perfil (pasa por la misma revisión de fotos) y su nombre para crear el usuario.
