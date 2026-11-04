@@ -11,7 +11,7 @@
     salir(); registrar(t.id);
     let pts = 0, ronda = 0;
     const jugarRonda = () => {
-      const cats = Object.keys(PALABRAS), cat = cats[Math.floor(Math.random() * cats.length)], pal = PALABRAS[cat][Math.floor(Math.random() * PALABRAS[cat].length)];
+      const PAL = t.palabras || PALABRAS, cats = Object.keys(PAL), cat = cats[Math.floor(Math.random() * cats.length)], pal = PAL[cat][Math.floor(Math.random() * PAL[cat].length)];
       let usadas = new Set(), globos = 6, cerrada = false;
       stage(cab(t, `Puntos: ${pts}`) + `<p class="sub" style="margin:4px 0">Categoría: <b>${cat}</b> · Cada error revienta un globo 🎈</p><div id="gl" style="font-size:2rem;text-align:center;min-height:44px;letter-spacing:4px"></div><div id="pl" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:12px 0"></div><div id="tc" style="display:grid;grid-template-columns:repeat(9,1fr);gap:5px"></div></div>`);
       const pintar = () => {
@@ -34,8 +34,8 @@
   // ---------- 🔎 Sopa de letras ----------
   JUEGOS.sopa = t => {
     salir(); registrar(t.id);
-    const N = 10, cats = Object.keys(PALABRAS), cat = cats[Math.floor(Math.random() * cats.length)];
-    const pals = PALABRAS[cat].filter(p => p.length <= N).sort(() => Math.random() - .5).slice(0, 6);
+    const N = 10, PAL = t.palabras || PALABRAS, cats = Object.keys(PAL), cat = cats[Math.floor(Math.random() * cats.length)];
+    const pals = PAL[cat].filter(p => p.length <= N).sort(() => Math.random() - .5).slice(0, 6);
     const g = Array(N * N).fill(''), DIR = [[1, 0], [0, 1], [1, 1], [-1, 1]], pos = {};
     for (const p of pals) for (let i = 0; i < 300; i++) { const [dx, dy] = DIR[Math.floor(Math.random() * DIR.length)], x0 = Math.floor(Math.random() * N), y0 = Math.floor(Math.random() * N), cs = [...p].map((c, k) => [x0 + dx * k, y0 + dy * k]);
       if (cs.every(([x, y], k) => x >= 0 && y >= 0 && x < N && y < N && (!g[y * N + x] || g[y * N + x] === p[k]))) { cs.forEach(([x, y], k) => g[y * N + x] = p[k]); pos[p] = cs.map(([x, y]) => y * N + x); break; } }

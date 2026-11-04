@@ -674,7 +674,7 @@ http.createServer(async (req, res) => {
     f = path.normalize(path.join(PUB, decodeURIComponent(f)));
     if (!f.startsWith(PUB + path.sep) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) return send(res, 404, 'No encontrado', 'text/plain; charset=utf-8');
     const ext = path.extname(f), extra = ext === '.html' ? { 'cache-control': 'no-cache' } : { 'cache-control': u.searchParams.has('v') ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' };
-    if (path.basename(f) === 'sw.js') extra['cache-control'] = 'no-cache';
+    if (['sw.js', 'tests.json'].includes(path.basename(f))) extra['cache-control'] = 'no-cache'; // siempre la última versión (con ETag no se descarga si no cambió)
     if (path.basename(f) === 'panel.html') extra['content-security-policy'] = "frame-ancestors 'self' http://localhost:* http://127.0.0.1:*";
     return archivo(req, res, f, MIME[ext] || 'application/octet-stream', extra);
   } catch (e) { console.error(e); if (!res.headersSent) send(res, 500, { error: 'Error interno' }); }

@@ -1,3 +1,14 @@
+v7.33.0 — Juegos educativos (por nivel) y juegos cristianos
+- ✝️📚 Dos botones nuevos en la portada: "Juegos cristianos" y "Juegos educativos".
+- 📚 21 juegos educativos separados por nivel:
+  · 🎒 1.° a 3.° de primaria: Sumas y restas, Inglés con emojis, Adivina la palabra, Animales del mundo, Mi cuerpo.
+  · 📐 4.° a 6.° de primaria: Reto de tablas de multiplicar, Cálculo mental, Sopa de letras de ciencia, El sistema solar, Ciencias naturales, Ortografía.
+  · 🧪 Secundaria: Ecuaciones (halla x), Capitales de América, Historia universal, Química básica, Literatura.
+  · 🎓 Instituto y universidad: Porcentajes y regla de tres, Razonamiento lógico, Finanzas personales, Informática y tecnología, Cultura general avanzada.
+- ✝️ 12 juegos cristianos: Versículo del día (con imagen para compartir en tu estado), Ordena el versículo, Completa el versículo, Ahorcado bíblico, Sopa de letras bíblica y trivias del Antiguo y Nuevo Testamento, la vida de Jesús, personajes, milagros y parábolas, Biblia para niños y libros de la Biblia. Versículos de la Reina-Valera 1909 (dominio público).
+- Cada trivia explica la respuesta correcta para aprender jugando.
+- La lista de juegos ahora se actualiza al instante en el celular de cada visitante.
+
 v7.32.0 — QR en los métodos de apoyo
 - 📷 Cada método de apoyo tiene el botón "Subir QR" (Yape, Plin, Binance, cripto…). Si subes el QR y dejas el número vacío, en la página solo se muestra el QR: tu número no se publica.
 - 🌐 En /apoyar el QR aparece grande con el botón "⬇️ Descargar QR" y los pasos: escanearlo desde otra pantalla o, si es el mismo celular, descargarlo y elegirlo desde la galería dentro de la app.

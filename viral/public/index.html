@@ -136,6 +136,7 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
     <div class="card" id="videoCard" hidden></div>
     <input id="buscar" type="search" placeholder="🔎 Buscar un test…" aria-label="Buscar un test" style="margin-bottom:10px">
     <div class="cats" id="cats"></div>
+    <div class="cats" id="niveles" hidden></div>
     <div class="grid" id="games"><p class="sub">Cargando tests…</p></div>
     <div class="card" id="pollCard" hidden></div>
   </section>
@@ -249,7 +250,7 @@ const NUM = { 1:'Líder nato. Abres caminos y te gusta ser el primero.', 2:'Dipl
 
 // ---------- Navegación ----------
 // ---------- Catálogo de tests (public/tests.json) ----------
-let TESTS = [], CATS = [], cat = 'todos', POP = [], SALAS = null;
+let TESTS = [], CATS = [], NIVELES = [], cat = 'todos', nivel = 'todos', POP = [], SALAS = null;
 function pintarVivo() {
   fetch('/api/chat/salas').then(r => r.json()).then(d => {
     SALAS = d; const v = $('#vivoCard'); if (!d.activo) { v.hidden = true; return; }
@@ -261,15 +262,18 @@ function pintarVivo() {
 }
 pintarVivo(); setInterval(() => { if (!$('#home').hidden) pintarVivo(); }, 30000);
 fetch('/api/populares').then(r => r.json()).then(d => { POP = d.populares || []; if (TESTS.length) pintarHome(); }).catch(() => {});
-const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; pintarHome(); window.pintarHub?.(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
+const testsP = fetch('/tests.json').then(r => r.json()).then(d => { TESTS = d.tests; CATS = d.categorias; NIVELES = d.niveles || []; pintarHome(); window.pintarHub?.(); }).catch(() => { $('#games').innerHTML = '<p class="sub">No se pudieron cargar los tests. Recarga la página.</p>'; });
 const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const TIPO = { perfil: 'Personalidad', trivia: 'Trivia', calc: 'Calculadora', especial: 'Interactivo', sala: 'En vivo', mesa: 'Multijugador', arcade: 'Juego' };
 function pintarHome() {
-  const q = norm($('#buscar').value || ''), lista = [...TESTS].sort((a, b) => (POP.includes(b.id) ? 6 - POP.indexOf(b.id) : 0) - (POP.includes(a.id) ? 6 - POP.indexOf(a.id) : 0)).filter(t => (cat === 'todos' || t.cat === cat) && (!q || norm(t.t + ' ' + t.d).includes(q)));
+  const q = norm($('#buscar').value || ''), lista = [...TESTS].sort((a, b) => (POP.includes(b.id) ? 6 - POP.indexOf(b.id) : 0) - (POP.includes(a.id) ? 6 - POP.indexOf(a.id) : 0)).filter(t => (cat === 'todos' || t.cat === cat) && (cat !== 'educativos' || nivel === 'todos' || t.nivel === nivel) && (!q || norm(t.t + ' ' + t.d).includes(q)));
   $('#cats').innerHTML = CATS.map(([k, l]) => `<button data-c="${k}" class="${k === cat ? 'on' : ''}">${l}</button>`).join('');
-  $('#games').innerHTML = lista.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}${POP.slice(0, 3).includes(t.id) ? '<span class="badge">🔥 Popular</span>' : ''}</b><small>${escH(t.d)}</small><span class="meta">${TIPO[t.tipo] || ''} · ${t.min} min</span></button>`).join('') || '<p class="sub">No hay tests con esa búsqueda.</p>';
+  const nv = $('#niveles'); nv.hidden = cat !== 'educativos'; if (!nv.hidden) nv.innerHTML = [['todos', '📚 Todos los niveles'], ...NIVELES].map(([k, l]) => `<button data-nv="${k}" class="${k === nivel ? 'on' : ''}">${l}</button>`).join('');
+  $('#games').innerHTML = lista.map(t => `<button class="game" data-g="${t.id}"><span class="e">${t.e}</span><b>${escH(t.t)}${POP.slice(0, 3).includes(t.id) ? '<span class="badge">🔥 Popular</span>' : ''}</b><small>${escH(t.d)}</small><span class="meta">${t.nivel ? (NIVELES.find(n => n[0] === t.nivel)?.[1] || '') + ' · ' : ''}${TIPO[t.tipo] || ''} · ${t.min} min</span></button>`).join('') || '<p class="sub">No hay tests con esa búsqueda.</p>';
 }
-$('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; pintarHome(); } };
+$('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; nivel = 'todos'; pintarHome(); } };
+$('#niveles').onclick = e => { const b = e.target.closest('[data-nv]'); if (b) { nivel = b.dataset.nv; pintarHome(); } };
+window.irCategoria = (c, n = 'todos') => { cat = c; nivel = n; $('#buscar').value = ''; pintarHome(); $('#cats').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 $('#buscar').oninput = () => pintarHome();
 $('#games').onclick = e => { const b = e.target.closest('[data-g]'); if (b) abrir(b.dataset.g); };
 $('#back').onclick = () => { if (window.ARCADE) ARCADE.salir(); if (ES) { ES.close(); ES = null; } if (MES) { MES.close(); MES = null; } pintarVivo(); history.replaceState(null, '', location.pathname); show('home'); };
@@ -537,7 +541,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sn = document.createElement('script'); sn.src = '/sonido.js?v=4'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=1'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=3'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=15'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=11'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=6'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=4'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=3'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=15'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=2'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=11'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
@@ -783,6 +787,9 @@ window.pintarHub = function () {
   ${cfg.pro ? `<button class="joyban" data-g="pro" style="background:linear-gradient(120deg,#0f172a,#2563eb 50%,#06b6d4);box-shadow:0 10px 30px rgba(37,99,235,.35)"><span>🕹️</span><div><b>Juegos profesionales</b><small>Cientos de juegos de estudios de todo el mundo: carreras, acción, puzzles y más. Gratis.</small></div></button>` : ''}
   <button class="joyban" data-g="arcade-joyas"><span>💎</span><div><b>${jn > 1 ? 'Continúa Joyas · Nivel ' + jn : 'Nuevo: Joyas, 100 niveles'}</b><small>${jn > 1 ? 'Tu progreso está guardado. ¡Sigue donde te quedaste!' : 'Combina joyas, crea bombas y arcoíris. Se guarda tu avance.'}</small></div></button>
   <button class="joyban" data-g="arcade-huerto" style="background:linear-gradient(120deg,#15803d,#4ade80 55%,#facc15);box-shadow:0 10px 30px rgba(74,222,128,.3)"><span>🌱</span><div><b>${(D.juegos.huerto?.nivel || 1) > 1 ? 'Continúa Huerto Defensor · Nivel ' + (D.juegos.huerto?.nivel || 1) : 'Nuevo: Huerto Defensor'}</b><small>Planta choclos, cocos y ajíes para frenar a las plagas. 30 niveles.</small></div></button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px">
+    <button class="joyban" data-ircat="cristianos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#1e3a8a,#7c3aed 60%,#f59e0b);box-shadow:0 8px 24px rgba(124,58,237,.35)"><span style="font-size:1.8rem">✝️</span><div><b>Juegos cristianos</b><small>Trivias bíblicas, versículos y más</small></div></button>
+    <button class="joyban" data-ircat="educativos" style="margin:0;flex-direction:column;align-items:flex-start;gap:4px;background:linear-gradient(135deg,#065f46,#10b981 55%,#0ea5e9);box-shadow:0 8px 24px rgba(16,185,129,.35)"><span style="font-size:1.8rem">📚</span><div><b>Juegos educativos</b><small>Primaria, secundaria y universidad</small></div></button></div>
   ${cfg.apoyo ? `<a href="/apoyar" class="card" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:10px 12px;background:linear-gradient(120deg,rgba(253,224,71,.16),rgba(244,114,182,.14))"><span style="font-size:1.8rem">💛</span><div style="flex:1"><b>Apoya el proyecto</b><br><small>Somos independientes. Si te gusta, puedes ayudarnos a seguir creando juegos.</small></div><span>›</span></a>` : ''}
   <div class="card" id="refBox" style="background:linear-gradient(120deg,rgba(34,197,94,.18),rgba(14,165,233,.14));padding:12px"></div>
   <div class="card hub"><div class="hubtop">${av ? avImg(av, 46) : '<span style="font-size:2.2rem">🧑‍🚀</span>'}<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><b>${escH(nom)}</b><span class="lvl">Nivel ${nv}</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><small class="sub" style="margin:0">${D.xp - a} / ${b - a} XP para el nivel ${nv + 1}</small></div></div>
@@ -795,7 +802,7 @@ window.pintarHub = function () {
   <p class="sub" style="text-align:left;font-size:.85rem">Tu progreso se guarda solo en este navegador y en la nube. ${PERFIL.codigo ? `Tu código para seguir en otro celular: <b style="letter-spacing:2px;color:var(--gold)">${PERFIL.codigo}</b> (guárdalo, no lo compartas).` : 'Juega una partida para obtener tu código de respaldo.'}</p>
   <div style="display:flex;gap:6px"><input id="codRec" maxlength="8" placeholder="¿Tienes un código? Escríbelo" style="flex:1;margin:0;text-transform:uppercase"><button class="btn" id="btnRec" style="width:auto;margin:0;padding:8px 14px">Recuperar</button></div></details></div>`;
   if (REFI.d) pintarRef(); else refCargar().then(pintarRef);
-  h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g);
+  h.onclick = async e => { const g = e.target.closest('[data-g]'); if (g) return abrir(g.dataset.g); const ic = e.target.closest('[data-ircat]'); if (ic) return irCategoria(ic.dataset.ircat);
     if (e.target.id === 'hubCrear') return cuentaModal('crear'); if (e.target.id === 'hubEntrar') return cuentaModal('entrar');
     if (e.target.id === 'hubSalir') { e.preventDefault(); if (confirm('¿Cerrar sesión en este celular? Tu progreso queda guardado en tu usuario.')) { await PERFIL.salirCuenta(); toast('Sesión cerrada'); } return; }
     if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
