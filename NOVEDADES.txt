@@ -1,3 +1,7 @@
+v7.44.1 — Botón para cambiar la contraseña del panel
+- 🔐 Nuevo botón "🔄 Cambiar contraseña" junto a la contraseña del panel de la página (sección Página viral). Crea una nueva al azar y la página se reinicia sola. Úsalo si la contraseña se vio en alguna captura.
+- 🎙️ "Voces naturales para todos los juegos" ahora espera su turno: si otra grabación (GLORY BROWN o Huerto) está en marcha, empieza sola apenas termine. Antes, el botón no hacía nada en ese caso.
+
 v7.44.0 — Escenarios pintados con IA y juegos con más vida
 - 🏞️ Nuevo botón en ShortForge (Página viral): "🏞️ Escenarios pintados con IA". Pinta con tu cuenta de Cloudflare 50 fondos: los 7 mundos de GLORY BROWN, las 3 zonas del Huerto, 5 mundos de Joyas (cambian cada 20 niveles), 6 cielos panorámicos para las Islas 3D, uno para cada juego arcade y el aula (educativos y cristianos). Si se acaba el cupo gratis del día, sigue solo al día siguiente.
 - 🎬 Cada juego muestra su escenario de fondo con un acercamiento lento tipo cine y lucecitas flotando.

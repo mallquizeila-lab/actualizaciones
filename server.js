@@ -284,6 +284,7 @@ async function api(u, q, U, r) {
     if (u === '/api/viral/voces-glory' && P) { V.vocesGlory(); return V.estado(); }
     if (u === '/api/viral/voces-todas' && P) { V.vocesTodas(); return V.estado(); }
     if (u === '/api/viral/escenas' && P) { V.escenasIA(); return V.estado(); }
+    if (u === '/api/viral/nueva-clave' && P) { V.nuevaClave(); return V.estado(); }
     if (u === '/api/viral/arte-glory' && P) { V.arteGlory(); return V.estado(); }
     if (u === '/api/viral/huerto-medios' && P) { V.huertoMedios(); return V.estado(); }
     if (u === '/api/viral/apoyo') { if (P) await V.admin('ajustes', { apoyo: { on: !!o.on, mensaje: String(o.mensaje || ''), metodos: Array.isArray(o.metodos) ? o.metodos : [] } }); const a = await V.admin('ajustes'); return { ...(a.apoyo || {}), redes: a.redesCripto || [] }; }
