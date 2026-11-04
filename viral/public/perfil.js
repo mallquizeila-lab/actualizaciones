@@ -33,17 +33,23 @@
     }
   }
   function aviso(txt) { const d = document.createElement('div'); d.className = 'toast'; d.style.cssText = 'background:linear-gradient(90deg,#ffd166,#ff7aa8);color:#241a00;font-weight:800'; d.textContent = txt; document.body.append(d); setTimeout(() => d.remove(), 3200); try { FX?.son?.('ganar'); } catch (e) {} }
+  // Premio diario: día 1 a 7 (el día 7 es un cofre). Si faltas un día, la racha vuelve a empezar.
+  const PREMIO_DIA = [20, 30, 40, 50, 60, 80, 150]; let silencioso = false;
   function racha() {
     const h = hoy(); if (D.racha.dia === h) return;
     const ayer = new Date(Date.now() - 5 * 3600000 - 864e5).toISOString().slice(0, 10);
     D.racha.n = D.racha.dia === ayer ? D.racha.n + 1 : 1; D.racha.dia = h; D.racha.max = Math.max(D.racha.max, D.racha.n);
-    const premio = Math.min(10 + D.racha.n * 5, 60); D.monedas += premio; setTimeout(() => aviso(`🔥 Racha de ${D.racha.n} ${D.racha.n === 1 ? 'día' : 'días'} · +${premio} 🪙`), 900);
+    const premio = PREMIO_DIA[(D.racha.n - 1) % 7]; D.monedas += premio; if ((D.racha.n - 1) % 7 === 6) sumarXp(50); if (!silencioso) setTimeout(() => aviso(`🔥 Racha de ${D.racha.n} ${D.racha.n === 1 ? 'día' : 'días'} · +${premio} 🪙`), 900);
+    return premio;
   }
   function logros() { for (const [id, txt, cond] of LOGROS) if (!D.logros.includes(id) && cond(D)) { D.logros.push(id); D.monedas += 25; aviso(`🏅 Logro: ${txt} · +25 🪙`); } }
   function sumarXp(n) { const antes = nivelDe(D.xp); D.xp += n; const ahora = nivelDe(D.xp); if (ahora > antes) { D.monedas += 20 * ahora; setTimeout(() => aviso(`⭐ ¡Subiste a nivel ${ahora}! +${20 * ahora} 🪙`), 400); } }
 
   window.PERFIL = {
-    get datos() { return D; }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara,
+    get datos() { return D; }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara, PREMIO_DIA,
+    diarioPendiente() { return D.racha.dia !== hoy(); },
+    diaSiguiente() { const ayer = new Date(Date.now() - 5 * 3600000 - 864e5).toISOString().slice(0, 10); return D.racha.dia === ayer ? D.racha.n + 1 : 1; },
+    reclamarDiario() { if (D.racha.dia === hoy()) return null; silencioso = true; let p; try { p = racha(); } finally { silencioso = false; } guardar(); return { n: D.racha.n, premio: p }; },
     async crearCuenta(u, clave) { const r = await post('/api/cuenta/crear', { uid: VID, tok, usuario: u, clave, data: D }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); if (!LS.get('chatNom')) LS.set('chatNom', usuario); guardar(); return usuario; },
     async entrar(u, clave) { const r = await post('/api/cuenta/entrar', { usuario: u, clave }); if (r.error) throw new Error(r.error); tok = r.tok; usuario = r.usuario; LS.set('perfilTok', tok); LS.set('perfilUsuario', usuario); LS.set('chatNom', usuario); if (r.data) D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); return usuario; },
     // Continuar con Google / Facebook (el servidor verifica y crea o vincula la cuenta)

@@ -50,6 +50,9 @@ create table if not exists settings (k text primary key, v text);
 create table if not exists perfiles (id text primary key, codigo text unique, data text, updated_at text default (datetime('now')));
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
+create table if not exists pro_rep (id text, iph text, created_at text default (datetime('now')), primary key (id, iph));
+create table if not exists pro_oculto (id text primary key, motivo text, created_at text default (datetime('now')));
+create table if not exists errores (firma text primary key, msg text, src text, ruta text, ua text, n integer default 1, primero text default (datetime('now')), ultimo text default (datetime('now')));
 create table if not exists resultados (id integer primary key, test text, clave text, created_at text default (datetime('now')));
 create index if not exists ix_r_test on resultados(test, clave);`);
 try { db.exec('alter table subscribers add column intereses text'); } catch (e) {} // agrega la columna si falta
@@ -221,6 +224,10 @@ function enviarHtml(req, res, html, extra = {}) {
 // En el panel se pega el enlace del catálogo (JSON o RSS) que da el distribuidor; aquí se lee y se ordena.
 let PRO = { t: 0, items: [], feed: '' };
 const textoP = v => String(v ?? '').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").trim();
+// Categorías de los distribuidores, en español
+const CAT_ES = { puzzle: 'Rompecabezas', puzzles: 'Rompecabezas', action: 'Acción', arcade: 'Arcade', adventure: 'Aventura', racing: 'Carreras', car: 'Carros', cars: 'Carros', sports: 'Deportes', sport: 'Deportes', soccer: 'Fútbol', football: 'Fútbol', basketball: 'Básquet', shooter: 'Disparos', shooting: 'Disparos', strategy: 'Estrategia', casual: 'Casual', girls: 'Moda y belleza', 'dress-up': 'Vestir', dressup: 'Vestir', board: 'De mesa', 'board games': 'De mesa', cards: 'Cartas', card: 'Cartas', 'match-3': 'Combinar 3', match3: 'Combinar 3', io: 'Multijugador .io', '.io': 'Multijugador .io', kids: 'Infantiles', educational: 'Educativos', education: 'Educativos', simulation: 'Simulación', platformer: 'Plataformas', platform: 'Plataformas', fighting: 'Peleas', classics: 'Clásicos', classic: 'Clásicos', music: 'Música', word: 'Palabras', words: 'Palabras', '3d': '3D', idle: 'Idle', clicker: 'Clicker', drawing: 'Dibujo', running: 'Correr', runner: 'Correr', skill: 'Habilidad', multiplayer: 'Multijugador', cooking: 'Cocina', animal: 'Animales', animals: 'Animales', 'hidden object': 'Objetos ocultos', quiz: 'Trivias', trivia: 'Trivias', mahjong: 'Mahjong', solitaire: 'Solitario', bubble: 'Burbujas', 'bubble shooter': 'Burbujas', tower: 'Torres', 'tower defense': 'Defensa de torres', zombie: 'Zombis', math: 'Matemáticas', coloring: 'Colorear', escape: 'Escape', physics: 'Física', rpg: 'Rol', horror: 'Terror', stickman: 'Stickman', bike: 'Motos', flight: 'Aviones', minecraft: 'Bloques', snake: 'Serpiente', golf: 'Golf', pool: 'Billar', chess: 'Ajedrez' };
+const catEs = c => { const k = String(c || '').trim().toLowerCase(); return CAT_ES[k] || (k ? k.charAt(0).toUpperCase() + k.slice(1) : 'Juegos'); };
+const slugDe = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'juego';
 function normalizarJuego(g, plantilla) {
   const pick = (...ks) => { for (const k of ks) { let v = k.split('.').reduce((o, x) => o?.[x], g); if (Array.isArray(v)) v = v[0]; if (v && typeof v === 'object') v = v.url || v.src || v.name || ''; if (v != null && v !== '') return v; } return ''; };
   const t = textoP(pick('title', 'Title', 'name', 'Name', 'game_name')).slice(0, 80), id = String(pick('id', 'Id', 'namespace', 'Md5', 'md5', 'gameId', 'game_id', 'slug'));
@@ -229,7 +236,8 @@ function normalizarJuego(g, plantilla) {
   const img = String(pick('banner_image', 'image', 'Image', 'thumb', 'Thumb', 'thumbnail', 'Thumbnail', 'Asset', 'assets', 'images', 'icon', 'cover'));
   const cat = textoP(pick('category', 'Category', 'categories', 'Categories', 'genre', 'tags')).split(/[,|]/)[0].trim().slice(0, 30);
   if (!t || !/^https:\/\/[^\s"'<>]+$/i.test(url)) return null;
-  return { id: crypto.createHash('md5').update(url).digest('hex').slice(0, 12), t, u: url, img: /^https:\/\/[^\s"'<>]+$/i.test(img) ? img : '', cat: cat || 'Juegos', d: textoP(pick('description', 'Description', 'desc')).slice(0, 220), w: +pick('width', 'Width') || 0, h: +pick('height', 'Height') || 0 };
+  const id12 = crypto.createHash('md5').update(url).digest('hex').slice(0, 12);
+  return { id: id12, s: slugDe(t) + '-' + id12, t, u: url, img: /^https:\/\/[^\s"'<>]+$/i.test(img) ? img : '', cat: catEs(cat), d: textoP(pick('description', 'Description', 'desc')).slice(0, 220), w: +pick('width', 'Width') || 0, h: +pick('height', 'Height') || 0 };
 }
 async function catalogoPro(forzar) {
   const cfg = getS('pro', {}); if (!cfg.on || !cfg.feed) return [];
@@ -253,6 +261,14 @@ async function catalogoPro(forzar) {
   } catch (e) { console.error('Juegos pro:', e.message); }
   return PRO.items;
 }
+// Juegos ocultos (reportados como "no carga" o escondidos por el dueño) y descripción en español
+const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
+const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
+const proVisibles = async () => { const oc = proOcultos(), t = await catalogoPro(); return oc.size ? t.filter(g => !oc.has(g.id)) : t; };
+// Traduce de a poco las descripciones de los juegos al español (una sola vez; queda guardado)
+setInterval(async () => { try { if (!getS('pro', {}).on) return; const t = await catalogoPro(); const falta = [];
+  for (const g of t) { if (falta.length >= 30) break; if (g.d && !/[áéíóúñ¿¡]/i.test(g.d) && !q1("select 1 from i18n where lang='es' and src=?", g.d)) falta.push(g.d); }
+  if (falta.length) await traducirFaltan('es', falta); } catch (e) {} }, 8 * 60000);
 // ---------- Traducción automática (la hace ShortForge con tu IA; aquí se guarda para siempre) ----------
 const IDIOMAS = ['en', 'pt', 'fr', 'it', 'de', 'ru', 'ja', 'ko', 'zh', 'id', 'tr'];
 const enCurso = new Map(); let usoHoy = { d: '', n: 0 };
@@ -405,9 +421,25 @@ async function api(req, res, u) {
     }
     return send(res, 404, { error: 'No existe' });
   }
+  if (u.pathname === '/api/pro/reportar' && P) { // "Este juego no carga": con 3 personas distintas se oculta hasta que lo revises
+    if (limite(ip, 'proRep', 10, 3600000)) return send(res, 429, { error: 'Más despacio' });
+    const b = await json(req), id = String(b.id || ''); if (!/^[a-f0-9]{12}$/.test(id)) return send(res, 400, { error: 'Juego no válido' });
+    run('insert or ignore into pro_rep(id, iph) values(?,?)', id, crypto.createHash('sha256').update('rep:' + ip).digest('hex').slice(0, 16));
+    if ((q1('select count(*) n from pro_rep where id=?', id)?.n || 0) >= 3) run("insert or ignore into pro_oculto(id, motivo) values(?, 'Reportado: no carga')", id);
+    return send(res, 200, { ok: 1 });
+  }
+  if (u.pathname === '/api/err' && P) { // errores de los jugadores (sin datos personales) para revisarlos en el panel
+    if (limite(ip, 'err', 20, 3600000)) return send(res, 200, { ok: 0 });
+    const b = await json(req, 6000), msg = String(b.msg || '').slice(0, 300), src = String(b.src || '').slice(0, 200), ruta = String(b.ruta || '').slice(0, 120), ua = String(req.headers['user-agent'] || '').slice(0, 160);
+    if (!msg || /^Script error\.?$/i.test(msg) || /extension:\/\//.test(src)) return send(res, 200, { ok: 0 });
+    const firma = crypto.createHash('sha1').update(msg + '|' + src.replace(/\?.*$/, '')).digest('hex').slice(0, 16);
+    if (q1('select 1 from errores where firma=?', firma)) run("update errores set n=n+1, ultimo=datetime('now'), ruta=?, ua=? where firma=?", ruta, ua, firma);
+    else if ((q1('select count(*) n from errores')?.n || 0) < 500) run('insert into errores(firma, msg, src, ruta, ua) values(?,?,?,?,?)', firma, msg, src, ruta, ua);
+    return send(res, 200, { ok: 1 });
+  }
   if (u.pathname === '/api/pro') {
     const cfg = getS('pro', {}); if (!cfg.on) return send(res, 200, { on: false, juegos: [] });
-    const todos = await catalogoPro(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
+    const todos = await proVisibles(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
     const cats = Object.entries(todos.reduce((a, g) => (a[g.cat] = (a[g.cat] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => c);
     const f = todos.filter(g => (!cat || g.cat === cat) && (!qq || g.t.toLowerCase().includes(qq)));
     return send(res, 200, { on: true, total: f.length, cats, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
@@ -546,6 +578,11 @@ async function api(req, res, u) {
     const r = u.pathname.slice(11), F = Object.fromEntries(u.searchParams);
     if (r === 'reportes-dm' || r === 'suspender') { const ar = amigos.admin(r, P ? await json(req) : {}); if (ar) return send(res, 200, ar); }
     if (r === 'foto-ver') return fotos.verAdmin(req, res, String(F.id || ''), send, archivo);
+    if (r === 'pro-reportes') { const todos = await catalogoPro(), M = new Map(todos.map(g => [g.id, g])); const ocultos = q('select id, motivo, created_at from pro_oculto order by created_at desc limit 200').map(o => ({ ...o, t: M.get(o.id)?.t || '(ya no está en el catálogo)', s: M.get(o.id)?.s || '' })); const rep = q('select id, count(*) n from pro_rep group by id order by n desc limit 50').map(o => ({ ...o, t: M.get(o.id)?.t || '?', s: M.get(o.id)?.s || '' })); return send(res, 200, { ocultos, rep }); }
+    if (r === 'pro-mostrar' && P) { const b = await json(req), id = String(b.id || ''); run('delete from pro_oculto where id=?', id); run('delete from pro_rep where id=?', id); return send(res, 200, { ok: 1 }); }
+    if (r === 'pro-ocultar' && P) { const b = await json(req), id = String(b.id || ''); if (/^[a-f0-9]{12}$/.test(id)) run("insert or replace into pro_oculto(id, motivo) values(?, 'Ocultado por el dueño')", id); return send(res, 200, { ok: 1 }); }
+    if (r === 'errores') return send(res, 200, { errores: q('select * from errores order by ultimo desc limit 100') });
+    if (r === 'errores-borrar' && P) { run('delete from errores'); return send(res, 200, { ok: 1 }); }
     if (r === 'fotos' || r.startsWith('fotos/')) { const fr = fotos.admin(r, P ? await json(req) : {}); if (fr) return send(res, 200, fr); }
     if (r === 'chat' || r.startsWith('chat/')) { const cr = chat.admin(r, P ? await json(req) : {}, F); if (cr) return send(res, 200, cr); }
     if (r === 'logout') return send(res, 200, { ok: 1 }, undefined, { 'set-cookie': 'sid=; Path=/; Max-Age=0' });
@@ -691,7 +728,8 @@ http.createServer(async (req, res) => {
     if (u.pathname.startsWith('/fotos/')) { const r = await fotos.http(req, res, u, { ip: clientIp(req), json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
-      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2']];
+      const juegosPro = getS('pro', {}).on ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
+      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...juegosPro];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
     }
     { const mq = /^\/apoyo-qr\/([a-f0-9]{20}\.(png|jpg|webp))$/.exec(u.pathname); if (mq) return archivo(req, res, path.join(QR_DIR, mq[1]), mq[2] === 'jpg' ? 'image/jpeg' : 'image/' + mq[2], { 'cache-control': 'public, max-age=31536000, immutable' }); }
@@ -719,6 +757,25 @@ http.createServer(async (req, res) => {
       const og = `<title>GLORY BROWN · El Choque de los Reinos</title><meta name="description" content="${esc(t.d)}"><meta property="og:type" content="website"><meta property="og:title" content="👑 GLORY BROWN · El Choque de los Reinos"><meta property="og:description" content="${esc(t.d)} ¡Juega gratis!"><meta property="og:url" content="${esc(PUBLIC_URL + '/glory')}"><meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}"><meta name="apple-mobile-web-app-title" content="GLORY BROWN"><link rel="apple-touch-icon" href="/glory/icono-192.png"><script>if (!/[?&]g=/.test(location.search)) history.replaceState(null, '', '/glory?g=arcade-batalla&src=app');</script>`;
       return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og + adsScript()), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
     }
+    { const mj = /^\/juego\/([a-z0-9-]{0,80}?)-?([a-f0-9]{12})\/?$/.exec(u.pathname); if (mj) { // 🕹️ Página propia de cada juego profesional (para que Google la encuentre)
+      const todos = getS('pro', {}).on ? await proVisibles() : [], g = todos.find(x => x.id === mj[2]);
+      if (!g) { res.writeHead(302, { location: '/?g=pro' }); return res.end(); }
+      if (u.pathname !== '/juego/' + g.s) { res.writeHead(301, { location: '/juego/' + g.s }); return res.end(); }
+      const sitio = getS('marca', null)?.nombre || 'Yupitok', d = descEs(g), titulo = `${g.t}: juega gratis online · ${sitio}`, url = PUBLIC_URL + '/juego/' + g.s;
+      const desc = (d ? d.replace(/\s+/g, ' ').slice(0, 150) + ' ' : '') + `Juego de ${g.cat.toLowerCase()} gratis, sin instalar, en celular y PC.`;
+      const rel = todos.filter(x => x.cat === g.cat && x.id !== g.id).slice(0, 12);
+      const og = `<title>${esc(titulo)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(url)}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(sitio)}"><meta property="og:title" content="${esc(g.t)} · ¡Juega gratis!"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">${g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(g.img)}">` : ''}<meta property="og:locale" content="es_LA">
+<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'VideoGame', name: g.t, description: d || desc, url, image: g.img || undefined, genre: g.cat, inLanguage: 'es', isAccessibleForFree: true, gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web', publisher: { '@type': 'Organization', name: sitio } }).replace(/</g, '\\u003c')}</script>
+<script>window.JUEGO_SEO=${JSON.stringify(g).replace(/</g, '\\u003c')};</script>`;
+      const art = `<article id="seoJuego" class="card" style="margin-top:6px">${g.img ? `<img src="${esc(g.img)}" alt="${esc(g.t)}" width="512" height="384" style="width:100%;max-height:260px;object-fit:cover;border-radius:14px;display:block" loading="eager">` : ''}
+<h1 style="font-size:1.6rem;margin:12px 0 4px;text-align:left">🎮 ${esc(g.t)}</h1><p class="sub" style="text-align:left;margin:0 0 8px">${esc(g.cat)} · Gratis · Sin instalar · Celular y PC</p>
+${d ? `<p style="margin:0 0 10px">${esc(d)}</p>` : ''}<button class="btn" id="seoJugar" style="font-size:1.15rem">▶ Jugar ahora</button>
+${rel.length ? `<h2 style="font-size:1.1rem;margin:16px 0 8px">Más juegos de ${esc(g.cat.toLowerCase())}</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">${rel.map(x => `<a href="/juego/${esc(x.s)}" style="display:block;text-decoration:none;color:inherit;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06)">${x.img ? `<img src="${esc(x.img)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">` : ''}<small style="display:block;padding:4px 6px;font-weight:700;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.t)}</small></a>`).join('')}</div>` : ''}
+<p class="sub" style="font-size:.75rem;margin:10px 0 0">Juego de un estudio externo, ofrecido por un distribuidor autorizado. <a href="/?g=pro" style="color:inherit">Ver todos los juegos →</a></p></article>`;
+      const html = fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + adsScript()).replace('<section id="home">', '<section id="home">' + art);
+      return enviarHtml(req, res, html, { 'cache-control': 'public, max-age=600' });
+    } }
     if (u.pathname === '/' || u.pathname === '/index.html') {
       const t = CATALOGO.find(x => x.id === u.searchParams.get('g'));
       const titulo = t ? t.t : (getS('marca', null)?.titulo || `${getS('marca', null)?.nombre || 'Yupitok'}: juegos y tests gratis · ¡Juega, ríe, aprende y gana!`);

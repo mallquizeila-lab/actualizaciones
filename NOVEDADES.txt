@@ -1,3 +1,10 @@
+v7.45.0 — Una página para cada juego, premio diario y revisión de errores
+- 🔎 Cada juego profesional (GamePix) tiene ahora su propia página: yupitok.com/juego/nombre-del-juego, con título, imagen, descripción en español, categoría y "Más juegos de…". Todas entran solas al sitemap.xml para que Google las encuentre (miles de páginas nuevas para aparecer en las búsquedas).
+- 🌎 Las descripciones de los juegos se traducen solas al español con la IA de ShortForge, de a poco (30 cada 8 minutos) y una sola vez. Las categorías se muestran en español (Carreras, Disparos, Rompecabezas…).
+- 🎁 Premio diario: calendario de 7 días al entrar a la portada (20, 30, 40, 50, 60, 80 y un cofre de 150 🪙 + 50 XP el día 7). Si faltas un día, la racha vuelve a empezar. Banner "¡Tu premio diario te espera!" en la portada.
+- ⚠️ Botón "¿No carga?" en cada juego profesional: si 3 personas distintas lo reportan, el juego se oculta solo. En el panel → 🛡️ Moderación ves los juegos reportados, los pruebas y puedes mostrarlos de nuevo u ocultar otros.
+- 🐞 Errores de los jugadores: si a alguien se le traba algo, el error técnico (sin datos personales) aparece en el panel → 🛡️ Moderación, para arreglarlo rápido.
+
 v7.44.4 — Catálogo de GamePix completo
 - 🕹️ "Juegos profesionales" ahora lee los catálogos por páginas (como el de GamePix: ...&pagination=96&page=1): sigue cargando las páginas siguientes solo, hasta 5.000 juegos. Antes solo se cargaba la primera página.
 

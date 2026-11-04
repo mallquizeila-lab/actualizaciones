@@ -230,7 +230,7 @@ function pintarRef() {
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${redesPais().slice(0, 2).map(k => `<a class="btn" style="flex:1;margin:0;text-align:center;background:${REDES_DEF[k][2]};color:#fff" target="_blank" rel="noopener" href="${enlaceRed(k, url, txt)}">${REDES_DEF[k][0]} ${REDES_DEF[k][1]}</a>`).join('')}<button class="btn alt" id="refComp" style="flex:1;margin:0">🔗 Compartir</button>${d.pendientes ? `<button class="btn" id="refRec" style="flex:1 1 100%;margin:0">🎁 Reclamar ${d.pendientes * 100} 🪙</button>` : ''}</div>`;
   box.onclick = async e => {
     if (e.target.id === 'refComp') { if (navigator.share) navigator.share({ title: 'Juega conmigo', text: txt, url }).catch(() => {}); else { navigator.clipboard?.writeText(url).catch(() => {}); toast('🔗 Enlace copiado: pégalo donde quieras'); } }
-    if (e.target.id === 'refRec') { const r = await post('/api/ref/reclamar', { uid: VID }).catch(() => null); if (r?.reclamados) { PERFIL.ganar(r.reclamados * 100); FX?.confeti?.(); toast(`🎁 +${r.reclamados * 100} 🪙 por invitar amigos`); } REFI.d = null; REFI.cargando = null; refCargar().then(pintarRef); }
+    if (e.target.id === 'refRec') { const r = await post('/api/ref/reclamar', { uid: VID }).catch(() => null); if (r?.reclamados) { PERFIL.ganar(r.reclamados * 100); window.FX?.confeti?.(); toast(`🎁 +${r.reclamados * 100} 🪙 por invitar amigos`); } REFI.d = null; REFI.cargando = null; refCargar().then(pintarRef); }
   };
 }
 let cfg = {}; const cfgP = fetch('/api/config').then(r => r.json()).then(c => { cfg = c; pintarExtras(); if (c.pro || c.apoyo) window.pintarHub?.(); else if (typeof pintarRef === 'function') pintarRef(); }).catch(() => {});
@@ -804,7 +804,7 @@ testsP.then(() => { if (P.get('g') && (JUEGO[P.get('g')] || TESTS.some(t => t.id
 // 🔐 Continuar con Google / Facebook
 const cargarScript = src => new Promise((ok, no) => { if (document.querySelector(`script[src="${src}"]`)) return ok(); const sc = document.createElement('script'); sc.src = src; sc.async = true; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
 async function loginSocial(proveedor, cred, d, alTerminar) {
-  try { const r = await PERFIL.entrarSocial(proveedor, cred); d?.remove(); toast(r.nueva ? `✅ ¡Bienvenido, ${r.usuario}! Tu usuario está listo` : `👋 ¡Hola de nuevo, ${r.usuario}!`); FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
+  try { const r = await PERFIL.entrarSocial(proveedor, cred); d?.remove(); toast(r.nueva ? `✅ ¡Bienvenido, ${r.usuario}! Tu usuario está listo` : `👋 ¡Hola de nuevo, ${r.usuario}!`); window.FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
   catch (er) { const e = d?.querySelector('#cuErr'); if (e) e.textContent = er.message; else toast(er.message); } }
 async function botonesSocial(d, alTerminar) {
   const L = cfg.login || {}, box = d.querySelector('#cuSocial'); if (!box || (!L.google && !L.facebook)) return;
@@ -829,7 +829,7 @@ window.cuentaModal = function (modo = 'crear', alTerminar) {
     if (u.length < 3) return err.textContent = 'Escribe un usuario de al menos 3 letras'; if (c.length < 6) return err.textContent = 'La contraseña debe tener al menos 6 caracteres';
     if (modo === 'crear' && c !== $('#cuC2').value) return err.textContent = 'Las contraseñas no coinciden';
     e.target.disabled = true;
-    try { if (modo === 'crear') await PERFIL.crearCuenta(u, c); else await PERFIL.entrar(u, c); d.remove(); toast(modo === 'crear' ? `✅ ¡Listo, ${PERFIL.usuario}! Tu progreso está guardado` : `👋 ¡Hola de nuevo, ${PERFIL.usuario}!`); FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
+    try { if (modo === 'crear') await PERFIL.crearCuenta(u, c); else await PERFIL.entrar(u, c); d.remove(); toast(modo === 'crear' ? `✅ ¡Listo, ${PERFIL.usuario}! Tu progreso está guardado` : `👋 ¡Hola de nuevo, ${PERFIL.usuario}!`); window.FX?.son?.('ganar'); window.pintarHub?.(); alTerminar && alTerminar(); }
     catch (er) { err.textContent = er.message || 'No se pudo. Inténtalo otra vez.'; e.target.disabled = false; } };
 };
 // ---------- Juegos profesionales (catálogo del distribuidor configurado en el panel) ----------
@@ -840,17 +840,23 @@ JUEGO.pro = async function (cat = '', qq = '', pag = 0) {
   let d; try { d = await (await fetch(`/api/pro?cat=${encodeURIComponent(cat)}&q=${encodeURIComponent(qq)}&p=${pag}`)).json(); } catch (e) { d = { juegos: [] }; }
   if (!d.on) { $('#proLista').innerHTML = '<p class="sub">Esta sección aún no está disponible.</p>'; return; }
   $('#proCats').innerHTML = ['', ...(d.cats || [])].map(c => `<button class="btn ${c === cat ? '' : 'alt'}" data-cat="${escH(c)}" style="width:auto;margin:0;padding:5px 12px;font-size:.8rem;white-space:nowrap">${c ? escH(c) : 'Todos'}</button>`).join('');
-  $('#proLista').innerHTML = d.juegos.length ? d.juegos.map(g => `<button data-pj="${g.id}" style="border:0;padding:0;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);cursor:pointer;color:inherit;text-align:left"><div style="aspect-ratio:1;background:#1e1b4b center/cover no-repeat${g.img ? `;background-image:url('${g.img.replace(/'/g, '%27')}')` : ''}"></div><small style="display:block;padding:5px 7px;font-weight:700;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(g.t)}</small></button>`).join('') : '<p class="sub">No encontramos juegos con ese nombre.</p>';
+  $('#proLista').innerHTML = d.juegos.length ? d.juegos.map(g => `<a href="/juego/${g.s}" data-pj="${g.id}" style="display:block;text-decoration:none;border:0;padding:0;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);cursor:pointer;color:inherit;text-align:left"><div style="aspect-ratio:1;background:#1e1b4b center/cover no-repeat${g.img ? `;background-image:url('${g.img.replace(/'/g, '%27')}')` : ''}"></div><small style="display:block;padding:5px 7px;font-weight:700;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(g.t)}</small></a>`).join('') : '<p class="sub">No encontramos juegos con ese nombre.</p>';
   $('#proMas').innerHTML = `${pag > 0 ? '<button class="btn alt" id="proAnt" style="width:auto;display:inline-block;margin:0 4px">← Anteriores</button>' : ''}${(pag + 1) * 48 < d.total ? '<button class="btn alt" id="proSig" style="width:auto;display:inline-block;margin:0 4px">Ver más →</button>' : ''}`;
   let tq; $('#proQ').oninput = e => { clearTimeout(tq); tq = setTimeout(() => JUEGO.pro(cat, e.target.value.trim(), 0), 450); };
   $('#stage').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) return JUEGO.pro(c.dataset.cat, qq, 0);
     if (e.target.id === 'proSig') return JUEGO.pro(cat, qq, pag + 1); if (e.target.id === 'proAnt') return JUEGO.pro(cat, qq, pag - 1);
-    const b = e.target.closest('[data-pj]'); if (!b) return; const g = d.juegos.find(x => x.id === b.dataset.pj); if (!g) return;
+    const b = e.target.closest('[data-pj]'); if (!b) return; e.preventDefault(); const g = d.juegos.find(x => x.id === b.dataset.pj); if (!g) return;
+    JUEGO.proAbrir(g, () => JUEGO.pro(cat, qq, pag)); };
+};
+// Abre un juego profesional (desde la lista o desde su página propia /juego/...)
+JUEGO.proAbrir = function (g, volver) {
     $('#stage').onclick = null; scrollTo(0, 0);
     stage(`<div class="card" style="padding:8px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><button class="btn alt" id="proVolver" style="width:auto;margin:0;padding:6px 12px">← Juegos</button><b style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(g.t)}</b><button class="btn alt" id="proFull" style="width:auto;margin:0;padding:6px 12px">⛶</button></div>
       <div id="proCaja" style="position:relative;width:100%;aspect-ratio:${g.w && g.h ? g.w + '/' + g.h : '16/10'};max-height:78vh;background:#000;border-radius:12px;overflow:hidden"><iframe src="${g.u.replace(/"/g, '%22')}" title="${escH(g.t)}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; fullscreen; gamepad; clipboard-write" allowfullscreen sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-pointer-lock allow-orientation-lock"></iframe></div>
-      ${g.d ? `<p class="sub" style="text-align:left;margin:8px 4px 0;font-size:.85rem">${escH(g.d)}</p>` : ''}<p class="sub" style="font-size:.72rem;margin:6px 0 0">Juego de un estudio externo, mostrado por un distribuidor autorizado.</p></div>`);
-    $('#proVolver').onclick = () => JUEGO.pro(cat, qq, pag); $('#proFull').onclick = () => { const c = $('#proCaja'); (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c); }; };
+      ${g.d ? `<p class="sub" style="text-align:left;margin:8px 4px 0;font-size:.85rem">${escH(g.d)}</p>` : ''}<p class="sub" style="font-size:.72rem;margin:6px 0 0">Juego de un estudio externo, mostrado por un distribuidor autorizado. <button id="proRep" style="background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit">⚠️ ¿No carga?</button></p></div>`);
+    $('#proVolver').onclick = () => volver ? volver() : JUEGO.pro(); $('#proFull').onclick = () => { const c = $('#proCaja'); (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c); };
+    $('#proRep').onclick = async () => { if (!confirm('¿El juego no carga o no se puede jugar? Avisaremos para revisarlo.')) return; await post('/api/pro/reportar', { id: g.id }).catch(() => {}); toast('🙏 Gracias, lo revisaremos'); volver ? volver() : JUEGO.pro(); };
+    try { PERFIL.evento('pro', 'pro'); } catch (e) {}
 };
 window.pintarHub = function () {
   const h = $('#hub'); if (!h || !window.PERFIL) return;
@@ -884,8 +890,32 @@ window.pintarHub = function () {
     if (e.target.id === 'hubSalir') { e.preventDefault(); if (confirm('¿Cerrar sesión en este celular? Tu progreso queda guardado en tu usuario.')) { await PERFIL.salirCuenta(); toast('Sesión cerrada'); } return; }
     if (e.target.id === 'btnRec') { const c = $('#codRec').value.trim(); if (c.length < 6) return toast('El código tiene 6 caracteres'); try { await PERFIL.recuperar(c); toast('✅ Progreso recuperado'); pintarHub(); } catch (er) { toast(er.message || 'No se pudo recuperar'); } } };
 };
+// 🎁 Premio diario: calendario de 7 días (el día 7 es un cofre). Aparece una vez al día al entrar a la portada.
+window.premioDiario = function (forzar) {
+  if (!window.PERFIL || !PERFIL.diarioPendiente() || document.getElementById('pdModal')) return;
+  const n = PERFIL.diaSiguiente(), k = (n - 1) % 7, P = PERFIL.PREMIO_DIA, d = document.createElement('div'); d.className = 'modal'; d.id = 'pdModal';
+  d.innerHTML = `<div class="card" style="text-align:center"><h2 style="margin:0">🎁 Premio diario</h2><p class="sub" style="margin:4px 0 12px">${n > 1 ? `🔥 ¡Llevas ${n} días seguidos! No faltes mañana.` : 'Entra cada día y el premio crece. ¡El día 7 hay cofre!'}</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${P.map((p, i) => `<div style="padding:10px 4px;border-radius:14px;border:1px solid ${i === k ? 'var(--neon-c,#22e6ff)' : 'rgba(255,255,255,.12)'};background:${i < k ? 'rgba(43,255,177,.12)' : i === k ? 'rgba(34,230,255,.15)' : 'rgba(255,255,255,.04)'};${i === k ? 'box-shadow:0 0 18px rgba(34,230,255,.5);' : ''}${i === 6 ? 'grid-column:span 2;' : ''}"><small style="display:block;opacity:.8">Día ${i + 1}</small><div style="font-size:${i === 6 ? '2rem' : '1.4rem'}">${i < k ? '✅' : i === 6 ? '🧰' : '🪙'}</div><b>${p}</b></div>`).join('')}</div>
+    <button class="btn" id="pdOk" style="margin-top:14px">Reclamar ${P[k]} 🪙${k === 6 ? ' + cofre' : ''}</button><button class="btn alt" id="pdNo">Más tarde</button></div>`;
+  document.body.append(d);
+  d.onclick = e => { if (e.target.id === 'pdNo' || e.target === d) return d.remove(); if (e.target.id !== 'pdOk') return;
+    const r = PERFIL.reclamarDiario(); d.remove(); if (!r) return; window.FX?.confeti?.(); toast(`🎁 ¡Día ${r.n}! +${r.premio} 🪙${(r.n - 1) % 7 === 6 ? ' y +50 XP del cofre' : ''}`); window.pintarHub?.(); };
+};
+{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments);
+  try { if (PERFIL.diarioPendiente()) { const h = document.getElementById('hub'); if (h && !h.querySelector('[data-pd]')) h.insertAdjacentHTML('afterbegin', `<button class="joyban" data-pd="1" onclick="premioDiario()" style="grid-column:1/-1;background:linear-gradient(120deg,#f59e0b,#ef4444 55%,#a21caf);box-shadow:0 10px 30px rgba(245,158,11,.35)"><span>🎁</span><div><b>¡Tu premio diario te espera!</b><small>Día ${PERFIL.diaSiguiente() > 7 ? ((PERFIL.diaSiguiente() - 1) % 7) + 1 : PERFIL.diaSiguiente()} de 7 · toca para reclamar</small></div></button>`); }
+    if (!window.__pdVisto && PERFIL.diarioPendiente() && LS.get('consent') && !/[?&]g=/.test(location.search) && !location.pathname.startsWith('/juego/')) { window.__pdVisto = 1; setTimeout(() => { if (!$('#home').hidden) premioDiario(); }, 1500); } } catch (e) {} }; }
 </script>
-<script src="/perfil.js?v=3"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
+<script src="/perfil.js?v=4"></script><script src="/amigos.js?v=3"></script><script>if (new URLSearchParams(location.search).get('amigos')) setTimeout(() => window.AMIGOS?.abrir(), 1500);</script>
+<script>
+// 🐞 Errores de los jugadores: se anotan en tu panel (solo el mensaje técnico, sin datos personales)
+(() => { let n = 0; const ruido = /Failed to fetch|NetworkError|Load failed|AbortError|aborted|ResizeObserver|Script error|cancel/i;
+  const env = (msg, src) => { msg = String(msg || ''); if (!msg || ruido.test(msg) || n++ >= 5) return; try { const b = new Blob([JSON.stringify({ msg: msg.slice(0, 300), src: String(src || '').slice(0, 200), ruta: location.pathname + location.search.slice(0, 40) })], { type: 'application/json' }); navigator.sendBeacon ? navigator.sendBeacon('/api/err', b) : fetch('/api/err', { method: 'POST', body: b, keepalive: true }); } catch (e) {} };
+  addEventListener('error', e => { if (!e.message || (e.filename && !e.filename.startsWith(location.origin))) return; env(e.message, (e.filename || '').replace(location.origin, '') + ':' + e.lineno); });
+  addEventListener('unhandledrejection', e => env('Promesa: ' + (e.reason?.message || e.reason), (e.reason?.stack || '').split('\n')[1] || ''));
+})();
+// 🕹️ Página propia de un juego (/juego/...): botón "Jugar ahora"
+if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.onclick = async () => { if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el juego 🙏'); show('play'); JUEGO.proAbrir(window.JUEGO_SEO, () => show('home')); }; }
+</script>
 <script>window.pintarHub?.(); window.__instalar = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__instalar = e; }); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});</script>
 <link rel="stylesheet" href="/neon.css?v=2">
 </body>
