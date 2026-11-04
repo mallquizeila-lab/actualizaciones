@@ -1,3 +1,6 @@
+v7.50.1 — Un toque y a jugar
+- ⚡ En la fila "🔥 Los más jugados / ⭐ Los mejores juegos" de la portada, un solo toque abre el juego al instante (sin cargar otra página ni apretar "Jugar ahora"). Al volver, regresas a la portada.
+
 v7.50.0 — Los mejores juegos primero y campeones también en GamePix
 - ⭐ Los mejores juegos de GamePix son lo primero que se ve en la portada (justo después del premio diario): fila grande "🔥 Los más jugados" con su puesto #1, #2, #3… Primero van los más jugados en Yupitok esta semana y se completa con los mejores de GamePix (su ranking de calidad), así nunca está vacía.
 - 🎮 Campeones también en los juegos de GamePix: como esos juegos no nos mandan los puntajes, se mide el tiempo jugado de verdad (solo cuenta con la pantalla visible y después de tocar el juego; máximo 4 horas al día).
