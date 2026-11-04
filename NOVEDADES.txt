@@ -1,3 +1,10 @@
+v7.56.0 — SEO a fondo: categorías, IndexNow y más señales para Google
+- 🕹️ Nuevas páginas por categoría (yupitok.com/juegos y yupitok.com/juegos/carreras, /disparos, /rompecabezas, /deportes, /estrategia…): cada una con su texto propio en español, los juegos más jugados primero y enlaces a cada juego. Apuntan a búsquedas muy comunes como "juegos de carreras gratis". Todas entran solas al sitemap.
+- 📣 IndexNow: una vez al día tu página avisa sola a Bing, Yandex y otros buscadores de las páginas nuevas, para que las encuentren mucho más rápido.
+- 🧭 Más señales para Google: "migas de pan" (Yupitok › Juegos › Categoría › Juego), lista de juegos en cada categoría, y la ficha de organización de Yupitok con logo, lema y tu página de Facebook.
+- 🔗 Más enlaces internos: cada juego enlaza a su categoría, y la portada enlaza a las categorías y a las guías.
+- Las páginas de categorías no cargan AdSense mientras Google te revisa (son listas de juegos de otros estudios).
+
 v7.55.0 — Guías y trucos (contenido para Google)
 - 📝 Nueva sección "Guías y trucos" (yupitok.com/guias) con 5 guías originales: cómo ganar en GLORY BROWN (10 consejos), guía completa de Huerto Defensor (defensores, plagas y trucos), los mejores juegos gratis sin instalar, juegos para aprender las tablas de multiplicar, y cómo ganar monedas (premio diario, Hora feliz, torneo y Salón de la Fama).
 - Cada guía tiene botón "▶ Jugar ahora gratis", "Más guías", datos estructurados de artículo para Google y entra sola al sitemap. Este tipo de contenido propio ayuda a aparecer en Google y a que AdSense apruebe y pague mejor.

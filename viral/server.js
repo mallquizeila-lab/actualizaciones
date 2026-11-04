@@ -321,6 +321,59 @@ async function catalogoPro(forzar) {
   } catch (e) { console.error('Juegos pro:', e.message); }
   return PRO.items;
 }
+// ---------- 📣 IndexNow: avisa a Bing, Yandex, Seznam, Naver… cuando hay páginas nuevas (una vez al día) ----------
+const indexNowKey = () => { let k = getS('indexnowKey', ''); if (!/^[a-f0-9]{32}$/.test(k)) { k = crypto.randomBytes(16).toString('hex'); setS('indexnowKey', k); } return k; };
+async function indexNow() {
+  if (!/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(PUBLIC_URL) || /trycloudflare/.test(PUBLIC_URL) || getS('indexnowDia', '') === hoyPeru()) return;
+  setS('indexnowDia', hoyPeru());
+  try { const r = await fetch(PUBLIC_URL.replace(/\/$/, '') + '/sitemap.xml', { signal: AbortSignal.timeout(60000) }).catch(() => null); const xml = r && r.ok ? await r.text() : '';
+    const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].replace(/&amp;/g, '&')), vistos = new Set(getS('indexnowEnviadas', [])), nuevas = urls.filter(x => !vistos.has(x));
+    const lote = (nuevas.length ? nuevas : urls.slice(0, 20)).slice(0, 9000); if (!lote.length) return; const host = new URL(PUBLIC_URL).host, key = indexNowKey();
+    const rr = await fetch('https://api.indexnow.org/indexnow', { method: 'POST', headers: { 'content-type': 'application/json; charset=utf-8' }, body: JSON.stringify({ host, key, keyLocation: `${PUBLIC_URL}/${key}.txt`, urlList: lote }), signal: AbortSignal.timeout(60000) });
+    if (rr.ok || rr.status === 202) setS('indexnowEnviadas', [...vistos, ...lote].slice(-20000)); console.log('IndexNow:', rr.status, lote.length, 'URLs');
+  } catch (e) { console.error('IndexNow:', e.message); }
+}
+setTimeout(() => indexNow(), 5 * 60000); setInterval(() => indexNow(), 3 * 3600000).unref();
+// ---------- 🔎 Páginas de categorías (SEO): "Juegos de carreras gratis", etc. ----------
+const INTRO_CAT = {
+  'Carreras': 'Pisa el acelerador: carros, motos y camiones para correr contra el reloj o contra otros pilotos. Juegos de carreras gratis que funcionan en el celular y en la computadora, sin descargar nada.',
+  'Carros': 'Maneja, estaciona, derrapa y personaliza carros de todo tipo. Juegos de carros gratis para jugar al instante desde el navegador.',
+  'Motos': 'Saltos imposibles, pistas extremas y acrobacias en dos ruedas. Juegos de motos gratis para el celular y la PC.',
+  'Disparos': 'Puntería, reflejos y estrategia: juegos de disparos gratis para todos los gustos, desde tiro al blanco hasta misiones de acción.',
+  'Acción': 'Aventuras rápidas, enemigos, saltos y poderes. Juegos de acción gratis para descargar adrenalina en minutos.',
+  'Aventura': 'Explora mundos, resuelve misterios y supera desafíos. Juegos de aventura gratis para jugar sin instalar.',
+  'Rompecabezas': 'Entrena tu mente con rompecabezas, acertijos y retos de lógica. Juegos de puzzle gratis para relajarte o desafiarte.',
+  'Deportes': 'Fútbol, básquet, tenis, golf y mucho más. Juegos de deportes gratis para competir desde el celular o la computadora.',
+  'Fútbol': 'Penales, partidos rápidos y torneos: juegos de fútbol gratis para los amantes de la pelota.',
+  'Estrategia': 'Planifica, construye y defiende. Juegos de estrategia gratis donde cada decisión cuenta.',
+  'Casual': 'Partidas cortas, fáciles de aprender y difíciles de soltar. Juegos casuales gratis para cualquier momento del día.',
+  'Arcade': 'La diversión clásica de las maquinitas, ahora en tu celular: juegos arcade gratis, rápidos y adictivos.',
+  'Multijugador .io': 'Compite en vivo contra jugadores de todo el mundo en juegos .io gratis: crece, sobrevive y llega al primer lugar.',
+  'Multijugador': 'Juega con amigos o con gente de todo el mundo en juegos multijugador gratis y sin instalar.',
+  'Combinar 3': 'Combina joyas, dulces y frutas de 3 en 3. Juegos de combinar gratis, relajantes y llenos de niveles.',
+  'Moda y belleza': 'Viste, maquilla y decora: juegos de moda y belleza gratis para dar rienda suelta a tu creatividad.',
+  'Vestir': 'Crea looks, combina ropa y diseña estilos únicos en juegos de vestir gratis.',
+  'Cocina': 'Prepara recetas, atiende clientes y maneja tu propio restaurante en juegos de cocina gratis.',
+  'Infantiles': 'Juegos sencillos, coloridos y divertidos para los más pequeños de la casa, con supervisión de un adulto.',
+  'Educativos': 'Aprende jugando: matemáticas, idiomas, memoria y más en juegos educativos gratis.',
+  'De mesa': 'Ajedrez, damas, ludo y otros clásicos de mesa para jugar gratis en línea.',
+  'Cartas': 'Solitario, póquer sin apuestas, uno y más: juegos de cartas gratis para pasar el rato.',
+  'Plataformas': 'Corre, salta y esquiva obstáculos en juegos de plataformas gratis al estilo de los clásicos.',
+  'Simulación': 'Maneja, construye, cultiva o administra: juegos de simulación gratis para vivir otras vidas.',
+  'Habilidad': 'Reflejos, precisión y paciencia: juegos de habilidad gratis para ponerte a prueba.',
+  'Burbujas': 'Apunta, combina colores y revienta burbujas en juegos clásicos de burbujas gratis.',
+  'Zombis': 'Sobrevive a las hordas de zombis con estrategia y puntería en juegos de zombis gratis.',
+  'Peleas': 'Golpes, combos y poderes especiales en juegos de peleas gratis para jugar al instante.',
+  'Correr': 'Corre sin parar, esquiva obstáculos y junta monedas en juegos de correr infinitos y gratis.',
+  'Clásicos': 'Los juegos de siempre, renovados: clásicos gratis para jugar en el navegador.',
+  'Ajedrez': 'Mueve tus piezas y entrena tu estrategia con juegos de ajedrez gratis.',
+  'Solitario': 'El clásico solitario y sus variantes, gratis y sin instalar.',
+};
+const catsPro = async () => { const t = await proVisibles(), m = {}; for (const g of t) (m[g.cat] = m[g.cat] || []).push(g); return Object.entries(m).filter(([, l]) => l.length >= 6).sort((a, b) => b[1].length - a[1].length); };
+const CSS_NEON = `<style>body{font-family:system-ui,sans-serif;max-width:980px;margin:0 auto;padding:22px 16px 60px;line-height:1.6;color:#f3f0ff;background:radial-gradient(circle at 15% 0,rgba(255,61,240,.22),transparent 40%),radial-gradient(circle at 90% 20%,rgba(34,230,255,.18),transparent 45%),radial-gradient(circle at 50% 0,#25106b,#0c0830 55%,#04030f) fixed;font-size:17px}a{color:#22e6ff}h1{line-height:1.25;text-shadow:0 0 14px rgba(255,61,240,.5)}h2{color:#fde68a}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.t{display:block;text-decoration:none;color:inherit;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}.t img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.t span{display:block;padding:6px 8px;font-weight:700;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chips a{display:inline-block;margin:4px;padding:6px 12px;border-radius:999px;border:1px solid rgba(139,92,246,.5);text-decoration:none;color:#e9e4ff}.miga{font-size:.85rem;opacity:.8}.btn{display:block;text-align:center;padding:14px;border-radius:14px;background:linear-gradient(90deg,#22e6ff,#8b5cf6,#ff3df0);color:#fff;font-weight:800;text-decoration:none;margin:16px 0}</style>`;
+const PIE_NEON = `<p class="miga" style="margin-top:30px"><a href="/">🎮 Yupitok</a> · <a href="/juegos">🕹️ Todas las categorías</a> · <a href="/guias">📝 Guías</a> · <a href="/campeones">👑 Salón de la Fama</a> · <a href="/nosotros.html">Quiénes somos</a> · <a href="/contacto.html">Contacto</a> · <a href="/privacidad.html">Privacidad</a></p><script src="/i18n.js?v=4"></script></body></html>`;
+const headNeon = (t, d, url, ld) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(d)}"><link rel="canonical" href="${esc(url)}"><meta property="og:type" content="website"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(d)}"><meta property="og:url" content="${esc(url)}"><meta property="og:image" content="${esc(PUBLIC_URL + '/og/general.png')}"><link rel="icon" href="/icon.png?v=3">${(Array.isArray(ld) ? ld : ld ? [ld] : []).map(x => `<script type="application/ld+json">${JSON.stringify(x).replace(/</g, '\\u003c')}</script>`).join('')}${CSS_NEON}</head><body>`;
+const migas = l => ({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: l.map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: PUBLIC_URL + u })) });
 // Juegos ocultos (reportados como "no carga" o escondidos por el dueño) y descripción en español
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
@@ -907,10 +960,12 @@ http.createServer(async (req, res) => {
     { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
       if (req.headers['if-none-match'] === et) { res.writeHead(304, { etag: et }); return res.end(); } const gz = /gzip/.test(req.headers['accept-encoding'] || ''); return send(res, 200, gz ? zlib.gzipSync(cuerpo) : cuerpo, 'application/json; charset=utf-8', { etag: et, 'cache-control': 'no-cache', vary: 'Accept-Encoding', ...(gz ? { 'content-encoding': 'gzip' } : {}) }); } }
     if (u.pathname.startsWith('/fotos/')) { const r = await fotos.http(req, res, u, { ip: clientIp(req), json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
+    { const mk = /^\/([a-f0-9]{32})\.txt$/.exec(u.pathname); if (mk && mk[1] === getS('indexnowKey', '')) return send(res, 200, mk[1], 'text/plain; charset=utf-8'); }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
       const juegosPro = getS('pro', {}).on ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
-      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/campeones', '0.7'], ['/guias', '0.7'], ...(() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias.map(x => ['/guias/' + x.slug, '0.8']); } catch (e) { return []; } })(), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...juegosPro];
+      const catsUrls = getS('pro', {}).on ? [['/juegos', '0.8'], ...(await catsPro()).map(([c]) => ['/juegos/' + slugDe(c), '0.8'])] : [];
+      const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/campeones', '0.7'], ['/guias', '0.7'], ...(() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias.map(x => ['/guias/' + x.slug, '0.8']); } catch (e) { return []; } })(), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...catsUrls, ...juegosPro];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
     }
     { const mq = /^\/apoyo-qr\/([a-f0-9]{20}\.(png|jpg|webp))$/.exec(u.pathname); if (mq) return archivo(req, res, path.join(QR_DIR, mq[1]), mq[2] === 'jpg' ? 'image/jpeg' : 'image/' + mq[2], { 'cache-control': 'public, max-age=31536000, immutable' }); }
@@ -938,6 +993,25 @@ http.createServer(async (req, res) => {
       const og = `<title>GLORY BROWN · El Choque de los Reinos</title><meta name="description" content="${esc(t.d)}"><meta property="og:type" content="website"><meta property="og:title" content="👑 GLORY BROWN · El Choque de los Reinos"><meta property="og:description" content="${esc(t.d)} ¡Juega gratis!"><meta property="og:url" content="${esc(PUBLIC_URL + '/glory')}"><meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}"><meta name="apple-mobile-web-app-title" content="GLORY BROWN"><link rel="apple-touch-icon" href="/glory/icono-192.png"><script>if (!/[?&]g=/.test(location.search)) history.replaceState(null, '', '/glory?g=arcade-batalla&src=app');</script>`;
       return send(res, 200, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<link rel="manifest" href="/manifest.webmanifest">', '<link rel="manifest" href="/glory/manifest.webmanifest">').replace('<link rel="apple-touch-icon" href="/icon.png">', '').replace('<!--OG-->', og + adsScript()), 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
     }
+    { const mc = /^\/juegos(?:\/([a-z0-9-]{2,60}))?\/?$/.exec(u.pathname); if (mc) { // 🕹️ Categorías de juegos (páginas para Google)
+      if (!getS('pro', {}).on) { res.writeHead(302, { location: '/' }); return res.end(); }
+      const sitio = getS('marca', null)?.nombre || 'Yupitok', cats = await catsPro(), J7 = jugadas7();
+      const tile = g => `<a class="t" href="/juego/${esc(g.s)}">${g.img ? `<img src="${esc(g.img)}" alt="${esc(g.t)}" loading="lazy">` : ''}<span>${esc(g.t)}</span></a>`;
+      const chips = `<div class="chips">${cats.map(([c, l]) => `<a href="/juegos/${slugDe(c)}">${esc(c)} (${l.length})</a>`).join('')}</div>`;
+      if (!mc[1]) { const url = PUBLIC_URL + '/juegos', total = cats.reduce((a, [, l]) => a + l.length, 0);
+        return enviarHtml(req, res, headNeon(`Juegos gratis por categoría: ${total.toLocaleString('es-PE')} juegos sin instalar · ${sitio}`, `Más de ${total.toLocaleString('es-PE')} juegos gratis sin instalar: carreras, disparos, rompecabezas, deportes, estrategia y más. Juega al instante en el celular o la PC.`, url, [migas([['Yupitok', '/'], ['Juegos', '/juegos']]), { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Juegos gratis por categoría', url, inLanguage: 'es' }])
+          + `<p class="miga"><a href="/">← Volver a Yupitok</a></p><h1>🕹️ Juegos gratis por categoría</h1><p>Más de <b>${total.toLocaleString('es-PE')} juegos gratis</b> para jugar al instante, sin descargar nada, en el celular, la tablet o la computadora. Elige tu categoría favorita:</p>${chips}`
+          + cats.slice(0, 12).map(([c, l]) => `<h2><a href="/juegos/${slugDe(c)}" style="color:inherit">${esc(c)}</a></h2><div class="grid">${l.slice().sort((a, b) => (J7.get(b.id) || 0) - (J7.get(a.id) || 0)).slice(0, 6).map(tile).join('')}</div><p><a href="/juegos/${slugDe(c)}">Ver los ${l.length} juegos de ${esc(c.toLowerCase())} →</a></p>`).join('') + PIE_NEON, { 'cache-control': 'public, max-age=900' }); }
+      const ent = cats.find(([c]) => slugDe(c) === mc[1]); if (!ent) { res.writeHead(302, { location: '/juegos' }); return res.end(); }
+      const [cat, lista] = ent, url = PUBLIC_URL + '/juegos/' + mc[1], ord = lista.slice().sort((a, b) => (J7.get(b.id) || 0) - (J7.get(a.id) || 0)), catL = cat.toLowerCase();
+      const intro = INTRO_CAT[cat] || `Los mejores juegos de ${catL} gratis: juégalos al instante desde el navegador, en el celular o la computadora, sin instalar nada.`;
+      const ld = [migas([['Yupitok', '/'], ['Juegos', '/juegos'], [cat, '/juegos/' + mc[1]]]), { '@context': 'https://schema.org', '@type': 'ItemList', name: `Juegos de ${catL} gratis`, numberOfItems: Math.min(60, ord.length), itemListElement: ord.slice(0, 60).map((g, i) => ({ '@type': 'ListItem', position: i + 1, url: PUBLIC_URL + '/juego/' + g.s, name: g.t })) }];
+      const top = ord.slice(0, 5).map(g => `<b>${esc(g.t)}</b>`).join(', ');
+      return enviarHtml(req, res, headNeon(`Juegos de ${catL} gratis (${lista.length}) · Juega sin instalar · ${sitio}`, `${intro.slice(0, 120)} ${lista.length} juegos de ${catL} gratis en ${sitio}.`, url, ld)
+        + `<p class="miga"><a href="/">Yupitok</a> › <a href="/juegos">Juegos</a> › ${esc(cat)}</p><h1>🎮 Juegos de ${esc(catL)} gratis</h1><p>${esc(intro)}</p><p>Tenemos <b>${lista.length} juegos de ${esc(catL)}</b>. Los más jugados esta semana: ${top}.</p>`
+        + `<div class="grid">${ord.slice(0, 120).map(tile).join('')}</div>${lista.length > 120 ? `<p>…y ${lista.length - 120} juegos más en <a href="/?g=pro">el catálogo completo</a>.</p>` : ''}`
+        + `<h2>¿Cómo jugar?</h2><p>Toca cualquier juego para abrir su página y aprieta <b>"Jugar ahora"</b>. Todos son gratis, funcionan en el navegador y no ocupan espacio en tu celular. Si un juego no carga, avísanos con el botón "¿No carga?" para revisarlo.</p><h2>Otras categorías</h2>${chips}` + PIE_NEON, { 'cache-control': 'public, max-age=900' });
+    } }
     { const mg = /^\/guias(?:\/([a-z0-9-]{3,80}))?\/?$/.exec(u.pathname); if (mg) { // 📝 Guías y trucos (contenido propio)
       let G = []; try { G = JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias; } catch (e) {}
       const sitio = getS('marca', null)?.nombre || 'Yupitok', g = mg[1] ? G.find(x => x.slug === mg[1]) : null; if (mg[1] && !g) return send(res, 404, 'Guía no encontrada', 'text/plain; charset=utf-8');
@@ -978,9 +1052,10 @@ http.createServer(async (req, res) => {
       const og = `<title>${esc(titulo)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(url)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(sitio)}"><meta property="og:title" content="${esc(g.t)} · ¡Juega gratis!"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">${g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(g.img)}">` : ''}<meta property="og:locale" content="es_LA">
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'VideoGame', name: g.t, description: d || desc, url, image: g.img || undefined, genre: g.cat, inLanguage: 'es', isAccessibleForFree: true, gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web', publisher: { '@type': 'Organization', name: sitio } }).replace(/</g, '\\u003c')}</script>
+<script type="application/ld+json">${JSON.stringify(migas([['Yupitok', '/'], ['Juegos', '/juegos'], [g.cat, '/juegos/' + slugDe(g.cat)], [g.t, '/juego/' + g.s]])).replace(/</g, '\\u003c')}</script>
 <script>window.JUEGO_SEO=${JSON.stringify(g).replace(/</g, '\\u003c')};</script>`;
       const art = `<article id="seoJuego" class="card" style="margin-top:6px">${g.img ? `<img src="${esc(g.img)}" alt="${esc(g.t)}" width="512" height="384" style="width:100%;max-height:260px;object-fit:cover;border-radius:14px;display:block" loading="eager">` : ''}
-<h1 style="font-size:1.6rem;margin:12px 0 4px;text-align:left">🎮 ${esc(g.t)}</h1><p class="sub" style="text-align:left;margin:0 0 8px">${esc(g.cat)} · Gratis · Sin instalar · Celular y PC</p>
+<h1 style="font-size:1.6rem;margin:12px 0 4px;text-align:left">🎮 ${esc(g.t)}</h1><p class="sub" style="text-align:left;margin:0 0 8px"><a href="/juegos/${slugDe(g.cat)}" style="color:inherit">${esc(g.cat)}</a> · Gratis · Sin instalar · Celular y PC</p>
 ${d ? `<p style="margin:0 0 10px">${esc(d)}</p>` : ''}<button class="btn" id="seoJugar" style="font-size:1.15rem">▶ Jugar ahora</button>
 ${rel.length ? `<h2 style="font-size:1.1rem;margin:16px 0 8px">Más juegos de ${esc(g.cat.toLowerCase())}</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">${rel.map(x => `<a href="/juego/${esc(x.s)}" style="display:block;text-decoration:none;color:inherit;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06)">${x.img ? `<img src="${esc(x.img)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">` : ''}<small style="display:block;padding:4px 6px;font-weight:700;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.t)}</small></a>`).join('')}</div>` : ''}
 <p class="sub" style="font-size:.75rem;margin:10px 0 0">Juego de un estudio externo, ofrecido por un distribuidor autorizado. <a href="/?g=pro" style="color:inherit">Ver todos los juegos →</a></p></article>`;
@@ -1001,7 +1076,7 @@ ${rel.length ? `<h2 style="font-size:1.1rem;margin:16px 0 8px">Más juegos de ${
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
 <meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">
 <link rel="canonical" href="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">
-<script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : { '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', inLanguage: 'es' }).replace(/</g, '\\u003c')}</script>`;
+<script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : [{ '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', inLanguage: 'es' }, { '@context': 'https://schema.org', '@type': 'Organization', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', logo: PUBLIC_URL + '/icon-512.png', slogan: '¡Juega, ríe, aprende y gana!', sameAs: (getS('redesMarca', null) || ['https://www.facebook.com/yupitokoficial']).filter(x => /^https:\/\//.test(x)) }]).replace(/</g, '\\u003c')}</script>`;
       return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + adsScript()), { 'cache-control': 'no-cache' });
     }
     // Archivos de la página.
