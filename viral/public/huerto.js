@@ -51,7 +51,7 @@
   function cargarVocesH() { if (MANI_H) return; MANI_H = {}; fetch('/voces/huerto/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI_H = Object.fromEntries((m.voces || []).map(v => [v, 1])); }).catch(() => {}); }
   function voz(txt, quien, o = {}) {
     const id = idFrase(quien, txt);
-    if (MANI_H && MANI_H[id]) { if (LS.get('arcVoz') === '0' || LS.get('arcSonido') === '0') return; const ahora = Date.now(); if (!o.forzar && ahora - ultVozH < 1800) return; ultVozH = ahora;
+    if (MANI_H && MANI_H[id] && (window.IDIOMA?.actual || 'es') === 'es') { if (LS.get('arcVoz') === '0' || LS.get('arcSonido') === '0') return; const ahora = Date.now(); if (!o.forzar && ahora - ultVozH < 1800) return; ultVozH = ahora;
       try { if (o.cortar && audioH) audioH.pause(); audioH = new Audio('/voces/huerto/' + id + '.mp3'); audioH.volume = .95; audioH.play().catch(() => {}); } catch (e) {} return; }
     FX.voz?.(txt, { ...(VOZ[quien] || {}), ...o });
   }
@@ -320,6 +320,7 @@
   // ---------- Mapa de niveles ----------
   function mapa(t) {
     salir(); registrar(t.id); $('#stage').onclick = null; FX.musica?.('huerto'); cargarVocesH(); cargarArteH();
+    if (window.IDIOMA && IDIOMA.actual !== 'es') { const todas = []; const rec = o => typeof o === 'string' ? todas.push(o) : Object.values(o).forEach(rec); rec(FRASES); IDIOMA.precargar(todas); }
     const J = datos(), act = Math.min(J.nivel || 1, TOTAL), est = J.estrellas || {}, totE = Object.values(est).reduce((a, b) => a + b, 0);
     const W = Math.min(($('#stage').clientWidth || 360) - 4, 460), HN = 92, posX = n => W / 2 + Math.sin(n * 1.15) * W * .28;
     const zonasHTML = [...ZONAS].reverse().map(z => {

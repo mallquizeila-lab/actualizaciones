@@ -1,3 +1,9 @@
+v7.35.0 — Voces y textos de los juegos en el idioma del visitante
+- 🗣️ Los personajes de GLORY BROWN y del Huerto hablan en el idioma del visitante (inglés, portugués, francés…), con una voz de ese idioma. Las frases se piden traducir apenas se abre el juego, así hablan desde la primera partida. En español siguen usando las voces grabadas con tu biblioteca.
+- 🎮 Los textos dibujados dentro de los juegos (carteles de batalla, nombres de cartas, mensajes del Huerto, globos de diálogo) también se traducen.
+- La IA ya no traduce los nombres de las personas y jugadores.
+- Todo lo traducido queda guardado: cada idioma se traduce una sola vez.
+
 v7.34.0 — La página en el idioma de cada visitante
 - 🌐 La página detecta el idioma del celular o la computadora del visitante y se muestra en ese idioma: español, inglés, portugués, francés, italiano, alemán, ruso, japonés, coreano, chino, indonesio o turco.
 - Botón "🌐" abajo a la derecha para elegir otro idioma (se esconde durante las batallas a pantalla completa).

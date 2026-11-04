@@ -12,7 +12,10 @@
   window.IDIOMA = {
     actual: L, nombres: NOMBRES, bandera: BANDERA,
     cambiar(l) { try { localStorage.setItem('lang', l); } catch (e) {} location.reload(); },
-    t: s => { if (L === 'es') return s; const [p, n] = plantilla(String(s).trim()); const r = D.get(p); return r != null ? rellenar(r, n) : s; }, // traducción inmediata si ya existe
+    codigoVoz: { es: 'es', en: 'en-US', pt: 'pt-BR', fr: 'fr-FR', it: 'it-IT', de: 'de-DE', ru: 'ru-RU', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', id: 'id-ID', tr: 'tr-TR' }[L],
+    // Traducción inmediata si ya existe; si no, se pide en segundo plano y por ahora devuelve el original
+    precargar: lista => { if (L !== 'es') for (const x of lista || []) if (typeof x === 'string') IDIOMA.t(x); }, // pide traducciones por adelantado (voces de los personajes)
+    t: s => { if (L === 'es' || typeof s !== 'string') return s; const st = s.trim(), [p, n] = plantilla(st), r = D.get(p); if (r != null) return s.replace(st, rellenar(r, n)); traducir(s, () => {}); return s; },
     selector() {
       const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('translate', 'no');
       m.innerHTML = `<div class="card" style="text-align:center;max-width:360px"><h2 style="margin:0 0 10px">🌐 Idioma · Language</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${Object.entries(NOMBRES).map(([k, n]) => `<button class="btn ${k === L ? '' : 'alt'}" data-l="${k}" style="margin:0">${BANDERA[k]} ${n}</button>`).join('')}</div><button class="btn alt" data-l="" style="margin-top:10px">✕</button></div>`;
@@ -47,7 +50,7 @@
     try { const r = await fetch('/api/i18n', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: L, textos: lote }) }); const j = await r.json(); for (const [k, v] of Object.entries(j.t || {})) D.set(k, v); } catch (e) {}
     for (const k of lote) { const lista = pend.get(k) || []; pend.delete(k); const r = D.get(k); if (r == null) { lista.forEach(([, s]) => FALLO.set(s, Date.now())); continue; } // sin traducción por ahora: se reintenta más tarde
       for (const [raw, s, n, aplicar] of lista) { const tr = rellenar(r, n); HECHOS.add(tr.trim()); if (tr !== s) aplicar(raw.replace(s, tr)); } }
-    pidiendo = false; if (pend.size) timer = setTimeout(pedir, 250);
+    pidiendo = false; limpiarCC?.(); if (pend.size) timer = setTimeout(pedir, 250);
   }
   const ATR = ['placeholder', 'title', 'aria-label'];
   function recorrer(raiz) {
@@ -61,6 +64,13 @@
       else for (const a of ATR) { const v = x.getAttribute?.(a); if (v) traducir(v, t => x.setAttribute(a, t)); }
     }
   }
+  // Texto dibujado dentro de los juegos (canvas): se traduce al dibujarlo, usando lo ya guardado
+  const CC = new Map();
+  const tCanvas = s => { if (s.length < 2 || !/\p{L}{2,}/u.test(s)) return s; let r = CC.get(s); if (r !== undefined) return r; const [p, n] = plantilla(s.trim()), d = D.get(p);
+    if (d != null) { r = s.replace(s.trim(), rellenar(d, n)); CC.set(s, r); return r; } if (CC.size > 5000) CC.clear(); CC.set(s, s); traducir(s, () => {}); return s; };
+  const limpiarCC = () => { for (const [k, v] of CC) if (k === v) CC.delete(k); };
+  const CP = window.CanvasRenderingContext2D?.prototype;
+  if (CP) for (const f of ['fillText', 'strokeText', 'measureText']) { const o = CP[f]; CP[f] = function (txt, ...r) { return o.call(this, typeof txt === 'string' ? tCanvas(txt) : txt, ...r); }; }
   // alert / confirm con texto traducido (si ya está guardado)
   const al = window.alert.bind(window), co = window.confirm.bind(window);
   window.alert = m => al(IDIOMA.t(m)); window.confirm = m => co(IDIOMA.t(m));

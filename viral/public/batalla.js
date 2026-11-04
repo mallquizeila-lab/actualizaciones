@@ -5,7 +5,7 @@
   const AN = 18, AL = 32, RIO0 = 15, RIO1 = 17, PUENTES = [3.5, 14.5];
   let G = null, CARTA = {}, GA = null;
   const cargar = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
-  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=4'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); }
+  async function listo() { if (!window.GLORY) await cargar('/glory/cartas.js?v=1'); if (!window.GARTE) await cargar('/glory/arte.js?v=2'); if (!window.GloryMotor) await cargar('/glory/motor.js?v=1'); try { if (!window.THREE) await cargar('/three.min.js?v=149'); if (!window.GLORY3D) await cargar('/glory/tres.js?v=4'); } catch (e) {} G = window.GLORY; GA = window.GARTE; CARTA = Object.fromEntries(G.cartas.map(c => [c.id, c])); for (const [k, m] of Object.entries(G.minis)) CARTA['_' + k] = { id: '_' + k, n: m.n, arq: m.arq, aspecto: m.aspecto, mundo: 'sombras', m: 4, tipo: 'tropa', ...G.cartas.find(c => c.arq === m.arq && c.tipo === 'tropa'), id: '_' + k, n: m.n, aspecto: m.aspecto, hp: m.hp, dmg: m.dmg, cant: 1, hab: null, frases: null }; vocesManifest(); await arteManifest(); if (window.IDIOMA && IDIOMA.actual !== 'es') { const todas = []; const rec = o => typeof o === 'string' ? todas.push(o) : o && typeof o === 'object' && Object.values(o).forEach(rec); G.cartas.forEach(c => rec(c.frases)); IDIOMA.precargar(todas); } }
   const azar = l => l[Math.floor(Math.random() * l.length)];
   const RZ = () => G.rarezas;
   const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
@@ -42,7 +42,7 @@
     const ahora = Date.now(); if (!forzar && ahora - ultVoz < 1700) return null; ultVoz = ahora;
     if (LS.get('arcSonido') === '0' || LS.get('arcVoz') === '0') return txt;
     const id = `${card.id}__${clave}${i % arr.length}`;
-    if (MANI && MANI[id]) { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`/voces/glory/${id}.mp3`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
+    if (MANI && MANI[id] && (window.IDIOMA?.actual || 'es') === 'es') { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`/voces/glory/${id}.mp3`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
     else FX.voz?.(txt, { tono: card.voz?.tono ?? 1, vel: card.voz?.vel ?? 1.05, forzar: true, cortar: true });
     return txt;
   }

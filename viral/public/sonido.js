@@ -97,12 +97,14 @@
 
   // ---------- Voces de personajes ----------
   let vozEs = null, ultVoz = 0;
-  const elegirVoz = () => { try { const v = speechSynthesis.getVoices().filter(x => /^es/i.test(x.lang)); vozEs = v.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) || v[0] || null; } catch (e) {} };
+  const LG = (window.IDIOMA?.actual || 'es');
+  const elegirVoz = () => { try { const v = speechSynthesis.getVoices().filter(x => x.lang.toLowerCase().startsWith(LG)); vozEs = (LG === 'es' ? v.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) : LG === 'pt' ? v.find(x => /BR/i.test(x.lang)) : LG === 'en' ? v.find(x => /US|GB/i.test(x.lang)) : null) || v[0] || null; } catch (e) {} };
   if (window.speechSynthesis) { elegirVoz(); speechSynthesis.onvoiceschanged = elegirVoz; }
   FX.voz = function (txt, o = {}) {
     if (mute() || sinVoz() || !window.speechSynthesis) return false;
     const ahora = Date.now(); if (!o.forzar && ahora - ultVoz < (o.espera ?? 2200)) return false; ultVoz = ahora;
-    try { if (o.cortar || speechSynthesis.pending) speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = vozEs?.lang || 'es-ES'; if (vozEs) u.voice = vozEs; u.pitch = o.tono ?? 1; u.rate = o.vel ?? 1.1; u.volume = o.vol ?? 1; speechSynthesis.speak(u); return true; } catch (e) { return false; }
+    if (LG !== 'es') { const tr = window.IDIOMA?.t(txt); if (!tr || tr === txt) return false; txt = tr; } // en otro idioma: habla la traducción (si todavía no está, se calla y la pide)
+    try { if (o.cortar || speechSynthesis.pending) speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = vozEs?.lang || window.IDIOMA?.codigoVoz || 'es-ES'; if (vozEs) u.voice = vozEs; u.pitch = o.tono ?? 1; u.rate = o.vel ?? 1.1; u.volume = o.vol ?? 1; speechSynthesis.speak(u); return true; } catch (e) { return false; }
   };
   FX.callar = () => { try { speechSynthesis.cancel(); } catch (e) {} };
 
