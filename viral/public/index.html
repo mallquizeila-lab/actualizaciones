@@ -194,6 +194,9 @@ let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) +
 // ---------- Invitaciones: tu código va en todo lo que compartes; ganas premios cuando un amigo nuevo juega ----------
 { const r = (P.get('ref') || '').toUpperCase(); if (/^[A-Z2-9]{6}$/.test(r) && !LS.get('refDe') && r !== LS.get('miRef')) LS.set('refDe', r); }
 window.REF = () => LS.get('miRef') ? '&ref=' + LS.get('miRef') : '';
+// 💛 Recordatorio amable de apoyo: aparece en momentos felices (al ganar), como máximo una vez cada 2 días
+window.apoyoHTML = () => { try { if (!cfg.apoyo) return ''; const ult = +(LS.get('apoyoVisto') || 0); if (Date.now() - ult < 2 * 864e5) return ''; LS.set('apoyoVisto', String(Date.now()));
+  return `<a href="/apoyar" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;text-align:left;text-decoration:none;color:#fff;margin:10px 0;padding:10px 12px;border-radius:14px;background:linear-gradient(120deg,rgba(253,224,71,.22),rgba(244,114,182,.22));border:1px solid rgba(253,224,71,.45)"><span style="font-size:1.8rem">💛</span><span><b>¿Te gustó? Ayúdanos a seguir creando juegos gratis</b><br><small style="opacity:.85">Somos un proyecto independiente. Cualquier aporte, aunque sea pequeño, nos ayuda muchísimo.</small></span></a>`; } catch (e) { return ''; } };
 // ---------- Redes para compartir según el país del visitante (las más usadas primero) ----------
 const MOVIL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const REDES_DEF = {
@@ -416,19 +419,30 @@ const CALC = {
   },
 };
 // ---------- 💬 Salas en vivo ----------
-const avImg = (a, t = 32) => /^a\d\d$/.test(a || '') ? `<img src="/avatares/${a}.svg" alt="" width="${t}" height="${t}" style="border-radius:50%;display:block">` : `<span style="font-size:${Math.round(t * .8)}px;line-height:1">${escH(a || '😀')}</span>`;
+const avImg = (a, t = 32) => /^f[0-9a-f]{16}$/.test(a || '') ? `<img src="/fotos/${a}.webp${a === LS.get('miFoto') ? '?mia=' + VID : ''}" alt="" width="${t}" height="${t}" style="border-radius:50%;display:block;object-fit:cover" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🙂',style:'font-size:${Math.round(t * .8)}px;line-height:1'}))">` : /^a\d\d$/.test(a || '') ? `<img src="/avatares/${a}.svg" alt="" width="${t}" height="${t}" style="border-radius:50%;display:block">` : `<span style="font-size:${Math.round(t * .8)}px;line-height:1">${escH(a || '😀')}</span>`;
 let ES = null;
+// 📷 Sube tu foto: se recorta en cuadrado, se achica a 256 px y se revisa antes de mostrarse a los demás
+async function subirFoto(file) {
+  if (!file) return null; if (!/^image\//.test(file.type)) { toast('Elige una imagen'); return null; }
+  try { const img = await createImageBitmap(file), l = Math.min(img.width, img.height), c = document.createElement('canvas'); c.width = c.height = 256;
+    c.getContext('2d').drawImage(img, (img.width - l) / 2, (img.height - l) / 2, l, l, 0, 0, 256, 256);
+    let d = c.toDataURL('image/webp', .85); if (!d.startsWith('data:image/webp')) d = c.toDataURL('image/jpeg', .85);
+    toast('📷 Subiendo tu foto…'); const r = await post('/api/foto/subir', { uid: VID, img: d }); if (r.error) { toast(r.error); return null; }
+    LS.set('miFoto', r.id); toast(r.estado === 'ok' ? '✅ ¡Foto lista!' : r.estado === 'rechazada' ? '🚫 Esa foto no se puede usar. Prueba con otra.' : '⏳ Tu foto se está revisando: los demás la verán en unos minutos.');
+    return r.estado === 'rechazada' ? null : r.id; } catch (e) { toast('No se pudo leer esa imagen'); return null; } }
 function perfilChat(t, cb) {
-  let av = LS.get('chatAv'); if (!/^a\d\d$/.test(av || '')) av = 'a' + String(1 + Math.floor(Math.random() * 14)).padStart(2, '0'); const nom = LS.get('chatNom') || '';
+  let av = LS.get('chatAv'); if (!/^(a\d\d|f[0-9a-f]{16})$/.test(av || '')) av = 'a' + String(1 + Math.floor(Math.random() * 14)).padStart(2, '0'); const nom = LS.get('chatNom') || '';
   if (nom && LS.get('chatOk') === '1') return cb(nom, av);
   const lista = SALAS?.avatares?.length ? SALAS.avatares : Array.from({ length: 48 }, (_, i) => 'a' + String(i + 1).padStart(2, '0'));
   stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">Elige cómo te verán los demás.</p>
     <label for="cn">Tu apodo</label><input id="cn" type="text" maxlength="18" value="${escH(nom)}" placeholder="Ej.: Andrés de Lima">
-    <label>Tu avatar</label><div class="avs" id="avs">${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}" aria-label="Avatar">${avImg(a, 44)}</button>`).join('')}</div>
+    <label>Tu avatar</label><div class="avs" id="avs"><button data-subir="1" aria-label="Subir mi foto" title="Subir mi foto" style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;line-height:1.1">${LS.get('miFoto') ? avImg(LS.get('miFoto'), 44) : '<span style="font-size:1.5rem">📷</span>Tu foto'}</button>${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}" aria-label="Avatar">${avImg(a, 44)}</button>`).join('')}</div>
     <label class="check"><input type="checkbox" id="cr"><span>Seré respetuoso. Sé que <b>no se permiten enlaces, teléfonos, correos ni datos personales</b>, y que los mensajes pueden ser revisados y borrados.</span></label>
     <p class="err" id="err"></p><button class="btn" id="go">Entrar a la sala</button></div>`);
   let sel = av;
-  $('#avs').onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; sel = b.dataset.a; document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#avs').onclick = e => { if (e.target.closest('[data-subir]')) { const mf = LS.get('miFoto'); if (mf) { sel = mf; document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', !!x.dataset.subir)); }
+      const inp = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*' }); inp.onchange = () => subirFoto(inp.files[0]).then(id => { if (!id) return; sel = id; const bt = $('#avs [data-subir]'); if (bt) { bt.innerHTML = avImg(id, 44); document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', x === bt)); } }); if (!mf || confirm('¿Quieres subir otra foto?')) inp.click(); return; }
+    const b = e.target.closest('[data-a]'); if (!b) return; sel = b.dataset.a; document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', x === b)); };
   $('#go').onclick = () => {
     const n = $('#cn').value.trim();
     if (n.length < 2) return $('#err').textContent = 'Escribe un apodo de al menos 2 letras';

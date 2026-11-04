@@ -255,6 +255,14 @@ async function api(u, q, U, r) {
     publish.saveTokens(); return { ok: 1 };
   }
   if (u === '/api/instagram/check' && P) { const o = await json(q), ch = db.channels.find(c => c.id === o.channelId); if (!ch) throw new Error('Canal no encontrado'); const pg = publish.tokens.facebook?.pages?.find(p => p.id === ch.fbPageId); if (pg) delete pg.ig; await require('./lib/redes').igCuenta(ch); return { ok: 1, username: pg?.ig?.username }; }
+  // Revisión de fotos de perfil de la página viral (la pide la propia página desde esta PC, con la clave local)
+  if (u === '/api/moderar-imagen' && P) {
+    const tok = require('crypto').createHash('sha256').update('sf-local:' + (E.VIRAL_PASSWORD || '')).digest('hex');
+    if (!E.VIRAL_PASSWORD || q.headers['x-sf-token'] !== tok) throw new Error('No autorizado');
+    const o = JSON.parse((await body(q, 1e6)).toString() || '{}'); if (!/^data:image\/(webp|jpeg|png);base64,/.test(o.img || '')) throw new Error('Imagen no válida');
+    const r = await ai.ask([{ role: 'system', content: 'You moderate profile pictures for a family-friendly gaming website with a public chat. Reply ONLY with JSON {"ok": true|false, "motivo": "short reason in Spanish"}. Reject (ok=false) if the image contains: nudity or sexual content, underwear or swimwear focus, violence, blood, weapons pointed at camera, drugs, hate symbols, offensive gestures, text with insults, QR codes, phone numbers, emails, links or social media handles, or any visible personal document. Accept normal selfies, faces, pets, cartoons, landscapes, memes without offensive text, logos and game characters.' }, { role: 'user', content: [{ type: 'text', text: 'Moderate this profile picture.' }, { type: 'image_url', image_url: { url: o.img } }] }], { json: true, vision: true, max: 300 });
+    const j = parseJSON(r.text) || {}; return { ok: j.ok === true ? true : j.ok === false ? false : null, motivo: String(j.motivo || '').slice(0, 120) };
+  }
   // Traducciones para la página viral (la pide la propia página desde esta PC, con la clave local)
   if (u === '/api/traducir' && P) {
     const tok = require('crypto').createHash('sha256').update('sf-local:' + (E.VIRAL_PASSWORD || '')).digest('hex');

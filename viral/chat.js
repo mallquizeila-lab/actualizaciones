@@ -151,7 +151,7 @@ create index if not exists ix_chat_sala on chat(sala, id);`);
       const B = bloqueados(), hu = hash(uid), hi = hash(ip);
       if ((B[hu] && B[hu] > Date.now()) || (B[hi] && B[hi] > Date.now())) return send(res, 403, { error: 'No puedes escribir en el chat por ahora' });
       const nombre = apodo(b.nombre); if (!nombre) return send(res, 400, { error: 'Elige otro apodo (2 a 18 letras, sin groserías)' });
-      const avatar = AVATARES.includes(b.avatar) || EMOJI_AV.includes(b.avatar) ? b.avatar : 'a01';
+      const avatar = AVATARES.includes(b.avatar) || EMOJI_AV.includes(b.avatar) || require('./fotos').valido(b.avatar) ? b.avatar : 'a01';
       const t = (ultimos[uid] || []).filter(x => Date.now() - x < 30000); ultimos[uid] = t;
       if (t.length && Date.now() - t[t.length - 1] < 2500) return send(res, 429, { error: 'Más despacio 🙂' });
       if (t.length >= 8 || limite(ip, 'chat', 30)) return send(res, 429, { error: 'Estás escribiendo muy rápido. Espera un momento.' });

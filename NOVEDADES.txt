@@ -1,3 +1,8 @@
+v7.39.0 — Fotos de perfil, rivales automáticos y recordatorio de apoyo
+- 📷 Sube tu propia foto de perfil (botón "📷 Tu foto" al elegir avatar). Se recorta y achica sola, y se revisa con la IA de ShortForge antes de que la vean los demás. Nueva sección "📷 Fotos" en el panel de la página para aprobar o borrar fotos; con 3 reportes una foto se oculta hasta que la revises.
+- 🤖 Las partidas en línea nunca se quedan vacías: si no aparece otro jugador en unos segundos (GLORY BROWN 1 vs 1: 10 s; 2 vs 2: 18 s; Tres en raya y Cuatro en línea: 12 s), la partida empieza sola contra un rival de la computadora con nombre y avatar normales y un nivel parecido al tuyo. Al final de la partida se indica con 🤖, y está explicado en los Términos.
+- 💛 Recordatorio amable de apoyo en los momentos felices (al ganar una batalla, al salvar el huerto o al hacer un nuevo récord), como máximo una vez cada 2 días y solo si tienes activada la sección de apoyo.
+
 v7.38.1 — Arreglo: guardar la dirección fija
 - 🛠️ El botón "Guardar" de 📣 Página viral → 🔗 Dirección fija no funcionaba (mostraba "Cannot read properties of null"): estaba ejecutando por error el guardado de "Mis voces". Corregido.
 - 🔒 Protección nueva: los métodos de apoyo no dejan guardar algo que parezca una clave o un token (por ejemplo, el token del túnel), porque esos datos se publican en la página.

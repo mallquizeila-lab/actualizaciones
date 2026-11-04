@@ -1,7 +1,7 @@
 // 🎲 Mesas de juego en tiempo real (sin librerías: Server-Sent Events + POST).
 // Juegos propios de dominio público / género: Tres en raya, Cuatro en línea y "¿Quién es el impostor?" (palabras).
 // En 1 contra 1, si nadie se une, juega la máquina. Chat de mesa con el mismo filtro del chat en vivo.
-const crypto = require('crypto');
+const crypto = require('crypto'), RIV = require('./rivales');
 
 const JUEGOS = {
   tresenraya: { nombre: 'Tres en raya', min: 2, max: 2, bot: true },
@@ -131,9 +131,12 @@ function crear({ revisar, apodo }) {
     const g = m.jugadores.find(j => j.ficha === r.g); m.ganador = r.g === 'empate' ? 'empate' : g?.nombre;
     if (g) g.puntos = (g.puntos || 0) + 1;
     m.msg = r.g === 'empate' ? '🤝 ¡Empate!' : `🏆 ¡Ganó ${g?.nombre}!`;
+    if (m.jugadores.some(j => j.auto)) m.msg += ' · 🤖 No había jugadores disponibles: tu rival era de la computadora.';
   }
 
   // Limpieza de mesas abandonadas.
+  // Si nadie se une a una mesa pública 1 contra 1, entra un rival de la computadora (con aviso al final de la partida)
+  setInterval(() => { const ahora = Date.now(); for (const m of Object.values(mesas)) if (m.estado === 'esperando' && !m.privada && JUEGOS[m.juego].bot && m.jugadores.length === 1 && !m.jugadores[0].bot && ahora - m.creada > RIV.ESPERA.mesa * 1000) { m.jugadores.push({ uid: 'bot' + crypto.randomBytes(3).toString('hex'), nombre: RIV.nombreRival(), avatar: RIV.avatarRival(), bot: true, auto: true }); empezar(m); } }, 1000);
   setInterval(() => { const ahora = Date.now(); for (const [id, m] of Object.entries(mesas)) if (ahora - m.activo > 20 * 60000 && !(subs[id]?.size)) { clearTimeout(m.timer); delete mesas[id]; } }, 60000).unref();
 
   async function http(req, res, u, { ip, json, send, limite }) {
@@ -160,7 +163,7 @@ function crear({ revisar, apodo }) {
     if (limite(ip, 'mesa', 120)) return send(res, 429, { error: 'Más despacio 🙂' });
     const b = await json(req), uid = String(b.uid || '').slice(0, 40);
     if (uid.length < 6) return send(res, 400, { error: 'Falta tu perfil' });
-    const nombre = apodo(b.nombre), avatar = /^a\d\d$/.test(b.avatar || '') ? b.avatar : 'a01';
+    const nombre = apodo(b.nombre), avatar = require('./fotos').valido(b.avatar) ? b.avatar : 'a01';
     if (!nombre) return send(res, 400, { error: 'Elige otro apodo' });
     const r = u.pathname.slice(11);
     if (r === 'crear' || r === 'rapido') {

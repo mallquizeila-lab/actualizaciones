@@ -72,7 +72,7 @@ const flag = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUppe
 const SIGNOS = ['aries','tauro','geminis','cancer','leo','virgo','libra','escorpio','sagitario','capricornio','acuario','piscis'];
 let JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Compatibilidad', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
 fetch('/tests.json').then(r => r.json()).then(d => { JUEGOS = Object.fromEntries(d.tests.map(t => [t.id, t.t])); }).catch(() => {});
-const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['chat', '💬 Chat'], ['ajustes', 'Ajustes']];
+const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['chat', '💬 Chat'], ['fotos', '📷 Fotos'], ['ajustes', 'Ajustes']];
 let tab = 'resumen'; const CH = { rep: false };
 function mostrarLogin() { $('#app').hidden = true; $('#login').hidden = false; $('#pw').focus(); }
 $('#lgo').onclick = async () => { try { await api('login', { password: $('#pw').value }); $('#login').hidden = true; iniciar(); } catch (e) { $('#lerr').textContent = e.message; } };
@@ -181,6 +181,13 @@ const V = {
       if (del) { await api('chat/borrar', { id: +del.dataset.del }); ir('chat'); }
       if (ban) { const h = prompt('¿Por cuántas horas bloquear a esta persona? (0 = para siempre)', '24'); if (h === null) return; await api('chat/bloquear', { id: +ban.dataset.ban, horas: +h || 0 }); ir('chat'); }
     };
+  },
+  async fotos() {
+    const d = await api('fotos'), E = { ok: '✅ Aprobada', pendiente: '⏳ Pendiente', rechazada: '🚫 Rechazada' };
+    $('#main').innerHTML = `<div class="card"><h2>📷 Fotos de perfil</h2><p class="hint">Las fotos se revisan solas con la IA de ShortForge. Las pendientes y las reportadas aparecen primero. Con 3 reportes, una foto se oculta hasta que la revises.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">${d.fotos.map(f => `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:8px;text-align:center"><img src="/api/admin/foto-ver?id=${f.id}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;background:#f3f4f6"><div style="font-size:.8rem;margin:6px 0">${E[f.estado] || f.estado}${f.reportes ? ` · 🚩 ${f.reportes}` : ''}${f.motivo ? `<br><small>${esc(f.motivo)}</small>` : ''}</div>
+        ${f.estado !== 'ok' ? `<button class="btn" data-ap="${f.id}" style="padding:4px 10px">Aprobar</button>` : ''} ${f.estado !== 'rechazada' ? `<button class="btn" data-bo="${f.id}" style="padding:4px 10px;background:#b91c1c">Borrar</button>` : ''}</div>`).join('') || '<p class="hint">Todavía nadie subió fotos.</p>'}</div></div>`;
+    $('#main').onclick = async e => { const a = e.target.dataset.ap, b = e.target.dataset.bo; if (a) { await api('fotos/aprobar', { id: a }); ir('fotos'); } if (b && confirm('¿Borrar esta foto?')) { await api('fotos/borrar', { id: b }); ir('fotos'); } };
   },
   async ajustes() {
     const a = await api('ajustes');

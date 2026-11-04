@@ -330,11 +330,12 @@ function paginaLegal(tipo) {
       <h2>1. Qué ofrecemos</h2><p>Tests de entretenimiento, juegos gratuitos (propios y de otros estudios), chat y comunidad. Los resultados de los tests son solo para entretenimiento y no son consejo profesional.</p>
       <h2>2. Edad</h2><p>Las funciones con cuenta, chat y clanes son para mayores de 18 años. Los menores deben usar el sitio con supervisión de un adulto.</p>
       <h2>3. Convivencia</h2><p>No se permite publicar insultos, acoso, contenido sexual, violento o ilegal, datos personales, enlaces, teléfonos ni correos. Moderamos el chat y podemos suspender cuentas que no respeten estas reglas.</p>
-      <h2>4. Juegos de terceros</h2><p>Algunos juegos son de otros estudios y se muestran a través de distribuidores autorizados. Sus derechos pertenecen a sus autores.</p>
-      <h2>5. Anuncios</h2><p>El sitio es gratis gracias a la publicidad. Algunos anuncios los muestra Google u otros socios, que pueden usar cookies según su propia política.</p>
-      <h2>6. Contenido propio</h2><p>Los juegos, personajes, textos e imágenes propios de ${sitio} (incluido GLORY BROWN) están protegidos. No se pueden copiar ni vender sin permiso.</p>
-      <h2>7. Cambios</h2><p>Podemos actualizar estos términos. La versión vigente siempre está en esta página.</p>
-      <h2>8. Contacto</h2><p>${resp} · ${ciudad} · ${correo}</p>`],
+      <h2>4. Partidas en línea</h2><p>Si cuando buscas una partida en línea no hay otros jugadores disponibles, después de unos segundos juegas contra un rival controlado por la computadora. Al final de la partida te lo indicamos con 🤖.</p>
+      <h2>5. Juegos de terceros</h2><p>Algunos juegos son de otros estudios y se muestran a través de distribuidores autorizados. Sus derechos pertenecen a sus autores.</p>
+      <h2>6. Anuncios</h2><p>El sitio es gratis gracias a la publicidad. Algunos anuncios los muestra Google u otros socios, que pueden usar cookies según su propia política.</p>
+      <h2>7. Contenido propio</h2><p>Los juegos, personajes, textos e imágenes propios de ${sitio} (incluido GLORY BROWN) están protegidos. No se pueden copiar ni vender sin permiso.</p>
+      <h2>8. Cambios</h2><p>Podemos actualizar estos términos. La versión vigente siempre está en esta página.</p>
+      <h2>9. Contacto</h2><p>${resp} · ${ciudad} · ${correo}</p>`],
     contacto: ['Contacto', `<p>¿Tienes una pregunta, una idea o quieres reportar algo? Escríbenos.</p><p style="font-size:1.2rem"><b>📧 ${correo}</b></p><p>Responsable: ${resp} · ${ciudad}</p><p>Para pedir que borremos tus datos o tu cuenta, escribe a ese correo con el asunto <b>"Borrar mis datos"</b>. Respondemos en un máximo de 10 días hábiles.</p>`],
     nosotros: ['Quiénes somos', `<p><b>${sitio}</b> es una plataforma latina de entretenimiento gratis: tests para conocerte, más de 60 juegos, juegos propios como <b>GLORY BROWN: El Choque de los Reinos</b> y <b>Huerto Defensor</b>, chat, clanes y torneos.</p>
       <p>GLORY BROWN nació como homenaje a una abuelita muy querida: la Reina Glory Brown, que protege su reino con amor. Ese cariño es lo que queremos que se sienta en todo el sitio.</p>
@@ -346,6 +347,7 @@ const json = (req, max = 20000) => new Promise((ok, no) => { let b = ''; req.on(
 const csv = rows => { if (!rows.length) return '\ufeffsin datos\n'; const k = Object.keys(rows[0]); const c = v => { v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; return '\ufeff' + [k.join(','), ...rows.map(r => k.map(x => c(r[x])).join(','))].join('\n'); };
 
 const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTrivia: () => CATALOGO.filter(t => t.tipo === 'trivia').flatMap(t => t.preguntas) });
+const FOTOS = require('./fotos'), fotos = FOTOS.crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN });
 const online = require('./juego_online').crear({ datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
@@ -388,6 +390,7 @@ async function api(req, res, u) {
     return send(res, 200, { on: true, total: f.length, cats, juegos: f.slice(pag * 48, pag * 48 + 48) }, undefined, { 'cache-control': 'public, max-age=300' });
   }
   if (u.pathname.startsWith('/api/chat/')) { const r = await chat.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (u.pathname.startsWith('/api/foto/')) { const r = await fotos.http(req, res, u, { ip, json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
   if (/^\/api\/(cuenta|clan|duelo|glory)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
@@ -439,7 +442,7 @@ async function api(req, res, u) {
     const b = await json(req), jg = String(b.juego || ''), pts = Math.round(+b.puntos || 0);
     if (!TOPE[jg] || pts < 0 || pts > TOPE[jg]) return send(res, 400, { error: 'Puntaje no válido' });
     if (limite(ip, 'arc', 30)) return send(res, 429, { error: 'Más despacio' });
-    const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = /^a\d\d$/.test(b.avatar || '') ? b.avatar : 'a01', uidh = crypto.createHash('sha256').update(String(b.uid || ip)).digest('hex').slice(0, 16);
+    const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = FOTOS.valido(b.avatar) ? b.avatar : 'a01', uidh = crypto.createHash('sha256').update(String(b.uid || ip)).digest('hex').slice(0, 16);
     run('insert into arcade(juego, uid, nombre, avatar, puntos) values(?,?,?,?,?)', jg, uidh, nombre, avatar, pts);
     const hoy = hoyPeru();
     const top = q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy);
@@ -517,6 +520,8 @@ async function api(req, res, u) {
     if (!admin(req)) return send(res, 401, { error: 'Inicia sesión' });
     if (P && req.headers['x-panel'] !== '1' && !req.headers['x-sf-token']) return send(res, 403, { error: 'Prohibido' }); // protección CSRF
     const r = u.pathname.slice(11), F = Object.fromEntries(u.searchParams);
+    if (r === 'foto-ver') return fotos.verAdmin(req, res, String(F.id || ''), send, archivo);
+    if (r === 'fotos' || r.startsWith('fotos/')) { const fr = fotos.admin(r, P ? await json(req) : {}); if (fr) return send(res, 200, fr); }
     if (r === 'chat' || r.startsWith('chat/')) { const cr = chat.admin(r, P ? await json(req) : {}, F); if (cr) return send(res, 200, cr); }
     if (r === 'logout') return send(res, 200, { ok: 1 }, undefined, { 'set-cookie': 'sid=; Path=/; Max-Age=0' });
     if (r === 'stats') {
@@ -653,6 +658,7 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
     { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
       if (req.headers['if-none-match'] === et) { res.writeHead(304, { etag: et }); return res.end(); } const gz = /gzip/.test(req.headers['accept-encoding'] || ''); return send(res, 200, gz ? zlib.gzipSync(cuerpo) : cuerpo, 'application/json; charset=utf-8', { etag: et, 'cache-control': 'no-cache', vary: 'Accept-Encoding', ...(gz ? { 'content-encoding': 'gzip' } : {}) }); } }
+    if (u.pathname.startsWith('/fotos/')) { const r = await fotos.http(req, res, u, { ip: clientIp(req), json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
       const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2']];

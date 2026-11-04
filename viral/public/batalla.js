@@ -332,9 +332,9 @@
         ${sala.codigo ? `<p class="sub">Comparte este código con tu amigo:</p><div style="font:900 2.2rem Figtree,sans-serif;letter-spacing:6px;color:#ffd166">${sala.codigo}</div><button class="btn alt" id="compCod">📣 Enviar el código</button>${D().clan ? '<button class="btn alt" id="aClan">🛡️ Avisar a mi clan</button>' : ''}` : ''}
         <p style="font-size:1.4rem;margin:12px 0">${'🟢'.repeat(n)}${'⚪'.repeat(Math.max(0, tot - n))}</p><p class="sub">${n} de ${tot} jugadores · ${seg} s</p>
         <div style="text-align:left">${(ultimo?.jugadores || []).map(j => `<div class="dato"><span>${j.asiento < (tot / 2) ? '🔵' : '🔴'} ${escH(j.nombre)}${j.clan ? ' · 🛡️ ' + escH(j.clan) : ''}</span><b>🏆 ${j.trofeos}</b></div>`).join('')}</div>
-        ${sala.asiento === 0 && seg >= 15 ? `<button class="btn" id="bots">🤖 Completar con bots y empezar</button>` : ''}<button class="btn alt" id="cancelar">✖ Cancelar</button></div>`); };
+        ${sala.codigo && sala.asiento === 0 && seg >= 15 ? `<button class="btn" id="bots">🤖 Completar con bots y empezar</button>` : ''}<button class="btn alt" id="cancelar">✖ Cancelar</button></div>`); };
     pinta();
-    tm = setInterval(() => { if (!ES) return clearInterval(tm); pinta(); if (sala.asiento === 0 && !sala.codigo && Date.now() - t0 > 45000) post('/api/duelo/bots', { sala: sala.sala, tok: sala.tok }); }, 1000);
+    tm = setInterval(() => { if (!ES) return clearInterval(tm); pinta(); }, 1000);
     ES = new EventSource(`/api/duelo/stream?sala=${sala.sala}&tok=${sala.tok}`);
     ES.addEventListener('sala', e => pinta(JSON.parse(e.data)));
     ES.addEventListener('empieza', e => { if (empezo) return; empezo = true; clearInterval(tm); const s = JSON.parse(e.data); FX.son('sirena'); setParar(() => {}); batalla(t, { modo: s.modo, online: { ...sala, jugadores: s.jugadores } }); });
@@ -743,7 +743,8 @@
       setTimeout(() => { cerrarES(); const d = document.createElement('div'); d.className = 'gb-modal gb'; const nuevas = subio ? G.cartas.filter(c => c.arena === arenaAhora) : [];
         d.innerHTML = `<div class="box"><div class="gb-panel" style="text-align:center"><div style="font-size:3rem">${gano ? '🏆' : gano === null ? '🤝' : '💔'}</div><h2 style="font:900 2rem 'Fraunces',Georgia,serif;color:${gano ? '#fde68a' : '#fca5a5'};margin:0">${gano ? '¡VICTORIA!' : gano === null ? '¡EMPATE!' : 'DERROTA'}</h2>
           <div style="font-size:2rem;letter-spacing:4px">${'👑'.repeat(misC)}<span style="opacity:.25">${'👑'.repeat(3 - misC)}</span></div>
-          ${rank != null ? `<p class="gb-chip" style="color:#fde68a">🌎 Ranking en línea: ${rank} puntos</p>` : ''}<p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑 · +${xpPase} XP 🎫</p>
+          ${rank != null ? `<p class="gb-chip" style="color:#fde68a">🌎 Ranking en línea: ${rank} puntos</p>` : ''}${ON && ON.jugadores?.some(j => j.bot) ? '<p class="sub" style="font-size:.78rem;opacity:.75;margin:2px 0">🤖 No había jugadores disponibles: jugaste contra un rival de la computadora.</p>' : ''}
+          ${gano ? (window.apoyoHTML?.() || '') : ''}<p>${camp ? `Campaña: ${'⭐'.repeat(J.campana?.[cfg.campana] || 0)}` : `🏆 ${dTr >= 0 ? '+' : ''}${dTr} trofeos (${J.trofeos})`} · +${monedas} 🪙 · +${misC} 👑 · +${xpPase} XP 🎫</p>
           ${cofre ? `<div class="gb-panel gb-shine" style="display:inline-block;padding:8px 18px"><span style="font-size:2.4rem">${COFRES[cofre].e}</span><br><b>¡Ganaste un ${COFRES[cofre].n}!</b></div>` : gano && J.cofres.length >= 4 ? '<p class="sub">Tus 4 espacios de cofres están llenos: ábrelos para ganar más.</p>' : ''}
           ${subio ? `<div class="gb-panel" style="border-color:#fde047"><b style="color:#fde68a">🗺️ ¡Nueva arena: ${escH(G.arenas[arenaAhora].n)}!</b><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">${nuevas.map(c => cartaHTML(c)).join('')}</div></div>` : ''}
           ${reinaNueva ? `<div class="gb-panel gb-shine" style="border-color:#fde047"><img src="/glory/reina_mini.webp" style="width:80px;border-radius:50%;border:3px solid #fde047"><br><b style="color:#fde68a">👑 ¡Desbloqueaste a Glory Brown, la Reina de la Victoria!</b></div>` : ''}

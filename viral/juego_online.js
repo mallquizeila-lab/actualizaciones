@@ -1,6 +1,6 @@
 // Cuentas de jugador (usuario + contraseña), clanes con chat moderado y salas en línea de Duelo de Torres (1 vs 1 y 2 vs 2).
 // Las salas usan un "anfitrión": el primer jugador simula la partida y el servidor solo reenvía mensajes (rápido y sin carga).
-const crypto = require('crypto'), fs = require('fs'), path = require('path'), vm = require('vm');
+const crypto = require('crypto'), fs = require('fs'), path = require('path'), vm = require('vm'), RIV = require('./rivales');
 // Catálogo y motor de GLORY BROWN: el servidor calcula las partidas en línea (los celulares solo las dibujan).
 function cargarGlory() {
   const ctx = { window: {} }; vm.runInNewContext(fs.readFileSync(path.join(__dirname, 'public', 'glory', 'cartas.js'), 'utf8'), ctx); const G = ctx.window.GLORY;
@@ -44,7 +44,8 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
   }
   let GL = null; const MAZO_INICIAL = ['escudero_del_alba', 'arqueras_del_sol', 'lanceros_dorados', 'hadas_del_alba', 'lluvia_de_luz', 'torre_del_vigia', 'paladin_radiante', 'cleriga_de_la_aurora'];
   function empezar(s, conBots) {
-    if (conBots) for (let i = 0; i < tam(s.modo); i++) if (!s.jugadores.some(j => j.asiento === i)) s.jugadores.push({ asiento: i, bot: 1, nombre: ['Bot Kira', 'Bot Toro', 'Bot Luna', 'Bot Rayo'][i], trofeos: 0, mazo: [], niveles: {} });
+    if (conBots) { const ref = s.jugadores.filter(j => !j.bot).map(j => j.trofeos || 0), base = ref.length ? ref.reduce((a, b) => a + b, 0) / ref.length : 100;
+      for (let i = 0; i < tam(s.modo); i++) if (!s.jugadores.some(j => j.asiento === i)) s.jugadores.push({ asiento: i, bot: 1, nombre: RIV.nombreRival(), avatar: RIV.avatarRival(), trofeos: Math.max(0, Math.round(base + (Math.random() - .5) * 160)), mazo: [], niveles: {} }); }
     s.estado = 'jugando'; s.inicio = Date.now(); emitir(s, 'empieza', pub(s));
     try { iniciarMotor(s); } catch (e) { console.error('GLORY motor:', e.message); }
   }
@@ -93,6 +94,7 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
       run(`insert into glory_semana(semana, jugador, nombre, pais, puntos, victorias, partidas) values(?,?,?,?,?,?,1) on conflict(semana, jugador) do update set nombre=excluded.nombre, pais=coalesce(excluded.pais, pais), puntos=puntos+excluded.puntos, victorias=victorias+excluded.victorias, partidas=partidas+1`, lunes(), j.jid, j.nombre, j.pais || null, Math.max(0, pt), g === eq ? 1 : 0); }
     emitir(s, 'fin', { g, c: s.motor.S.coronas, rank }); s.estado = 'terminada'; setTimeout(() => { salas.delete(s.id); subs.delete(s.id); }, 20000);
   }
+  setInterval(() => { const ahora = Date.now(); for (const s of salas.values()) if (s.estado === 'esperando' && !s.codigo && s.jugadores.some(j => !j.bot) && ahora - s.creada > (s.modo === '2v2' ? RIV.ESPERA.duelo2v2 : RIV.ESPERA.duelo1v1) * 1000) { cola[s.modo] = cola[s.modo].filter(x => x !== s.id); empezar(s, true); } }, 1000);
   setInterval(() => { const ahora = Date.now(); for (const [id, s] of salas) if (ahora - s.activo > (s.estado === 'jugando' ? 90000 : 10 * 60000)) { emitir(s, 'cerrada', {}); salas.delete(id); subs.delete(id); } for (const m in cola) cola[m] = cola[m].filter(x => salas.has(x) && salas.get(x).estado === 'esperando'); }, 15000).unref();
 
   async function http(req, res, u, { ip, json, send, limite }) {
@@ -159,7 +161,7 @@ function crear({ db, q, q1, run, revisar, apodo, datos }) {
       }
       if (r === '/api/clan/chat') {
         if (limite(jid, 'clanmsg', 12)) return send(res, 429, { error: 'Estás enviando muy rápido 🙂' });
-        const av = /^a\d\d$/.test(b.avatar || '') ? b.avatar : 'a01';
+        const av = require('./fotos').valido(b.avatar) ? b.avatar : 'a01';
         if (b.reto) { const cod = String(b.reto).toUpperCase(); const sa = [...salas.values()].find(x => x.codigo === cod && x.estado === 'esperando'); if (!sa) return send(res, 400, { error: 'Esa sala ya no está disponible' }); run('insert into clan_chat(clan_id, nombre, avatar, texto, tipo, extra) values(?,?,?,?,?,?)', yo.clan_id, nombre, av, `⚔️ ${nombre} busca rival para un ${sa.modo === '2v2' ? '2 vs 2' : '1 vs 1'}`, 'reto', cod); return send(res, 200, { ok: 1 }); }
         const t = revisar(b.texto); if (t.error) return send(res, 400, { error: t.error });
         run('insert into clan_chat(clan_id, nombre, avatar, texto) values(?,?,?,?)', yo.clan_id, nombre, av, t.texto);
