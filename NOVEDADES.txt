@@ -1,3 +1,6 @@
+v7.44.4 — Catálogo de GamePix completo
+- 🕹️ "Juegos profesionales" ahora lee los catálogos por páginas (como el de GamePix: ...&pagination=96&page=1): sigue cargando las páginas siguientes solo, hasta 5.000 juegos. Antes solo se cargaba la primera página.
+
 v7.44.3 — ads.txt listo para GamePix y otros distribuidores
 - 📄 La tarjeta "💰 Google AdSense" → "Líneas extra para ads.txt" ahora acepta listas largas (cientos de líneas), como la que pide GamePix. Antes se cortaba a las primeras líneas.
 - Acepta también las líneas especiales del estándar ads.txt (OWNERDOMAIN=, MANAGERDOMAIN=, comentarios con #) e IDs con puntos. Lo que no sea una línea válida se ignora.

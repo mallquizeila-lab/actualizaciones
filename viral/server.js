@@ -237,7 +237,16 @@ async function catalogoPro(forzar) {
   try {
     const r = await fetch(cfg.feed, { signal: AbortSignal.timeout(25000), headers: { accept: 'application/json, application/rss+xml, application/xml, text/xml' } }); const txt = (await r.text()).slice(0, 12e6);
     let lista = [];
-    try { const j = JSON.parse(txt); lista = Array.isArray(j) ? j : j.data?.items || j.data || j.items || j.games || j.results || Object.values(j).find(Array.isArray) || []; }
+    const sacar = j => Array.isArray(j) ? j : j.data?.items || j.data || j.items || j.games || j.results || Object.values(j).find(Array.isArray) || [];
+    try { const j = JSON.parse(txt); lista = sacar(j);
+      // catálogos por páginas (por ejemplo GamePix: ...&pagination=96&page=1): sigue leyendo las páginas siguientes
+      let sig = j && !Array.isArray(j) && /^https:\/\//.test(j.next_url || '') ? j.next_url : null, pag = 1; const uP = new URL(cfg.feed), porSig = !!sig;
+      for (let k = 0; k < 20 && lista.length < 5000; k++) {
+        if (!sig && !porSig && uP.searchParams.has('page')) { pag++; uP.searchParams.set('page', String(pag)); sig = uP.toString(); }
+        if (!sig) break;
+        try { const r2 = await fetch(sig, { signal: AbortSignal.timeout(25000), headers: { accept: 'application/json' } }); if (!r2.ok) break; const j2 = JSON.parse((await r2.text()).slice(0, 12e6)), l2 = sacar(j2); if (!l2.length) break;
+          const antes = lista.length; lista = lista.concat(l2); if (lista.length === antes) break; sig = j2 && !Array.isArray(j2) && /^https:\/\//.test(j2.next_url || '') && j2.next_url !== sig ? j2.next_url : null; } catch (e2) { break; }
+      } }
     catch (e) { lista = [...txt.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(m => { const o = {}; for (const [, k, v] of m[1].matchAll(/<([a-zA-Z_:]+)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/\1>/g)) o[k.replace(/^.*:/, '')] = v; const im = /<(?:media:thumbnail|media:content|enclosure)[^>]*url="([^"]+)"/.exec(m[1]); if (im) o.image = im[1]; return o; }); }
     const vistos = new Set(), items = lista.map(g => normalizarJuego(g, cfg.plantilla)).filter(g => g && !vistos.has(g.id) && vistos.add(g.id)).slice(0, 5000);
     if (items.length) PRO = { t: Date.now(), items, feed: cfg.feed }; else console.error('Juegos pro: el catálogo no trajo juegos reconocibles');
