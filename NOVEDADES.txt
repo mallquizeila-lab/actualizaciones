@@ -1,3 +1,8 @@
+v7.44.2 — Página "Borrar mis datos"
+- 🗑️ Nueva página yupitok.com/borrar-datos.html: cada persona puede borrar su usuario y sus datos al instante (escribiendo BORRAR) o pedirlo por correo. Se borran su progreso, fotos, amigos, mensajes privados, rankings y clan; sus mensajes del chat público quedan como "(mensaje borrado)".
+- La pide Facebook para aprobar "Continuar con Facebook" (campo "URL de instrucciones para eliminar datos") y también cumple con los derechos ARCO de la Ley 29733.
+- Enlace a esta página desde Contacto.
+
 v7.44.1 — Botón para cambiar la contraseña del panel
 - 🔐 Nuevo botón "🔄 Cambiar contraseña" junto a la contraseña del panel de la página (sección Página viral). Crea una nueva al azar y la página se reinicia sola. Úsalo si la contraseña se vio en alguna captura.
 - 🎙️ "Voces naturales para todos los juegos" ahora espera su turno: si otra grabación (GLORY BROWN o Huerto) está en marcha, empieza sola apenas termine. Antes, el botón no hacía nada en ese caso.

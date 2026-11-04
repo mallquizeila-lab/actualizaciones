@@ -9,7 +9,7 @@ function cargarGlory() {
   return { G, CARTA, Motor: require('./public/glory/motor.js') };
 }
 
-function crear({ db, q, q1, run, revisar, apodo, datos, social = () => ({}), guardarFoto = async () => null }) {
+function crear({ db, q, q1, run, revisar, apodo, datos, social = () => ({}), guardarFoto = async () => null, borrarFotos = () => {} }) {
   const VIDEOS = path.join(datos || __dirname, 'videos'); let G_MUNDOS = ['Reino del Alba', 'Bosque Esmeralda', 'Imperio de las Arenas', 'Islas Celestiales', 'Reino de las Sombras', 'Dominio de Hielo', 'Reino del Dragón'];
   db.exec(`
     create table if not exists glory_semana (semana text, jugador text, nombre text, pais text, puntos integer default 0, victorias integer default 0, partidas integer default 0, primary key (semana, jugador));
@@ -160,6 +160,19 @@ function crear({ db, q, q1, run, revisar, apodo, datos, social = () => ({}), gua
       const tok = crypto.randomBytes(24).toString('hex'); run('insert into sesiones(tok, cuenta_id) values(?,?)', tok, c.id);
       const f = q1('select data from perfiles where id=?', c.perfil_id);
       return send(res, 200, { ok: 1, tok, usuario: c.usuario, data: f ? JSON.parse(f.data) : null });
+    }
+    // 🗑️ Borrar mi cuenta y mis datos (lo pide la ley y Facebook/Google). No se puede deshacer.
+    if (r === '/api/cuenta/borrar' && P) {
+      if (limite(ip, 'cuentaB', 5, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera unos minutos.' });
+      const b = await json(req), c = cuentaDeTok(b.tok); if (!c) return send(res, 401, { error: 'Primero entra a tu usuario en este celular o computadora' });
+      if (String(b.confirmar || '').trim().toUpperCase() !== 'BORRAR') return send(res, 400, { error: 'Escribe BORRAR para confirmar' });
+      const id = c.id, pid = c.perfil_id, uid = /^[a-z0-9]{8,40}$/.test(String(b.uid || '')) ? String(b.uid) : null, T = (sql, ...a) => { try { run(sql, ...a); } catch (e) {} };
+      T('delete from sesiones where cuenta_id=?', id); T('delete from amigos where a=? or b=?', id, id); T('delete from bloqueos where quien=? or a=?', id, id);
+      T('delete from dm where de=? or para=?', id, id); T('delete from dm_reportes where quien=?', id); T('delete from grupo_miembros where cuenta=?', id); T('delete from gmsg where de=?', id);
+      for (const j of [pid, uid].filter(Boolean)) { T('delete from glory_rank where jugador=?', j); T('delete from glory_semana where jugador=?', j); T('delete from glory_premios where jugador=?', j); T('delete from clan_miembros where jugador=?', j); T('delete from arcade where uid=?', j); T("update chat set nombre='(borrado)', texto='(mensaje borrado)', borrado=1 where uid=?", j); T('delete from ref_codigos where uid=?', j); }
+      T('delete from perfiles where id=?', pid); T('delete from cuentas where id=?', id);
+      if (uid) try { borrarFotos(uid); } catch (e) {}
+      return send(res, 200, { ok: 1 });
     }
     if (r === '/api/cuenta/salir' && P) { const b = await json(req); if (b.tok) run('delete from sesiones where tok=?', String(b.tok)); return send(res, 200, { ok: 1 }); }
     if (r === '/api/cuenta/yo' && P) { const b = await json(req), c = cuentaDeTok(b.tok); return send(res, 200, c ? { usuario: c.usuario } : { usuario: null }); }

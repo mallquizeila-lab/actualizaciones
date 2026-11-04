@@ -73,7 +73,9 @@ function crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN }) {
     fs.writeFileSync(archivo(id), data); if (!q1('select 1 from fotos where id=?', id)) run('insert into fotos(id, uid) values(?,?)', id, crypto.createHash('sha256').update(String(uid || '')).digest('hex'));
     moderar(id); return id;
   }
-  return { http, admin, verAdmin, guardarBuffer };
+  // Borra todas las fotos subidas por un usuario (cuando pide borrar su cuenta)
+  function borrarDe(uid) { const h = crypto.createHash('sha256').update(String(uid || '')).digest('hex'); for (const x of q('select id from fotos where uid=?', h)) { aprobadas.delete(x.id); try { fs.rmSync(archivo(x.id), { force: true }); } catch (e) {} } run('delete from fotos where uid=?', h); }
+  return { http, admin, verAdmin, guardarBuffer, borrarDe };
 }
 // Un avatar es válido si es uno de los ilustrados (a01…a48) o una foto aprobada
 const valido = a => /^a\d\d$/.test(a || '') || (ID.test(a || '') && aprobadas.has(a));

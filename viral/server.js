@@ -336,7 +336,19 @@ function paginaLegal(tipo) {
       <h2>7. Contenido propio</h2><p>Los juegos, personajes, textos e imágenes propios de ${sitio} (incluido GLORY BROWN) están protegidos. No se pueden copiar ni vender sin permiso.</p>
       <h2>8. Cambios</h2><p>Podemos actualizar estos términos. La versión vigente siempre está en esta página.</p>
       <h2>9. Contacto</h2><p>${resp} · ${ciudad} · ${correo}</p>`],
-    contacto: ['Contacto', `<p>¿Tienes una pregunta, una idea o quieres reportar algo? Escríbenos.</p><p style="font-size:1.2rem"><b>📧 ${correo}</b></p><p>Responsable: ${resp} · ${ciudad}</p><p>Para pedir que borremos tus datos o tu cuenta, escribe a ese correo con el asunto <b>"Borrar mis datos"</b>. Respondemos en un máximo de 10 días hábiles.</p>`],
+    contacto: ['Contacto', `<p>¿Tienes una pregunta, una idea o quieres reportar algo? Escríbenos.</p><p>🗑️ Para borrar tu cuenta tú mismo, entra a <a href="/borrar-datos.html">Borrar mis datos</a>.</p><p style="font-size:1.2rem"><b>📧 ${correo}</b></p><p>Responsable: ${resp} · ${ciudad}</p><p>Para pedir que borremos tus datos o tu cuenta, escribe a ese correo con el asunto <b>"Borrar mis datos"</b>. Respondemos en un máximo de 10 días hábiles.</p>`],
+    'borrar-datos': ['Borrar mis datos', `<p>Puedes borrar tu usuario y tus datos de ${sitio} cuando quieras, también si entraste con <b>Google</b> o <b>Facebook</b>.</p>
+      <h2>Opción 1: tú mismo, al instante</h2><ol><li>Abre ${sitio} en el mismo celular o computadora donde entraste a tu usuario.</li><li>Vuelve a esta página y aprieta el botón de abajo.</li><li>Escribe <b>BORRAR</b> para confirmar.</li></ol>
+      <div id="bz" style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff"><p id="bzEst">Revisando…</p><input id="bzC" placeholder="Escribe BORRAR" style="padding:10px;border:1px solid #ccc;border-radius:8px;width:100%;max-width:260px" hidden> <button id="bzB" hidden style="padding:10px 16px;border:0;border-radius:8px;background:#dc2626;color:#fff;font-weight:700;cursor:pointer">🗑️ Borrar mi cuenta y mis datos</button></div>
+      <h2>Opción 2: por correo</h2><p>Escribe a <b>${correo}</b> con el asunto <b>"Borrar mis datos"</b> e indica tu nombre de usuario. Lo hacemos en un máximo de 10 días hábiles.</p>
+      <h2>Qué se borra</h2><p>Tu usuario, tu progreso, tus fotos subidas, tus amigos y mensajes privados, tus puntajes en los rankings y tu lugar en los clanes. Tus mensajes del chat público quedan como "(mensaje borrado)".</p>
+      <h2>Si entraste con Facebook o Google</h2><p>También puedes quitar el permiso a ${sitio}: en Facebook ve a <i>Configuración → Apps y sitios web</i>; en Google ve a <i>myaccount.google.com → Seguridad → Conexiones de terceros</i>.</p>
+      <script>(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},tok=g('perfilTok'),us=g('perfilUsuario'),E=document.getElementById('bzEst'),C=document.getElementById('bzC'),B=document.getElementById('bzB');
+      if(!tok){E.textContent='En este navegador no hay ningún usuario abierto. Entra a tu usuario en ${sitio} y vuelve aquí, o usa la opción 2.';return}
+      E.innerHTML='Usuario abierto aquí: <b></b>';E.querySelector('b').textContent=us||'(tu usuario)';C.hidden=B.hidden=false;
+      B.onclick=async()=>{if(C.value.trim().toUpperCase()!=='BORRAR'){alert('Escribe BORRAR para confirmar');return}B.disabled=true;
+        const r=await fetch('/api/cuenta/borrar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({tok,uid:g('vid'),confirmar:'BORRAR'})}).then(x=>x.json()).catch(()=>({error:'Sin conexión'}));
+        if(r.ok){try{['perfilTok','perfilUsuario','perfilCodigo','miFoto'].forEach(k=>localStorage.removeItem(k))}catch(e){}E.textContent='✅ Listo: tu cuenta y tus datos fueron borrados.';C.hidden=B.hidden=true}else{E.textContent='❌ '+(r.error||'No se pudo borrar');B.disabled=false}}})();</script>`],
     nosotros: ['Quiénes somos', `<p><b>${sitio}</b> es una plataforma latina de entretenimiento gratis: tests para conocerte, más de 60 juegos, juegos propios como <b>GLORY BROWN: El Choque de los Reinos</b> y <b>Huerto Defensor</b>, chat, clanes y torneos.</p>
       <p>GLORY BROWN nació como homenaje a una abuelita muy querida: la Reina Glory Brown, que protege su reino con amor. Ese cariño es lo que queremos que se sienta en todo el sitio.</p>
       <p>Creamos contenido nuevo cada semana, con identidad latina y en español, para que juegues sin instalar nada desde tu celular, tablet o computadora.</p><p>Responsable: ${resp} · ${ciudad} · ${correo}</p>`],
@@ -350,7 +362,7 @@ const chat = require('./chat').crear({ db, q, q1, run, getS, setS, preguntasTriv
 const FOTOS = require('./fotos'), fotos = FOTOS.crear({ DATA, db, q, q1, run, E, LOCAL_TOKEN });
 const amigos = require('./amigos').crear({ db, q, q1, run, revisar: require('./chat').revisar, valido: FOTOS.valido, catalogo: () => CATALOGO,
   notificar: (vid, n) => { if (!VAPID) return; for (const r of q('select id, sub from subscribers where vid=? and active=1 order by id desc limit 3', vid)) webpush.sendNotification(JSON.parse(r.sub), JSON.stringify({ ...n, url: PUBLIC_URL + n.url, tag: 'amigos' }), { vapid: VAPID, TTL: 3600, urgency: 'high' }).catch(e => { if (e.statusCode === 404 || e.statusCode === 410) run('update subscribers set active=0 where id=?', r.id); }); } });
-const online = require('./juego_online').crear({ social: () => getS('login', {}), guardarFoto: (buf, uid) => fotos.guardarBuffer(buf, uid), datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
+const online = require('./juego_online').crear({ social: () => getS('login', {}), guardarFoto: (buf, uid) => fotos.guardarBuffer(buf, uid), borrarFotos: uid => fotos.borrarDe(uid), datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
@@ -675,7 +687,7 @@ http.createServer(async (req, res) => {
     }
     { const mq = /^\/apoyo-qr\/([a-f0-9]{20}\.(png|jpg|webp))$/.exec(u.pathname); if (mq) return archivo(req, res, path.join(QR_DIR, mq[1]), mq[2] === 'jpg' ? 'image/jpeg' : 'image/' + mq[2], { 'cache-control': 'public, max-age=31536000, immutable' }); }
     if (u.pathname === '/apoyar' || u.pathname === '/apoyar.html') return enviarHtml(req, res, paginaApoyo(), { 'cache-control': 'no-cache' });
-    const legal = /^\/(terminos|contacto|nosotros)\.html$/.exec(u.pathname);
+    const legal = /^\/(terminos|contacto|nosotros|borrar-datos)\.html$/.exec(u.pathname);
     if (legal) return enviarHtml(req, res, paginaLegal(legal[1]), { 'cache-control': 'no-cache' });
     if (u.pathname === '/ads.txt') { const a = adsCfg(), lineas = []; if (/^ca-pub-\d{10,20}$/.test(a.client || '')) lineas.push(`google.com, ${a.client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0`); for (const l of String(a.extra || '').split(/\r?\n/)) if (/^[a-z0-9.-]+\.[a-z]{2,},\s*[\w-]+,\s*(DIRECT|RESELLER)(,\s*[\w]+)?$/i.test(l.trim())) lineas.push(l.trim()); return send(res, 200, lineas.join('\n') + '\n', 'text/plain; charset=utf-8', { 'cache-control': 'no-cache' }); }
     // Política de privacidad con tus datos (se completa en el panel → Ajustes; sobrevive a las actualizaciones).
