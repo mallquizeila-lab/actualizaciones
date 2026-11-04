@@ -7,8 +7,8 @@
 </style>
 <meta name="theme-color" content="#1a1640">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.png?v=2">
-<link rel="apple-touch-icon" href="/icon-512.png?v=2">
+<link rel="icon" href="/icon.png?v=3">
+<link rel="apple-touch-icon" href="/icon-512.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Figtree:wght@400;600;700&family=Exo+2:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -924,7 +924,7 @@ window.pintarHub = function () {
 window.premioDiario = function (forzar) {
   if (!window.PERFIL || !PERFIL.diarioPendiente() || document.getElementById('pdModal')) return;
   const n = PERFIL.diaSiguiente(), k = (n - 1) % 7, P = PERFIL.PREMIO_DIA, d = document.createElement('div'); d.className = 'modal'; d.id = 'pdModal';
-  d.innerHTML = `<div class="card" style="text-align:center"><h2 style="margin:0">🎁 Premio diario</h2><p class="sub" style="margin:4px 0 12px">${n > 1 ? `🔥 ¡Llevas ${n} días seguidos! No faltes mañana.` : 'Entra cada día y el premio crece. ¡El día 7 hay cofre!'}</p>
+  d.innerHTML = `<div class="card" style="text-align:center"><img src="/brand/mascota-128.webp" alt="" width="84" height="84" style="display:block;margin:-4px auto 4px;width:84px;height:84px;border-radius:22px"><h2 style="margin:0">🎁 Premio diario</h2><p class="sub" style="margin:4px 0 12px">${n > 1 ? `🔥 ¡Llevas ${n} días seguidos! No faltes mañana.` : 'Entra cada día y el premio crece. ¡El día 7 hay cofre!'}</p>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${P.map((p, i) => `<div style="padding:10px 4px;border-radius:14px;border:1px solid ${i === k ? 'var(--neon-c,#22e6ff)' : 'rgba(255,255,255,.12)'};background:${i < k ? 'rgba(43,255,177,.12)' : i === k ? 'rgba(34,230,255,.15)' : 'rgba(255,255,255,.04)'};${i === k ? 'box-shadow:0 0 18px rgba(34,230,255,.5);' : ''}${i === 6 ? 'grid-column:span 2;' : ''}"><small style="display:block;opacity:.8">Día ${i + 1}</small><div style="font-size:${i === 6 ? '2rem' : '1.4rem'}">${i < k ? '✅' : i === 6 ? '🧰' : '🪙'}</div><b>${p}</b></div>`).join('')}</div>
     <button class="btn" id="pdOk" style="margin-top:14px">Reclamar ${P[k]} 🪙${k === 6 ? ' + cofre' : ''}</button><button class="btn alt" id="pdNo">Más tarde</button></div>`;
   document.body.append(d);
@@ -985,12 +985,12 @@ window.instalarApp = async function () {
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent), safari = ios && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent), m = document.createElement('div'); m.className = 'modal';
   const pasos = ios ? (safari ? ['Toca el botón <b>Compartir</b> <span style="font-size:1.2rem">⬆️</span> (abajo en la pantalla).', 'Baja y toca <b>"Agregar a inicio"</b> ➕.', 'Toca <b>"Agregar"</b>. ¡Listo! Ábrela desde tu pantalla de inicio.'] : ['En iPhone se instala desde <b>Safari</b>: copia la dirección <b>yupitok.com</b> y ábrela en Safari.', 'Toca <b>Compartir</b> ⬆️ y luego <b>"Agregar a inicio"</b>.'])
     : ['Toca el menú <b>⋮</b> del navegador (arriba a la derecha).', 'Elige <b>"Instalar aplicación"</b> o <b>"Agregar a pantalla de inicio"</b>.', 'Toca <b>"Instalar"</b>. ¡Listo! Ábrela desde tu pantalla de inicio.'];
-  m.innerHTML = `<div class="card" style="text-align:center"><h2 style="margin:0">📲 Instala Yupitok gratis</h2><p class="sub" style="margin:6px 0 12px">Ábrelo con un toque desde tu pantalla de inicio, a pantalla completa y sin ocupar espacio. ¡La primera vez que lo abras instalado te regalamos <b>100 🪙</b>!</p>
+  m.innerHTML = `<div class="card" style="text-align:center"><img src="/brand/mascota.webp" alt="" width="120" height="120" style="display:block;margin:-6px auto 6px;width:120px;height:120px;border-radius:28px;box-shadow:0 0 24px rgba(34,230,255,.45)"><h2 style="margin:0">📲 Instala Yupitok gratis</h2><p class="sub" style="margin:6px 0 12px">Ábrelo con un toque desde tu pantalla de inicio, a pantalla completa y sin ocupar espacio. ¡La primera vez que lo abras instalado te regalamos <b>100 🪙</b>!</p>
     <ol style="text-align:left;margin:0 0 6px 18px;line-height:1.6">${pasos.map(p => `<li>${p}</li>`).join('')}</ol><button class="btn" id="apOk">¡Entendido!</button><button class="btn alt" id="apNo">Ahora no</button></div>`;
   document.body.append(m); m.onclick = e => { if (e.target.id === 'apNo') { LS.set('appNoHasta', String(Date.now() + 7 * 864e5)); document.querySelector('[data-app]')?.remove(); } if (e.target.id === 'apOk' || e.target.id === 'apNo' || e.target === m) m.remove(); };
 };
 addEventListener('appinstalled', () => { document.querySelector('[data-app]')?.remove(); document.getElementById('appPill')?.remove(); });
-setTimeout(() => { if (appInstalada() || document.getElementById('appPill')) return; const b = document.createElement('button'); b.id = 'appPill'; b.textContent = '📲 App'; b.title = 'Instala Yupitok';
+setTimeout(() => { if (appInstalada() || document.getElementById('appPill')) return; const b = document.createElement('button'); b.id = 'appPill'; b.innerHTML = '<img src="/brand/mascota-128.webp" alt="" width="22" height="22" style="width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:5px">App'; b.title = 'Instala Yupitok';
   b.style.cssText = 'position:fixed;left:12px;bottom:14px;z-index:45;border:1px solid rgba(34,230,255,.6);background:rgba(10,8,32,.92);color:#fff;font:800 .85rem Figtree,sans-serif;padding:7px 12px;border-radius:999px;box-shadow:0 0 16px rgba(34,230,255,.45);cursor:pointer';
   b.onclick = () => instalarApp(); document.body.append(b); const ver = () => { b.hidden = !!(document.body.classList.contains('gb-full') || document.body.classList.contains('hd-full') || document.getElementById('m3d') || $('#home')?.hidden); }; ver(); setInterval(ver, 1500); }, 2000);
 const pintarHoraFeliz = () => { const h = document.getElementById('hub'), hf = cfg.horaFeliz; if (!h || !hf?.on || h.querySelector('[data-hf]')) return;
@@ -1000,7 +1000,7 @@ const pintarHoraFeliz = () => { const h = document.getElementById('hub'), hf = c
   const ref = [...h.querySelectorAll('[data-pd],[data-camp]')].pop(); if (ref) ref.insertAdjacentHTML('afterend', html); else h.insertAdjacentHTML('afterbegin', html); };
 setTimeout(() => { if (appInstalada() && !LS.get('appPremio') && window.PERFIL) { LS.set('appPremio', '1'); PERFIL.ganar(100); toast('🎉 ¡Gracias por instalar Yupitok! +100 🪙'); window.pintarHub?.(); } }, 2500);
 const pintarApp = () => { const h = document.getElementById('hub'); if (!h || appInstalada() || h.querySelector('[data-app]') || +(LS.get('appNoHasta') || 0) > Date.now()) return;
-  const html = `<button class="joyban" data-app="1" onclick="instalarApp()" style="grid-column:1/-1;background:linear-gradient(120deg,#0ea5e9,#6366f1 55%,#a855f7);box-shadow:0 10px 30px rgba(99,102,241,.35)"><span>📲</span><div><b>Instala Yupitok gratis · +100 🪙</b><small>Ábrelo como app desde tu pantalla de inicio, con un toque.</small></div></button>`;
+  const html = `<button class="joyban" data-app="1" onclick="instalarApp()" style="grid-column:1/-1;background:linear-gradient(120deg,#0ea5e9,#6366f1 55%,#a855f7);box-shadow:0 10px 30px rgba(99,102,241,.35)"><img src="/brand/mascota-128.webp" alt="" width="58" height="58" style="width:58px;height:58px;border-radius:16px;flex:0 0 58px;box-shadow:0 0 14px rgba(255,255,255,.35)"><div><b>Instala Yupitok gratis · +100 🪙</b><small>Ábrelo como app desde tu pantalla de inicio, con un toque.</small></div></button>`;
   const ref = h.querySelector('#hubTop') || [...h.querySelectorAll('[data-pd],[data-camp]')].pop(); if (ref) ref.insertAdjacentHTML('afterend', html); else h.insertAdjacentHTML('afterbegin', html); };
 { const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
   try { if (PERFIL.diarioPendiente()) { const h = document.getElementById('hub'); if (h && !h.querySelector('[data-pd]')) h.insertAdjacentHTML('afterbegin', `<button class="joyban" data-pd="1" onclick="premioDiario()" style="grid-column:1/-1;background:linear-gradient(120deg,#f59e0b,#ef4444 55%,#a21caf);box-shadow:0 10px 30px rgba(245,158,11,.35)"><span>🎁</span><div><b>¡Tu premio diario te espera!</b><small>Día ${PERFIL.diaSiguiente() > 7 ? ((PERFIL.diaSiguiente() - 1) % 7) + 1 : PERFIL.diaSiguiente()} de 7 · toca para reclamar</small></div></button>`); }

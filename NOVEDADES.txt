@@ -1,3 +1,7 @@
+v7.53.1 — Llega la mascota de Yupitok
+- 👑 La nueva mascota "Y" (con corona, audífonos y control) es ahora el ícono de la app de Yupitok (pantalla de inicio del celular, pestaña del navegador y notificaciones), con versión especial para los íconos redondos de Android.
+- Aparece también en la ventana "Instala Yupitok", en el banner para instalar, en el premio diario y en el botón flotante "App".
+
 v7.53.0 — Aviso de racha, Hora feliz y app más visible
 - 🔥 Aviso "No pierdas tu racha": cada día a las 7 pm (Perú) llega una notificación personalizada ("🔥 ¡Llevas 5 días seguidos! Entra hoy y reclama tu premio del día 6: 80 🪙") solo a quien tiene racha de 2+ días y todavía no entró ese día. Se configura en el panel → Ajustes.
 - 🎉 Hora feliz: un día a la semana (por defecto sábado de 8 a 9 pm), cada partida da 20 🪙 extra. Banner en la portada (también avisa durante el día "Hoy es la Hora feliz") y notificación al empezar. Día, hora y monedas se cambian en el panel → Ajustes.
