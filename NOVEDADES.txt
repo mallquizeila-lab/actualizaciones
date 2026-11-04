@@ -1,3 +1,6 @@
+v7.40.1 — Moderación en el panel
+- 🛡️ La pestaña "📷 Fotos" del panel de la página ahora se llama "🛡️ Moderación": además de las fotos, muestra los reportes de chats privados y de grupo (quién reportó, a quién y los últimos mensajes) con un botón para suspender o quitar la suspensión.
+
 v7.40.0 — Amigos, chat privado y chats de grupo
 - 👥 Nueva sección "Amigos y chat privado" en la portada (para usuarios registrados): busca a tus amigos por su usuario, envía y acepta solicitudes, y mira quién está en línea.
 - 💬 Chat privado entre amigos y 👥 chats de grupo (hasta 20 personas): crea un grupo, agrega amigos y conversen para organizarse.

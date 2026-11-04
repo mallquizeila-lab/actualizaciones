@@ -72,7 +72,7 @@ const flag = cc => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUppe
 const SIGNOS = ['aries','tauro','geminis','cancer','leo','virgo','libra','escorpio','sagitario','capricornio','acuario','piscis'];
 let JUEGOS = { horoscopo: 'Horóscopo', compatibilidad: 'Compatibilidad', ruleta: 'Ruleta', numerologia: 'Numerología', encuesta: 'Encuesta' };
 fetch('/tests.json').then(r => r.json()).then(d => { JUEGOS = Object.fromEntries(d.tests.map(t => [t.id, t.t])); }).catch(() => {});
-const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['chat', '💬 Chat'], ['fotos', '📷 Fotos'], ['ajustes', 'Ajustes']];
+const TABS = [['resumen', 'Resumen'], ['visitantes', 'Visitantes'], ['suscriptores', 'Suscriptores'], ['campanas', 'Campañas'], ['chat', '💬 Chat'], ['fotos', '🛡️ Moderación'], ['ajustes', 'Ajustes']];
 let tab = 'resumen'; const CH = { rep: false };
 function mostrarLogin() { $('#app').hidden = true; $('#login').hidden = false; $('#pw').focus(); }
 $('#lgo').onclick = async () => { try { await api('login', { password: $('#pw').value }); $('#login').hidden = true; iniciar(); } catch (e) { $('#lerr').textContent = e.message; } };
@@ -183,11 +183,13 @@ const V = {
     };
   },
   async fotos() {
-    const d = await api('fotos'), E = { ok: '✅ Aprobada', pendiente: '⏳ Pendiente', rechazada: '🚫 Rechazada' };
-    $('#main').innerHTML = `<div class="card"><h2>📷 Fotos de perfil</h2><p class="hint">Las fotos se revisan solas con la IA de ShortForge. Las pendientes y las reportadas aparecen primero. Con 3 reportes, una foto se oculta hasta que la revises.</p>
+    const [d, rp] = await Promise.all([api('fotos'), api('reportes-dm').catch(() => ({ reportes: [] }))]), E = { ok: '✅ Aprobada', pendiente: '⏳ Pendiente', rechazada: '🚫 Rechazada' };
+    $('#main').innerHTML = `<div class="card"><h2>🚩 Reportes de chats privados y grupos</h2><p class="hint">Cuando alguien reporta un chat, aquí ves quién reportó, a quién y los últimos mensajes. Puedes suspender al usuario: ya no podrá enviar mensajes.</p>
+      ${(rp.reportes || []).map(r => `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0"><b>${esc(r.quien || '?')}</b> reportó a <b>${esc(r.a || 'un grupo')}</b> <small>· ${esc(r.created_at)}</small><p style="margin:6px 0;font-size:.9rem">${esc(r.texto || '')}</p>${r.a ? `<button class="btn" data-sus="${esc(r.a)}" data-si="${r.suspendido ? 0 : 1}" style="padding:4px 10px;${r.suspendido ? '' : 'background:#b91c1c'}">${r.suspendido ? 'Quitar suspensión' : 'Suspender a ' + esc(r.a)}</button>` : ''}</div>`).join('') || '<p class="hint">No hay reportes. 🎉</p>'}</div>
+      <div class="card"><h2>📷 Fotos de perfil</h2><p class="hint">Las fotos se revisan solas con la IA de ShortForge. Las pendientes y las reportadas aparecen primero. Con 3 reportes, una foto se oculta hasta que la revises.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">${d.fotos.map(f => `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:8px;text-align:center"><img src="/api/admin/foto-ver?id=${f.id}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;background:#f3f4f6"><div style="font-size:.8rem;margin:6px 0">${E[f.estado] || f.estado}${f.reportes ? ` · 🚩 ${f.reportes}` : ''}${f.motivo ? `<br><small>${esc(f.motivo)}</small>` : ''}</div>
         ${f.estado !== 'ok' ? `<button class="btn" data-ap="${f.id}" style="padding:4px 10px">Aprobar</button>` : ''} ${f.estado !== 'rechazada' ? `<button class="btn" data-bo="${f.id}" style="padding:4px 10px;background:#b91c1c">Borrar</button>` : ''}</div>`).join('') || '<p class="hint">Todavía nadie subió fotos.</p>'}</div></div>`;
-    $('#main').onclick = async e => { const a = e.target.dataset.ap, b = e.target.dataset.bo; if (a) { await api('fotos/aprobar', { id: a }); ir('fotos'); } if (b && confirm('¿Borrar esta foto?')) { await api('fotos/borrar', { id: b }); ir('fotos'); } };
+    $('#main').onclick = async e => { if (e.target.dataset.sus) { await api('suspender', { usuario: e.target.dataset.sus, si: e.target.dataset.si === '1' }); return ir('fotos'); } const a = e.target.dataset.ap, b = e.target.dataset.bo; if (a) { await api('fotos/aprobar', { id: a }); ir('fotos'); } if (b && confirm('¿Borrar esta foto?')) { await api('fotos/borrar', { id: b }); ir('fotos'); } };
   },
   async ajustes() {
     const a = await api('ajustes');
