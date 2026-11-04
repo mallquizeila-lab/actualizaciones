@@ -622,7 +622,7 @@ function arcade(t) {
     const ir2 = () => window.ARCADE.jugar(t);
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
-    const sc = document.createElement('script'); sc.src = '/arcade.js?v=7'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=7'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=5'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=20'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=3'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=16'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
+    const sc = document.createElement('script'); sc.src = '/arcade.js?v=8'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=7'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=5'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=20'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=3'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=16'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
   });
 }
 const MOTOR = {
@@ -718,7 +718,7 @@ function enlace(r) { return `${location.origin}/r/${r.g}?src=compartido${window.
 function compartirBox(r) {
   const url = enlace(r), txt = r.compartir, e = encodeURIComponent;
   const box = document.createElement('div'); box.className = 'card';
-  box.innerHTML = `<h3>📣 Compártelo y reta a tus amigos</h3><div class="share">
+  box.innerHTML = `<h3>📣 Compártelo y reta a tus amigos</h3>${r.reto != null && r.g?.startsWith('arcade-') ? `<button class="btn" data-s="story" style="margin:0 0 10px">📸 Imagen de mi récord para WhatsApp e Historias</button>` : ''}<div class="share">
     ${(() => { const pr = redesPais(), resto = ['wa', 'fb', 'tg', 'x', 'ms'].filter(k => !pr.includes(k) && (MOVIL || !REDES_DEF[k][4])), a = k => `<a href="${enlaceRed(k, url, txt)}" target="_blank" rel="noopener"><span>${REDES_DEF[k][0]}</span>${REDES_DEF[k][1]}</a>`;
       return pr.map(a).join('') + '<button data-s="story"><span>📸</span>Instagram</button><button data-s="story"><span>🎵</span>TikTok</button>' + resto.map(a).join(''); })()}
     <button data-s="native"><span>📤</span>Más</button><button data-s="copy"><span>🔗</span>Copiar</button></div>
@@ -731,8 +731,35 @@ function compartirBox(r) {
     if (b.dataset.s === 'story') historia(r, url);
   };
 }
+// 📸 Tarjeta de récord (juegos): 1080x1920 estilo neón, con la mascota, el nombre, el puntaje y el reto "¿Me ganas?"
+const cargarImg = src => new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; });
+async function tarjetaRecord(r, url) {
+  try { await document.fonts?.ready; } catch (e) {}
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d'), W = 1080, H = 1920;
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1a0b4d'); g.addColorStop(.55, '#0c0830'); g.addColorStop(1, '#04030f'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  for (const [cx, cy, R, col] of [[160, 300, 520, 'rgba(255,61,240,.35)'], [950, 820, 560, 'rgba(34,230,255,.28)'], [540, 1700, 600, 'rgba(139,92,246,.30)']]) { const rg = x.createRadialGradient(cx, cy, 0, cx, cy, R); rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = rg; x.fillRect(0, 0, W, H); }
+  x.save(); x.strokeStyle = 'rgba(34,230,255,.18)'; x.lineWidth = 2; for (let k = 0; k < 14; k++) { const yy = 1380 + k * k * 4.2; x.beginPath(); x.moveTo(0, yy); x.lineTo(W, yy); x.stroke(); } for (let k = -12; k <= 12; k++) { x.beginPath(); x.moveTo(540 + k * 40, 1380); x.lineTo(540 + k * 160, H); x.stroke(); } x.restore();
+  const t = TESTS.find(z => z.id === r.g), nom = (LS.get('chatNom') || 'Jugador').slice(0, 18), pts = Number(r.reto).toLocaleString('es-PE');
+  const masc = await cargarImg('/brand/mascota.webp'); if (masc) { x.save(); x.shadowColor = 'rgba(34,230,255,.8)'; x.shadowBlur = 60; x.beginPath(); x.roundRect(330, 130, 420, 420, 90); x.clip(); x.drawImage(masc, 330, 130, 420, 420); x.restore(); x.strokeStyle = 'rgba(255,255,255,.35)'; x.lineWidth = 6; x.beginPath(); x.roundRect(330, 130, 420, 420, 90); x.stroke(); }
+  x.textAlign = 'center';
+  if (r.etiqueta) { x.font = '900 64px Figtree, sans-serif'; const tw = x.measureText(r.etiqueta).width + 90; const gl = x.createLinearGradient(540 - tw / 2, 0, 540 + tw / 2, 0); gl.addColorStop(0, '#f59e0b'); gl.addColorStop(1, '#ef4444'); x.fillStyle = gl; x.beginPath(); x.roundRect(540 - tw / 2, 610, tw, 104, 52); x.fill(); x.fillStyle = '#fff'; x.fillText(r.etiqueta, 540, 684); }
+  x.fillStyle = '#e9e4ff'; x.font = '800 70px Figtree, sans-serif'; lineas(x, `${t?.e || '🎮'} ${t ? t.t.split(':')[0] : 'Yupitok'}`, 960).slice(0, 2).forEach((l, k) => x.fillText(l, 540, 840 + k * 84));
+  const gs = x.createLinearGradient(0, 900, 0, 1180); gs.addColorStop(0, '#fff7c2'); gs.addColorStop(.5, '#fcd34d'); gs.addColorStop(1, '#f59e0b'); x.fillStyle = gs; x.shadowColor = 'rgba(252,211,77,.7)'; x.shadowBlur = 50;
+  let fs = 260; x.font = `900 ${fs}px Figtree, sans-serif`; while (x.measureText(pts).width > 960 && fs > 120) { fs -= 10; x.font = `900 ${fs}px Figtree, sans-serif`; } x.fillText(pts, 540, 1170); x.shadowBlur = 0;
+  x.fillStyle = '#b9b3e6'; x.font = '700 58px Figtree, sans-serif'; x.fillText('puntos', 540, 1250);
+  x.fillStyle = '#fff'; x.font = '800 66px Figtree, sans-serif'; x.fillText(`por ${nom}`, 540, 1360);
+  const gb = x.createLinearGradient(140, 0, 940, 0); gb.addColorStop(0, '#22e6ff'); gb.addColorStop(.55, '#8b5cf6'); gb.addColorStop(1, '#ff3df0'); x.fillStyle = gb; x.beginPath(); x.roundRect(140, 1480, 800, 150, 75); x.fill();
+  x.fillStyle = '#fff'; x.font = '900 72px Figtree, sans-serif'; x.fillText('⚔️ ¿Me ganas?', 540, 1580);
+  x.fillStyle = '#e9e4ff'; x.font = '700 50px Figtree, sans-serif'; x.fillText('Juega gratis, sin instalar 👇', 540, 1720); x.fillStyle = '#22e6ff'; x.font = '900 70px Figtree, sans-serif'; x.fillText(location.host.replace(/^www\./, ''), 540, 1810);
+  const blob = await new Promise(ok => c.toBlob(ok, 'image/png')), file = new File([blob], 'mi-record-yupitok.png', { type: 'image/png' });
+  if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], text: r.compartir + ' ' + url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mi-record-yupitok.png'; a.click();
+  try { await navigator.clipboard.writeText(r.compartir + ' ' + url); } catch (e) {}
+  toast('📸 Imagen descargada y enlace copiado: compártela en WhatsApp, Facebook o tu Historia 🔗');
+}
 // Imagen vertical 1080x1920 del resultado para Historias de Instagram/TikTok/WhatsApp.
 async function historia(r, url) {
+  if (r.reto != null && r.g && r.g.startsWith('arcade-')) return tarjetaRecord(r, url);
   const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
   const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#3a2f86'); g.addColorStop(1, '#1a1640'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
   x.textAlign = 'center'; x.fillStyle = '#f4b942'; x.font = '260px serif'; x.fillText(r.emoji || '📊', 540, 560);
