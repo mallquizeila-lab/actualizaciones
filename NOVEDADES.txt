@@ -1,3 +1,17 @@
+v7.59.0 — 📣 Agente de Marketing (el camino al millón) + Yupitok en 7 idiomas
+- 📣 Nuevo agente MARKETING en el Centro de Mando (sin IA, 0 créditos): el estratega encargado de traer las visitas.
+  · Meta del mes con barra de progreso (1 mil → 10 mil → 100 mil → 1 millón → 10 millones) y cálculo de "a este ritmo llegas al millón en X semanas".
+  · Plan de la semana según tu fase (Semilla, Tracción, Escala, Marca mundial).
+  · "Lo que dicen tus números": tu mejor red, países nuevos que llegan, invitaciones y notificaciones.
+  · Ranking de dónde llega la gente en los últimos 30 días (Facebook, Google, TikTok, WhatsApp, campañas…).
+  · Campañas con enlace propio para cada creador, grupo o anuncio, contando cuántas visitas trajo cada uno.
+  · Mensaje listo (español, inglés y portugués) para proponer a creadores un torneo con su nombre.
+  · Guía de anuncios pagados para cuando llegues a la Fase 3, sin comprar visitas falsas.
+- 🌍 Yupitok en 7 idiomas: además del español y el inglés, ahora hay páginas en portugués (/pt), francés (/fr), alemán (/de), italiano (/it) e indonesio (/id), con portada, categorías y una página por cada juego. Todas están enlazadas entre sí para Google (hreflang).
+- 🔤 Las descripciones de los juegos se traducen solas, de a poco (un lote cada 6 minutos, con tu IA). Una página entra al sitemap cuando ya tiene su texto traducido.
+- 🔎 Ahora se sabe si la visita llegó desde Google, Bing, Yandex, ChatGPT, TikTok, Instagram, YouTube, Reddit, Pinterest y otros, aunque el link no tenga ?src=.
+- 📨 El reporte diario de las 8 am ahora empieza con el resumen del agente de Marketing.
+
 v7.58.0 — 🌍 Agente Embajador + Yupitok en inglés para todo el mundo
 - 🌍 Nuevo 5º agente en el Centro de Mando: el EMBAJADOR (sin IA, 0 créditos). Cada día te arma el "kit de difusión" listo para copiar y pegar en Facebook, TikTok/Reels/Shorts, X y WhatsApp, en ESPAÑOL, INGLÉS y PORTUGUÉS. Cambia de tema cada día: Salón de la Fama, torneo de la semana, top 3 más jugados, GLORY BROWN, juego estrella, reto de récord y juegos para la familia.
 - 🔗 Cada enlace dice de qué red llegó la visita (src=fb, x, whatsapp, bio), así el agente Data aprende qué red te trae más gente.

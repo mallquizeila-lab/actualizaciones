@@ -355,8 +355,9 @@ VIEWS.mando = () => {
   const D = MD.datos || {}, v = D.visitas || {}, chs = S.channels || [];
   const EST = { nuevo: '⏳ En cola', analizando: '🔎 Analizando…', decidido: '', armado: '🎬 Armado (en producción)', dejado: '⏭️ Dejado', error: '⚠️ Error' };
   const kpi = (t, n, sub) => `<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:.8rem;opacity:.75">${t}</div><div style="font-size:1.6rem;font-weight:800">${n}</div>${sub ? `<div style="font-size:.75rem;opacity:.7">${sub}</div>` : ''}</div>`;
-  return `<h1>🧭 Centro de Mando</h1><p class="sub">Tus 5 agentes trabajan solos y casi no gastan créditos: 📊 Data, 🛠️ Guardián, 🌍 Embajador y 💰 Monetiza funcionan sin IA; 🎬 Creativo usa la IA solo para decidir y crear. Cada mañana (8 am) te mandan el reporte por Telegram.</p>
+  return `<h1>🧭 Centro de Mando</h1><p class="sub">Tus 6 agentes trabajan solos y casi no gastan créditos: 📣 Marketing, 📊 Data, 🛠️ Guardián, 🌍 Embajador y 💰 Monetiza funcionan sin IA; 🎬 Creativo usa la IA solo para decidir y crear. Cada mañana (8 am) te mandan el reporte por Telegram.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0">${kpi('👀 Visitas ayer', v.ayer ?? '–')}${kpi('📅 Últimos 7 días', v.semana ?? '–', v.semanaAnterior ? `semana anterior: ${v.semanaAnterior}` : '')}${kpi('🔔 Suscriptores', D.subs?.activos ?? '–', D.subs?.hoy ? `+${D.subs.hoy} hoy` : '')}${kpi('🎬 Videos por revisar', D.videos?.revisar ?? '–')}${kpi('💰 Ingresos del mes', (D.ingresos?.total ?? 0) + ' USD')}</div>
+  ${marketingCard(MD.marketing, MD.mensajes)}
   <div class="card"><h3>🛠️ Guardián</h3>${(D.alertas || []).length ? `<ul>${D.alertas.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '<p>✅ Todo en orden: página encendida, sin errores ni pendientes.</p>'}
     ${(D.consejos || []).length ? `<h3 style="margin-top:12px">💡 Consejos de los agentes</h3><ul>${D.consejos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
     <div class="btns"><button class="b sm" data-act="mdReporte">📨 Generar reporte ahora (y mandarlo a Telegram)</button></div></div>
@@ -386,6 +387,22 @@ VIEWS.mando = () => {
   <div class="card"><h3>📨 Últimos reportes</h3>${(MD.reportes || []).length ? MD.reportes.map(r => `<details><summary>${esc(r.dia)}</summary><pre style="white-space:pre-wrap;font-size:.85rem">${esc(r.texto)}</pre></details>`).join('') : '<p class="hint">El primer reporte llega mañana a las 8 am (o aprieta "Generar reporte ahora").</p>'}</div>`;
 };
 let MDlang = 'es';
+function marketingCard(K, MSG) {
+  if (!K) return '';
+  const f = n => (n || 0).toLocaleString('es'), max = Math.max(1, ...(K.ranking || []).map(r => r.n));
+  return `<div class="card" style="border:2px solid #7c3aed"><h3>📣 Marketing: el camino al millón de visitas</h3>
+    <p style="margin:4px 0"><b>${esc(K.fase)}</b> · objetivo: ${esc(K.metaTexto)}</p>
+    <div style="background:#ede9fe;border-radius:999px;height:16px;overflow:hidden;margin:6px 0"><div style="height:100%;width:${Math.max(2, K.progreso)}%;background:linear-gradient(90deg,#22e6ff,#8b5cf6,#ff3df0)"></div></div>
+    <p class="hint" style="margin:0"><b>${f(K.mes)}</b> visitas en los últimos 30 días de una meta de <b>${f(K.meta)}</b> (${K.progreso} %)${K.antes ? ` · el mes anterior: ${f(K.antes)}` : ''}${K.crecimiento !== null ? ` · esta semana: <b>${K.crecimiento > 0 ? '+' : ''}${K.crecimiento} %</b>` : ''}${K.semanas ? ` · a este ritmo llegas a la meta en <b>${K.semanas} semanas</b>` : ''}${K.semanasMillon ? ` y al <b>millón en ${K.semanasMillon} semanas</b>` : ''}</p>
+    <h4 style="margin:12px 0 4px">🗓️ Plan de esta semana</h4><ol style="margin:0 0 0 18px">${K.plan.map(x => `<li style="margin:3px 0">${esc(x)}</li>`).join('')}</ol>
+    ${K.foco.length ? `<h4 style="margin:12px 0 4px">🎯 Lo que dicen tus números</h4><ul style="margin:0 0 0 18px">${K.foco.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+    <h4 style="margin:12px 0 4px">🚪 De dónde llega la gente (30 días)</h4>${(K.ranking || []).length ? K.ranking.map(r => `<div style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:2px 0"><span style="width:210px;flex:none">${esc(r.red)}</span><div style="flex:1;background:#f3f4f6;border-radius:6px;height:12px"><div style="height:100%;border-radius:6px;background:#8b5cf6;width:${Math.round(r.n * 100 / max)}%"></div></div><b style="width:70px;text-align:right">${f(r.n)}</b></div>`).join('') : '<p class="hint">Todavía no hay visitas este mes.</p>'}
+    <h4 style="margin:14px 0 4px">🔗 Campañas con enlace propio</h4><p class="hint" style="margin:0 0 6px">Crea un enlace para cada creador, grupo o anuncio y sabrás exactamente cuánta gente trajo cada uno.</p>
+    <div class="row"><label>Nombre<input id="mk-n" maxlength="40" placeholder="Ej: creador Juanito, anuncio México"></label><label>Tipo<select id="mk-t"><option value="creador">🤝 Creador / influencer</option><option value="grupo">👥 Grupo o comunidad</option><option value="anuncio">💸 Anuncio pagado</option><option value="otro">📌 Otro</option></select></label><label>Lleva a<select id="mk-d"><option value="inicio">Portada</option><option value="glory">GLORY BROWN</option><option value="juegos">Juegos por categoría</option><option value="torneo">Salón de la Fama / torneo</option><option value="en">Versión en inglés</option><option value="pt">Versión en portugués</option></select></label></div>
+    <div class="btns"><button class="b sm" data-act="mkNueva">➕ Crear enlace</button></div>
+    ${(K.campanas || []).map(c => `<div style="border-top:1px solid #e5e7eb;padding:6px 0;font-size:.9rem"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="flex:1">${{ creador: '🤝', grupo: '👥', anuncio: '💸' }[c.tipo] || '📌'} ${esc(c.nombre)}</b><span><b>${f(c.visitas)}</b> visitas</span><button class="b ghost sm" data-act="mkCopiar" data-t="${esc(c.link)}">📋 Enlace</button>${c.tipo === 'creador' ? ['es', 'en', 'pt'].map(l => `<button class="b ghost sm" data-act="mkCopiar" data-t="${esc((MSG?.[l] || '').replace('{nombre}', c.nombre.replace(/^creador\s+/i, '')).replace('{link}', c.link))}">✉️ ${l.toUpperCase()}</button>`).join('') : ''}<button class="b ghost sm" data-act="mkBorrar" data-id="${c.id}">🗑️</button></div><small class="hint">${esc(c.link)}</small></div>`).join('')}
+    <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">💸 ¿Y los anuncios pagados? (cuando llegues a la Fase 3)</summary><p class="hint">Empieza con 3–5 USD al día en Meta Ads (Facebook/Instagram), solo en el país que más juega, con un enlace de campaña tipo "anuncio". Después de 1 semana mira aquí cuántas visitas trajo y compáralo con lo que ganas en GamePix y AdSense por visita. Si gana más de lo que cuesta, súbelo poco a poco. Nunca compres "visitas" o "seguidores" baratos: son bots y te pueden quitar AdSense.</p></details></div>`;
+}
 function embajadorCard(E) {
   if (!E) return '';
   const k = E.kit, a = E.ajustes || {}, RED = { facebook: '📘 Facebook', tiktok: '🎵 TikTok / Reels / Shorts (descripción)', x: '𝕏 X (Twitter)', whatsapp: '💬 WhatsApp (estado, canal o grupos de amigos)' };
@@ -921,6 +938,9 @@ const ACT = {
   mdRe: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'reanalizar' }); render(); }),
   mdBorrar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
+  mkNueva: guard(async () => { MD = await api('/api/mando/campana', { nombre: $('#mk-n').value, tipo: $('#mk-t').value, destino: $('#mk-d').value }); toast('🔗 Enlace de campaña creado'); render(); }),
+  mkBorrar: guard(async el => { if (!confirm('¿Borrar esta campaña?')) return; MD = await api('/api/mando/campana', { borrar: el.dataset.id }); render(); }),
+  mkCopiar: el => navigator.clipboard.writeText(el.dataset.t).then(() => toast('📋 Copiado')),
   mdLang: el => { MDlang = el.dataset.l; render(); },
   mdCopiar: el => { const k = MD.embajador?.kit, [l, r] = el.dataset.k.split('.'), t = l === 'bio' ? k?.bio : k?.textos?.[l]?.[r]; if (t) navigator.clipboard.writeText(t).then(() => toast('📋 Copiado: pégalo en tu red')); },
   mdFB: guard(async () => { if (!confirm('¿Publicar ahora el post del día en tu página de Facebook?')) return; MD = await api('/api/mando/fb', {}); toast('📘 Publicado en tu página'); render(); }),

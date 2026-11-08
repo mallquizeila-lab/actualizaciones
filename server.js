@@ -370,6 +370,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/embajador' && P) { mando.ajustesEmbajador(await json(q)); return await mando.estado(); }
   if (u === '/api/mando/fb' && P) { await mando.publicarFB(); return await mando.estado(); }
   if (u === '/api/mando/short' && P) { await mando.shortYupitok(); return await mando.estado(); }
+  if (u === '/api/mando/campana' && P) { const o = await json(q); if (o.borrar) mando.borrarCampana(o.borrar); else mando.nuevaCampana(o); return await mando.estado(); }
   if (u === '/api/mando/ingreso' && P) { const o = await json(q); if (o.borrar) mando.borrarIngreso(o.borrar); else mando.ingreso(o); return await mando.estado(); }
   if (u === '/api/inspire') {
     const o = await json(q), ch = channel(o.channelId);
