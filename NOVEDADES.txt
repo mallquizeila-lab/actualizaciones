@@ -1,3 +1,15 @@
+v7.60.0 — 📝 6 guías nuevas para Google + el Creativo escribe guías (tú apruebas)
+- 📝 6 guías nuevas en yupitok.com/guias, escritas a mano para responder búsquedas reales:
+  · Trucos para ganar en 2048 (la estrategia de la esquina)
+  · Cómo jugar Buscaminas y ganar (números y patrones 1-1 y 1-2-1)
+  · Juegos para jugar con amigos online gratis
+  · Estrategia de Cuatro en Línea: 7 trucos
+  · Trivia bíblica: 15 preguntas y respuestas para jugar en familia
+  · Juegos educativos gratis por niveles (primaria, secundaria y universidad)
+  Ya son 11 guías, todas en el sitemap y avisadas a los buscadores.
+- ✍️ Nuevo en el Centro de Mando, "Creativo: guías para Google": escribes un tema (o eliges una de las ideas que te sugiere según los juegos más jugados) y el agente escribe el borrador con 1 consulta de IA. Tú lo lees ahí mismo y decides: ✅ Publicar, 🔁 Rehacer o 🗑️ Borrar. Nada se publica sin tu visto bueno.
+- 🛡️ Por seguridad, las guías solo aceptan texto simple y enlaces internos: se borra cualquier código, script o enlace raro.
+
 v7.59.0 — 📣 Agente de Marketing (el camino al millón) + Yupitok en 7 idiomas
 - 📣 Nuevo agente MARKETING en el Centro de Mando (sin IA, 0 créditos): el estratega encargado de traer las visitas.
   · Meta del mes con barra de progreso (1 mil → 10 mil → 100 mil → 1 millón → 10 millones) y cálculo de "a este ritmo llegas al millón en X semanas".

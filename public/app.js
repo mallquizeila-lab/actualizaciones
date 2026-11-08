@@ -373,6 +373,7 @@ VIEWS.mando = () => {
       ${l.info?.autor ? `<small class="hint">${esc(l.info.autor)}${l.info.vistas ? ' · ' + l.info.vistas.toLocaleString('es') + ' vistas' : ''}</small>` : ''}
       ${l.motivo ? `<p style="margin:4px 0;font-size:.9rem">${l.decision === 'armar' ? '✅' : 'ℹ️'} ${esc(l.motivo)}</p>` : ''}${l.idea ? `<p style="margin:4px 0;font-size:.9rem">💡 <b>Nuestra idea:</b> ${esc(l.idea)}${l.gancho ? ` · <i>"${esc(l.gancho)}"</i>` : ''}</p>` : ''}
       <div class="btns" style="margin-top:4px">${['decidido', 'dejado'].includes(l.estado) ? `<select data-mdcanal="${l.id}" style="width:auto">${chs.map(c => `<option value="${c.id}" ${c.id === l.canal ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select><button class="b sm" data-act="mdArmar" data-id="${l.id}">🎬 Armarlo</button>` : ''}${l.estado === 'decidido' && l.decision === 'armar' ? `<button class="b ghost sm" data-act="mdDejar" data-id="${l.id}">⏭️ Dejarlo</button>` : ''}${l.estado === 'error' ? `<button class="b ghost sm" data-act="mdRe" data-id="${l.id}">🔁 Reintentar</button>` : ''}<button class="b ghost sm" data-act="mdBorrar" data-id="${l.id}">🗑️</button></div></div>`).join('')}</div>` : ''}</div>
+  ${guiasCard(MD)}
   <div class="card"><h3>📊 Data</h3>
     <p><b>Página:</b> ${D.pagina?.encendida ? '🟢 encendida' : '🔴 apagada'} · túnel ${esc(D.pagina?.tunel || '?')} · total histórico ${(v.total || 0).toLocaleString('es')} visitas</p>
     ${(D.juegos || []).length ? `<p><b>🎮 Más visitados:</b> ${D.juegos.map(x => `${esc(x.game)} (${x.n})`).join(' · ')}</p>` : ''}
@@ -387,6 +388,18 @@ VIEWS.mando = () => {
   <div class="card"><h3>📨 Últimos reportes</h3>${(MD.reportes || []).length ? MD.reportes.map(r => `<details><summary>${esc(r.dia)}</summary><pre style="white-space:pre-wrap;font-size:.85rem">${esc(r.texto)}</pre></details>`).join('') : '<p class="hint">El primer reporte llega mañana a las 8 am (o aprieta "Generar reporte ahora").</p>'}</div>`;
 };
 let MDlang = 'es';
+function guiasCard(MD) {
+  const G = MD.guias || [], EST = { nuevo: '⏳ En cola', escribiendo: '✍️ Escribiendo…', borrador: '👀 Borrador: revísalo', publicada: '✅ Publicada', error: '⚠️ Error' };
+  return `<div class="card"><h3>📝 Creativo: guías para Google</h3><p class="hint">Cada guía es una página nueva que Google puede mostrar cuando alguien busca ese tema (ej: "trucos 2048"). El agente escribe el borrador (1 consulta de IA), <b>tú lo lees y decides</b> si se publica. Ya tienes 11 guías escritas por mí.</p>
+    <label>Tema de la guía<input id="gu-tema" maxlength="140" placeholder="Ej: Trucos para ganar en el gusanito"></label>
+    ${(MD.ideasGuias || []).length ? `<p class="hint" style="margin:4px 0">💡 Ideas: ${MD.ideasGuias.map(t => `<a href="#" data-act="guIdea" data-t="${esc(t)}">${esc(t)}</a>`).join(' · ')}</p>` : ''}
+    <div class="btns"><button class="b sm" data-act="guNueva">✍️ Escribir borrador</button></div>
+    ${G.map(g => `<div style="border-top:1px solid #e5e7eb;padding:8px 0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="flex:1">${esc(g.g?.emoji || '📝')} ${esc(g.g?.titulo || g.tema)}</b><small>${EST[g.estado] || g.estado}${g.palabras ? ` · ${g.palabras} palabras` : ''}</small></div>
+      ${g.motivo && g.estado === 'error' ? `<p class="hint" style="color:#b91c1c">${esc(g.motivo)}</p>` : ''}${g.g?.desc ? `<p class="hint" style="margin:2px 0">${esc(g.g.desc)}</p>` : ''}
+      ${g.estado === 'borrador' ? `<details><summary class="hint" style="cursor:pointer">👀 Leer el borrador</summary><iframe sandbox style="width:100%;height:380px;border:1px solid #e5e7eb;border-radius:8px;background:#fff" srcdoc="${esc('<meta charset=utf-8><style>body{font-family:system-ui;padding:10px 14px;line-height:1.55;color:#111}a{color:#7c3aed}</style><h1>' + esc(g.g.titulo) + '</h1>' + g.g.html)}"></iframe></details>` : ''}
+      ${g.url ? `<a href="${esc(g.url)}" target="_blank" rel="noopener" class="hint">${esc(g.url)} ↗</a>` : ''}
+      <div class="btns" style="margin-top:4px">${g.estado === 'borrador' ? `<button class="b sm" data-act="guPub" data-id="${g.id}">✅ Publicar en Yupitok</button>` : ''}${['borrador', 'error'].includes(g.estado) ? `<button class="b ghost sm" data-act="guRe" data-id="${g.id}">🔁 Rehacer</button>` : ''}<button class="b ghost sm" data-act="guBorrar" data-id="${g.id}">🗑️${g.estado === 'publicada' ? ' Quitar de la web' : ''}</button></div></div>`).join('')}</div>`;
+}
 function marketingCard(K, MSG) {
   if (!K) return '';
   const f = n => (n || 0).toLocaleString('es'), max = Math.max(1, ...(K.ranking || []).map(r => r.n));
@@ -938,6 +951,11 @@ const ACT = {
   mdRe: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'reanalizar' }); render(); }),
   mdBorrar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
+  guIdea: el => { const i = $('#gu-tema'); if (i) { i.value = el.dataset.t; i.focus(); } },
+  guNueva: guard(async () => { MD = await api('/api/mando/guia', { tema: $('#gu-tema').value }); toast('✍️ El Creativo está escribiendo tu guía (1–2 min)'); render(); }),
+  guPub: guard(async el => { if (!confirm('¿Ya leíste el borrador y quieres publicarlo en Yupitok?')) return; MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'publicar' }); toast('✅ Guía publicada: ' + (MD.url || '')); render(); }),
+  guRe: guard(async el => { MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'rehacer' }); render(); }),
+  guBorrar: guard(async el => { if (!confirm('¿Borrar esta guía?')) return; MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   mkNueva: guard(async () => { MD = await api('/api/mando/campana', { nombre: $('#mk-n').value, tipo: $('#mk-t').value, destino: $('#mk-d').value }); toast('🔗 Enlace de campaña creado'); render(); }),
   mkBorrar: guard(async el => { if (!confirm('¿Borrar esta campaña?')) return; MD = await api('/api/mando/campana', { borrar: el.dataset.id }); render(); }),
   mkCopiar: el => navigator.clipboard.writeText(el.dataset.t).then(() => toast('📋 Copiado')),
