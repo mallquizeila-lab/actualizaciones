@@ -1,3 +1,14 @@
+v7.58.0 — 🌍 Agente Embajador + Yupitok en inglés para todo el mundo
+- 🌍 Nuevo 5º agente en el Centro de Mando: el EMBAJADOR (sin IA, 0 créditos). Cada día te arma el "kit de difusión" listo para copiar y pegar en Facebook, TikTok/Reels/Shorts, X y WhatsApp, en ESPAÑOL, INGLÉS y PORTUGUÉS. Cambia de tema cada día: Salón de la Fama, torneo de la semana, top 3 más jugados, GLORY BROWN, juego estrella, reto de récord y juegos para la familia.
+- 🔗 Cada enlace dice de qué red llegó la visita (src=fb, x, whatsapp, bio), así el agente Data aprende qué red te trae más gente.
+- 📘 Opcional: publica solo el post del día en TU página de Facebook (API oficial), a la hora que elijas.
+- 🎬 Opcional: crea shorts propios de Yupitok (top de juegos, trivias, trucos de GLORY y Huerto) 2, 3 o 7 veces por semana.
+- 🎯 12 misiones para que el mundo te encuentre (Bing, Yandex, Pinterest, itch.io, Canal de WhatsApp, TikTok, Instagram…), con su enlace directo y casilla de "hecha".
+- 🌎 Consejo por país: te dice a qué hora (hora Perú) publicar según el país del que más te visitan.
+- 🇬🇧 Yupitok en inglés: nuevas páginas yupitok.com/en, /en/games, /en/games/<categoría> y una página en inglés para CADA juego (miles), con la descripción original, enlazadas con Google en ambos idiomas (hreflang) y en el sitemap. Así Yupitok puede salir en búsquedas de Estados Unidos, India, Filipinas, Europa y más.
+- 🔤 Al entrar desde una página en inglés (o con ?hl=en / ?hl=pt), toda la página se muestra en ese idioma.
+- 🐞 /glory ya no pierde de qué red llegó la visita.
+
 v7.57.0 — 🧭 Centro de Mando: 4 agentes que trabajan solos (y casi no gastan créditos)
 - 🧭 Nueva pestaña "Centro de Mando" en ShortForge con tus 4 agentes:
   · 📊 Data (sin IA): visitas, suscriptores, juegos más jugados, países y de dónde llega la gente.

@@ -6,6 +6,7 @@
   const NOMBRES = { es: 'Español', en: 'English', pt: 'Português', fr: 'Français', it: 'Italiano', de: 'Deutsch', ru: 'Русский', ja: '日本語', ko: '한국어', zh: '中文', id: 'Bahasa Indonesia', tr: 'Türkçe' };
   const BANDERA = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷', fr: '🇫🇷', it: '🇮🇹', de: '🇩🇪', ru: '🇷🇺', ja: '🇯🇵', ko: '🇰🇷', zh: '🇨🇳', id: '🇮🇩', tr: '🇹🇷' };
   let L = null; try { L = localStorage.getItem('lang'); } catch (e) {}
+  const HL = (/[?&]hl=([a-z]{2})\b/.exec(location.search) || [])[1]; if (HL && NOMBRES[HL]) { L = HL; try { localStorage.setItem('lang', HL); } catch (e) {} } // ?hl=en (enlaces de las páginas en inglés)
   // Los robots de Google (búsqueda y AdSense) y otros buscadores ven siempre la página original en español
   if (/bot|crawl|spider|slurp|Mediapartners|Google-|APIs-Google|AdsBot|facebookexternalhit|Lighthouse|Chrome-Lighthouse/i.test(navigator.userAgent)) L = 'es';
   if (!NOMBRES[L]) L = (navigator.languages || [navigator.language || 'es']).map(x => String(x).toLowerCase().slice(0, 2)).find(x => NOMBRES[x]) || 'es';

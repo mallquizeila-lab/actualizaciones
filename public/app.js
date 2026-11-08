@@ -355,11 +355,12 @@ VIEWS.mando = () => {
   const D = MD.datos || {}, v = D.visitas || {}, chs = S.channels || [];
   const EST = { nuevo: '⏳ En cola', analizando: '🔎 Analizando…', decidido: '', armado: '🎬 Armado (en producción)', dejado: '⏭️ Dejado', error: '⚠️ Error' };
   const kpi = (t, n, sub) => `<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:.8rem;opacity:.75">${t}</div><div style="font-size:1.6rem;font-weight:800">${n}</div>${sub ? `<div style="font-size:.75rem;opacity:.7">${sub}</div>` : ''}</div>`;
-  return `<h1>🧭 Centro de Mando</h1><p class="sub">Tus 4 agentes trabajan solos y casi no gastan créditos: 📊 Data, 🛠️ Guardián y 💰 Monetiza funcionan sin IA; 🎬 Creativo usa la IA solo para decidir y crear. Cada mañana (8 am) te mandan el reporte por Telegram.</p>
+  return `<h1>🧭 Centro de Mando</h1><p class="sub">Tus 5 agentes trabajan solos y casi no gastan créditos: 📊 Data, 🛠️ Guardián, 🌍 Embajador y 💰 Monetiza funcionan sin IA; 🎬 Creativo usa la IA solo para decidir y crear. Cada mañana (8 am) te mandan el reporte por Telegram.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0">${kpi('👀 Visitas ayer', v.ayer ?? '–')}${kpi('📅 Últimos 7 días', v.semana ?? '–', v.semanaAnterior ? `semana anterior: ${v.semanaAnterior}` : '')}${kpi('🔔 Suscriptores', D.subs?.activos ?? '–', D.subs?.hoy ? `+${D.subs.hoy} hoy` : '')}${kpi('🎬 Videos por revisar', D.videos?.revisar ?? '–')}${kpi('💰 Ingresos del mes', (D.ingresos?.total ?? 0) + ' USD')}</div>
   <div class="card"><h3>🛠️ Guardián</h3>${(D.alertas || []).length ? `<ul>${D.alertas.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '<p>✅ Todo en orden: página encendida, sin errores ni pendientes.</p>'}
     ${(D.consejos || []).length ? `<h3 style="margin-top:12px">💡 Consejos de los agentes</h3><ul>${D.consejos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
     <div class="btns"><button class="b sm" data-act="mdReporte">📨 Generar reporte ahora (y mandarlo a Telegram)</button></div></div>
+  ${embajadorCard(MD.embajador)}
   <div class="card"><h3>🎬 Creativo: bandeja de links de YouTube</h3><p class="hint">Pega el link de un video que te guste. El agente lo analiza y decide: <b>🎬 lo armo</b> (hace un video <b>100 % original</b> inspirado solo en la idea, para el canal que mejor encaje) o <b>⏭️ lo dejo</b> (te dice por qué). Nunca copia la historia, la voz ni las imágenes del otro video.</p>
     <label>Link de YouTube<input id="md-url" placeholder="https://youtube.com/shorts/... o https://youtu.be/..."></label>
     <label>Nota para el agente <small>(opcional: qué te gustó, para qué canal)</small><input id="md-nota" maxlength="500" placeholder="Ej: me gusta el reto del final, para el canal Yupitok"></label>
@@ -384,6 +385,23 @@ VIEWS.mando = () => {
     ${(MD.ingresos || []).slice(0, 10).map(x => `<div style="display:flex;gap:8px;font-size:.9rem;border-top:1px solid #e5e7eb;padding:4px 0"><span style="flex:1">${esc(x.fecha)} · ${esc(x.fuente)}</span><b>${x.monto.toFixed(2)} USD</b><button class="b ghost sm" data-act="mdIngBorrar" data-id="${x.id}">✕</button></div>`).join('')}</div>
   <div class="card"><h3>📨 Últimos reportes</h3>${(MD.reportes || []).length ? MD.reportes.map(r => `<details><summary>${esc(r.dia)}</summary><pre style="white-space:pre-wrap;font-size:.85rem">${esc(r.texto)}</pre></details>`).join('') : '<p class="hint">El primer reporte llega mañana a las 8 am (o aprieta "Generar reporte ahora").</p>'}</div>`;
 };
+let MDlang = 'es';
+function embajadorCard(E) {
+  if (!E) return '';
+  const k = E.kit, a = E.ajustes || {}, RED = { facebook: '📘 Facebook', tiktok: '🎵 TikTok / Reels / Shorts (descripción)', x: '𝕏 X (Twitter)', whatsapp: '💬 WhatsApp (estado, canal o grupos de amigos)' };
+  const hechas = (E.misiones || []).filter(m => m.hecha).length;
+  return `<div class="card"><h3>🌍 Embajador: trae gente de todo el mundo</h3><p class="hint">Cada día te prepara las publicaciones listas para copiar y pegar en tus redes, en <b>español, inglés y portugués</b>. Los enlaces dicen de qué red llegó cada visita, así el agente Data aprende qué funciona. Además, Yupitok ya tiene <b>páginas en inglés</b> (yupitok.com/en) para aparecer en Google de todo el mundo. Sin bots ni cuentas falsas: solo publicaciones tuyas, en tus redes.</p>
+    ${k ? `<p><b>📅 Kit de hoy:</b> ${esc(k.tema)}</p><div class="btns">${[['es', '🇪🇸 Español'], ['en', '🇬🇧 English'], ['pt', '🇧🇷 Português']].map(([l, n]) => `<button class="b sm ${MDlang === l ? '' : 'ghost'}" data-act="mdLang" data-l="${l}">${n}</button>`).join('')}</div>
+    ${Object.entries(k.textos[MDlang] || {}).map(([red, t]) => `<label style="margin-top:8px">${RED[red] || red}<textarea readonly rows="${Math.min(7, t.split('\n').length + 1)}" style="font-size:.88rem">${esc(t)}</textarea></label><button class="b ghost sm" data-act="mdCopiar" data-k="${MDlang}.${red}">📋 Copiar</button>`).join('')}
+    <p class="hint" style="margin-top:8px">🔗 Enlace para la bio de TikTok / Instagram: <b>${esc(k.bio)}</b> <button class="b ghost sm" data-act="mdCopiar" data-k="bio">📋</button></p>` : '<p class="hint">Enciende la página viral para que el Embajador arme el kit del día.</p>'}
+    <h4 style="margin:14px 0 6px">🤖 En automático</h4>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="emb-fb" style="width:auto" ${a.fbAuto ? 'checked' : ''} data-act-change="embAj"> Publicar el post del día en mi página de Facebook ${E.fb ? `(<b>${esc(E.fb)}</b>)` : '<small>(primero conecta Facebook en Ajustes → Publicación)</small>'} a las <input type="number" id="emb-hora" min="6" max="23" value="${a.hora}" style="width:70px" data-act-change="embAj"> h (Perú)</label>
+    <label>🎬 Shorts propios de Yupitok (top de juegos, trivias, trucos) <small>(usa un poco de IA por video)</small><select id="emb-sh" data-act-change="embAj">${[[0, 'Ninguno (yo los pido)'], [2, '2 por semana (mar y vie)'], [3, '3 por semana (lun, mié, vie)'], [7, '1 cada día']].map(([n, t]) => `<option value="${n}" ${a.shortsSemana === n ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <div class="btns"><button class="b sm" data-act="mdFB">📘 Publicar en Facebook ahora</button><button class="b ghost sm" data-act="mdShort">🎬 Crear un short de Yupitok ahora</button></div>
+    ${(E.historial || []).length ? `<p class="hint">Últimas: ${E.historial.slice(0, 5).map(h => `${h.red === 'facebook' ? '📘' : '🎬'} ${esc(h.at.slice(5, 10))} ${esc(h.tema)}`).join(' · ')}</p>` : ''}
+    <h4 style="margin:14px 0 6px">🎯 Misiones para que el mundo te encuentre (${hechas}/${(E.misiones || []).length})</h4>
+    ${(E.misiones || []).map(m => `<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:4px 0"><input type="checkbox" style="width:auto;margin-top:4px" ${m.hecha ? 'checked' : ''} data-act-change="embMision" data-id="${m.id}"><span style="${m.hecha ? 'opacity:.55;text-decoration:line-through' : ''}">${esc(m.txt)}${m.url ? ` · <a href="${esc(m.url)}" target="_blank" rel="noopener">abrir ↗</a>` : ''}</span></label>`).join('')}</div>`;
+}
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
   const v = VS || {};
@@ -903,6 +921,10 @@ const ACT = {
   mdRe: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'reanalizar' }); render(); }),
   mdBorrar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
+  mdLang: el => { MDlang = el.dataset.l; render(); },
+  mdCopiar: el => { const k = MD.embajador?.kit, [l, r] = el.dataset.k.split('.'), t = l === 'bio' ? k?.bio : k?.textos?.[l]?.[r]; if (t) navigator.clipboard.writeText(t).then(() => toast('📋 Copiado: pégalo en tu red')); },
+  mdFB: guard(async () => { if (!confirm('¿Publicar ahora el post del día en tu página de Facebook?')) return; MD = await api('/api/mando/fb', {}); toast('📘 Publicado en tu página'); render(); }),
+  mdShort: guard(async () => { MD = await api('/api/mando/short', {}); toast('🎬 Short de Yupitok en producción: míralo en Videos'); render(); }),
   mdIngBorrar: guard(async el => { if (!confirm('¿Borrar este ingreso?')) return; MD = await api('/api/mando/ingreso', { borrar: el.dataset.id }); render(); }),
   go: el => { tab = el.dataset.tab; store.set('tab', tab); render(); },
   filter: el => { filter = el.dataset.f; store.set('filter', filter); render(); },
@@ -1249,6 +1271,8 @@ document.addEventListener('change', guard(async e => {
   if (t.id === 'ds-files' && t.files.length) { await uploadDS([...t.files]); return; }
   if (t.id === 'chatFile' && t.files.length) { await subirAdj(t.files); t.value = ''; return; }
   if (t.id === 'vf-dest') { VS = await api('/api/viral/ajustes', { destacado: t.checked }); toast(t.checked ? 'Tu último video será el destacado' : 'Desactivado'); return; }
+  if (t.dataset.actChange === 'embAj') { if (t.id === 'emb-fb' && t.checked && !confirm('El Embajador publicará 1 post al día (el kit del día, en español) en tu página de Facebook. ¿Activar?')) { t.checked = false; return; } MD = await api('/api/mando/embajador', { fbAuto: $('#emb-fb').checked, hora: $('#emb-hora').value, shortsSemana: $('#emb-sh').value }); toast('🌍 Embajador actualizado'); render(); return; }
+  if (t.dataset.actChange === 'embMision') { MD = await api('/api/mando/mision', { id: t.dataset.id, hecha: t.checked }); if (t.checked) toast('🎯 ¡Misión cumplida!'); render(); return; }
   if (t.dataset.actChange === 'radarCh') { store.set('radarCh', t.value); render(); return; }
   if (t.dataset.actChange === 'hora') { await api('/api/job/action', { id: t.dataset.id, action: 'hora', hora: t.value }); toast('Hora cambiada (hora Perú)'); await refresh(true); return; }
   if (t.dataset.actChange === 'canal') {
