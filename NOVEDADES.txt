@@ -1,3 +1,11 @@
+v7.61.0 — 🎞️ Unir clips de IA en un solo video
+- 🎞️ Nuevo en "Reeditar mis videos": casilla "Unir todos los clips en UN solo video". Subes de 2 a 12 clips cortos (por ejemplo, los de 6–8 s que haces con una IA de video) y ShortForge:
+  · los une en orden por nombre (1, 2, 3…) con transiciones suaves y variadas;
+  · los deja verticales 9:16 en 1080x1920 (si alguno es horizontal, le pone fondo difuminado sin cortarlo);
+  · mira el video completo con la IA y le escribe un guion nuevo con voz, subtítulos karaoke, gancho, efectos, sonidos y el cierre de tu canal ("¡Juega gratis en yupitok.com!").
+- Si tus clips no tienen sonido, se usa solo el modo "Guion nuevo con voz nueva".
+- Te avisa por Telegram cuando terminó de unirlos.
+
 v7.60.0 — 📝 6 guías nuevas para Google + el Creativo escribe guías (tú apruebas)
 - 📝 6 guías nuevas en yupitok.com/guias, escritas a mano para responder búsquedas reales:
   · Trucos para ganar en 2048 (la estrategia de la esquina)

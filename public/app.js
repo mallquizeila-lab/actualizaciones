@@ -545,6 +545,7 @@ VIEWS.reeditar = () => {
   ${(() => { const pend = S.jobs.filter(j => j.kind === 'reedit' && j.vozPregunta === 'pendiente'); return pend.length ? `<div class="card"><h3>🎤 Voces encontradas en tus videos (${pend.length})</h3><p class="hint">Tú decides cuáles clonar. Las que se parecen a una que ya tienes vienen desmarcadas.</p>${pend.map(vozPropuesta).join('')}</div>` : ''; })()}
   <div class="card"><div class="row"><label>Canal<select id="re-ch" data-act-change="reCh">${chs.map(x => `<option value="${x.id}" ${x.id === c.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
   <label>Qué hacer con el audio<select id="re-mode"><option value="mejorar" ${(c.reeditMode || 'mejorar') === 'mejorar' ? 'selected' : ''}>Conservar mi audio y mejorar el video</option><option value="doblaje" ${c.reeditMode === 'doblaje' ? 'selected' : ''}>🎭 Dar voz a los personajes (doblaje; si ya tiene voces, las cambia)</option><option value="nueva_voz" ${c.reeditMode === 'nueva_voz' ? 'selected' : ''}>Guion nuevo con voz nueva (sobre mis imágenes)</option></select></label></div>
+  <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:8px 0"><input type="checkbox" id="re-unir" style="width:auto;margin-top:4px"><span><b>🎞️ Unir todos los clips en UN solo video</b> <small class="hint">(para clips cortos hechos con una IA de video, de 5–10 s cada uno: se unen en orden por nombre, 1, 2, 3…, con transiciones suaves; luego se les pone voz, subtítulos, efectos y el cierre de tu canal. Si tus clips no tienen sonido, se usa solo "Guion nuevo con voz nueva". Máx 12 clips.)</small></span></label>
   <div id="drop" class="drop">Arrastra aquí tus videos (puedes soltar varios a la vez)<br><small>o</small><br><input type="file" id="re-files" accept="video/*" multiple></div>
   <div id="re-prog" class="hint"></div>
   <ul class="check" style="list-style:none;padding:0;margin-top:14px;font-size:14px">
@@ -810,7 +811,21 @@ async function saveChannel(close) {
 
 // Subida de videos propios con barra de progreso (uno por uno).
 async function uploadVideos(files) {
-  const ch = $('#re-ch').value, mode = $('#re-mode').value, out = $('#re-prog');
+  const ch = $('#re-ch').value, out = $('#re-prog'); let mode = $('#re-mode').value;
+  if ($('#re-unir')?.checked && files.length > 1) { if (mode === 'mejorar') mode = 'nueva_voz'; // 🎞️ todos los clips → un solo video
+    if (files.length > 12) throw new Error('Máximo 12 clips por video');
+    const L = [...files].sort((a, b) => a.name.localeCompare(b.name, 'es', { numeric: true })), grupo = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+    for (const [i, f] of L.entries()) await new Promise((ok, no) => {
+      const x = new XMLHttpRequest();
+      x.open('POST', '/api/reedit/upload?' + new URLSearchParams({ channel: ch, mode, name: f.name, grupo, parte: i, total: L.length }));
+      x.setRequestHeader('x-sf', '1');
+      x.upload.onprogress = e => { out.textContent = `Subiendo clip ${i + 1} de ${L.length}: ${f.name} (${Math.round(e.loaded / e.total * 100)}%)`; };
+      x.onload = () => { const j = JSON.parse(x.responseText || '{}'); if (x.status >= 400 || j.error) no(new Error(j.error || 'Error')); else ok(j); };
+      x.onerror = () => no(new Error('No se pudo subir ' + f.name)); x.send(f);
+    });
+    out.textContent = `🎞️ Uniendo ${L.length} clips en un solo video (1–2 minutos). Cuando termine aparece aquí abajo y se reedita solo.`;
+    setTimeout(() => refresh(true), 60000); return;
+  }
   for (const [i, f] of files.entries()) {
     await new Promise((ok, no) => {
       const x = new XMLHttpRequest();

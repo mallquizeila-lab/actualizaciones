@@ -397,6 +397,21 @@ async function api(u, q, U, r) {
     const w = fs.createWriteStream(tmp); let n = 0;
     for await (const x of q) { n += x.length; if (n > 2e9) { w.destroy(); fs.rmSync(tmp, { force: true }); throw new Error('Video demasiado grande'); } w.write(x); }
     await new Promise(r => w.end(r));
+    // 🎞️ Varios clips que se unen en un solo video: se guardan juntos y, al llegar el último, se unen y entran a Reeditar.
+    const grupo = U.searchParams.get('grupo') || '', parte = +U.searchParams.get('parte'), total = +U.searchParams.get('total');
+    if (grupo) {
+      if (!/^[a-z0-9]{6,24}$/.test(grupo) || !(total >= 2 && total <= 12) || !(parte >= 0 && parte < total)) { fs.rmSync(tmp, { force: true }); throw new Error('Grupo de clips no válido'); }
+      const gdir = path.join(DATA, 'cache', 'grupo-' + grupo); fs.mkdirSync(gdir, { recursive: true });
+      fs.renameSync(tmp, path.join(gdir, String(parte).padStart(2, '0') + path.extname(name).toLowerCase()));
+      const partes = fs.readdirSync(gdir).filter(f => /^\d\d\./.test(f)).sort();
+      if (partes.length < total) return { ok: 1, esperando: total - partes.length };
+      const out = path.join(DATA, 'cache', 'montaje-' + grupo + '.mp4'), modo = U.searchParams.get('mode') || 'nueva_voz';
+      require('./lib/unir').unirClips(partes.map(f => path.join(gdir, f)), out)
+        .then(r => { worker.addOwnVideo(ch, out, { name: (U.searchParams.get('titulo') || `Montaje de ${r.clips} clips`).slice(0, 80) + '.mp4', mode: modo }); require('./lib/avisos').avisar?.(`🎞️ Uní ${r.clips} clips en un video de ${Math.round(r.duracion)} s. Ya está en Reeditar.`); })
+        .catch(e => { console.log('[Unir clips] ' + e.message); try { require('./lib/avisos').avisar?.('⚠️ No pude unir los clips: ' + e.message); } catch (x) {} })
+        .finally(() => fs.rmSync(gdir, { recursive: true, force: true }));
+      return { ok: 1, uniendo: total };
+    }
     const j = worker.addOwnVideo(ch, tmp, { name, mode: U.searchParams.get('mode') || undefined });
     return { ok: 1, id: j.id, publishDate: j.publishDate };
   }
