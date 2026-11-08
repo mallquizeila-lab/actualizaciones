@@ -13,6 +13,7 @@ const publish = require('./lib/publish');
 const comments = require('./lib/comments');
 const cerebro = require('./lib/cerebro');
 const avisos = require('./lib/avisos');
+const mando = require('./lib/mando');
 const desarmar = require('./lib/desarmar');
 const salud = require('./lib/salud');
 const actualizar = require('./lib/actualizar');
@@ -301,6 +302,7 @@ async function api(u, q, U, r) {
   if (u === '/api/brain') return { canales: cerebro.resumen(), state: cerebro.state, telegram: { bot: !!E.TELEGRAM_BOT_TOKEN, chat: !!E.TELEGRAM_CHAT_ID }, lastBackup: db.settings.lastBackup || null };
   // Miniaturas de los archivos del asistente (se piden con <img>).
   if (u === '/api/chat/adjunto' && !P) { const f = require('./lib/adjuntos').imagen(U.searchParams.get('id')); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': 'image/jpeg', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
+  if (u === '/api/mando') return await mando.estado();
   if (!P) return null;
   if (!q.headers['x-sf']) throw Object.assign(new Error('Prohibido'), { code: 403 });
 
@@ -360,6 +362,11 @@ async function api(u, q, U, r) {
     return { ok: 1, n };
   }
   if (u === '/api/job/action') return jobAction(await json(q));
+  // 🧭 Centro de Mando (4 agentes, bandeja de links de YouTube, ingresos y reporte diario)
+  if (u === '/api/mando/reporte' && P) return await mando.reporte(true);
+  if (u === '/api/mando/link' && P) { const o = await json(q); mando.nuevoLink(o); return await mando.estado(); }
+  if (u === '/api/mando/link/accion' && P) { await mando.accionLink(await json(q)); return await mando.estado(); }
+  if (u === '/api/mando/ingreso' && P) { const o = await json(q); if (o.borrar) mando.borrarIngreso(o.borrar); else mando.ingreso(o); return await mando.estado(); }
   if (u === '/api/inspire') {
     const o = await json(q), ch = channel(o.channelId);
     if (!ch) throw new Error('Elige un canal');
@@ -514,7 +521,7 @@ http.createServer(async (q, r) => {
   publish.start();
   comments.start();
   cerebro.start();
-  avisos.start();
+  avisos.start(); mando.start();
   salud.start();
   actualizar.start();
   require('./lib/crecer').start();

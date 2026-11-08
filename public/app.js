@@ -82,6 +82,7 @@ async function refresh(force) {
   sig = s2;
   if (tab === 'desarmar' && Date.now() - DSt > 5000 && (DS || []).some(d => !['listo', 'error'].includes(d.estado))) loadDS().catch(() => {});
   if (tab === 'estadisticas' && Date.now() - BRt > 30000) loadBrain(true).catch(() => {});
+  if (tab === 'mando' && Date.now() - MDt > 15000) loadMando().catch(() => {});
   if (tab === 'viral' && Date.now() - VSt > 5000 && document.activeElement?.tagName !== 'INPUT') loadViral().catch(() => {});
   if (Date.now() - CMt > (tab === 'comentarios' ? 15000 : 120000)) loadComments().catch(() => {});
   document.querySelectorAll('[data-log]').forEach(el => { const j = S.jobs.find(x => x.id === el.dataset.log); if (j) { el.innerHTML = j.log.map(esc).join('<br>'); el.scrollTop = 1e6; } });
@@ -344,6 +345,45 @@ function viralTop() {
       ${v.arteGlory?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.arteGlory.error)}</p>` : ''}</div>
     <details style="margin-top:8px"><summary class="hint">Registro</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:180px;overflow:auto">${esc((v.log || []).join('\n'))}</pre></details>`;
 }
+// ---------- 🧭 Centro de Mando ----------
+let MD = null, MDt = 0, MDcargando = false;
+async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
+VIEWS.mando = () => {
+  if (!MD || Date.now() - MDt > 15000) loadMando().catch(() => {});
+  if (!MD) return '<h1>🧭 Centro de Mando</h1><p class="sub">Cargando a los agentes…</p>';
+  if (MD.error) return `<h1>🧭 Centro de Mando</h1><p class="hint" style="color:#b91c1c">${esc(MD.error)}</p>`;
+  const D = MD.datos || {}, v = D.visitas || {}, chs = S.channels || [];
+  const EST = { nuevo: '⏳ En cola', analizando: '🔎 Analizando…', decidido: '', armado: '🎬 Armado (en producción)', dejado: '⏭️ Dejado', error: '⚠️ Error' };
+  const kpi = (t, n, sub) => `<div class="card" style="margin:0;padding:12px;text-align:center"><div style="font-size:.8rem;opacity:.75">${t}</div><div style="font-size:1.6rem;font-weight:800">${n}</div>${sub ? `<div style="font-size:.75rem;opacity:.7">${sub}</div>` : ''}</div>`;
+  return `<h1>🧭 Centro de Mando</h1><p class="sub">Tus 4 agentes trabajan solos y casi no gastan créditos: 📊 Data, 🛠️ Guardián y 💰 Monetiza funcionan sin IA; 🎬 Creativo usa la IA solo para decidir y crear. Cada mañana (8 am) te mandan el reporte por Telegram.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0">${kpi('👀 Visitas ayer', v.ayer ?? '–')}${kpi('📅 Últimos 7 días', v.semana ?? '–', v.semanaAnterior ? `semana anterior: ${v.semanaAnterior}` : '')}${kpi('🔔 Suscriptores', D.subs?.activos ?? '–', D.subs?.hoy ? `+${D.subs.hoy} hoy` : '')}${kpi('🎬 Videos por revisar', D.videos?.revisar ?? '–')}${kpi('💰 Ingresos del mes', (D.ingresos?.total ?? 0) + ' USD')}</div>
+  <div class="card"><h3>🛠️ Guardián</h3>${(D.alertas || []).length ? `<ul>${D.alertas.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '<p>✅ Todo en orden: página encendida, sin errores ni pendientes.</p>'}
+    ${(D.consejos || []).length ? `<h3 style="margin-top:12px">💡 Consejos de los agentes</h3><ul>${D.consejos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
+    <div class="btns"><button class="b sm" data-act="mdReporte">📨 Generar reporte ahora (y mandarlo a Telegram)</button></div></div>
+  <div class="card"><h3>🎬 Creativo: bandeja de links de YouTube</h3><p class="hint">Pega el link de un video que te guste. El agente lo analiza y decide: <b>🎬 lo armo</b> (hace un video <b>100 % original</b> inspirado solo en la idea, para el canal que mejor encaje) o <b>⏭️ lo dejo</b> (te dice por qué). Nunca copia la historia, la voz ni las imágenes del otro video.</p>
+    <label>Link de YouTube<input id="md-url" placeholder="https://youtube.com/shorts/... o https://youtu.be/..."></label>
+    <label>Nota para el agente <small>(opcional: qué te gustó, para qué canal)</small><input id="md-nota" maxlength="500" placeholder="Ej: me gusta el reto del final, para el canal Yupitok"></label>
+    <details style="margin:6px 0"><summary class="hint" style="cursor:pointer">➕ Pegar la transcripción (opcional, mejora mucho el resultado)</summary><textarea id="md-tr" rows="4" placeholder="En YouTube: ⋯ → Mostrar transcripción → copia el texto aquí"></textarea></details>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="md-auto" style="width:auto" checked> Si decide "lo armo", que empiece a producirlo solo</label>
+    <div class="btns"><button class="b" data-act="mdLink">🎬 Enviar al agente Creativo</button></div>
+    ${(MD.links || []).length ? `<div style="margin-top:10px">${MD.links.map(l => `<div style="border-top:1px solid #e5e7eb;padding:8px 0">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-weight:700">${esc(l.info?.titulo || l.url)}</a><small>${l.estado === 'decidido' ? (l.decision === 'armar' ? '🎬 Propone armarlo' : '⏭️ Propone dejarlo') : EST[l.estado] || l.estado}</small></div>
+      ${l.info?.autor ? `<small class="hint">${esc(l.info.autor)}${l.info.vistas ? ' · ' + l.info.vistas.toLocaleString('es') + ' vistas' : ''}</small>` : ''}
+      ${l.motivo ? `<p style="margin:4px 0;font-size:.9rem">${l.decision === 'armar' ? '✅' : 'ℹ️'} ${esc(l.motivo)}</p>` : ''}${l.idea ? `<p style="margin:4px 0;font-size:.9rem">💡 <b>Nuestra idea:</b> ${esc(l.idea)}${l.gancho ? ` · <i>"${esc(l.gancho)}"</i>` : ''}</p>` : ''}
+      <div class="btns" style="margin-top:4px">${['decidido', 'dejado'].includes(l.estado) ? `<select data-mdcanal="${l.id}" style="width:auto">${chs.map(c => `<option value="${c.id}" ${c.id === l.canal ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select><button class="b sm" data-act="mdArmar" data-id="${l.id}">🎬 Armarlo</button>` : ''}${l.estado === 'decidido' && l.decision === 'armar' ? `<button class="b ghost sm" data-act="mdDejar" data-id="${l.id}">⏭️ Dejarlo</button>` : ''}${l.estado === 'error' ? `<button class="b ghost sm" data-act="mdRe" data-id="${l.id}">🔁 Reintentar</button>` : ''}<button class="b ghost sm" data-act="mdBorrar" data-id="${l.id}">🗑️</button></div></div>`).join('')}</div>` : ''}</div>
+  <div class="card"><h3>📊 Data</h3>
+    <p><b>Página:</b> ${D.pagina?.encendida ? '🟢 encendida' : '🔴 apagada'} · túnel ${esc(D.pagina?.tunel || '?')} · total histórico ${(v.total || 0).toLocaleString('es')} visitas</p>
+    ${(D.juegos || []).length ? `<p><b>🎮 Más visitados:</b> ${D.juegos.map(x => `${esc(x.game)} (${x.n})`).join(' · ')}</p>` : ''}
+    ${(D.fuentes || []).length ? `<p><b>🚪 De dónde llegan:</b> ${D.fuentes.map(x => `${esc(x.source || 'directo')} (${x.n})`).join(' · ')}</p>` : ''}
+    ${(D.paises || []).length ? `<p><b>🌎 Países:</b> ${D.paises.map(x => `${esc(x.pais)} (${x.visitas})`).join(' · ')}</p>` : ''}
+    ${(D.canales || []).length ? `<p><b>📺 Canales:</b> ${D.canales.map(c => `${esc(c.nombre)}${c.subs != null ? ` · ${c.subs} subs` : ''}${c.vistas90 ? ` · ${c.vistas90.toLocaleString('es')} vistas (90 d)` : ''}`).join(' | ')}</p>` : ''}</div>
+  <div class="card"><h3>💰 Monetiza: tus ingresos</h3><p class="hint">Anota lo que ganas (míralo en GamePix → Reports, AdSense → Pagos, Yape, etc.). Así el agente sigue cómo crece el negocio y te da consejos.</p>
+    <div class="row"><label>Fuente<select id="md-fu"><option>GamePix</option><option>AdSense</option><option>Apoyos / Yape</option><option>YouTube</option><option>Facebook</option><option>Patrocinador</option><option>Otro</option></select></label><label>Monto (USD)<input id="md-mo" type="number" step="0.01" min="0"></label><label>Fecha<input id="md-fe" type="date" value="${today()}"></label></div>
+    <div class="btns"><button class="b sm" data-act="mdIngreso">➕ Anotar ingreso</button></div>
+    ${D.ingresos?.total ? `<p><b>Este mes:</b> ${D.ingresos.total} USD · ${Object.entries(D.ingresos.porFuente || {}).map(([k, n]) => `${esc(k)}: ${n.toFixed(2)}`).join(' · ')}</p>` : ''}
+    ${(MD.ingresos || []).slice(0, 10).map(x => `<div style="display:flex;gap:8px;font-size:.9rem;border-top:1px solid #e5e7eb;padding:4px 0"><span style="flex:1">${esc(x.fecha)} · ${esc(x.fuente)}</span><b>${x.monto.toFixed(2)} USD</b><button class="b ghost sm" data-act="mdIngBorrar" data-id="${x.id}">✕</button></div>`).join('')}</div>
+  <div class="card"><h3>📨 Últimos reportes</h3>${(MD.reportes || []).length ? MD.reportes.map(r => `<details><summary>${esc(r.dia)}</summary><pre style="white-space:pre-wrap;font-size:.85rem">${esc(r.texto)}</pre></details>`).join('') : '<p class="hint">El primer reporte llega mañana a las 8 am (o aprieta "Generar reporte ahora").</p>'}</div>`;
+};
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
   const v = VS || {};
@@ -856,6 +896,14 @@ VIEWS.comentarios = () => {
 };
 
 const ACT = {
+  mdReporte: guard(async () => { await api('/api/mando/reporte', {}); MD = await api('/api/mando'); toast('📨 Reporte generado y enviado a Telegram'); render(); }),
+  mdLink: guard(async () => { const url = $('#md-url').value.trim(); if (!url) throw new Error('Pega un link de YouTube'); MD = await api('/api/mando/link', { url, nota: $('#md-nota').value, transcripcion: $('#md-tr').value, auto: $('#md-auto').checked }); MDt = Date.now(); toast('🎬 El agente Creativo lo está analizando…'); render(); }),
+  mdArmar: guard(async el => { const c = document.querySelector(`[data-mdcanal="${el.dataset.id}"]`)?.value; MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'armar', canal: c }); toast('🎬 ¡A producir! Lo verás en Videos'); render(); }),
+  mdDejar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'dejar' }); render(); }),
+  mdRe: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'reanalizar' }); render(); }),
+  mdBorrar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'borrar' }); render(); }),
+  mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
+  mdIngBorrar: guard(async el => { if (!confirm('¿Borrar este ingreso?')) return; MD = await api('/api/mando/ingreso', { borrar: el.dataset.id }); render(); }),
   go: el => { tab = el.dataset.tab; store.set('tab', tab); render(); },
   filter: el => { filter = el.dataset.f; store.set('filter', filter); render(); },
   plan: guard(async el => { const r = await api('/api/plan', { date: el.dataset.date }); toast(r.n ? `${r.n} videos agregados a la cola` : 'Ya hay videos para ese día (o no hay canales activos)'); await refresh(true); }),

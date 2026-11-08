@@ -1,3 +1,11 @@
+v7.57.0 — 🧭 Centro de Mando: 4 agentes que trabajan solos (y casi no gastan créditos)
+- 🧭 Nueva pestaña "Centro de Mando" en ShortForge con tus 4 agentes:
+  · 📊 Data (sin IA): visitas, suscriptores, juegos más jugados, países y de dónde llega la gente.
+  · 🛠️ Guardián (sin IA): avisa si la página o el túnel se caen, si hay juegos con errores, juegos reportados, fotos o redes de campeones por aprobar, y videos fallidos.
+  · 💰 Monetiza (sin IA): anota tus ingresos (GamePix, AdSense, apoyos) y ve el total del mes.
+  · 🎬 Creativo (usa IA solo para decidir): bandeja de links de YouTube. Pegas un link y decide "🎬 lo armo" (hace un video 100 % original inspirado solo en la idea, para el canal que mejor encaje) o "⏭️ lo dejo" (te dice por qué). Puedes forzar Armar o Dejar tú mismo.
+- 📨 Reporte diario: cada mañana a las 8 am te llega el resumen por Telegram (o apriétalo cuando quieras).
+
 v7.56.0 — SEO a fondo: categorías, IndexNow y más señales para Google
 - 🕹️ Nuevas páginas por categoría (yupitok.com/juegos y yupitok.com/juegos/carreras, /disparos, /rompecabezas, /deportes, /estrategia…): cada una con su texto propio en español, los juegos más jugados primero y enlaces a cada juego. Apuntan a búsquedas muy comunes como "juegos de carreras gratis". Todas entran solas al sitemap.
 - 📣 IndexNow: una vez al día tu página avisa sola a Bing, Yandex y otros buscadores de las páginas nuevas, para que las encuentren mucho más rápido.
