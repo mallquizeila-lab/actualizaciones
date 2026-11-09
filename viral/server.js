@@ -467,6 +467,19 @@ function ycDar(perfil, monto, motivo, ip, cat = 'juego') { // devuelve cuántas 
 }
 function ycGastar(perfil, monto, motivo, ip) { monto = Math.floor(+monto) || 0; if (monto <= 0 || ycSaldo(perfil) < monto) return false; run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'gastado',?,?,?)", perfil, -monto, motivo, ipCorta(ip || '')); return true; }
 const ycEstado = perfil => { const C = YC(); return { saldo: ycSaldo(perfil), hoy: ycHoyJuego('perfil', perfil), tope: C.topeDia, valorUsd: C.valorUsd }; };
+// 📺 Yupitok TV: listas y videos de YouTube que elige el dueño (reproductor oficial de YouTube, contenido legal)
+function tvParse(texto) {
+  const out = [];
+  for (const l of String(texto || '').split(/\r?\n/)) {
+    const [a, b] = l.includes('|') ? l.split('|') : ['', l], u = (b || '').trim(), t = clip(textoP(a).trim(), 60); if (!u) continue;
+    let m;
+    if ((m = /[?&]list=([A-Za-z0-9_-]{10,64})/.exec(u))) out.push({ t: t || 'Lista', k: 'l', id: m[1] });
+    else if ((m = /youtube\.com\/channel\/UC([A-Za-z0-9_-]{22})/.exec(u))) out.push({ t: t || 'Canal', k: 'l', id: 'UU' + m[1] });
+    else if ((m = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/.exec(u))) out.push({ t: t || 'Video', k: 'v', id: m[1] });
+    if (out.length >= 40) break;
+  }
+  return out;
+}
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
 // ---------- 👑 Campeones del mes (por juego; el top 3 puede mostrar su red social, aprobada por el dueño) ----------
@@ -735,7 +748,7 @@ async function api(req, res, u) {
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
     const subs = q1('select count(*) n from subscribers where active=1').n;
-    return send(res, 200, { horaFeliz: (({ activa, fin, extra, desde, hasta, diaNombre, on }) => ({ activa, fin, extra, desde, hasta, diaNombre, on }))(horaFeliz()), pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, login: getS('login', {}), marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    const TV = getS('tv', {}); return send(res, 200, { tv: TV.on && TV.listas?.length ? TV.listas : null, horaFeliz: (({ activa, fin, extra, desde, hasta, diaNombre, on }) => ({ activa, fin, extra, desde, hasta, diaNombre, on }))(horaFeliz()), pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, login: getS('login', {}), marca: getS('marca', { nombre: '', eslogan: '' }), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/visit' && P) {
     const b = await json(req);
@@ -1024,6 +1037,7 @@ async function api(req, res, u) {
         if (b.rachaAviso) setS('rachaAviso', { on: !!b.rachaAviso.on, hora: /^\d\d:\d\d$/.test(b.rachaAviso.hora) ? b.rachaAviso.hora : '19:00' });
         if (b.horaFeliz) { const h = b.horaFeliz, ok = x => /^\d\d:\d\d$/.test(x); setS('horaFeliz', { on: !!h.on, dia: Math.max(0, Math.min(6, +h.dia || 0)), desde: ok(h.desde) ? h.desde : '20:00', hasta: ok(h.hasta) ? h.hasta : '21:00', extra: Math.max(5, Math.min(100, +h.extra || 20)), aviso: h.aviso !== false }); }
         if (b.famaDias !== undefined) setS('famaDias', +b.famaDias === 7 ? 7 : 0);
+        if (b.tv) { const listas = tvParse(b.tv.texto); setS('tv', { on: !!b.tv.on, texto: clip(String(b.tv.texto || ''), 6000), listas }); }
         if (b.juegoDia) setS('juegoDia', { on: !!b.juegoDia.on, hora: /^\d\d:\d\d$/.test(b.juegoDia.hora) ? b.juegoDia.hora : '19:30' });
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
@@ -1034,7 +1048,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), campeonesAviso: getS('campeonesAviso', true), famaDias: getS('famaDias', 0), rachaAviso: getS('rachaAviso', { on: true, hora: '19:00' }), horaFeliz: getS('horaFeliz', { on: true, dia: 6, desde: '20:00', hasta: '21:00', extra: 20, aviso: true }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), tv: getS('tv', { on: false, texto: '', listas: [] }), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), campeonesAviso: getS('campeonesAviso', true), famaDias: getS('famaDias', 0), rachaAviso: getS('rachaAviso', { on: true, hora: '19:00' }), horaFeliz: getS('horaFeliz', { on: true, dia: 6, desde: '20:00', hasta: '21:00', extra: 20, aviso: true }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });

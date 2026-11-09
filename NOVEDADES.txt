@@ -1,3 +1,10 @@
+v7.68.0 — 📺 Yupitok TV
+- 📺 Nueva sección "Yupitok TV": series, videos y canales para ver sin salir de Yupitok. Aparece como un banner en la portada (y con el enlace yupitok.com/?tv=1).
+- 🎮 Botón "Jugar mientras miro": el video pasa a una ventanita en la esquina que sigue sonando mientras juegas. Desde ahí puedes agrandarla, ver más videos o cerrarla.
+- 🛠️ Tú eliges qué se ve: en el panel de la página → Ajustes → "📺 Yupitok TV", una línea por cada lista: "Título | enlace de YouTube". Sirven listas (list=), videos y canales (youtube.com/channel/UC… muestra todos sus videos subidos, ideal para tu propio canal de Yupitok).
+- ✅ Solo contenido legal: usa el reproductor oficial de YouTube (sin cookies de seguimiento). Pon solo videos públicos que permitan insertarse; nada de películas copiadas.
+- 🏆 El banner del torneo muestra también los Yupicoins del premio (+30, +20, +10 💎).
+
 v7.67.0 — 💎 Yupicoins: máximo 30 al día jugando
 - 💎 Ahora hay dos monedas:
   · 🪙 Monedas: como siempre, se ganan jugando sin límite y sirven dentro de los juegos (movimientos extra, cartas de GLORY, gorros). No valen dinero.

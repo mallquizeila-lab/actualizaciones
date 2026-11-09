@@ -1005,7 +1005,7 @@ setTimeout(() => post('/api/campeon/yo', { uid: VID }).then(d => { if (!d?.lista
 let TORNEO = null; const pintarTorneo = () => { const h = document.getElementById('hub'); if (!h || !TORNEO || h.querySelector('#hubTorneo')) return;
   const t = TESTS.find(x => x.id === 'arcade-' + TORNEO.juego); if (!t) return; const dias = Math.max(0, Math.ceil((TORNEO.termina - Date.now()) / 864e5));
   const html = `<div id="hubTorneo" class="card" style="grid-column:1/-1;padding:12px;border-color:rgba(255,210,63,.5);background:linear-gradient(135deg,rgba(120,53,15,.55),rgba(14,11,40,.85))"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:1.05rem">🏆 Torneo de la semana: ${t.e} ${escH(t.t)}</b><small style="white-space:nowrap">⏳ ${dias <= 1 ? '¡Último día!' : `quedan ${dias} días`}</small></div>
-    <p class="sub" style="text-align:left;margin:4px 0 8px">Gratis para todos. Premios: 🥇 ${TORNEO.premios[0]} 🪙 · 🥈 ${TORNEO.premios[1]} 🪙 · 🥉 ${TORNEO.premios[2]} 🪙${TORNEO.patrocinador ? `<br>🎁 Premio especial: <b>${escH(TORNEO.patrocinador)}</b>` : ''}</p>
+    <p class="sub" style="text-align:left;margin:4px 0 8px">Gratis para todos. Premios: 🥇 ${TORNEO.premios[0]} 🪙 + 30 💎 · 🥈 ${TORNEO.premios[1]} 🪙 + 20 💎 · 🥉 ${TORNEO.premios[2]} 🪙 + 10 💎${TORNEO.patrocinador ? `<br>🎁 Premio especial: <b>${escH(TORNEO.patrocinador)}</b>` : ''}</p>
     ${TORNEO.top.slice(0, 3).map((x, i) => `<div class="dato"><span style="display:flex;gap:6px;align-items:center">${['🥇', '🥈', '🥉'][i]} ${avImg(x.avatar, 22)} ${escH(x.nombre)}</span><b>${x.puntos}</b></div>`).join('') || '<p class="sub" style="text-align:left">Nadie ha jugado todavía. ¡Sé el primero!</p>'}
     ${TORNEO.yo ? `<p class="sub" style="text-align:left;margin:6px 0 0">Tu mejor puntaje: <b>${TORNEO.yo.puntos}</b> · puesto <b>#${TORNEO.yo.puesto}</b></p>` : ''}
     <button class="btn" data-g="arcade-${TORNEO.juego}" style="margin-top:10px">▶ Jugar el torneo</button><a href="/campeones" style="display:block;text-align:center;margin-top:8px;color:inherit;font-weight:700">👑 Ver el Salón de la Fama →</a></div>`;
@@ -1038,7 +1038,7 @@ setTimeout(() => { if (appInstalada() && !LS.get('appPremio') && window.PERFIL) 
 const pintarApp = () => { const h = document.getElementById('hub'); if (!h || appInstalada() || h.querySelector('[data-app]') || +(LS.get('appNoHasta') || 0) > Date.now()) return;
   const html = `<button class="joyban" data-app="1" onclick="instalarApp()" style="grid-column:1/-1;background:linear-gradient(120deg,#0ea5e9,#6366f1 55%,#a855f7);box-shadow:0 10px 30px rgba(99,102,241,.35)"><img src="/brand/mascota-128.webp" alt="" width="58" height="58" style="width:58px;height:58px;border-radius:16px;flex:0 0 58px;box-shadow:0 0 14px rgba(255,255,255,.35)"><div><b>Instala Yupitok gratis · +100 🪙</b><small>Ábrelo como app desde tu pantalla de inicio, con un toque.</small></div></button>`;
   const ref = h.querySelector('#hubTop') || [...h.querySelectorAll('[data-pd],[data-camp]')].pop(); if (ref) ref.insertAdjacentHTML('afterend', html); else h.insertAdjacentHTML('afterbegin', html); };
-{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
+{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTV(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
   try { if (PERFIL.diarioPendiente()) { const h = document.getElementById('hub'); if (h && !h.querySelector('[data-pd]')) h.insertAdjacentHTML('afterbegin', `<button class="joyban" data-pd="1" onclick="premioDiario()" style="grid-column:1/-1;background:linear-gradient(120deg,#f59e0b,#ef4444 55%,#a21caf);box-shadow:0 10px 30px rgba(245,158,11,.35)"><span>🎁</span><div><b>¡Tu premio diario te espera!</b><small>Día ${PERFIL.diaSiguiente() > 7 ? ((PERFIL.diaSiguiente() - 1) % 7) + 1 : PERFIL.diaSiguiente()} de 7 · toca para reclamar</small></div></button>`); }
     if (!window.__pdVisto && PERFIL.diarioPendiente() && LS.get('consent') && !/[?&]g=/.test(location.search) && !location.pathname.startsWith('/juego/')) { window.__pdVisto = 1; setTimeout(() => { if (!$('#home').hidden) premioDiario(); }, 1500); } } catch (e) {} }; }
 </script>
@@ -1052,6 +1052,34 @@ const pintarApp = () => { const h = document.getElementById('hub'); if (!h || ap
 })();
 // 🕹️ Página propia de un juego (/juego/...): botón "Jugar ahora"
 if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.onclick = async () => { if (!(await pedirPermiso())) return toast('Sin tu permiso no podemos mostrarte el juego 🙏'); show('play'); JUEGO.proAbrir(window.JUEGO_SEO, () => show('home')); }; }
+</script>
+<script>
+// 📺 Yupitok TV: series y videos (reproductor oficial de YouTube) sin salir de la página.
+// "🎮 Jugar mientras miro" lo deja en una ventanita que sigue sonando mientras juegas.
+(() => {
+  const css = document.createElement('style'); css.textContent = `#tvBox{position:fixed;inset:0;z-index:9000;background:rgba(5,3,20,.96);overflow:auto;padding:14px 14px 40px;color:#fff}#tvBox h2{margin:4px 0 10px}#tvBox .tvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}#tvBox .tvi{border:1px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);cursor:pointer;color:#fff;font:inherit;text-align:left;padding:0}#tvBox .tvi img,#tvBox .tvi .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:linear-gradient(135deg,#7b2ff7,#ff5fa2);display:flex;align-items:center;justify-content:center;font-size:2rem}#tvBox .tvi b{display:block;padding:6px 8px;font-size:.85rem}
+  #tvPl{position:fixed;z-index:9001;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.6)}#tvPl.grande{left:50%;top:64px;transform:translateX(-50%);width:min(96vw,900px)}#tvPl.mini{right:10px;bottom:70px;width:min(62vw,320px)}#tvPl iframe{width:100%;aspect-ratio:16/9;border:0;display:block}#tvPl .bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;padding:6px;background:#120c2e}#tvPl .bar button{all:unset;box-sizing:border-box;border-radius:999px;padding:6px 10px;font:700 12px/1.2 system-ui,sans-serif;cursor:pointer;background:#2a1f63;color:#fff;white-space:nowrap}#tvPl .bar button[hidden]{display:none}#tvPl.mini .bar button{padding:5px 8px;font-size:11px}`;
+  document.head.append(css);
+  const src = x => x.k === 'l' ? `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(x.id)}&autoplay=1&playsinline=1&rel=0` : `https://www.youtube-nocookie.com/embed/${encodeURIComponent(x.id)}?autoplay=1&playsinline=1&rel=0`;
+  function cerrarCaja() { document.getElementById('tvBox')?.remove(); }
+  function reproductor(x, modo) {
+    let pl = document.getElementById('tvPl');
+    if (!pl) { pl = document.createElement('div'); pl.id = 'tvPl'; document.body.append(pl); }
+    if (x) pl.innerHTML = `<iframe src="${src(x)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="${escH(x.t)}"></iframe><div class="bar"><button data-tv="mini">🎮 Jugar mientras miro</button><button data-tv="grande">⛶ Agrandar</button><button data-tv="lista">📺 Más</button><button data-tv="x">✕</button></div>`;
+    pl.className = modo; pl.querySelector('[data-tv="mini"]').hidden = modo === 'mini'; pl.querySelector('[data-tv="grande"]').hidden = modo === 'grande';
+    pl.onclick = e => { const a = e.target.dataset?.tv; if (!a) return; if (a === 'x') { pl.remove(); cerrarCaja(); } else if (a === 'mini') { cerrarCaja(); reproductor(null, 'mini'); } else if (a === 'grande') { window.abrirTV(true); reproductor(null, 'grande'); } else if (a === 'lista') { window.abrirTV(true); } };
+  }
+  window.abrirTV = function (sinCambiar) {
+    const L = cfg.tv || []; if (!L.length) return toast('Yupitok TV estará disponible muy pronto 📺');
+    cerrarCaja(); const b = document.createElement('div'); b.id = 'tvBox';
+    b.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>📺 Yupitok TV</h2><button class="btn alt" style="width:auto;padding:8px 14px" data-c="1">✕ Cerrar</button></div><p class="sub" style="text-align:left;margin:0 0 10px">Series y videos para ver sin salir de Yupitok. Toca <b>🎮 Jugar mientras miro</b> y sigue viéndolo en una ventanita mientras juegas.</p><div style="height:${document.getElementById('tvPl')?.classList.contains('grande') ? 'min(54vw,520px)' : '0'}"></div><div class="tvg">${L.map((x, i) => `<button class="tvi" data-i="${i}">${x.k === 'v' ? `<img src="https://i.ytimg.com/vi/${encodeURIComponent(x.id)}/hqdefault.jpg" alt="" loading="lazy">` : '<span class="ph">📺</span>'}<b>${escH(x.t)}</b></button>`).join('')}</div>`;
+    document.body.append(b);
+    b.onclick = e => { if (e.target.closest('[data-c]')) { cerrarCaja(); const pl = document.getElementById('tvPl'); if (pl?.classList.contains('grande')) reproductor(null, 'mini'); return; } const it = e.target.closest('[data-i]'); if (!it) return; reproductor(L[+it.dataset.i], 'grande'); b.querySelector('div[style^="height"]').style.height = 'min(54vw,520px)'; b.scrollTo({ top: 0, behavior: 'smooth' }); try { window.PERFIL?.evento?.('vivo'); } catch (er) {} };
+  };
+  window.pintarTV = () => { const h = document.getElementById('hub'); if (!h || !cfg.tv?.length || h.querySelector('#hubTV')) return;
+    h.insertAdjacentHTML('beforeend', `<button id="hubTV" class="joyban" onclick="abrirTV()" style="grid-column:1/-1;background:linear-gradient(120deg,#1e1b4b,#7b2ff7 55%,#22e6ff)"><span style="font-size:2.2rem">📺</span><span><b style="font-size:1.1rem">Yupitok TV</b><br><small>Series y videos sin salir de Yupitok. ¡Mira y juega al mismo tiempo!</small></span></button>`); };
+  cfgP.then(() => { try { pintarTV(); } catch (e) {} if (new URLSearchParams(location.search).get('tv') === '1') setTimeout(() => window.abrirTV(), 800); });
+})();
 </script>
 <script>window.pintarHub?.(); window.__instalar = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__instalar = e; }); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});</script>
 <link rel="stylesheet" href="/neon.css?v=2">
