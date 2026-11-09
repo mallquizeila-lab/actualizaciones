@@ -1,3 +1,7 @@
+v7.65.1 — Bienvenida con un solo botón
+- 🚀 La bienvenida ahora tiene solo el botón "¡A jugar!". Más simple y más rápido para empezar a jugar.
+- 📄 Quien no quiera que se guarden sus estadísticas lo puede desactivar (y volver a activar) desde la política de privacidad, y sigue jugando igual.
+
 v7.65.0 — 🎮 Yupitok para todas las edades (sin perder jugadores)
 - ✅ Ya no se pregunta "¿Tienes 18 años?" para jugar. Ahora sale una bienvenida de un toque: "¡A jugar! 🚀" (guarda datos anónimos para tus estadísticas) o "Jugar sin compartir datos" (puede jugar igual, pero no se guarda su visita).
 - 🎮 Todos los juegos (Huerto, GLORY BROWN, Joyas, arcade, tests, educativos, cristianos y miles de juegos más) son para todo público: para jugar solo se pide un apodo.

@@ -199,7 +199,6 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
     <p class="sub" style="text-align:left;margin:0 0 6px">Juegos gratis para todos. Para mejorar la página guardamos datos anónimos: tu país y ciudad aproximados y el tipo de celular o computadora (nunca tu nombre). Más detalles en la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</p>
     <p class="sub" style="text-align:left;font-size:.85rem;margin:4px 0 0">🔔 Al ver tu resultado, tu navegador te preguntará si quieres recibir tu lectura diaria. Puedes aceptar o no, y quitarlas cuando quieras.</p>
     <button class="btn" id="g-go">¡A jugar! 🚀</button>
-    <button class="btn alt" id="g-no">Jugar sin compartir datos</button>
   </div>
 </div>
 
@@ -261,13 +260,13 @@ const pick = (a, h) => a[h % a.length];
 const hoy = () => new Date().toISOString().slice(0, 10);
 
 // ---------- Permiso (una vez) ----------
+if (P.get('nodatos') === '1') { LS.set('consent', '0'); } else if (P.get('nodatos') === '0') { LS.set('consent', '2'); }
 let consent = LS.get('consent') === '2';
 function pedirPermiso() {
   return new Promise(ok => {
     if (consent || LS.get('consent') === '0') return ok(true);
     const g = $('#gate'); g.hidden = false;
     $('#g-go').onclick = () => { consent = true; LS.set('consent', '2'); g.hidden = true; pixel(); ok(true); };
-    $('#g-no').onclick = () => { LS.set('consent', '0'); g.hidden = true; ok(true); }; // igual puede jugar: solo no se guardan sus datos
   });
 }
 function pixel() {
