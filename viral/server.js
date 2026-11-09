@@ -54,6 +54,7 @@ create table if not exists yc_alerta (id integer primary key, perfil text, detal
 create table if not exists vistas_seo (id integer primary key, path text, fuente text, cc text, created_at text default (datetime('now')));
 create index if not exists vistas_seo_f on vistas_seo(created_at);
 create table if not exists dev_juegos (id text primary key, token text, estudio text, email text, titulo text, url text, descr text, cat text, img text, estado text default 'pendiente', motivo text, jugadas integer default 0, created_at text default (datetime('now')));
+create table if not exists temp_pts (perfil text, temp text, pts integer default 0, reclamados text default '[]', primary key (perfil, temp));
 create table if not exists yc_inv (perfil text, item text, created_at text default (datetime('now')), primary key (perfil, item));
 create table if not exists yc_estilo (uidh text primary key, perfil text, marco text, titulo text, color text);
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
@@ -478,11 +479,25 @@ const TIENDA = [
   ['t-gamer', 'titulo', '🎮 Gamer', 30], ['t-huerto', 'titulo', '🌱 Rey del Huerto', 60], ['t-joyas', 'titulo', '💎 Maestro de Joyas', 60], ['t-glory', 'titulo', '⚔️ Guerrero GLORY', 60], ['t-cerebro', 'titulo', '🧠 Cerebrito', 60], ['t-leyenda', 'titulo', '👑 Leyenda', 250],
   ['c-oro', 'color', '🟨 Nombre dorado', 40, 'color:#ffd23f'], ['c-cian', 'color', '🟦 Nombre cian', 40, 'color:#22e6ff'], ['c-rosa', 'color', '🟪 Nombre rosa', 40, 'color:#ff7ac0'], ['c-verde', 'color', '🟩 Nombre verde', 40, 'color:#4ade80'],
   ['c-arcoiris', 'color', '🌈 Nombre arcoíris', 150, 'background:linear-gradient(90deg,#ff5fa2,#ffd23f,#22e6ff);-webkit-background-clip:text;background-clip:text;color:transparent'],
+  ['tp-titulo', 'titulo', '🏆 Campeón de temporada', null], ['tp-color', 'color', '✨ Nombre de temporada', null, 'background:linear-gradient(90deg,#ffd23f,#ff3df0);-webkit-background-clip:text;background-clip:text;color:transparent'],
+  ['tp-marco', 'marco', '🏆 Marco de temporada', null, '0 0 0 2px #ffd23f,0 0 0 4px #8b5cf6,0 0 14px #ff3df0'],
 ].map(([id, tipo, nombre, precio, css]) => ({ id, tipo, nombre, precio, css: css || '' }));
 const TIENDA_M = new Map(TIENDA.map(x => [x.id, x]));
 const uidArcade = uid => crypto.createHash('sha256').update(String(uid || '')).digest('hex').slice(0, 16);
 const estiloCss = r => r ? { m: TIENDA_M.get(r.marco)?.css || '', t: TIENDA_M.get(r.titulo)?.nombre || '', c: TIENDA_M.get(r.color)?.css || '' } : null;
 const conEstilo = filas => { if (!filas.length) return filas; const E = new Map(q(`select * from yc_estilo where uidh in (${filas.map(() => '?').join(',')})`, ...filas.map(f => f.uid)).map(r => [r.uidh, r])); return filas.map(f => ({ ...f, est: estiloCss(E.get(f.uid)) })); };
+// 🏆 Yupi Pass: una temporada por mes, 30 niveles gratis. Se sube jugando (los mismos eventos que dan Yupicoins,
+// pero los puntos de temporada NO tienen el tope de 30). Premios: monedas y, en los niveles 10, 20 y 30, artículos exclusivos.
+const TP_PTS = { diario: 10, partida: 3, mision: 8, logro: 8, nivel: 10 }, TP_POR_NIVEL = 60, TP_NIVELES = 30;
+const tpPremio = n => n === 10 ? { item: 'tp-titulo' } : n === 20 ? { item: 'tp-color' } : n === 30 ? { item: 'tp-marco' } : { monedas: n % 5 === 0 ? 150 : 40 + n * 2 };
+const tpFila = (perfil, temp) => q1('select pts, reclamados from temp_pts where perfil=? and temp=?', perfil, temp) || { pts: 0, reclamados: '[]' };
+const TP_TOPE = { diario: 1, partida: 40, mision: 4, logro: 5, nivel: 5 }; // eventos que suman puntos de temporada por día
+function tpSumar(perfil, motivo) { const T = mesPeru().mes, p = TP_PTS[motivo] || 0; const hoyN = q1("select count(*) n from yc_mov where perfil=? and motivo=? and date(created_at,'-5 hours')=?", perfil, 'juego:' + motivo, hoyPeru()).n; if (hoyN > (TP_TOPE[motivo] || 0)) return; if (p) run('insert into temp_pts(perfil,temp,pts) values(?,?,?) on conflict(perfil,temp) do update set pts=pts+excluded.pts', perfil, T, p); }
+function tpEstado(perfil) {
+  const M = mesPeru(), f = tpFila(perfil, M.mes), rec = JSON.parse(f.reclamados || '[]'), nivel = Math.min(TP_NIVELES, Math.floor(f.pts / TP_POR_NIVEL)), inv = new Set(q('select item from yc_inv where perfil=?', perfil).map(r => r.item));
+  return { temp: M.mes, nombre: M.nombre, fin: M.fin, pts: f.pts, nivel, porNivel: TP_POR_NIVEL, total: TP_NIVELES, enNivel: f.pts % TP_POR_NIVEL,
+    niveles: Array.from({ length: TP_NIVELES }, (_, i) => { const n = i + 1, pr = tpPremio(n); return { n, ...pr, nombreItem: pr.item ? TIENDA_M.get(pr.item)?.nombre : null, reclamado: rec.includes(n) || (pr.item && inv.has(pr.item) && rec.includes(n)), listo: n <= nivel && !rec.includes(n) }; }) };
+}
 const ycEstado = perfil => { const C = YC(); return { saldo: ycSaldo(perfil), hoy: ycHoyJuego('perfil', perfil), tope: C.topeDia, valorUsd: C.valorUsd }; };
 // 📺 Yupitok TV: listas y videos de YouTube que elige el dueño (reproductor oficial de YouTube, contenido legal)
 function tvParse(texto) {
@@ -904,7 +919,7 @@ async function api(req, res, u) {
     const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     const id = online.perfilId(b), uidh = uidArcade(b.uid), inv = () => q('select item from yc_inv where perfil=?', id).map(r => r.item);
     const eq = () => q1('select marco, titulo, color from yc_estilo where perfil=? limit 1', id) || {};
-    if (u.pathname === '/api/tienda/comprar') { const it = TIENDA_M.get(String(b.item || '')); if (!it) return send(res, 400, { error: 'Ese artículo no existe' });
+    if (u.pathname === '/api/tienda/comprar') { const it = TIENDA_M.get(String(b.item || '')); if (!it || it.precio == null) return send(res, 400, { error: 'Ese artículo no se vende: se gana en el 🏆 Yupi Pass' });
       if (inv().includes(it.id)) return send(res, 400, { error: 'Ya lo tienes' });
       if (!ycGastar(id, it.precio, 'tienda:' + it.id, ip)) return send(res, 400, { error: `Te faltan Yupicoins: cuesta ${it.precio} 💎` });
       run('insert or ignore into yc_inv(perfil,item) values(?,?)', id, it.id); b.equipar = it.id; }
@@ -914,13 +929,23 @@ async function api(req, res, u) {
       run('update yc_estilo set marco=?, titulo=?, color=? where perfil=?', e.marco || null, e.titulo || null, e.color || null, id); }
     return send(res, 200, { items: TIENDA, inv: inv(), equipo: eq(), ...ycEstado(id) });
   }
+  if ((u.pathname === '/api/pase' || u.pathname === '/api/pase/reclamar') && P) {
+    const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
+    const id = online.perfilId(b);
+    if (u.pathname === '/api/pase/reclamar') { const n = Math.floor(+b.n), E = tpEstado(id), lv = E.niveles[n - 1];
+      if (!lv || !lv.listo) return send(res, 400, { error: lv?.reclamado ? 'Ya lo reclamaste' : 'Todavía no llegas a ese nivel' });
+      const f = tpFila(id, E.temp), rec = JSON.parse(f.reclamados || '[]'); rec.push(n); run('insert into temp_pts(perfil,temp,pts,reclamados) values(?,?,?,?) on conflict(perfil,temp) do update set reclamados=excluded.reclamados', id, E.temp, f.pts, JSON.stringify(rec));
+      if (lv.item) run('insert or ignore into yc_inv(perfil,item) values(?,?)', id, lv.item);
+      return send(res, 200, { ok: 1, monedas: lv.monedas || 0, item: lv.nombreItem || null, ...tpEstado(id) }); }
+    return send(res, 200, tpEstado(id));
+  }
   if ((u.pathname === '/api/yc' || u.pathname === '/api/yc/ganar') && P) {
     const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     const id = online.perfilId(b); if (u.pathname === '/api/yc') return send(res, 200, ycEstado(id));
     const m = String(b.motivo || ''); if (!YC_JUEGO[m] || limite(id, 'yc', 40)) return send(res, 200, { ganado: 0, ...ycEstado(id) });
     if (m === 'diario' && q1("select 1 from yc_mov where perfil=? and motivo='juego:diario' and date(created_at,'-5 hours')=?", id, hoyPeru())) return send(res, 200, { ganado: 0, ...ycEstado(id) });
     if (m === 'partida' && q1("select 1 from yc_mov where perfil=? and motivo='juego:partida' and created_at>=datetime('now','-90 seconds')", id)) return send(res, 200, { ganado: 0, ...ycEstado(id) });
-    const g = ycDar(id, YC_JUEGO[m], m, ip); return send(res, 200, { ganado: g, ...ycEstado(id) });
+    const g = ycDar(id, YC_JUEGO[m], m, ip); if (g === 0) run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'evento',0,?,?)", id, 'juego:' + m, ipCorta(ip)); tpSumar(id, m); return send(res, 200, { ganado: g, ...ycEstado(id), pase: (({ nivel, pts, enNivel, porNivel }) => ({ nivel, pts, enNivel, porNivel }))(tpEstado(id)) });
   }
   if (u.pathname === '/api/perfil' && P) {
     const b = await json(req), id = online.perfilId(b);

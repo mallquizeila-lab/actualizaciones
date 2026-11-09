@@ -1038,7 +1038,7 @@ setTimeout(() => { if (appInstalada() && !LS.get('appPremio') && window.PERFIL) 
 const pintarApp = () => { const h = document.getElementById('hub'); if (!h || appInstalada() || h.querySelector('[data-app]') || +(LS.get('appNoHasta') || 0) > Date.now()) return;
   const html = `<button class="joyban" data-app="1" onclick="instalarApp()" style="grid-column:1/-1;background:linear-gradient(120deg,#0ea5e9,#6366f1 55%,#a855f7);box-shadow:0 10px 30px rgba(99,102,241,.35)"><img src="/brand/mascota-128.webp" alt="" width="58" height="58" style="width:58px;height:58px;border-radius:16px;flex:0 0 58px;box-shadow:0 0 14px rgba(255,255,255,.35)"><div><b>Instala Yupitok gratis · +100 🪙</b><small>Ábrelo como app desde tu pantalla de inicio, con un toque.</small></div></button>`;
   const ref = h.querySelector('#hubTop') || [...h.querySelectorAll('[data-pd],[data-camp]')].pop(); if (ref) ref.insertAdjacentHTML('afterend', html); else h.insertAdjacentHTML('afterbegin', html); };
-{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTV(); } catch (e) {} try { pintarTienda(); } catch (e) {} try { pintarDev(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
+{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTV(); } catch (e) {} try { pintarTienda(); } catch (e) {} try { pintarDev(); } catch (e) {} try { pintarPase(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
   try { if (PERFIL.diarioPendiente()) { const h = document.getElementById('hub'); if (h && !h.querySelector('[data-pd]')) h.insertAdjacentHTML('afterbegin', `<button class="joyban" data-pd="1" onclick="premioDiario()" style="grid-column:1/-1;background:linear-gradient(120deg,#f59e0b,#ef4444 55%,#a21caf);box-shadow:0 10px 30px rgba(245,158,11,.35)"><span>🎁</span><div><b>¡Tu premio diario te espera!</b><small>Día ${PERFIL.diaSiguiente() > 7 ? ((PERFIL.diaSiguiente() - 1) % 7) + 1 : PERFIL.diaSiguiente()} de 7 · toca para reclamar</small></div></button>`); }
     if (!window.__pdVisto && PERFIL.diarioPendiente() && LS.get('consent') && !/[?&]g=/.test(location.search) && !location.pathname.startsWith('/juego/')) { window.__pdVisto = 1; setTimeout(() => { if (!$('#home').hidden) premioDiario(); }, 1500); } } catch (e) {} }; }
 </script>
@@ -1082,6 +1082,28 @@ if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.
 })();
 </script>
 <script>
+// 🏆 Yupi Pass: temporada mensual gratis de 30 niveles (premios en monedas y artículos exclusivos en los niveles 10, 20 y 30)
+(() => {
+  let PS = null;
+  const cargar = () => post('/api/pase', { uid: VID, tok: window.PERFIL?.tok }).then(d => { if (d && !d.error) { PS = d; document.getElementById('hubPase')?.remove(); window.pintarPase?.(); } }).catch(() => {});
+  window.pintarPase = () => { const h = document.getElementById('hub'); if (!h || !PS || h.querySelector('#hubPase')) return; const dias = Math.max(0, Math.ceil((PS.fin - Date.now()) / 864e5)), listos = PS.niveles.filter(x => x.listo).length;
+    h.insertAdjacentHTML('afterbegin', `<button id="hubPase" class="joyban" onclick="abrirPase()" style="grid-column:1/-1;background:linear-gradient(120deg,#4c1d95,#8b5cf6 50%,#ffd23f)"><span style="font-size:2.2rem">🏆</span><span style="flex:1"><b style="font-size:1.05rem">Yupi Pass · Temporada de ${escH(PS.nombre)}</b> ${listos ? `<b style="background:#ff3df0;border-radius:999px;padding:1px 8px;font-size:.75rem">🎁 ${listos}</b>` : ''}<br><small>Nivel ${PS.nivel}/${PS.total} · termina en ${dias} días · premios exclusivos en los niveles 10, 20 y 30</small><span style="display:block;height:8px;border-radius:99px;background:rgba(255,255,255,.25);margin-top:6px;overflow:hidden"><span style="display:block;height:100%;width:${Math.round(PS.nivel >= PS.total ? 100 : PS.enNivel * 100 / PS.porNivel)}%;background:#fff"></span></span></span></button>`); };
+  window.abrirPase = () => { if (!PS) return; const box = document.createElement('div'); box.className = 'modal';
+    const pinta = () => { box.innerHTML = `<div class="card" style="max-height:88vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🏆 Yupi Pass</h2><button class="btn alt" data-x="1" style="width:auto;padding:6px 12px">✕</button></div>
+      <p class="sub" style="text-align:left;margin:6px 0">Temporada de <b>${escH(PS.nombre)}</b> · Nivel <b>${PS.nivel}/${PS.total}</b> (${PS.enNivel}/${PS.porNivel} puntos para el siguiente). Sube jugando: entrar cada día (+10), cada partida (+3), misiones y logros (+8), subir de nivel (+10). Es gratis y empieza de nuevo cada mes.</p>
+      ${PS.niveles.map(x => `<div class="dato" style="align-items:center;${x.n % 10 === 0 ? 'background:rgba(255,210,63,.12);border-radius:10px;padding:6px' : ''}"><span>${x.n <= PS.nivel ? '✅' : '🔒'} <b>Nivel ${x.n}</b> · ${x.item ? `<b>🌟 ${escH(x.nombreItem)}</b> (exclusivo)` : `🪙 ${x.monedas} monedas`}</span>${x.reclamado ? '<small>Reclamado</small>' : x.listo ? `<button class="btn" data-n="${x.n}" style="width:auto;padding:5px 10px;font-size:.8rem">🎁 Reclamar</button>` : ''}</div>`).join('')}
+      <p class="sub" style="font-size:.75rem;margin-top:10px">Los artículos exclusivos aparecen en tu 🛍️ Tienda para ponértelos y se lucen en los rankings.</p></div>`; };
+    pinta(); document.body.append(box);
+    box.onclick = async e => { if (e.target === box || e.target.closest('[data-x]')) return box.remove(); const b = e.target.closest('[data-n]'); if (!b) return;
+      const r = await post('/api/pase/reclamar', { uid: VID, tok: window.PERFIL?.tok, n: +b.dataset.n }).catch(() => null); if (!r || r.error) return toast(r?.error || 'No se pudo reclamar');
+      if (r.monedas) window.PERFIL?.ganar(r.monedas); toast(r.item ? `🌟 ¡Ganaste ${r.item}! Póntelo en la 🛍️ Tienda` : `🎁 +${r.monedas} 🪙 monedas`); window.FX?.confeti?.();
+      PS = r; pinta(); document.getElementById('hubPase')?.remove(); window.pintarPase?.(); };
+  };
+  addEventListener('yupicoins', () => cargar());
+  setTimeout(cargar, 1500);
+})();
+</script>
+<script>
 // 🛠️ Juegos de la comunidad: desarrolladores que publicaron en Yupitok (revisados por el dueño)
 (() => {
   let DEV = null; fetch('/api/dev/juegos').then(r => r.json()).then(d => { DEV = d.juegos || []; window.pintarDev?.(); const q = new URLSearchParams(location.search).get('dev'); if (q) { const g = DEV.find(x => x.dev === q); if (g) setTimeout(() => window.abrirDev(g.dev), 600); } }).catch(() => {});
@@ -1101,7 +1123,7 @@ window.nomEst = (x, t = 22) => `<span style="display:inline-flex;border-radius:5
     box.querySelector('.card').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">🛍️ Tienda Yupitok</h2><button class="btn alt" data-x="1" style="width:auto;padding:6px 12px">✕</button></div>
       <p class="sub" style="text-align:left;margin:6px 0">Tienes <b>💎 ${d.saldo} Yupicoins</b>. Jugando ganas hasta ${d.tope} al día (hoy llevas ${d.hoy}). Todo lo de la tienda es visual y se ve en los rankings y torneos.</p>
       <div class="dato" style="margin:6px 0 10px"><span>Así te ven: ${nomEst({ nombre: nom, avatar: av, est }, 30)}</span></div>
-      ${TIPOS.map(([tipo, tit]) => `<h3 style="margin:12px 0 6px">${tit}</h3>${d.items.filter(i => i.tipo === tipo).map(i => { const tengo = d.inv.includes(i.id), puesto = d.equipo[tipo] === i.id;
+      ${TIPOS.map(([tipo, tit]) => `<h3 style="margin:12px 0 6px">${tit}</h3>${d.items.filter(i => i.tipo === tipo && (i.precio != null || d.inv.includes(i.id))).map(i => { const tengo = d.inv.includes(i.id), puesto = d.equipo[tipo] === i.id;
         const prev = tipo === 'marco' ? `<span style="display:inline-flex;border-radius:50%;box-shadow:${i.css}">${avImg(av, 26)}</span>` : tipo === 'color' ? `<b style="${i.css}">${escH(nom)}</b>` : `<small style="padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.12)">${escH(i.nombre)}</small>`;
         return `<div class="dato" style="align-items:center"><span style="display:flex;gap:8px;align-items:center">${prev} ${tipo === 'titulo' ? '' : escH(i.nombre)}</span>${puesto ? `<button class="btn alt" data-quitar="${tipo}" style="width:auto;padding:5px 10px;font-size:.8rem">✓ Puesto · Quitar</button>` : tengo ? `<button class="btn alt" data-eq="${i.id}" style="width:auto;padding:5px 10px;font-size:.8rem">Usar</button>` : `<button class="btn" data-buy="${i.id}" style="width:auto;padding:5px 10px;font-size:.8rem" ${d.saldo < i.precio ? 'disabled' : ''}>💎 ${i.precio}</button>`}</div>`; }).join('')}`).join('')}
       <p class="sub" style="font-size:.75rem;margin-top:12px">Las Yupicoins se usan solo dentro de Yupitok y no se cambian por dinero (1 Yupicoin = 0.01 USD de referencia).</p>`;

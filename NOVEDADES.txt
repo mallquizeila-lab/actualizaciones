@@ -1,3 +1,10 @@
+v7.74.0 — 🏆 Yupi Pass (pase de temporada gratis)
+- 🏆 Como el pase de batalla de Fortnite, Free Fire o Roblox, pero gratis para todos: cada mes hay una temporada nueva con 30 niveles.
+- 📈 Se sube jugando: entrar cada día (+10 puntos), cada partida (+3), misiones y logros (+8), subir de nivel (+10). Sigue sumando aunque ya hayas ganado tus 30 💎 del día.
+- 🎁 Premios en cada nivel: monedas 🪙 (150 en los niveles 5, 15 y 25) y artículos EXCLUSIVOS que no se pueden comprar: 🏆 título "Campeón de temporada" (nivel 10), ✨ nombre de temporada (nivel 20) y 🏆 marco de temporada (nivel 30). Se ponen en la 🛍️ Tienda y se lucen en los rankings.
+- 🏠 Banner del Yupi Pass arriba de todo en la portada, con barra de progreso y aviso de premios por reclamar.
+- 🛡️ Antitrampas: cada tipo de evento suma puntos solo unas veces al día.
+
 v7.73.0 — 🛠️ Portal para desarrolladores + 📊 visitas de Google
 - 🛠️ Nueva página yupitok.com/desarrolladores: cualquier persona o estudio que haga juegos HTML5 puede enviar el suyo gratis (nombre, enlace https, portada, categoría y descripción; confirma que es suyo y apto para todo público).
   · Cada desarrollador recibe un enlace privado para ver el estado de su juego y cuántas partidas tiene.
