@@ -361,6 +361,7 @@ VIEWS.mando = () => {
   <div class="card"><h3>🛠️ Guardián</h3>${(D.alertas || []).length ? `<ul>${D.alertas.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '<p>✅ Todo en orden: página encendida, sin errores ni pendientes.</p>'}
     ${(D.consejos || []).length ? `<h3 style="margin-top:12px">💡 Consejos de los agentes</h3><ul>${D.consejos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
     <div class="btns"><button class="b sm" data-act="mdReporte">📨 Generar reporte ahora (y mandarlo a Telegram)</button></div></div>
+  ${flowCard(MD)}
   ${embajadorCard(MD.embajador)}
   <div class="card"><h3>🎬 Creativo: bandeja de links de YouTube</h3><p class="hint">Pega el link de un video que te guste. El agente lo analiza y decide: <b>🎬 lo armo</b> (hace un video <b>100 % original</b> inspirado solo en la idea, para el canal que mejor encaje) o <b>⏭️ lo dejo</b> (te dice por qué). Nunca copia la historia, la voz ni las imágenes del otro video.</p>
     <label>Link de YouTube<input id="md-url" placeholder="https://youtube.com/shorts/... o https://youtu.be/..."></label>
@@ -388,6 +389,16 @@ VIEWS.mando = () => {
   <div class="card"><h3>📨 Últimos reportes</h3>${(MD.reportes || []).length ? MD.reportes.map(r => `<details><summary>${esc(r.dia)}</summary><pre style="white-space:pre-wrap;font-size:.85rem">${esc(r.texto)}</pre></details>`).join('') : '<p class="hint">El primer reporte llega mañana a las 8 am (o aprieta "Generar reporte ahora").</p>'}</div>`;
 };
 let MDlang = 'es';
+function flowCard(MD) {
+  const g = (MD.flow || [])[0], dir = MD.carpetaUnir;
+  return `<div class="card" style="border:2px solid #f59e0b"><h3>🎬 Clips del día para Google Flow</h3><p class="hint">Cada mañana el agente te escribe <b>6 prompts</b> para Flow (tu plan de 4 USD al mes) con Yupi y tus personajes, en una historia con gancho y final épico. Tú los pegas en Flow, descargas los clips y ShortForge arma el video solo.</p>
+    <ol class="hint" style="margin:4px 0 8px 18px"><li>Copia cada prompt y pégalo en Flow (formato <b>vertical 9:16</b>).</li><li>Descarga los clips con nombre en orden: <b>1.mp4, 2.mp4…</b></li><li>Guárdalos en esta carpeta:<br><code style="user-select:all">${esc(dir || 'Crea primero el canal Yupitok')}</code> <button class="b ghost sm" data-act="mkCopiar" data-t="${esc(dir || '')}">📋</button></li><li>3 minutos después del último clip, ShortForge los <b>une solo</b>, les pone guion, voz, subtítulos y "¡Juega gratis en yupitok.com!", y te avisa por Telegram.</li></ol>
+    ${g ? `<p style="margin:8px 0 4px"><b>📅 ${esc(g.dia)} · ${esc(g.titulo)}</b></p><p class="hint" style="margin:0 0 6px">${esc(g.idea)}</p>
+      ${g.clips.map(c => `<div style="border-top:1px solid #e5e7eb;padding:6px 0"><div style="display:flex;gap:8px;align-items:center"><b style="flex:1">Clip ${c.n} · <span style="font-weight:400">${esc(c.que_pasa)}</span></b><button class="b ghost sm" data-act="mkCopiar" data-t="${esc(c.prompt)}">📋 Copiar prompt</button></div><textarea readonly rows="3" style="font-size:.8rem;margin-top:4px">${esc(c.prompt)}</textarea></div>`).join('')}` : '<p class="hint">Todavía no hay prompts de hoy. Crea los primeros abajo.</p>'}
+    <div class="row" style="margin-top:8px"><label>Tema (opcional)<input id="fl-tema" maxlength="160" placeholder="Vacío = el tema del día" list="fl-temas"><datalist id="fl-temas">${(MD.flowTemas || []).map(t => `<option value="${esc(t)}">`).join('')}</datalist></label></div>
+    <div class="btns"><button class="b sm" data-act="flNuevo">✍️ Crear 6 prompts nuevos</button></div>
+    <p class="hint" style="font-size:.8rem;margin-top:6px">⚠️ Si Flow te pone un personaje famoso (por ejemplo, un monstruo de Disney), descarta ese clip: puede traerte reclamos de derechos.</p></div>`;
+}
 function guiasCard(MD) {
   const G = MD.guias || [], EST = { nuevo: '⏳ En cola', escribiendo: '✍️ Escribiendo…', borrador: '👀 Borrador: revísalo', publicada: '✅ Publicada', error: '⚠️ Error' };
   return `<div class="card"><h3>📝 Creativo: guías para Google</h3><p class="hint">Cada guía es una página nueva que Google puede mostrar cuando alguien busca ese tema (ej: "trucos 2048"). El agente escribe el borrador (1 consulta de IA), <b>tú lo lees y decides</b> si se publica. Ya tienes 11 guías escritas por mí.</p>
@@ -966,6 +977,7 @@ const ACT = {
   mdRe: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'reanalizar' }); render(); }),
   mdBorrar: guard(async el => { MD = await api('/api/mando/link/accion', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
+  flNuevo: guard(async () => { toast('✍️ Escribiendo los prompts…'); MD = await api('/api/mando/flow', { tema: $('#fl-tema').value }); toast('🎬 Prompts listos: cópialos en Flow'); render(); }),
   guIdea: el => { const i = $('#gu-tema'); if (i) { i.value = el.dataset.t; i.focus(); } },
   guNueva: guard(async () => { MD = await api('/api/mando/guia', { tema: $('#gu-tema').value }); toast('✍️ El Creativo está escribiendo tu guía (1–2 min)'); render(); }),
   guPub: guard(async el => { if (!confirm('¿Ya leíste el borrador y quieres publicarlo en Yupitok?')) return; MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'publicar' }); toast('✅ Guía publicada: ' + (MD.url || '')); render(); }),

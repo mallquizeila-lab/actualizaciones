@@ -372,6 +372,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/short' && P) { await mando.shortYupitok(); return await mando.estado(); }
   if (u === '/api/mando/campana' && P) { const o = await json(q); if (o.borrar) mando.borrarCampana(o.borrar); else mando.nuevaCampana(o); return await mando.estado(); }
   if (u === '/api/mando/guia' && P) { const o = await json(q); if (o.accion) { const r = await mando.accionGuia(o); return { ...(await mando.estado()), url: r.url }; } mando.nuevaGuia(o); return await mando.estado(); }
+  if (u === '/api/mando/flow' && P) { const o = await json(q); if (o.auto !== undefined) { db.settings.flowAuto = !!o.auto; saveAll.settings(); } else await mando.flowGuion(o.tema); return await mando.estado(); }
   if (u === '/api/mando/ingreso' && P) { const o = await json(q); if (o.borrar) mando.borrarIngreso(o.borrar); else mando.ingreso(o); return await mando.estado(); }
   if (u === '/api/inspire') {
     const o = await json(q), ch = channel(o.channelId);

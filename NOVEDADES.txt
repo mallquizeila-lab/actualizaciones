@@ -1,3 +1,8 @@
+v7.62.0 — 🎬 Videos con Google Flow casi automáticos
+- 🎬 Nuevo en el Centro de Mando, "Clips del día para Google Flow": cada mañana el agente te escribe 6 prompts listos para Flow (en inglés, que es como mejor entiende Veo). Cuentan una historia con gancho, desarrollo y final épico, con Yupi, la reina de GLORY BROWN y los defensores del Huerto, siempre descritos igual para que se vean iguales en todos los clips. Cada prompt tiene su botón 📋 Copiar. Cuesta 1 sola consulta de IA de texto al día.
+- 📁 Carpeta mágica "unir": guarda los clips descargados de Flow en ShortForge-datos\entrada\Yupitok\unir (1.mp4, 2.mp4…). 3 minutos después del último clip, ShortForge los une solo, les pone guion, voz, subtítulos, efectos y "¡Juega gratis en yupitok.com!", y te avisa por Telegram. No hay que subir nada a mano.
+- 🛡️ Los prompts prohíben personajes de franquicias famosas (Disney, Nintendo, Pokémon, etc.) para evitar reclamos de derechos.
+
 v7.61.0 — 🎞️ Unir clips de IA en un solo video
 - 🎞️ Nuevo en "Reeditar mis videos": casilla "Unir todos los clips en UN solo video". Subes de 2 a 12 clips cortos (por ejemplo, los de 6–8 s que haces con una IA de video) y ShortForge:
   · los une en orden por nombre (1, 2, 3…) con transiciones suaves y variadas;
