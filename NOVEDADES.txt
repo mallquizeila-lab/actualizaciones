@@ -1,3 +1,12 @@
+v7.65.0 — 🎮 Yupitok para todas las edades (sin perder jugadores)
+- ✅ Ya no se pregunta "¿Tienes 18 años?" para jugar. Ahora sale una bienvenida de un toque: "¡A jugar! 🚀" (guarda datos anónimos para tus estadísticas) o "Jugar sin compartir datos" (puede jugar igual, pero no se guarda su visita).
+- 🎮 Todos los juegos (Huerto, GLORY BROWN, Joyas, arcade, tests, educativos, cristianos y miles de juegos más) son para todo público: para jugar solo se pide un apodo.
+- 🛡️ Lo que pone en contacto con desconocidos sigue siendo solo para mayores de 18: salas de chat, mesas en vivo, fotos de perfil y red social en el Salón de la Fama. Ahí se pregunta el año de nacimiento de forma neutral. Si alguien es menor, se le explica con cariño y se le invita a seguir jugando todo lo demás.
+- 💕 Los tests de amor y compatibilidad son para mayores de 13. El horóscopo y los demás tests con fecha son para todos (la fecha nunca sale del celular).
+- 📢 Si alguien dijo que es menor, los anuncios de AdSense que vea son no personalizados, y el píxel de Meta solo funciona con adultos (así lo piden Google y Meta).
+- 📄 Política de privacidad y términos actualizados: menores de 14 años con permiso de sus padres (Ley 29733 del Perú).
+- 🧩 Los juegos que pones en otras webs ahora son para todo público.
+
 v7.64.0 — 🧩 Tus juegos en otras webs + 📰 página de prensa y creadores
 - 🧩 Nueva página yupitok.com/para-tu-web: cualquier blog, web de juegos o comunidad puede poner gratis 11 juegos de Yupitok (Huerto Defensor, Joyas, 2048, Gusanito, Buscaminas, Sudoku, Memoria, Bloques, Inglés, Trivia de Perú y Personajes bíblicos) copiando y pegando un código.
   · Dentro del juego aparece el botón "🎮 Más juegos gratis en Yupitok", que lleva gente a tu página.

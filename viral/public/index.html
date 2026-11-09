@@ -195,12 +195,11 @@ input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{ou
 
 <div class="modal" id="gate" hidden>
   <div class="card">
-    <h2>Antes de empezar</h2>
-    <label class="check"><input type="checkbox" id="g-adult"><span>Tengo <b>18 años o más</b>.</span></label>
-    <label class="check"><input type="checkbox" id="g-ok"><span>Acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>: se guarda mi país, ciudad aproximada y tipo de dispositivo para mejorar la página y mostrarme contenido.</span></label>
+    <h2>🎮 ¡Bienvenido a Yupitok!</h2>
+    <p class="sub" style="text-align:left;margin:0 0 6px">Juegos gratis para todos. Para mejorar la página guardamos datos anónimos: tu país y ciudad aproximados y el tipo de celular o computadora (nunca tu nombre). Más detalles en la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</p>
     <p class="sub" style="text-align:left;font-size:.85rem;margin:4px 0 0">🔔 Al ver tu resultado, tu navegador te preguntará si quieres recibir tu lectura diaria. Puedes aceptar o no, y quitarlas cuando quieras.</p>
-    <button class="btn" id="g-go" disabled>Continuar</button>
-    <button class="btn alt" id="g-no">No, gracias</button>
+    <button class="btn" id="g-go">¡A jugar! 🚀</button>
+    <button class="btn alt" id="g-no">Jugar sin compartir datos</button>
   </div>
 </div>
 
@@ -211,6 +210,7 @@ const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'ap
 const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const toast = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 3200); };
 const REF_SRC = (() => { try { const h = new URL(document.referrer).hostname.replace(/^www\./, ''); if (!h || h === location.hostname) return ''; const M = [[/google\./, 'google'], [/bing\./, 'bing'], [/yandex\./, 'yandex'], [/duckduckgo\./, 'duckduckgo'], [/yahoo\./, 'yahoo'], [/(^|\.)(facebook|fb)\.com$|^l\.facebook|^m\.facebook/, 'facebook'], [/instagram\./, 'instagram'], [/tiktok\./, 'tiktok'], [/youtube\.|youtu\.be/, 'youtube'], [/^t\.co$|twitter\.|x\.com$/, 'x'], [/whatsapp\./, 'whatsapp'], [/reddit\./, 'reddit'], [/pinterest\./, 'pinterest'], [/itch\.io/, 'itch'], [/chatgpt\.|openai\./, 'chatgpt']]; for (const [r, n] of M) if (r.test(h)) return n; return 'web-' + h.slice(0, 30); } catch (e) { return ''; } })();
+if (LS.get('edad18') === 'no') { (window.adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1; }
 const SRC = (P.get('src') || REF_SRC || LS.get('src') || 'directo').slice(0, 60); LS.set('src', SRC);
 let VID = LS.get('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) + Date.now().toString(36); LS.set('vid', VID); }
 // ---------- Invitaciones: tu código va en todo lo que compartes; ganas premios cuando un amigo nuevo juega ----------
@@ -264,22 +264,20 @@ const hoy = () => new Date().toISOString().slice(0, 10);
 let consent = LS.get('consent') === '2';
 function pedirPermiso() {
   return new Promise(ok => {
-    if (consent) return ok(true);
+    if (consent || LS.get('consent') === '0') return ok(true);
     const g = $('#gate'); g.hidden = false;
-    const upd = () => $('#g-go').disabled = !($('#g-adult').checked && $('#g-ok').checked);
-    $('#g-adult').onchange = $('#g-ok').onchange = upd;
     $('#g-go').onclick = () => { consent = true; LS.set('consent', '2'); g.hidden = true; pixel(); ok(true); };
-    $('#g-no').onclick = () => { g.hidden = true; ok(false); };
+    $('#g-no').onclick = () => { LS.set('consent', '0'); g.hidden = true; ok(true); }; // igual puede jugar: solo no se guardan sus datos
   });
 }
 function pixel() {
-  if (!consent || !cfg.pixel || window.fbq) return;
+  if (!consent || !cfg.pixel || window.fbq || LS.get('edad18') !== 'si') return; // píxel de Meta solo con adultos
   !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s) }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', cfg.pixel); fbq('track', 'PageView');
 }
 async function registrar(game, sign) { // una vez por juego y día
-  const k = 'v:' + game + ':' + hoy(); if (LS.get(k)) return; LS.set(k, 1);
-  post('/api/visit', { consent: true, adult: true, vid: VID, src: SRC, game, sign }).catch(() => {});
+  if (!consent) return; const k = 'v:' + game + ':' + hoy(); if (LS.get(k)) return; LS.set(k, 1);
+  post('/api/visit', { consent: true, vid: VID, src: SRC, game, sign }).catch(() => {});
   if (window.fbq) fbq('trackCustom', 'Juego', { juego: game });
 }
 
@@ -363,12 +361,12 @@ const JUEGO = {
   horoscopo() {
     stage(`<div class="card"><h2>🔮 Tu signo y tu alma gemela</h2>
       <label for="n">Tu nombre</label><input id="n" type="text" maxlength="30" autocomplete="given-name">
-      <label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10)}">
+      <label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date().toISOString().slice(0, 10)}">
       <p class="err" id="err"></p><button class="btn" id="go">Ver mi lectura</button></div>`);
     $('#go').onclick = () => {
       const n = $('#n').value.trim(), bd = $('#bd').value;
       if (!n || !bd) return $('#err').textContent = 'Escribe tu nombre y tu fecha';
-      if (edad(bd) < 18) return $('#err').textContent = 'Este juego es solo para mayores de 18 años';
+      if (edad(bd) < 13) return $('#err').textContent = 'Este test es para mayores de 13 años. ¡Prueba los otros juegos! 🎮';
       preguntas(Q1, '¿Qué buscas en el amor?', a1 => preguntas(Q2, '¿Cuándo sientes más energía?', a2 => {
         const sg = signOf(bd), hn = hash(n.toLowerCase() + bd), hd = hash(n.toLowerCase() + bd + hoy());
         const same = SIGNS.filter(x => x[3] === sg[3] && x[0] !== sg[0]), comp = SIGNS.filter(x => x[3] === COMPLEMENT[sg[3]]);
@@ -407,10 +405,10 @@ const JUEGO = {
     };
   },
   numerologia() {
-    stage(`<div class="card"><h2>🔢 Tu número del destino</h2><label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10)}"><p class="err" id="err"></p><button class="btn" id="go">Calcular</button></div>`);
+    stage(`<div class="card"><h2>🔢 Tu número del destino</h2><label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${new Date().toISOString().slice(0, 10)}"><p class="err" id="err"></p><button class="btn" id="go">Calcular</button></div>`);
     $('#go').onclick = () => {
       const bd = $('#bd').value; if (!bd) return $('#err').textContent = 'Elige tu fecha';
-      if (edad(bd) < 18) return $('#err').textContent = 'Este juego es solo para mayores de 18 años';
+      if (edad(bd) < 13) return $('#err').textContent = 'Este test es para mayores de 13 años. ¡Prueba los otros juegos! 🎮';
       let n = bd.replace(/\D/g, '').split('').reduce((a, x) => a + +x, 0);
       while (n > 9 && ![11, 22, 33].includes(n)) n = String(n).split('').reduce((a, x) => a + +x, 0);
       registrar('numerologia', signOf(bd)[0]);
@@ -428,10 +426,10 @@ const JUEGO = {
   },
 };
 // ---------- Motor de tests ----------
-const fechaMax = () => new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10);
+const fechaMax = () => new Date().toISOString().slice(0, 10);
 function pedirFecha(t, cb) {
   stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">${escH(t.d)}</p><label for="bd">Tu fecha de nacimiento</label><input id="bd" type="date" max="${fechaMax()}"><p class="err" id="err"></p><button class="btn" id="go">Calcular</button></div>`);
-  $('#go').onclick = () => { const bd = $('#bd').value; if (!bd) return $('#err').textContent = 'Elige tu fecha'; if (edad(bd) < 18) return $('#err').textContent = 'Esta página es solo para mayores de 18 años'; cb(bd); };
+  $('#go').onclick = () => { const bd = $('#bd').value; if (!bd) return $('#err').textContent = 'Elige tu fecha'; if (edad(bd) < 3 || edad(bd) > 120) return $('#err').textContent = 'Revisa tu fecha'; cb(bd); };
 }
 const fmt = n => Math.round(n).toLocaleString('es-PE');
 const CHINO = [['Rata','🐀','Ingeniosa, adaptable y buena para detectar oportunidades.'],['Buey','🐂','Paciente, constante y muy confiable.'],['Tigre','🐅','Valiente, apasionado y competitivo.'],['Conejo','🐇','Amable, prudente y con buen gusto.'],['Dragón','🐉','Carismático, ambicioso y lleno de energía.'],['Serpiente','🐍','Intuitiva, reservada y sabia.'],['Caballo','🐎','Libre, activo y sociable.'],['Cabra','🐐','Creativa, sensible y pacífica.'],['Mono','🐒','Ingenioso, curioso y divertido.'],['Gallo','🐓','Trabajador, observador y directo.'],['Perro','🐕','Leal, honesto y protector.'],['Cerdo','🐖','Generoso, sincero y disfrutón.']];
@@ -477,14 +475,17 @@ async function subirFoto(file) {
     toast('📷 Subiendo tu foto…'); const r = await post('/api/foto/subir', { uid: VID, img: d }); if (r.error) { toast(r.error); return null; }
     LS.set('miFoto', r.id); toast(r.estado === 'ok' ? '✅ ¡Foto lista!' : r.estado === 'rechazada' ? '🚫 Esa foto no se puede usar. Prueba con otra.' : '⏳ Tu foto se está revisando: los demás la verán en unos minutos.');
     return r.estado === 'rechazada' ? null : r.id; } catch (e) { toast('No se pudo leer esa imagen'); return null; } }
-function perfilChat(t, cb) {
+function perfilChat(t, cb, soloApodo) { // soloApodo: juegos (sin chat) → solo el apodo, para todas las edades
   let av = LS.get('chatAv'); if (!/^(a\d\d|f[0-9a-f]{16})$/.test(av || '')) av = 'a' + String(1 + Math.floor(Math.random() * 14)).padStart(2, '0'); const nom = LS.get('chatNom') || '';
-  if (nom && LS.get('chatOk') === '1') return cb(nom, av);
+  if (soloApodo && nom) return cb(nom, /^f/.test(av) && LS.get('edad18') !== 'si' ? 'a01' : av);
+  if (!soloApodo && LS.get('edad18') === 'no') return stage(`<div class="card"><h2>💬 Salas en vivo</h2><p>Las salas de chat y las mesas en vivo son solo para mayores de 18 años, para cuidar a todos. 🙌</p><p>¡Pero tienes <b>todos los demás juegos</b> gratis! 🎮</p><button class="btn" onclick="location.href='/'">Ver juegos</button></div>`);
+  if (nom && LS.get('chatOk') === '1' && LS.get('edad18') === 'si') return cb(nom, av);
   const lista = SALAS?.avatares?.length ? SALAS.avatares : Array.from({ length: 48 }, (_, i) => 'a' + String(i + 1).padStart(2, '0'));
   stage(`<div class="card"><h2>${t.e} ${escH(t.t)}</h2><p class="sub" style="text-align:left">Elige cómo te verán los demás.</p>
     <label for="cn">Tu apodo</label><input id="cn" type="text" maxlength="18" value="${escH(nom)}" placeholder="Ej.: Andrés de Lima">
-    <label>Tu avatar</label><div class="avs" id="avs"><button data-subir="1" aria-label="Subir mi foto" title="Subir mi foto" style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;line-height:1.1">${LS.get('miFoto') ? avImg(LS.get('miFoto'), 44) : '<span style="font-size:1.5rem">📷</span>Tu foto'}</button>${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}" aria-label="Avatar">${avImg(a, 44)}</button>`).join('')}</div>
-    <label class="check"><input type="checkbox" id="cr"><span>Seré respetuoso. Sé que <b>no se permiten enlaces, teléfonos, correos ni datos personales</b>, y que los mensajes pueden ser revisados y borrados.</span></label>
+    <label>Tu avatar</label><div class="avs" id="avs"><button data-subir="1" ${soloApodo && LS.get('edad18') !== 'si' ? 'hidden' : ''} aria-label="Subir mi foto" title="Subir mi foto" style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;line-height:1.1">${LS.get('miFoto') ? avImg(LS.get('miFoto'), 44) : '<span style="font-size:1.5rem">📷</span>Tu foto'}</button>${lista.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}" aria-label="Avatar">${avImg(a, 44)}</button>`).join('')}</div>
+    ${soloApodo ? '' : `<label for="cy">Tu año de nacimiento</label>`}<select id="cy" ${soloApodo ? 'hidden' : ''}><option value="">Elige…</option>${Array.from({ length: 90 }, (_, i) => new Date().getFullYear() - 5 - i).map(y => `<option>${y}</option>`).join('')}</select>
+    <label class="check" ${soloApodo ? 'hidden' : ''}><input type="checkbox" id="cr" ${soloApodo ? 'checked' : ''}><span>Seré respetuoso. Sé que <b>no se permiten enlaces, teléfonos, correos ni datos personales</b>, y que los mensajes pueden ser revisados y borrados.</span></label>
     <p class="err" id="err"></p><button class="btn" id="go">Entrar a la sala</button></div>`);
   let sel = av;
   $('#avs').onclick = e => { if (e.target.closest('[data-subir]')) { const mf = LS.get('miFoto'); if (mf) { sel = mf; document.querySelectorAll('#avs button').forEach(x => x.classList.toggle('on', !!x.dataset.subir)); }
@@ -493,8 +494,10 @@ function perfilChat(t, cb) {
   $('#go').onclick = () => {
     const n = $('#cn').value.trim();
     if (n.length < 2) return $('#err').textContent = 'Escribe un apodo de al menos 2 letras';
+    if (!soloApodo) { const y = +$('#cy').value; if (!y) return $('#err').textContent = 'Elige tu año de nacimiento';
+      if (new Date().getFullYear() - y < 18) { LS.set('edad18', 'no'); return perfilChat(t, cb); } LS.set('edad18', 'si'); }
     if (!$('#cr').checked) return $('#err').textContent = 'Acepta las reglas para entrar';
-    LS.set('chatNom', n); LS.set('chatAv', sel); LS.set('chatOk', '1'); cb(n, sel);
+    LS.set('chatNom', n); LS.set('chatAv', sel); if (!soloApodo) LS.set('chatOk', '1'); cb(n, sel);
   };
 }
 function sala(t) {
@@ -626,7 +629,7 @@ function arcade(t) {
     if (window.ARCADE) return ir2();
     stage('<div class="card cargando"><div class="sp"></div><p>Cargando el juego…</p></div>');
     const sc = document.createElement('script'); sc.src = '/arcade.js?v=8'; sc.onload = () => { const sa = document.createElement('script'); sa.src = '/aula.js?v=1'; document.body.append(sa); const sn = document.createElement('script'); sn.src = '/sonido.js?v=8'; document.body.append(sn); const s2 = document.createElement('script'); s2.src = '/arcade2.js?v=1'; s2.onload = s2.onerror = () => { const s3 = document.createElement('script'); s3.src = '/arcade3.js?v=2'; s3.onload = s3.onerror = () => { const s4 = document.createElement('script'); s4.src = '/joyas.js?v=5'; s4.onload = s4.onerror = () => { const s5 = document.createElement('script'); s5.src = '/huerto.js?v=21'; s5.onload = s5.onerror = () => { const s6 = document.createElement('script'); s6.src = '/mundo.js?v=3'; s6.onload = s6.onerror = () => { const s7 = document.createElement('script'); s7.src = '/batalla.js?v=17'; s7.onload = s7.onerror = ir2; document.body.append(s7); }; document.body.append(s6); }; document.body.append(s5); }; document.body.append(s4); }; document.body.append(s3); }; document.body.append(s2); }; sc.onerror = () => toast('No se pudo cargar el juego'); document.body.append(sc);
-  });
+  }, true); // juegos: solo el apodo, para todas las edades
 }
 const MOTOR = {
   arcade,
@@ -979,6 +982,9 @@ window.pintarCampeon = () => document.querySelectorAll('.campLinea[data-cj]:not(
 // Si fuiste campeón del mes pasado: invitación a poner tu red social (la aprueba el dueño antes de mostrarse)
 window.campeonRed = async function () {
   const d = await post('/api/campeon/yo', { uid: VID }).catch(() => null); if (!d?.lista?.length) return;
+  if (LS.get('edad18') === 'no') return toast('👑 ¡Felicidades, campeón! Mostrar tu red social es solo para mayores de 18, pero tu nombre ya está en el Salón de la Fama 🏆');
+  if (LS.get('edad18') !== 'si') { const y = await new Promise(ok => { const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = `<div class="card"><h2>👑 ¡Fuiste campeón!</h2><label for="cy2">Tu año de nacimiento</label><select id="cy2"><option value="">Elige…</option>${Array.from({ length: 90 }, (_, i) => new Date().getFullYear() - 5 - i).map(y => `<option>${y}</option>`).join('')}</select><button class="btn" id="cy2ok">Seguir</button></div>`; document.body.append(m); m.querySelector('#cy2ok').onclick = () => { const v = +m.querySelector('#cy2').value; if (!v) return; m.remove(); ok(v); }; });
+    if (new Date().getFullYear() - y < 18) { LS.set('edad18', 'no'); return campeonRed(); } LS.set('edad18', 'si'); }
   if (!PERFIL.tok) { toast('Primero crea o entra a tu usuario para poner tu red 👤'); return window.cuentaModal('crear', () => campeonRed()); }
   const m = document.createElement('div'); m.className = 'modal';
   m.innerHTML = `<div class="card"><h2 style="margin:0">👑 ¡Fuiste campeón de ${escH(d.mes)}!</h2><p class="sub" style="text-align:left">${d.lista.map(x => { if (x.juego === 'jugador') return `${['🥇', '🥈', '🥉'][x.puesto - 1]} 🎮 Jugador del mes (${x.puntos} min)`; if (/^[a-f0-9]{12}$/.test(x.juego)) return `🥇 🕹️ Fan #1 de un juego (${x.puntos} min)`; const t = TESTS.find(y => y.id === 'arcade-' + x.juego); return `${['🥇', '🥈', '🥉'][x.puesto - 1]} ${t ? escH(t.t.split(':')[0]) : escH(x.juego)} (${x.puntos})`; }).join('<br>')}</p>
