@@ -1,3 +1,12 @@
+v7.71.0 — 🤝 Asistente de grupos de Facebook
+- 🤝 Nuevo en el Centro de Mando → 🌍 Embajador: "Asistente de grupos de Facebook".
+  · Guardas tus grupos una sola vez: nombre, enlace, tema (gamers, humor, tu ciudad, cristianos, estudio, tecnología) y cada cuántos días publicar (7, 14 o 30).
+  · Cada día te dice qué grupos tocan (máximo 3 al día y 1 vez por semana por grupo, para no cansar a nadie).
+  · Te deja el texto listo y adaptado al tema de cada grupo, con su propio enlace.
+  · Tres pasos: 📋 Copiar texto → ↗ Abrir grupo → ✅ Ya publiqué (unos 30 segundos).
+  · Cada grupo crea su campaña en 📣 Marketing: verás qué grupo trae más gente y cuántos vuelven.
+- 🛡️ Publicas tú: Facebook no permite que un programa publique en grupos (lo quitó en 2024) y castiga la automatización. Así tu cuenta y tu dominio yupitok.com quedan a salvo.
+
 v7.70.0 — 💸 Inversión y retorno (agente Marketing)
 - 💸 En el Centro de Mando → 📣 Marketing, cada campaña tiene ahora una casilla "Gastado (USD)". Anota lo que pagaste en un anuncio (Meta, TikTok, un creador…) y el agente calcula:
   · cuántas personas llegaron con ese enlace y cuánto te costó cada una;

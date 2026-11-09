@@ -40,3 +40,7 @@ Orden de trabajo. Cada fase se publica probada y sin romper lo anterior.
 - Suscripción "Yupitok Plus" (Fase 2 del documento de Yupicoins).
 - Anuncios con premio oficiales de Google (H5 Games Ads) cuando AdSense apruebe.
 - App en Google Play.
+
+## 🤝 Asistente de grupos de Facebook (hecho, v7.71.0)
+- El dueño publica a mano (Facebook quitó la API de grupos en 2024 y castiga la automatización y la evasión de su filtro de spam).
+- El agente guarda los grupos, avisa cuáles tocan (máx. 3 al día, 1 vez por semana por grupo), deja el texto listo según el tema y un enlace propio por grupo para medir en Marketing.

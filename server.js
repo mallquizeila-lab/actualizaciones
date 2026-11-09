@@ -367,6 +367,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/reporte' && P) return await mando.reporte(true);
   if (u === '/api/mando/link' && P) { const o = await json(q); mando.nuevoLink(o); return await mando.estado(); }
   if (u === '/api/mando/link/accion' && P) { await mando.accionLink(await json(q)); return await mando.estado(); }
+  if (u === '/api/mando/grupo' && P) { const o = await json(q); if (o.accion) mando.grupoAccion(o); else mando.grupoNuevo(o); return await mando.estado(); }
   if (u === '/api/mando/mision' && P) { const o = await json(q); mando.misionHecha(String(o.id || ''), !!o.hecha); return await mando.estado(); }
   if (u === '/api/mando/embajador' && P) { mando.ajustesEmbajador(await json(q)); return await mando.estado(); }
   if (u === '/api/mando/fb' && P) { await mando.publicarFB(); return await mando.estado(); }
