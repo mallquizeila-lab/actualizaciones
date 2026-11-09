@@ -1,3 +1,10 @@
+v7.72.0 — 🌍 Buscador de grupos en todo el mundo
+- 🔎 Nuevo en el Asistente de grupos: "Buscar grupos en todo el mundo". Búsquedas de Facebook listas en 14 idiomas: español, inglés, portugués, árabe, hindi, indonesio, francés, turco, ruso, vietnamita, filipino, alemán, italiano y bengalí. Las palabras (juegos gratis, gamers, juegos online…) ya vienen traducidas.
+  · Cada semana te destaca 3 idiomas nuevos para que vayas abriendo mercados.
+  · Tocas una búsqueda y Facebook te muestra los grupos públicos, sus miembros y cuántas publicaciones tienen al día. Tú eliges los más activos y te unes.
+- 🌐 Al agregar un grupo eliges su idioma: el agente te prepara el anuncio traducido a ese idioma (1 consulta de IA por publicación) y el enlace lleva a la versión de Yupitok en ese idioma (o en inglés si todavía no existe).
+- 🛡️ Sin robots ni scraping: Facebook lo prohíbe y bloquea las cuentas. Tú buscas, te unes y publicas; el agente prepara, traduce, recuerda y mide.
+
 v7.71.0 — 🤝 Asistente de grupos de Facebook
 - 🤝 Nuevo en el Centro de Mando → 🌍 Embajador: "Asistente de grupos de Facebook".
   · Guardas tus grupos una sola vez: nombre, enlace, tema (gamers, humor, tu ciudad, cristianos, estudio, tecnología) y cada cuántos días publicar (7, 14 o 30).
