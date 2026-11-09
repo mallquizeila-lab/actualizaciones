@@ -284,6 +284,7 @@ async function api(u, q, U, r) {
     if (u === '/api/viral/config' && P) { V.configurar(o); return V.estado(); }
     if (u === '/api/viral/voces-glory' && P) { V.vocesGlory(); return V.estado(); }
     if (u === '/api/viral/voces-todas' && P) { V.vocesTodas(); return V.estado(); }
+    if (u === '/api/viral/voces-idiomas' && P) { V.vocesIdiomas(o.langs); return V.estado(); }
     if (u === '/api/viral/escenas' && P) { V.escenasIA(); return V.estado(); }
     if (u === '/api/viral/nueva-clave' && P) { V.nuevaClave(); return V.estado(); }
     if (u === '/api/viral/arte-glory' && P) { V.arteGlory(); return V.estado(); }

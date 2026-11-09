@@ -48,11 +48,12 @@
   // Voces grabadas con la biblioteca de ShortForge (si existen); si no, la voz del celular
   let MANI_H = null, ultVozH = 0, audioH = null;
   const idFrase = (q, txt) => { let h = 0; const t = q + '|' + txt; for (let i = 0; i < t.length; i++) h = (Math.imul(h, 31) + t.charCodeAt(i)) >>> 0; return q + '_' + h.toString(36); };
-  function cargarVocesH() { if (MANI_H) return; MANI_H = {}; fetch('/voces/huerto/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI_H = Object.fromEntries((m.voces || []).map(v => [v, 1])); MANI_H._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
+  const LGh = (window.IDIOMA?.actual || 'es'), BASEh = LGh === 'es' ? '/voces/huerto' : '/voces/huerto-' + LGh;
+  function cargarVocesH() { if (MANI_H) return; MANI_H = {}; fetch(BASEh + '/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI_H = Object.fromEntries((m.voces || []).map(v => [v, 1])); MANI_H._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
   function voz(txt, quien, o = {}) {
     const id = idFrase(quien, txt);
-    if (MANI_H && MANI_H[id] && (window.IDIOMA?.actual || 'es') === 'es') { if (LS.get('arcVoz') === '0' || LS.get('arcSonido') === '0') return; const ahora = Date.now(); if (!o.forzar && ahora - ultVozH < 1800) return; ultVozH = ahora;
-      try { if (o.cortar && audioH) audioH.pause(); audioH = new Audio('/voces/huerto/' + id + '.mp3' + (MANI_H._v || '')); audioH.volume = .95; audioH.play().catch(() => {}); } catch (e) {} return; }
+    if (MANI_H && MANI_H[id]) { if (LS.get('arcVoz') === '0' || LS.get('arcSonido') === '0') return; const ahora = Date.now(); if (!o.forzar && ahora - ultVozH < 1800) return; ultVozH = ahora;
+      try { if (o.cortar && audioH) audioH.pause(); audioH = new Audio(BASEh + '/' + id + '.mp3' + (MANI_H._v || '')); audioH.volume = .95; audioH.play().catch(() => {}); } catch (e) {} return; }
     FX.voz?.(txt, { ...(VOZ[quien] || {}), ...o });
   }
   const datos = () => PERFIL.datos.juegos.huerto || { nivel: 1, estrellas: {} };

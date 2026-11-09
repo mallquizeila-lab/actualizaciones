@@ -35,14 +35,15 @@
   function imgArte(c) { if (!IMG[c.id]) IMG[c.id] = new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = '/arte/glory/' + c.id + '.webp'; }); return IMG[c.id]; }
   function cubrir(X, im, x, y, w, h) { const s = Math.max(w / im.width, h / im.height), iw = im.width * s, ih = im.height * s; X.drawImage(im, x + (w - iw) / 2, y + (h - ih) * .3, iw, ih); }
   function ponerArte(cv, c, w, h) { if (!tieneArte(c)) return false; imgArte(c).then(im => { if (!im) { const r = GA.retrato(c, w, h); cv.width = r.width; cv.height = r.height; cv.getContext('2d').drawImage(r, 0, 0); return; } cv.width = w * 2; cv.height = h * 2; cubrir(cv.getContext('2d'), im, 0, 0, w * 2, h * 2); }); return true; }
-  function vocesManifest() { if (MANI !== null) return; MANI = {}; fetch('/voces/glory/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI = m.voces ? Object.fromEntries(m.voces.map(v => [v, 1])) : {}; MANI._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
+  const LGv = (window.IDIOMA?.actual || 'es'), BASEv = LGv === 'es' ? '/voces/glory' : '/voces/glory-' + LGv;
+  function vocesManifest() { if (MANI !== null) return; MANI = {}; fetch(BASEv + '/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { MANI = m.voces ? Object.fromEntries(m.voces.map(v => [v, 1])) : {}; MANI._v = m.ver ? '?v=' + m.ver : ''; }).catch(() => {}); }
   let ultVoz = 0;
   function decir(card, clave, i, forzar) {
     if (!card?.frases) return null; const lista = card.frases[clave]; if (!lista) return null; const arr = Array.isArray(lista) ? lista : [lista]; if (i == null) i = Math.floor(Math.random() * arr.length); const txt = arr[i % arr.length];
     const ahora = Date.now(); if (!forzar && ahora - ultVoz < 1700) return null; ultVoz = ahora;
     if (LS.get('arcSonido') === '0' || LS.get('arcVoz') === '0') return txt;
     const id = `${card.id}__${clave}${i % arr.length}`;
-    if (MANI && MANI[id] && (window.IDIOMA?.actual || 'es') === 'es') { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`/voces/glory/${id}.mp3${MANI._v || ''}`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
+    if (MANI && MANI[id]) { try { FX.callar?.(); const a = AUD[id] || (AUD[id] = new Audio(`${BASEv}/${id}.mp3${MANI._v || ''}`)); a.currentTime = 0; a.volume = .95; a.play().catch(() => {}); } catch (e) {} }
     else FX.voz?.(txt, { tono: card.voz?.tono ?? 1, vel: card.voz?.vel ?? 1.05, forzar: true, cortar: true });
     return txt;
   }

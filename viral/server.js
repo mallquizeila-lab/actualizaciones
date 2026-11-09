@@ -1028,6 +1028,8 @@ http.createServer(async (req, res) => {
     // Fotos subidas para las notificaciones.
     m = /^\/videos\/([a-f0-9]{16}\.mp4)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'videos', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'Este video ya expiró', 'text/plain'); return send(res, 200, fs.readFileSync(f), 'video/mp4', { 'content-disposition': `attachment; filename="glory-brown-${m[1]}"` }); }
+    m = /^\/voces\/(juegos|glory|huerto)-(en|pt|fr|de|it|id)\/([a-z0-9_]{2,80}\.mp3|manifest\.json)$/.exec(u.pathname); // 🌍 voces grabadas en otros idiomas
+    if (m) { const f = path.join(DATA, `voces_${m[1]}_${m[2]}`, m[3]); return archivo(req, res, f, m[3].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[3].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/(arte|voces)\/huerto\/([a-z0-9_]{2,80}\.(?:webp|mp3)|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, m[1] + '_huerto', m[2]); return archivo(req, res, f, m[2].endsWith('.json') ? 'application/json' : m[2].endsWith('.mp3') ? 'audio/mpeg' : 'image/webp', { 'cache-control': m[2].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/arte\/glory\/([a-z0-9_]{2,80}\.webp|manifest\.json)$/.exec(u.pathname);

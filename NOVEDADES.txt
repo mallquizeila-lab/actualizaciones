@@ -1,3 +1,10 @@
+v7.63.0 — 🌍 Los juegos hablan en el idioma de cada visitante
+- 🌍 Nuevo botón en ShortForge → Página viral: "🌍 Grabar voces en 6 idiomas". Graba el narrador, los personajes del Huerto y los 127 personajes de GLORY BROWN en inglés, portugués (Brasil), francés, alemán, italiano e indonesio, con voces naturales de Edge (gratis).
+  · Cada personaje conserva su género y su tono (si en español es una voz grave de hombre, en inglés también).
+  · Las frases se traducen igual que el texto que se ve en pantalla, así voz y texto coinciden. Usa tu IA solo una vez por frase.
+  · Tarda varias horas en total: déjalo trabajando de noche. Va idioma por idioma y ya se puede usar lo que vaya terminando.
+- 🎧 Los juegos usan sola la voz del idioma del visitante: un jugador de Brasil escucha portugués, uno de Estados Unidos inglés, etc. Si alguna frase todavía no está grabada en su idioma, se usa la voz del navegador como antes.
+
 v7.62.0 — 🎬 Videos con Google Flow casi automáticos
 - 🎬 Nuevo en el Centro de Mando, "Clips del día para Google Flow": cada mañana el agente te escribe 6 prompts listos para Flow (en inglés, que es como mejor entiende Veo). Cuentan una historia con gancho, desarrollo y final épico, con Yupi, la reina de GLORY BROWN y los defensores del Huerto, siempre descritos igual para que se vean iguales en todos los clips. Cada prompt tiene su botón 📋 Copiar. Cuesta 1 sola consulta de IA de texto al día.
 - 📁 Carpeta mágica "unir": guarda los clips descargados de Flow en ShortForge-datos\entrada\Yupitok\unir (1.mp4, 2.mp4…). 3 minutos después del último clip, ShortForge los une solo, les pone guion, voz, subtítulos, efectos y "¡Juega gratis en yupitok.com!", y te avisa por Telegram. No hay que subir nada a mano.

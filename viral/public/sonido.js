@@ -107,7 +107,9 @@
   const idN = t => { let h = 0; t = String(t).trim().toLowerCase(); for (let i = 0; i < t.length; i++) h = (Math.imul(h, 31) + t.charCodeAt(i)) >>> 0; return 'n_' + h.toString(36); };
   const cargarNarr = () => { if (NARR) return; NARR = {}; fetch('/voces/juegos/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { NVER = m.ver || ''; for (const v of m.voces || []) { const k = v.replace(/_\d$/, ''); (NARR[k] = NARR[k] || []).push(v); } }).catch(() => {}); };
   cargarNarr();
-  FX.tieneVoz = txt => !!(NARR && NARR[idN(txt)]);
+  // 🌍 Narrador grabado en el idioma del visitante (inglés, portugués, francés, alemán, italiano, indonesio)
+  let NARR_L = null, NVER_L = ''; if (LG !== 'es' && /^(en|pt|fr|de|it|id)$/.test(LG)) { NARR_L = {}; fetch(`/voces/juegos-${LG}/manifest.json`).then(r => r.ok ? r.json() : {}).then(m => { NVER_L = m.ver || ''; for (const v of m.voces || []) NARR_L[v] = 1; }).catch(() => {}); }
+  FX.tieneVoz = txt => LG === 'es' ? !!(NARR && NARR[idN(txt)]) : !!(NARR_L && NARR_L[idN(txt) + '_0']);
   FX.audio = (src, o = {}) => { try { if (o.cortar !== false) FX.callar(); audN = new Audio(src); audN.volume = o.vol ?? .95; audN.play().catch(() => {}); return audN; } catch (e) { return null; } };
   FX.voz = function (txt, o = {}) {
     if (mute() || sinVoz()) return false;
@@ -117,6 +119,7 @@
       let t = tomas[Math.floor(Math.random() * tomas.length)]; if (tomas.length > 1 && t === ultToma[k]) t = tomas[(tomas.indexOf(t) + 1) % tomas.length]; ultToma[k] = t; // no repite la misma toma seguida
       ultVoz = ahora; return !!FX.audio(`/voces/juegos/${t}.mp3${NVER ? '?v=' + NVER : ''}`);
     }
+    if (NARR_L) { const k = idN(txt) + '_0'; if (NARR_L[k]) { ultVoz = ahora; return !!FX.audio(`/voces/juegos-${LG}/${k}.mp3${NVER_L ? '?v=' + NVER_L : ''}`); } }
     if (!window.speechSynthesis) return false; ultVoz = ahora;
     { const tr = window.IDIOMA?.t(txt); if (!tr || tr === txt) return false; txt = tr; } // en otro idioma: habla la traducción (si todavía no está, se calla y la pide)
     try { if (o.cortar || speechSynthesis.pending) speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = vozEs?.lang || window.IDIOMA?.codigoVoz || 'es-ES'; if (vozEs) u.voice = vozEs; u.pitch = o.tono ?? 1; u.rate = o.vel ?? 1.1; u.volume = o.vol ?? 1; speechSynthesis.speak(u); return true; } catch (e) { return false; }
