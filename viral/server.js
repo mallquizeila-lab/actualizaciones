@@ -51,6 +51,8 @@ create table if not exists perfiles (id text primary key, codigo text unique, da
 create table if not exists yc_mov (id integer primary key, perfil text, tipo text, monto integer, motivo text, ip text, created_at text default (datetime('now')));
 create index if not exists yc_mov_p on yc_mov(perfil, created_at);
 create table if not exists yc_alerta (id integer primary key, perfil text, detalle text, created_at text default (datetime('now')));
+create table if not exists yc_inv (perfil text, item text, created_at text default (datetime('now')), primary key (perfil, item));
+create table if not exists yc_estilo (uidh text primary key, perfil text, marco text, titulo text, color text);
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
@@ -466,6 +468,18 @@ function ycDar(perfil, monto, motivo, ip, cat = 'juego') { // devuelve cuántas 
   return monto;
 }
 function ycGastar(perfil, monto, motivo, ip) { monto = Math.floor(+monto) || 0; if (monto <= 0 || ycSaldo(perfil) < monto) return false; run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'gastado',?,?,?)", perfil, -monto, motivo, ipCorta(ip || '')); return true; }
+// 🛍️ Tienda Yupitok: cosas solo visuales que se lucen en los rankings (marco del avatar, título y color del nombre)
+const TIENDA = [
+  ['m-oro', 'marco', '🟡 Marco dorado', 60, '0 0 0 2px #ffd23f'], ['m-neon', 'marco', '💠 Marco neón', 90, '0 0 0 2px #22e6ff,0 0 8px #22e6ff'], ['m-fuego', 'marco', '🔥 Marco de fuego', 120, '0 0 0 2px #ff7a1a,0 0 10px #ff3d00'],
+  ['m-arcoiris', 'marco', '🌈 Marco arcoíris', 200, '0 0 0 2px #ff5fa2,0 0 0 4px #ffd23f,0 0 0 6px #22e6ff'], ['m-diamante', 'marco', '💎 Marco diamante', 300, '0 0 0 2px #b9f2ff,0 0 14px #b9f2ff'],
+  ['t-gamer', 'titulo', '🎮 Gamer', 30], ['t-huerto', 'titulo', '🌱 Rey del Huerto', 60], ['t-joyas', 'titulo', '💎 Maestro de Joyas', 60], ['t-glory', 'titulo', '⚔️ Guerrero GLORY', 60], ['t-cerebro', 'titulo', '🧠 Cerebrito', 60], ['t-leyenda', 'titulo', '👑 Leyenda', 250],
+  ['c-oro', 'color', '🟨 Nombre dorado', 40, 'color:#ffd23f'], ['c-cian', 'color', '🟦 Nombre cian', 40, 'color:#22e6ff'], ['c-rosa', 'color', '🟪 Nombre rosa', 40, 'color:#ff7ac0'], ['c-verde', 'color', '🟩 Nombre verde', 40, 'color:#4ade80'],
+  ['c-arcoiris', 'color', '🌈 Nombre arcoíris', 150, 'background:linear-gradient(90deg,#ff5fa2,#ffd23f,#22e6ff);-webkit-background-clip:text;background-clip:text;color:transparent'],
+].map(([id, tipo, nombre, precio, css]) => ({ id, tipo, nombre, precio, css: css || '' }));
+const TIENDA_M = new Map(TIENDA.map(x => [x.id, x]));
+const uidArcade = uid => crypto.createHash('sha256').update(String(uid || '')).digest('hex').slice(0, 16);
+const estiloCss = r => r ? { m: TIENDA_M.get(r.marco)?.css || '', t: TIENDA_M.get(r.titulo)?.nombre || '', c: TIENDA_M.get(r.color)?.css || '' } : null;
+const conEstilo = filas => { if (!filas.length) return filas; const E = new Map(q(`select * from yc_estilo where uidh in (${filas.map(() => '?').join(',')})`, ...filas.map(f => f.uid)).map(r => [r.uidh, r])); return filas.map(f => ({ ...f, est: estiloCss(E.get(f.uid)) })); };
 const ycEstado = perfil => { const C = YC(); return { saldo: ycSaldo(perfil), hoy: ycHoyJuego('perfil', perfil), tope: C.topeDia, valorUsd: C.valorUsd }; };
 // 📺 Yupitok TV: listas y videos de YouTube que elige el dueño (reproductor oficial de YouTube, contenido legal)
 function tvParse(texto) {
@@ -820,7 +834,7 @@ async function api(req, res, u) {
       const p = q1('select * from torneo_premios where semana=? and uid=? and reclamado=0', A.semana, uh); if (!p) return send(res, 200, { monedas: 0 });
       run('update torneo_premios set reclamado=1 where semana=? and uid=?', A.semana, uh); const ycg = ycDar(online.perfilId(b), [30, 20, 10][p.puesto - 1] || 0, 'torneo', ip); return send(res, 200, { monedas: p.monedas, puesto: p.puesto, juego: A.juego, yupicoins: ycg });
     }
-    const top = q(`select nombre, avatar, max(puntos) puntos from arcade where juego=? and created_at>=? and created_at<? group by uid order by puntos desc limit 10`, T.juego, T.desde, T.hasta);
+    const top = conEstilo(q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and created_at>=? and created_at<? group by uid order by puntos desc limit 10`, T.juego, T.desde, T.hasta)).map(({ uid, ...x }) => x);
     let yo = null; const uq = u.searchParams.get('uid'); if (uq) { const uh = uidh(uq), m = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', T.juego, uh, T.desde, T.hasta)?.p; if (m != null) yo = { puntos: m, puesto: q1(`select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?`, T.juego, T.desde, T.hasta, m).n + 1 }; }
     return send(res, 200, { juego: T.juego, termina: T.fin, top, yo, premios: TORNEO_PREMIOS, patrocinador: clip(getS('torneo', {}).premio || '', 140) });
   }
@@ -832,7 +846,7 @@ async function api(req, res, u) {
     const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = FOTOS.valido(b.avatar) ? b.avatar : 'a01', uidh = crypto.createHash('sha256').update(String(b.uid || ip)).digest('hex').slice(0, 16);
     run('insert into arcade(juego, uid, nombre, avatar, puntos) values(?,?,?,?,?)', jg, uidh, nombre, avatar, pts);
     const hoy = hoyPeru();
-    const top = q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy);
+    const top = conEstilo(q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy));
     const mio = q1(`select max(puntos) p from arcade where juego=? and uid=? and date(created_at,'-5 hours')=?`, jg, uidh, hoy).p;
     const puesto = q1(`select count(*) n from (select uid, max(puntos) p from arcade where juego=? and date(created_at,'-5 hours')=? group by uid) where p > ?`, jg, hoy, mio).n + 1;
     const MM = mesPeru(), mioMes = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', jg, uidh, MM.desde, MM.hasta).p, mesPuesto = q1('select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?', jg, MM.desde, MM.hasta, mioMes).n + 1;
@@ -861,6 +875,20 @@ async function api(req, res, u) {
   }
   // 🪙 Yupicoins: el saldo de cada jugador sale de su libro de movimientos (no se edita a mano).
   // Lo que el juego suma o resta se registra como movimiento; lo ganado tiene tope por día (por jugador y por IP) para frenar trampas.
+  if (u.pathname.startsWith('/api/tienda') && P) {
+    const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
+    const id = online.perfilId(b), uidh = uidArcade(b.uid), inv = () => q('select item from yc_inv where perfil=?', id).map(r => r.item);
+    const eq = () => q1('select marco, titulo, color from yc_estilo where perfil=? limit 1', id) || {};
+    if (u.pathname === '/api/tienda/comprar') { const it = TIENDA_M.get(String(b.item || '')); if (!it) return send(res, 400, { error: 'Ese artículo no existe' });
+      if (inv().includes(it.id)) return send(res, 400, { error: 'Ya lo tienes' });
+      if (!ycGastar(id, it.precio, 'tienda:' + it.id, ip)) return send(res, 400, { error: `Te faltan Yupicoins: cuesta ${it.precio} 💎` });
+      run('insert or ignore into yc_inv(perfil,item) values(?,?)', id, it.id); b.equipar = it.id; }
+    if (b.equipar !== undefined || b.quitar) { const tipo = b.quitar || TIENDA_M.get(String(b.equipar))?.tipo; if (!['marco', 'titulo', 'color'].includes(tipo)) return send(res, 400, { error: 'No válido' });
+      const val = b.quitar ? null : String(b.equipar); if (val && !inv().includes(val)) return send(res, 400, { error: 'Primero cómpralo' });
+      const e = { ...eq() }; e[tipo] = val; run('insert into yc_estilo(uidh,perfil,marco,titulo,color) values(?,?,?,?,?) on conflict(uidh) do update set perfil=excluded.perfil, marco=excluded.marco, titulo=excluded.titulo, color=excluded.color', uidh, id, e.marco || null, e.titulo || null, e.color || null);
+      run('update yc_estilo set marco=?, titulo=?, color=? where perfil=?', e.marco || null, e.titulo || null, e.color || null, id); }
+    return send(res, 200, { items: TIENDA, inv: inv(), equipo: eq(), ...ycEstado(id) });
+  }
   if ((u.pathname === '/api/yc' || u.pathname === '/api/yc/ganar') && P) {
     const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     const id = online.perfilId(b); if (u.pathname === '/api/yc') return send(res, 200, ycEstado(id));

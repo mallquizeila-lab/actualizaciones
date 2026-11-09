@@ -1,3 +1,13 @@
+v7.69.0 — 🛍️ Tienda Yupitok
+- 🛍️ Nueva Tienda Yupitok, para gastar las 💎 Yupicoins en cosas para lucirse:
+  · 🖼️ Marcos para el avatar: dorado (60), neón (90), fuego (120), arcoíris (200), diamante (300).
+  · 🏷️ Títulos: 🎮 Gamer (30), 🌱 Rey del Huerto, 💎 Maestro de Joyas, ⚔️ Guerrero GLORY, 🧠 Cerebrito (60), 👑 Leyenda (250).
+  · 🎨 Color del nombre: dorado, cian, rosa, verde (40) y 🌈 arcoíris (150).
+- 🏆 Lo que compras se luce en los rankings de cada juego y en el torneo de la semana.
+- 👀 Vista previa: "Así te ven" con tu apodo y tu avatar. Puedes usar o quitar lo que ya compraste cuando quieras.
+- 🛡️ Todo se compra en el servidor (con el libro de Yupicoins): nadie puede regalarse artículos desde su navegador.
+- 🏠 Banner "🛍️ Tienda Yupitok" en la portada. Tocar "💎 Yupicoins" también abre la tienda, y el enlace yupitok.com/?tienda=1 lleva directo.
+
 v7.68.0 — 📺 Yupitok TV
 - 📺 Nueva sección "Yupitok TV": series, videos y canales para ver sin salir de Yupitok. Aparece como un banner en la portada (y con el enlace yupitok.com/?tv=1).
 - 🎮 Botón "Jugar mientras miro": el video pasa a una ventanita en la esquina que sigue sonando mientras juegas. Desde ahí puedes agrandarla, ver más videos o cerrarla.
