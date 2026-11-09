@@ -1013,7 +1013,7 @@ let TORNEO = null; const pintarTorneo = () => { const h = document.getElementByI
 const cargarTorneo = () => fetch('/api/torneo?uid=' + encodeURIComponent(VID)).then(r => r.json()).then(d => { TORNEO = d.juego ? d : null; document.getElementById('hubTorneo')?.remove(); pintarTorneo(); }).catch(() => {});
 cargarTorneo();
 setTimeout(() => post('/api/torneo/premio', { uid: VID, tok: window.PERFIL?.tok }).then(r => { if (r?.monedas > 0 && window.PERFIL) { PERFIL.ganar(r.monedas); window.FX?.confeti?.(); toast(`🏆 ¡Quedaste #${r.puesto} en el torneo de la semana pasada! +${r.monedas} 🪙${r.yupicoins ? ` y +${r.yupicoins} 💎 Yupicoins` : ''}`); PERFIL.ycRefrescar(); window.pintarHub?.(); } }).catch(() => {}), 2500);
-addEventListener('yupicoins', () => window.pintarHub?.());
+addEventListener('yupicoins', () => { document.getElementById('accTienda')?.remove(); window.pintarHub?.(); });
 // 📲 Instalar Yupitok como app (Android: ventana oficial de Chrome; iPhone: pasos con Safari). Premio de 100 🪙 la primera vez que se abre instalada.
 const appInstalada = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 window.instalarApp = async function () {
@@ -1076,7 +1076,14 @@ if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.
     document.body.append(b);
     b.onclick = e => { if (e.target.closest('[data-c]')) { cerrarCaja(); const pl = document.getElementById('tvPl'); if (pl?.classList.contains('grande')) reproductor(null, 'mini'); return; } const it = e.target.closest('[data-i]'); if (!it) return; reproductor(L[+it.dataset.i], 'grande'); b.querySelector('div[style^="height"]').style.height = 'min(54vw,520px)'; b.scrollTo({ top: 0, behavior: 'smooth' }); try { window.PERFIL?.evento?.('vivo'); } catch (er) {} };
   };
-  window.pintarTV = () => { const h = document.getElementById('hub'); if (!h || !cfg.tv?.length || h.querySelector('#hubTV')) return;
+  // 🧭 Barra de accesos rápidos de la portada (Pase, Tienda, TV, Salón de la Fama): ordena la portada en una sola fila
+  window.tileAcceso = (id, icono, titulo, sub, onclick, badge, orden) => { const h = document.getElementById('hub'); if (!h) return; let bar = document.getElementById('hubAccesos');
+    if (!bar) { h.insertAdjacentHTML('afterbegin', `<div id="hubAccesos" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:8px;margin:2px 0 4px"></div>`); bar = document.getElementById('hubAccesos');
+      bar.insertAdjacentHTML('beforeend', `<button id="accFama" data-o="9" onclick="location.href='/campeones'" style="border:1px solid rgba(255,255,255,.14);border-radius:16px;background:linear-gradient(160deg,rgba(255,210,63,.18),rgba(14,11,40,.8));color:#fff;padding:10px 4px;cursor:pointer;font:inherit;position:relative"><div style="font-size:1.6rem">👑</div><b style="font-size:.78rem;display:block">Salón de la Fama</b><small style="font-size:.66rem;opacity:.8">Campeones</small></button>`); }
+    document.getElementById(id)?.remove();
+    const html = `<button id="${id}" data-o="${orden || 5}" style="border:1px solid rgba(255,255,255,.14);border-radius:16px;background:linear-gradient(160deg,rgba(139,92,246,.35),rgba(14,11,40,.85));color:#fff;padding:10px 4px;cursor:pointer;font:inherit;position:relative">${badge ? `<span style="position:absolute;top:4px;right:6px;background:#ff3df0;border-radius:999px;padding:0 6px;font-size:.66rem;font-weight:800">${badge}</span>` : ''}<div style="font-size:1.6rem">${icono}</div><b style="font-size:.78rem;display:block">${titulo}</b><small style="font-size:.66rem;opacity:.8">${sub}</small></button>`;
+    const sig = [...bar.children].find(x => +x.dataset.o > (orden || 5)); sig ? sig.insertAdjacentHTML('beforebegin', html) : bar.insertAdjacentHTML('beforeend', html); document.getElementById(id).onclick = onclick; };
+  window.pintarTV = () => { const h = document.getElementById('hub'); if (!h || !cfg.tv?.length || h.querySelector('#accTV')) return; window.tileAcceso('accTV', '📺', 'Yupitok TV', 'Mira y juega', () => abrirTV(), null, 3); return;
     h.insertAdjacentHTML('beforeend', `<button id="hubTV" class="joyban" onclick="abrirTV()" style="grid-column:1/-1;background:linear-gradient(120deg,#1e1b4b,#7b2ff7 55%,#22e6ff)"><span style="font-size:2.2rem">📺</span><span><b style="font-size:1.1rem">Yupitok TV</b><br><small>Series y videos sin salir de Yupitok. ¡Mira y juega al mismo tiempo!</small></span></button>`); };
   cfgP.then(() => { try { pintarTV(); } catch (e) {} if (new URLSearchParams(location.search).get('tv') === '1') setTimeout(() => window.abrirTV(), 800); });
 })();
@@ -1099,8 +1106,8 @@ if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.
 // 🏆 Yupi Pass: temporada mensual gratis de 30 niveles (premios en monedas y artículos exclusivos en los niveles 10, 20 y 30)
 (() => {
   let PS = null;
-  const cargar = () => post('/api/pase', { uid: VID, tok: window.PERFIL?.tok }).then(d => { if (d && !d.error) { PS = d; document.getElementById('hubPase')?.remove(); window.pintarPase?.(); } }).catch(() => {});
-  window.pintarPase = () => { const h = document.getElementById('hub'); if (!h || !PS || h.querySelector('#hubPase')) return; const dias = Math.max(0, Math.ceil((PS.fin - Date.now()) / 864e5)), listos = PS.niveles.filter(x => x.listo).length;
+  const cargar = () => post('/api/pase', { uid: VID, tok: window.PERFIL?.tok }).then(d => { if (d && !d.error) { PS = d; document.getElementById('accPase')?.remove(); window.pintarPase?.(); } }).catch(() => {});
+  window.pintarPase = () => { const h = document.getElementById('hub'); if (!h || !PS || h.querySelector('#accPase')) return; const listos = PS.niveles.filter(x => x.listo).length; window.tileAcceso('accPase', '🏆', 'Yupi Pass', `Nivel ${PS.nivel}/${PS.total}`, () => abrirPase(), listos ? '🎁' + listos : null, 1); return; const dias = 0;
     h.insertAdjacentHTML('afterbegin', `<button id="hubPase" class="joyban" onclick="abrirPase()" style="grid-column:1/-1;background:linear-gradient(120deg,#4c1d95,#8b5cf6 50%,#ffd23f)"><span style="font-size:2.2rem">🏆</span><span style="flex:1"><b style="font-size:1.05rem">Yupi Pass · Temporada de ${escH(PS.nombre)}</b> ${listos ? `<b style="background:#ff3df0;border-radius:999px;padding:1px 8px;font-size:.75rem">🎁 ${listos}</b>` : ''}<br><small>Nivel ${PS.nivel}/${PS.total} · termina en ${dias} días · premios exclusivos en los niveles 10, 20 y 30</small><span style="display:block;height:8px;border-radius:99px;background:rgba(255,255,255,.25);margin-top:6px;overflow:hidden"><span style="display:block;height:100%;width:${Math.round(PS.nivel >= PS.total ? 100 : PS.enNivel * 100 / PS.porNivel)}%;background:#fff"></span></span></span></button>`); };
   window.abrirPase = () => { if (!PS) return; const box = document.createElement('div'); box.className = 'modal';
     const pinta = () => { box.innerHTML = `<div class="card" style="max-height:88vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🏆 Yupi Pass</h2><button class="btn alt" data-x="1" style="width:auto;padding:6px 12px">✕</button></div>
@@ -1111,7 +1118,7 @@ if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.
     box.onclick = async e => { if (e.target === box || e.target.closest('[data-x]')) return box.remove(); const b = e.target.closest('[data-n]'); if (!b) return;
       const r = await post('/api/pase/reclamar', { uid: VID, tok: window.PERFIL?.tok, n: +b.dataset.n }).catch(() => null); if (!r || r.error) return toast(r?.error || 'No se pudo reclamar');
       if (r.monedas) window.PERFIL?.ganar(r.monedas); toast(r.item ? `🌟 ¡Ganaste ${r.item}! Póntelo en la 🛍️ Tienda` : `🎁 +${r.monedas} 🪙 monedas`); window.FX?.confeti?.();
-      PS = r; pinta(); document.getElementById('hubPase')?.remove(); window.pintarPase?.(); };
+      PS = r; pinta(); document.getElementById('accPase')?.remove(); window.pintarPase?.(); };
   };
   addEventListener('yupicoins', () => cargar());
   setTimeout(cargar, 1500);
@@ -1150,7 +1157,7 @@ window.nomEst = (x, t = 22) => `<span style="display:inline-flex;border-radius:5
         else d = await cargar(b.dataset.eq ? { equipar: b.dataset.eq } : { quitar: b.dataset.quitar });
         pintar(box, d); window.PERFIL?.ycRefrescar(); } catch (er) { toast(er.message); } };
   };
-  window.pintarTienda = () => { const h = document.getElementById('hub'); if (!h || h.querySelector('#hubTienda')) return;
+  window.pintarTienda = () => { const h = document.getElementById('hub'); if (!h || h.querySelector('#accTienda')) return; window.tileAcceso('accTienda', '🛍️', 'Tienda', `💎 ${window.PERFIL?.yupicoins?.saldo ?? 0}`, () => abrirTienda(), null, 2); return;
     h.insertAdjacentHTML('beforeend', `<button id="hubTienda" class="joyban" onclick="abrirTienda()" style="grid-column:1/-1;background:linear-gradient(120deg,#0e7490,#22e6ff 50%,#a78bfa)"><span style="font-size:2.2rem">🛍️</span><span><b style="font-size:1.1rem">Tienda Yupitok</b><br><small>Usa tus 💎 Yupicoins: marcos, títulos y colores para lucirte en los rankings.</small></span></button>`); };
   if (new URLSearchParams(location.search).get('tienda') === '1') setTimeout(() => window.abrirTienda(), 1200);
 })();

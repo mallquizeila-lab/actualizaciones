@@ -1,3 +1,7 @@
+v7.77.0 — 🧭 Portada más ordenada + 🎯 aviso del reto
+- 🧭 La portada quedó más limpia: el Yupi Pass, la Tienda, Yupitok TV y el Salón de la Fama ahora son una fila de 4 botones (accesos rápidos), como en las apps grandes, en vez de 3 banners gigantes. El Pase muestra tu nivel y avisa con 🎁 si tienes premios por reclamar, y la Tienda muestra tus 💎.
+- 🎯 Nuevo en el panel de la página → Ajustes: "Aviso del reto del día". Una notificación diaria a la hora que elijas, por ejemplo "🎯 Reto del día: Torre · ¿Puedes hacer 20 puntos?". Para no cansar a nadie, no se envía si ese día ya salió otra notificación. Viene apagado: actívalo cuando quieras.
+
 v7.76.0 — 👫 Invitar amigos sube el Yupi Pass
 - 👫 Cada amigo nuevo que invitas y juega te da ahora, además de las 100 🪙 de siempre: +30 puntos del 🏆 Yupi Pass y +5 💎 Yupicoins (hasta 5 amigos por día; los 💎 respetan el tope diario).
 - 🏆 El Yupi Pass explica todas las formas de subir: entrar cada día, partidas, misiones, logros, niveles, 🎯 reto del día (+25) y amigos invitados (+30).

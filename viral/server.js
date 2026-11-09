@@ -203,6 +203,15 @@ async function reloj() {
     enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
   }
 }
+// 🎯 Aviso del reto del día: una notificación con el juego y la meta del día. Solo si ese día no salió ninguna otra notificación general.
+async function avisoReto() {
+  const ra = getS('retoAviso', { on: false, hora: '17:00' }); if (!ra.on || horaPeru() < ra.hora || getS('retoAvisoDia', '') === hoyPeru() || enviando.id) return;
+  setS('retoAvisoDia', hoyPeru());
+  if (q1("select 1 from campaigns where date(created_at, '-5 hours') = ? and status in ('enviada','enviando','programada')", hoyPeru())) return;
+  const R = retoDia(), NOM = { gusanito: 'Gusanito', bloques: 'Bloques', frutas: 'Frutas', ladrillos: 'Ladrillos', vuela: 'Vuela', corredor: 'Corredor', torre: 'Torre', n2048: '2048', flechas: 'Flechas', memoria: 'Memoria' };
+  const r = run("insert into campaigns(title,body,url,filters,max_n,run_at,status,auto) values(?,?,?,?,0,datetime('now'),'programada','reto')", `🎯 Reto del día: ${NOM[R.juego] || R.juego}`, `¿Puedes hacer ${R.meta} puntos? Gana puntos del Yupi Pass y 💎 Yupicoins. ¡Solo hoy! 🔥`, `/?g=arcade-${R.juego}&src=push-reto`, '{}');
+  enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
+}
 // 🔥 Juego del día: una notificación al día con el juego más jugado de la semana (no repite el mismo en 7 días).
 // No se envía si ese día ya mandaste una campaña tuya, para no cansar a la gente.
 async function juegoDelDia() {
@@ -256,7 +265,7 @@ async function avisoHoraFeliz() {
   const r = run("insert into campaigns(title,body,url,filters,max_n,run_at,status,auto) values(?,?,?,?,0,datetime('now'),'programada','horaFeliz')", '🎉 ¡Empezó la Hora Feliz en Yupitok!', `+${h.extra} 🪙 extra por cada partida hasta las ${h.hasta}. ¡Entra a jugar ahora! 🎮`, '/?src=horafeliz', '{}');
   enviarCampana(q1('select * from campaigns where id=?', r.lastInsertRowid));
 }
-setInterval(() => reloj().then(() => juegoDelDia()).then(() => avisoCampeones()).then(() => avisoHoraFeliz()).then(() => avisoRacha()).catch(console.error), 30000).unref();
+setInterval(() => reloj().then(() => juegoDelDia()).then(() => avisoReto()).then(() => avisoCampeones()).then(() => avisoHoraFeliz()).then(() => avisoRacha()).catch(console.error), 30000).unref();
 
 // ---------------- Servidor ----------------
 const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
@@ -1137,6 +1146,7 @@ async function api(req, res, u) {
         if (b.horaFeliz) { const h = b.horaFeliz, ok = x => /^\d\d:\d\d$/.test(x); setS('horaFeliz', { on: !!h.on, dia: Math.max(0, Math.min(6, +h.dia || 0)), desde: ok(h.desde) ? h.desde : '20:00', hasta: ok(h.hasta) ? h.hasta : '21:00', extra: Math.max(5, Math.min(100, +h.extra || 20)), aviso: h.aviso !== false }); }
         if (b.famaDias !== undefined) setS('famaDias', +b.famaDias === 7 ? 7 : 0);
         if (b.tv) { const listas = tvParse(b.tv.texto); setS('tv', { on: !!b.tv.on, texto: clip(String(b.tv.texto || ''), 6000), listas }); }
+        if (b.retoAviso) setS('retoAviso', { on: !!b.retoAviso.on, hora: /^\d\d:\d\d$/.test(b.retoAviso.hora) ? b.retoAviso.hora : '17:00' });
         if (b.juegoDia) setS('juegoDia', { on: !!b.juegoDia.on, hora: /^\d\d:\d\d$/.test(b.juegoDia.hora) ? b.juegoDia.hora : '19:30' });
         if (b.diario) setS('diario', { on: !!b.diario.on, hora: /^\d\d:\d\d$/.test(b.diario.hora) ? b.diario.hora : '07:30', title: clip(b.diario.title, 80), body: clip(b.diario.body, 200), url: safeDest(b.diario.url || '/') || '/' });
         if (b.encuesta?.q && Array.isArray(b.encuesta.options)) {
@@ -1147,7 +1157,7 @@ async function api(req, res, u) {
       }
       const poll = q1('select * from polls where active=1 order by id desc limit 1');
       const pr = poll ? q('select option, count(*) n from votes where poll_id=? group by option', poll.id) : [];
-      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), tv: getS('tv', { on: false, texto: '', listas: [] }), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), campeonesAviso: getS('campeonesAviso', true), famaDias: getS('famaDias', 0), rachaAviso: getS('rachaAviso', { on: true, hora: '19:00' }), horaFeliz: getS('horaFeliz', { on: true, dia: 6, desde: '20:00', hasta: '21:00', extra: 20, aviso: true }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
+      return send(res, 200, { pro: { ...getS('pro', {}), juegos: (await catalogoPro()).length }, apoyo: { ...getS('apoyo', {}), metodos: metodosApoyo(getS('apoyo', {})) }, login: getS('login', {}), retoAviso: getS('retoAviso', { on: false, hora: '17:00' }), tv: getS('tv', { on: false, texto: '', listas: [] }), redesCripto: REDES_CRIPTO, ads: adsCfg(), marca: getS('marca', { nombre: '', eslogan: '' }), bienvenida: getS('bienvenida', { on: true, title: '✨ ¡Bienvenido!', body: 'Desde mañana recibirás tu lectura del día. Mientras tanto, prueba otro test 👉' }), priv: getS('priv', {}), video: getS('video', null), tope: getS('tope', 3), juegoDia: getS('juegoDia', { on: false, hora: '19:30' }), torneo: getS('torneo', {}), campeonesAviso: getS('campeonesAviso', true), famaDias: getS('famaDias', 0), rachaAviso: getS('rachaAviso', { on: true, hora: '19:00' }), horaFeliz: getS('horaFeliz', { on: true, dia: 6, desde: '20:00', hasta: '21:00', extra: 20, aviso: true }), diario: getS('diario', { on: false, hora: '07:30', title: '✨ Tu horóscopo de hoy, {signo}', body: 'Los astros tienen un mensaje para ti. Toca para verlo 👉', url: '/?g=horoscopo&src=push' }),
         encuesta: poll && { q: poll.question, options: JSON.parse(poll.options), votos: JSON.parse(poll.options).map((_, i) => pr.find(x => x.option === i)?.n || 0) } });
     }
     return send(res, 404, { error: 'No existe' });

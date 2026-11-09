@@ -245,6 +245,10 @@ const V = {
       <textarea id="tv-t" rows="7" maxlength="6000" placeholder="Las aventuras de Yupi | https://www.youtube.com/playlist?list=PL...&#10;Trucos de GLORY BROWN | https://youtu.be/XXXXXXXXXXX&#10;Canal Yupitok | https://www.youtube.com/channel/UC...">${esc(a.tv?.texto || '')}</textarea>
       <p class="hint">${(a.tv?.listas || []).length} elemento(s) válidos.</p>
       <p style="margin-top:10px"><button class="btn" id="tv-go">Guardar</button></p></div>
+    <div class="card"><h2>🎯 Aviso del reto del día</h2><p class="hint">Una notificación al día con el juego y la meta del reto (por ejemplo: "🎯 Reto del día: Torre · ¿Puedes hacer 20 puntos?"). Para no cansar a nadie, no se envía si ese día ya salió otra notificación.</p>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ra-on" style="width:auto" ${a.retoAviso?.on ? 'checked' : ''}> Activado</label>
+      <div class="row"><div><label>Hora (Perú)</label><input id="ra-h" type="time" value="${esc(a.retoAviso?.hora || '17:00')}"></div></div>
+      <p style="margin-top:10px"><button class="btn" id="ra-go">Guardar</button></p></div>
     <div class="card"><h2>🔥 El juego del día (automático)</h2><p class="hint">Una notificación al día con el juego profesional más jugado de la semana (no repite el mismo en 7 días). Si ese día ya mandaste una campaña tuya, no se envía, para no cansar a tus suscriptores.</p>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="jd-on" style="width:auto" ${a.juegoDia?.on ? 'checked' : ''}> Activado</label>
       <div class="row"><div><label>Hora (Perú)</label><input id="jd-h" type="time" value="${esc(a.juegoDia?.hora || '19:30')}"></div></div>
@@ -279,6 +283,7 @@ const V = {
     $('#hf-go').onclick = () => api('ajustes', { horaFeliz: { on: $('#hf-on').checked, dia: +$('#hf-d').value, desde: $('#hf-a').value, hasta: $('#hf-b').value, extra: +$('#hf-x').value, aviso: $('#hf-av').checked } }).then(ok, e => alert(e.message));
     $('#to-go').onclick = () => api('ajustes', { torneo: { premio: $('#to-p').value }, campeonesAviso: $('#to-ca').checked, famaDias: +$('#to-fd').value }).then(ok, e => alert(e.message));
     $('#tv-go').onclick = () => api('ajustes', { tv: { on: $('#tv-on').checked, texto: $('#tv-t').value } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#ra-go').onclick = () => api('ajustes', { retoAviso: { on: $('#ra-on').checked, hora: $('#ra-h').value } }).then(ok, e => alert(e.message));
     $('#jd-go').onclick = () => api('ajustes', { juegoDia: { on: $('#jd-on').checked, hora: $('#jd-h').value } }).then(ok, e => alert(e.message));
     $('#d-go').onclick = () => api('ajustes', { diario: { on: $('#d-on').checked, hora: $('#d-h').value, title: $('#d-t').value, body: $('#d-b').value, url: $('#d-u').value } }).then(ok, e => alert(e.message));
     $('#p-go').onclick = () => api('ajustes', { encuesta: { q: $('#p-q').value, options: $('#p-o').value.split('\n') } }).then(() => ir('ajustes'), e => alert(e.message));
