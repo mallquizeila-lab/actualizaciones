@@ -1,3 +1,10 @@
+v7.66.0 — 🪙 Yupicoins (Fase A, parte 1) + plan de Yupitok
+- 🪙 Las monedas ahora se llaman Yupicoins.
+- 📒 Libro de movimientos en el servidor: cada Yupicoin que se gana o se gasta queda registrada. El saldo de cada jugador sale de ese libro, y si alguien cambia su saldo a mano en el navegador, el servidor lo corrige.
+- 🛡️ Antifraude: tope de Yupicoins ganadas por jugador al día (2,500) y por conexión (12,000). El saldo que traían los jugadores se respeta hasta 5,000. Cuando alguien intenta sumar de más, se crea una alerta.
+- 🧭 Centro de Mando: nueva tarjeta "🪙 Yupicoins" con emitidas, gastadas, jugadores, % que gasta y alertas. El Guardián avisa en el reporte diario si hubo trampas.
+- 🗺️ Archivo PLAN_YUPITOK.md con el plan aprobado: Yupicoins y tienda, Yupitok TV, portal para desarrolladores y Yupitok Ads.
+
 v7.65.1 — Bienvenida con un solo botón
 - 🚀 La bienvenida ahora tiene solo el botón "¡A jugar!". Más simple y más rápido para empezar a jugar.
 - 📄 Quien no quiera que se guarden sus estadísticas lo puede desactivar (y volver a activar) desde la política de privacidad, y sigue jugando igual.

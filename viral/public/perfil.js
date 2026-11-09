@@ -12,11 +12,11 @@
   ];
   const LOGROS = [['primera', '🎮 Primera partida', d => d.partidas >= 1], ['diez', '🔟 10 partidas', d => d.partidas >= 10], ['cien', '💯 100 partidas', d => d.partidas >= 100],
     ['racha3', '🔥 Racha de 3 días', d => d.racha.max >= 3], ['racha7', '🔥 Racha de 7 días', d => d.racha.max >= 7], ['nivel5', '⭐ Nivel 5', d => nivelDe(d.xp) >= 5], ['nivel10', '🌟 Nivel 10', d => nivelDe(d.xp) >= 10],
-    ['joyas10', '💎 Nivel 10 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 10], ['joyas30', '💎 Nivel 30 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 30], ['huerto10', '🌱 Nivel 10 en Huerto', d => (d.juegos.huerto?.nivel || 1) > 10], ['rico', '🪙 500 monedas', d => d.monedas >= 500], ['explorador', '🧭 10 juegos distintos', d => Object.keys(d.juegos).length >= 10]];
+    ['joyas10', '💎 Nivel 10 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 10], ['joyas30', '💎 Nivel 30 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 30], ['huerto10', '🌱 Nivel 10 en Huerto', d => (d.juegos.huerto?.nivel || 1) > 10], ['rico', '🪙 500 Yupicoins', d => d.monedas >= 500], ['explorador', '🧭 10 juegos distintos', d => Object.keys(d.juegos).length >= 10]];
 
   function guardar() {
     LS.set('perfil', JSON.stringify(D)); clearTimeout(tg);
-    tg = setTimeout(() => post('/api/perfil', { uid: VID, tok, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } }).catch(() => {}), 1500);
+    tg = setTimeout(() => post('/api/perfil', { uid: VID, tok, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } if (Number.isFinite(r.monedas) && r.monedas !== D.monedas) { D.monedas = r.monedas; LS.set('perfil', JSON.stringify(D)); window.dispatchEvent(new Event('yupicoins')); } }).catch(() => {}), 1500);
   }
   function misionesHoy() {
     if (D.misiones?.dia !== hoy()) {
