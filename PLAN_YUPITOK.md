@@ -44,3 +44,7 @@ Orden de trabajo. Cada fase se publica probada y sin romper lo anterior.
 ## 🤝 Asistente de grupos de Facebook (hecho, v7.71.0)
 - El dueño publica a mano (Facebook quitó la API de grupos en 2024 y castiga la automatización y la evasión de su filtro de spam).
 - El agente guarda los grupos, avisa cuáles tocan (máx. 3 al día, 1 vez por semana por grupo), deja el texto listo según el tema y un enlace propio por grupo para medir en Marketing.
+
+## 🛠️ Fase C · Desarrolladores (base hecha, v7.73.0)
+- Página yupitok.com/desarrolladores con formulario, panel privado por juego (estado y partidas), revisión del dueño en el Centro de Mando y sección "Hechos por la comunidad" en la portada.
+- Pendiente para cuando haya tráfico: reparto de ingresos con contrato y verificación de identidad.

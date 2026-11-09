@@ -913,7 +913,7 @@ JUEGO.proAbrir = function (g, volver) {
     $('#proVolver').onclick = () => volver ? volver() : JUEGO.pro(); $('#proFull').onclick = () => { const c = $('#proCaja'); (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c); };
     $('#proRep').onclick = async () => { if (!confirm('¿El juego no carga o no se puede jugar? Avisaremos para revisarlo.')) return; await post('/api/pro/reportar', { id: g.id }).catch(() => {}); toast('🙏 Gracias, lo revisaremos'); volver ? volver() : JUEGO.pro(); };
     try { PERFIL.evento('pro', 'pro'); } catch (e) {}
-    const caja = $('#proCaja'); setTimeout(() => { if (caja && caja.isConnected && !document.hidden) post('/api/pro/jugar', { id: g.id }).catch(() => {}); }, 30000); // cuenta como jugada real solo tras 30 s
+    const caja = $('#proCaja'); setTimeout(() => { if (caja && caja.isConnected && !document.hidden) post(g.dev ? '/api/dev/jugar' : '/api/pro/jugar', { id: g.dev || g.id }).catch(() => {}); }, 30000); // cuenta como jugada real solo tras 30 s
     // ⏱️ Minutos jugados de verdad: solo cuenta si la pantalla está visible y la persona tocó el juego (máximo 4 h al día, lo controla el servidor)
     const tm = setInterval(() => { if (!caja.isConnected) return clearInterval(tm); if (document.visibilityState !== 'visible' || document.activeElement !== caja.querySelector('iframe')) return;
       post('/api/pro/tiempo', { id: g.id, uid: VID, nombre: LS.get('chatNom') || '', avatar: LS.get('chatAv') || '' }).catch(() => {}); }, 60000);
@@ -1038,7 +1038,7 @@ setTimeout(() => { if (appInstalada() && !LS.get('appPremio') && window.PERFIL) 
 const pintarApp = () => { const h = document.getElementById('hub'); if (!h || appInstalada() || h.querySelector('[data-app]') || +(LS.get('appNoHasta') || 0) > Date.now()) return;
   const html = `<button class="joyban" data-app="1" onclick="instalarApp()" style="grid-column:1/-1;background:linear-gradient(120deg,#0ea5e9,#6366f1 55%,#a855f7);box-shadow:0 10px 30px rgba(99,102,241,.35)"><img src="/brand/mascota-128.webp" alt="" width="58" height="58" style="width:58px;height:58px;border-radius:16px;flex:0 0 58px;box-shadow:0 0 14px rgba(255,255,255,.35)"><div><b>Instala Yupitok gratis · +100 🪙</b><small>Ábrelo como app desde tu pantalla de inicio, con un toque.</small></div></button>`;
   const ref = h.querySelector('#hubTop') || [...h.querySelectorAll('[data-pd],[data-camp]')].pop(); if (ref) ref.insertAdjacentHTML('afterend', html); else h.insertAdjacentHTML('afterbegin', html); };
-{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTV(); } catch (e) {} try { pintarTienda(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
+{ const ph = window.pintarHub; window.pintarHub = function () { ph.apply(this, arguments); try { pintarHoraFeliz(); } catch (e) {} try { pintarApp(); } catch (e) {} try { pintarTorneo(); } catch (e) {} try { pintarTV(); } catch (e) {} try { pintarTienda(); } catch (e) {} try { pintarDev(); } catch (e) {} try { pintarTopPro(); } catch (e) {}
   try { if (PERFIL.diarioPendiente()) { const h = document.getElementById('hub'); if (h && !h.querySelector('[data-pd]')) h.insertAdjacentHTML('afterbegin', `<button class="joyban" data-pd="1" onclick="premioDiario()" style="grid-column:1/-1;background:linear-gradient(120deg,#f59e0b,#ef4444 55%,#a21caf);box-shadow:0 10px 30px rgba(245,158,11,.35)"><span>🎁</span><div><b>¡Tu premio diario te espera!</b><small>Día ${PERFIL.diaSiguiente() > 7 ? ((PERFIL.diaSiguiente() - 1) % 7) + 1 : PERFIL.diaSiguiente()} de 7 · toca para reclamar</small></div></button>`); }
     if (!window.__pdVisto && PERFIL.diarioPendiente() && LS.get('consent') && !/[?&]g=/.test(location.search) && !location.pathname.startsWith('/juego/')) { window.__pdVisto = 1; setTimeout(() => { if (!$('#home').hidden) premioDiario(); }, 1500); } } catch (e) {} }; }
 </script>
@@ -1079,6 +1079,15 @@ if (window.JUEGO_SEO) { const b = document.getElementById('seoJugar'); if (b) b.
   window.pintarTV = () => { const h = document.getElementById('hub'); if (!h || !cfg.tv?.length || h.querySelector('#hubTV')) return;
     h.insertAdjacentHTML('beforeend', `<button id="hubTV" class="joyban" onclick="abrirTV()" style="grid-column:1/-1;background:linear-gradient(120deg,#1e1b4b,#7b2ff7 55%,#22e6ff)"><span style="font-size:2.2rem">📺</span><span><b style="font-size:1.1rem">Yupitok TV</b><br><small>Series y videos sin salir de Yupitok. ¡Mira y juega al mismo tiempo!</small></span></button>`); };
   cfgP.then(() => { try { pintarTV(); } catch (e) {} if (new URLSearchParams(location.search).get('tv') === '1') setTimeout(() => window.abrirTV(), 800); });
+})();
+</script>
+<script>
+// 🛠️ Juegos de la comunidad: desarrolladores que publicaron en Yupitok (revisados por el dueño)
+(() => {
+  let DEV = null; fetch('/api/dev/juegos').then(r => r.json()).then(d => { DEV = d.juegos || []; window.pintarDev?.(); const q = new URLSearchParams(location.search).get('dev'); if (q) { const g = DEV.find(x => x.dev === q); if (g) setTimeout(() => window.abrirDev(g.dev), 600); } }).catch(() => {});
+  window.abrirDev = id => { const g = (DEV || []).find(x => x.dev === id); if (!g) return; show('play'); JUEGO.proAbrir({ ...g, d: `${g.d} · Hecho por ${g.estudio}` }, () => { show('home'); }); };
+  window.pintarDev = () => { const h = document.getElementById('hub'); if (!h || !DEV?.length || h.querySelector('#hubDev')) return;
+    h.insertAdjacentHTML('beforeend', `<div id="hubDev" class="card" style="grid-column:1/-1;padding:12px"><b>🛠️ Hechos por la comunidad</b><p class="sub" style="text-align:left;margin:2px 0 8px">Juegos de desarrolladores independientes. ¿Haces juegos? <a href="/desarrolladores">Publica el tuyo</a>.</p><div style="display:flex;gap:8px;overflow-x:auto">${DEV.slice(0, 12).map(g => `<button onclick="abrirDev('${g.dev}')" style="flex:0 0 110px;border:0;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;padding:0;text-align:left;font:inherit">${g.img ? `<img src="${escH(g.img)}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block" loading="lazy">` : '<span style="display:flex;aspect-ratio:1;align-items:center;justify-content:center;font-size:2rem;background:linear-gradient(135deg,#7b2ff7,#ff5fa2)">🎮</span>'}<small style="display:block;padding:4px 6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(g.t)}</small></button>`).join('')}</div></div>`); };
 })();
 </script>
 <script>

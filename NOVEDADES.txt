@@ -1,3 +1,11 @@
+v7.73.0 — 🛠️ Portal para desarrolladores + 📊 visitas de Google
+- 🛠️ Nueva página yupitok.com/desarrolladores: cualquier persona o estudio que haga juegos HTML5 puede enviar el suyo gratis (nombre, enlace https, portada, categoría y descripción; confirma que es suyo y apto para todo público).
+  · Cada desarrollador recibe un enlace privado para ver el estado de su juego y cuántas partidas tiene.
+  · Tú los revisas en el Centro de Mando → 🛠️ Desarrolladores: ▶ Probar, ✅ Aprobar o ❌ Rechazar (con el motivo). El Guardián te avisa cuando hay juegos esperando.
+  · Los aprobados salen en la portada, en "🛠️ Hechos por la comunidad", y se abren dentro de Yupitok.
+- 📊 Ahora se cuentan las visitas a las guías, las categorías y las páginas en otros idiomas, de forma anónima (sin cookies ni IP guardada). En Centro de Mando → 📊 Data ves cuántas llegan desde Google, Bing y otros buscadores, y cuáles son las más vistas.
+- 🎯 Misión nueva en el Embajador: compartir yupitok.com/desarrolladores en comunidades de desarrolladores.
+
 v7.72.0 — 🌍 Buscador de grupos en todo el mundo
 - 🔎 Nuevo en el Asistente de grupos: "Buscar grupos en todo el mundo". Búsquedas de Facebook listas en 14 idiomas: español, inglés, portugués, árabe, hindi, indonesio, francés, turco, ruso, vietnamita, filipino, alemán, italiano y bengalí. Las palabras (juegos gratis, gamers, juegos online…) ya vienen traducidas.
   · Cada semana te destaca 3 idiomas nuevos para que vayas abriendo mercados.
