@@ -1,3 +1,9 @@
+v7.66.1 — 🪙 Valor de las Yupicoins
+- 💵 1 Yupicoin = 0.01 USD (1 centavo de dólar) de referencia.
+- ✅ Las Yupicoins se ganan jugando y pronto se podrán comprar (depositar). Se usan solo dentro de Yupitok y NO se cobran como dinero. Así lo dicen ahora los Términos.
+- 🛡️ Topes ajustados al nuevo valor: máximo 1,000 Yupicoins ganadas al día por jugador (10 USD de referencia) y 6,000 por conexión. El saldo anterior se respeta hasta 3,000.
+- 🧭 La tarjeta de Yupicoins del Centro de Mando muestra cuánto valor hay en circulación.
+
 v7.66.0 — 🪙 Yupicoins (Fase A, parte 1) + plan de Yupitok
 - 🪙 Las monedas ahora se llaman Yupicoins.
 - 📒 Libro de movimientos en el servidor: cada Yupicoin que se gana o se gasta queda registrada. El saldo de cada jugador sale de ese libro, y si alguien cambia su saldo a mano en el navegador, el servidor lo corrige.

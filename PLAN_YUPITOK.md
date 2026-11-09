@@ -3,12 +3,15 @@
 Orden de trabajo. Cada fase se publica probada y sin romper lo anterior.
 
 ## Fase A · 🪙 Yupicoins (APROBADO)
+- **Valor: 1 Yupicoin = 0.01 USD (1 centavo de dólar).** Una sola moneda.
+- Las Yupicoins **se ganan** jugando y **se pueden depositar (comprar)**, pero **NO se cobran**: solo se gastan dentro de Yupitok.
+- Depósitos: método por definir (Yape/Plin con aprobación manual o pasarela). Requiere RUC y boleta (SUNAT), tope mensual para menores y términos de reembolso.
 - Renombrar las monedas a **Yupicoins**.
 - **Libro de movimientos en el servidor** para jugadores con cuenta: cada ganancia o gasto es un registro que no se edita. El saldo sale del libro.
 - **Topes diarios** y antifraude: partidas muy cortas no pagan, límite por dispositivo e IP, alertas de saldos raros en el panel.
 - **🛍️ Tienda Yupitok** de cosas solo visuales: marcos de avatar, títulos, colores de nombre, gorros.
 - Panel: Yupicoins emitidas contra gastadas, top de saldos, alertas. Métricas: retención día 1 y día 7, % que gasta.
-- NO por ahora: vender Yupicoins, cambiarlas por dinero, sorteos con premios de valor real.
+- NO: cambiar Yupicoins por dinero (retiros). Tampoco sorteos con premios de valor real sin asesoría legal.
 
 ## Fase B · 📺 Yupitok TV
 - Sección para ver series y videos sin salir de Yupitok (como Melolo).
