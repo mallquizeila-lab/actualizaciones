@@ -489,10 +489,10 @@ const estiloCss = r => r ? { m: TIENDA_M.get(r.marco)?.css || '', t: TIENDA_M.ge
 const conEstilo = filas => { if (!filas.length) return filas; const E = new Map(q(`select * from yc_estilo where uidh in (${filas.map(() => '?').join(',')})`, ...filas.map(f => f.uid)).map(r => [r.uidh, r])); return filas.map(f => ({ ...f, est: estiloCss(E.get(f.uid)) })); };
 // 🏆 Yupi Pass: una temporada por mes, 30 niveles gratis. Se sube jugando (los mismos eventos que dan Yupicoins,
 // pero los puntos de temporada NO tienen el tope de 30). Premios: monedas y, en los niveles 10, 20 y 30, artículos exclusivos.
-const TP_PTS = { diario: 10, partida: 3, mision: 8, logro: 8, nivel: 10, reto: 25 }, TP_POR_NIVEL = 60, TP_NIVELES = 30;
+const TP_PTS = { diario: 10, partida: 3, mision: 8, logro: 8, nivel: 10, reto: 25, invita: 30 }, TP_POR_NIVEL = 60, TP_NIVELES = 30;
 const tpPremio = n => n === 10 ? { item: 'tp-titulo' } : n === 20 ? { item: 'tp-color' } : n === 30 ? { item: 'tp-marco' } : { monedas: n % 5 === 0 ? 150 : 40 + n * 2 };
 const tpFila = (perfil, temp) => q1('select pts, reclamados from temp_pts where perfil=? and temp=?', perfil, temp) || { pts: 0, reclamados: '[]' };
-const TP_TOPE = { diario: 1, partida: 40, mision: 4, logro: 5, nivel: 5, reto: 1 }; // eventos que suman puntos de temporada por día
+const TP_TOPE = { diario: 1, partida: 40, mision: 4, logro: 5, nivel: 5, reto: 1, invita: 5 }; // eventos que suman puntos de temporada por día
 function tpSumar(perfil, motivo) { const T = mesPeru().mes, p = TP_PTS[motivo] || 0; const hoyN = q1("select count(*) n from yc_mov where perfil=? and motivo=? and date(created_at,'-5 hours')=?", perfil, 'juego:' + motivo, hoyPeru()).n; if (hoyN > (TP_TOPE[motivo] || 0)) return; if (p) run('insert into temp_pts(perfil,temp,pts) values(?,?,?) on conflict(perfil,temp) do update set pts=pts+excluded.pts', perfil, T, p); }
 function tpEstado(perfil) {
   const M = mesPeru(), f = tpFila(perfil, M.mes), rec = JSON.parse(f.reclamados || '[]'), nivel = Math.min(TP_NIVELES, Math.floor(f.pts / TP_POR_NIVEL)), inv = new Set(q('select item from yc_inv where perfil=?', perfil).map(r => r.item));
@@ -719,7 +719,7 @@ async function api(req, res, u) {
     const b = await json(req), uid = clip(b.uid, 40), acc = u.pathname.slice(9); if (!/^[a-z0-9]{8,40}$/.test(uid)) return send(res, 400, { error: 'Falta tu identificador' });
     const miCodigo = () => { let f = q1('select codigo from ref_codigos where uid=?', uid); if (f) return f.codigo; for (let i = 0; i < 8; i++) { const c = Array.from(crypto.randomBytes(6), x => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[x % 32]).join(''); try { run('insert into ref_codigos(uid,codigo) values(?,?)', uid, c); return c; } catch (e) {} } return null; };
     if (acc === 'yo') { const c = miCodigo(), t = q1('select count(*) n, coalesce(sum(reclamado=0),0) p from ref_altas where codigo=?', c); return send(res, 200, { codigo: c, total: t.n, pendientes: t.p }); }
-    if (acc === 'reclamar') { const c = miCodigo(), n = q1('select count(*) n from ref_altas where codigo=? and reclamado=0', c).n; run('update ref_altas set reclamado=1 where codigo=?', c); return send(res, 200, { reclamados: n }); }
+    if (acc === 'reclamar') { const c = miCodigo(), n = q1('select count(*) n from ref_altas where codigo=? and reclamado=0', c).n; run('update ref_altas set reclamado=1 where codigo=?', c); let yc = 0; if (n) { const per = online.perfilId({ uid: b.uid, tok: b.tok }); for (let i = 0; i < Math.min(n, 5); i++) { run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'evento',0,'juego:invita',?)", per, ipCorta(ip)); tpSumar(per, 'invita'); yc += ycDar(per, 5, 'invita', ip); } } return send(res, 200, { reclamados: n, pase: Math.min(n, 5) * 30, yc }); }
     if (acc === 'confirmar') {
       const codigo = String(b.ref || '').toUpperCase(), dueno = q1('select uid from ref_codigos where codigo=?', codigo);
       if (!/^[A-Z2-9]{6}$/.test(codigo) || !dueno || dueno.uid === uid) return send(res, 200, { ok: 0 });

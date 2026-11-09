@@ -1,3 +1,7 @@
+v7.76.0 — 👫 Invitar amigos sube el Yupi Pass
+- 👫 Cada amigo nuevo que invitas y juega te da ahora, además de las 100 🪙 de siempre: +30 puntos del 🏆 Yupi Pass y +5 💎 Yupicoins (hasta 5 amigos por día; los 💎 respetan el tope diario).
+- 🏆 El Yupi Pass explica todas las formas de subir: entrar cada día, partidas, misiones, logros, niveles, 🎯 reto del día (+25) y amigos invitados (+30).
+
 v7.75.0 — 🎯 Reto del día
 - 🎯 Cada día hay un juego y una meta de puntos (Gusanito, Bloques, Frutas, Torre, 2048…). La meta se calcula sola con los puntajes reales de los jugadores: hay que ganarle a 6 de cada 10.
 - 🏆 Premio al superarlo: +25 puntos del Yupi Pass y +3 💎 Yupicoins (una vez al día).
