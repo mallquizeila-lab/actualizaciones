@@ -1,3 +1,11 @@
+v7.64.0 — 🧩 Tus juegos en otras webs + 📰 página de prensa y creadores
+- 🧩 Nueva página yupitok.com/para-tu-web: cualquier blog, web de juegos o comunidad puede poner gratis 11 juegos de Yupitok (Huerto Defensor, Joyas, 2048, Gusanito, Buscaminas, Sudoku, Memoria, Bloques, Inglés, Trivia de Perú y Personajes bíblicos) copiando y pegando un código.
+  · Dentro del juego aparece el botón "🎮 Más juegos gratis en Yupitok", que lleva gente a tu página.
+  · El panel y el agente de Marketing muestran desde qué web llegó cada jugador ("🧩 Juegos en otras webs").
+  · Sin AdSense dentro de otras webs (así lo pide Google) y con el mismo aviso de mayores de 18 años y privacidad.
+- 📰 Nueva página yupitok.com/prensa: qué es Yupitok, datos, logos e imágenes para descargar, la propuesta de "torneo con tu nombre" para creadores y streamers, y tu correo de contacto.
+- 🎯 2 misiones nuevas en el Embajador: ofrecer tus juegos a 3 webs y mandar el kit de prensa a 3 medios de tecnología y gaming.
+
 v7.63.0 — 🌍 Los juegos hablan en el idioma de cada visitante
 - 🌍 Nuevo botón en ShortForge → Página viral: "🌍 Grabar voces en 6 idiomas". Graba el narrador, los personajes del Huerto y los 127 personajes de GLORY BROWN en inglés, portugués (Brasil), francés, alemán, italiano e indonesio, con voces naturales de Edge (gratis).
   · Cada personaje conserva su género y su tono (si en español es una voz grave de hombre, en inglés también).
