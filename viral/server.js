@@ -954,6 +954,9 @@ async function api(req, res, u) {
     if (r === 'errores') return send(res, 200, { errores: q('select * from errores order by ultimo desc limit 100') });
     if (r === 'redes-campeones') return send(res, 200, { redes: q("select uid, usuario_yupi, red, usuario, estado, created_at from campeon_red order by (estado='pendiente') desc, created_at desc limit 100").map(x => ({ ...x, url: REDES_OK[x.red] ? REDES_OK[x.red][1](x.usuario) : '' })) });
     if (r === 'redes-campeones/estado' && P) { const b = await json(req); if (['ok', 'rechazado'].includes(b.estado)) run('update campeon_red set estado=? where uid=?', b.estado, String(b.uid || '')); return send(res, 200, { ok: 1 }); }
+    if (r === 'campanas-stats') { const base = q(`select source, count(*) n, count(distinct vid) u, min(created_at) desde from visitors where source like 'c-%' group by source`);
+      const vuelven = new Map(q(`select source, count(*) r from (select source, vid from visitors where source like 'c-%' group by source, vid having count(distinct date(created_at,'-5 hours'))>=2) group by source`).map(x => [x.source, x.r]));
+      return send(res, 200, { campanas: base.map(x => ({ ...x, vuelven: vuelven.get(x.source) || 0 })) }); }
     if (r === 'yupicoins') { const C = YC(); return send(res, 200, { ajustes: C,
       emitidas: q1("select coalesce(sum(monto),0) s from yc_mov where monto>0").s, gastadas: -q1("select coalesce(sum(monto),0) s from yc_mov where monto<0").s,
       hoy: { emitidas: q1("select coalesce(sum(monto),0) s from yc_mov where monto>0 and created_at>=datetime('now','-24 hours')").s, gastadas: -q1("select coalesce(sum(monto),0) s from yc_mov where monto<0 and created_at>=datetime('now','-24 hours')").s },

@@ -1,3 +1,12 @@
+v7.70.0 — 💸 Inversión y retorno (agente Marketing)
+- 💸 En el Centro de Mando → 📣 Marketing, cada campaña tiene ahora una casilla "Gastado (USD)". Anota lo que pagaste en un anuncio (Meta, TikTok, un creador…) y el agente calcula:
+  · cuántas personas llegaron con ese enlace y cuánto te costó cada una;
+  · qué % volvió otro día (lo que más vale: esas visitas ya son gratis);
+  · cuánto dejaron (estimado con tus ingresos reales anotados en 💰 Monetiza);
+  · el veredicto: 🟢 Reinvierte, 🟡 Ajusta el anuncio o 🔴 Corta (decide cuando ya llegaron al menos 30 personas).
+- 📊 Resumen arriba: total invertido, personas, costo por persona e ingreso estimado.
+- 🔁 Ideal para el plan de probar con 20 USD, medir y reinvertir lo que funciona.
+
 v7.69.1 — ads.txt más tolerante
 - 📄 El ads.txt ahora acepta líneas con tabulaciones, espacios raros y códigos con símbolos (algunos distribuidores, como GamePix, los usan). Antes esas líneas se descartaban.
 - 🔢 En el panel → Ajustes → Google AdSense ahora ves cuántas líneas del ads.txt tienes guardadas, para comparar con las que te pide tu distribuidor.
