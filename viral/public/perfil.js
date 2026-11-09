@@ -12,11 +12,11 @@
   ];
   const LOGROS = [['primera', '🎮 Primera partida', d => d.partidas >= 1], ['diez', '🔟 10 partidas', d => d.partidas >= 10], ['cien', '💯 100 partidas', d => d.partidas >= 100],
     ['racha3', '🔥 Racha de 3 días', d => d.racha.max >= 3], ['racha7', '🔥 Racha de 7 días', d => d.racha.max >= 7], ['nivel5', '⭐ Nivel 5', d => nivelDe(d.xp) >= 5], ['nivel10', '🌟 Nivel 10', d => nivelDe(d.xp) >= 10],
-    ['joyas10', '💎 Nivel 10 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 10], ['joyas30', '💎 Nivel 30 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 30], ['huerto10', '🌱 Nivel 10 en Huerto', d => (d.juegos.huerto?.nivel || 1) > 10], ['rico', '🪙 500 Yupicoins', d => d.monedas >= 500], ['explorador', '🧭 10 juegos distintos', d => Object.keys(d.juegos).length >= 10]];
+    ['joyas10', '💎 Nivel 10 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 10], ['joyas30', '💎 Nivel 30 en Joyas', d => (d.juegos.joyas?.nivel || 1) > 30], ['huerto10', '🌱 Nivel 10 en Huerto', d => (d.juegos.huerto?.nivel || 1) > 10], ['rico', '🪙 500 monedas', d => d.monedas >= 500], ['explorador', '🧭 10 juegos distintos', d => Object.keys(d.juegos).length >= 10]];
 
   function guardar() {
     LS.set('perfil', JSON.stringify(D)); clearTimeout(tg);
-    tg = setTimeout(() => post('/api/perfil', { uid: VID, tok, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } if (Number.isFinite(r.monedas) && r.monedas !== D.monedas) { D.monedas = r.monedas; LS.set('perfil', JSON.stringify(D)); window.dispatchEvent(new Event('yupicoins')); } }).catch(() => {}), 1500);
+    tg = setTimeout(() => post('/api/perfil', { uid: VID, tok, data: D }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } }).catch(() => {}), 1500);
   }
   function misionesHoy() {
     if (D.misiones?.dia !== hoy()) {
@@ -29,9 +29,13 @@
     for (const m of misionesHoy()) if (m.id === id && !m.hecho) {
       if (id === 'juegos2') { if (m.distintos.includes(extra)) continue; m.distintos.push(extra); }
       m.prog = Math.min(m.meta, m.prog + n);
-      if (m.prog >= m.meta) { m.hecho = true; D.monedas += m.premio; aviso(`✅ Misión cumplida: ${m.txt} · +${m.premio} 🪙`); }
+      if (m.prog >= m.meta) { m.hecho = true; D.monedas += m.premio; aviso(`✅ Misión cumplida: ${m.txt} · +${m.premio} 🪙`); yc('mision'); }
     }
   }
+  // 💎 Yupicoins (1 = 0.01 USD): las da el servidor; jugando, máximo 30 al día. Se gastan solo dentro de Yupitok.
+  let YCS = { saldo: +(LS.get('ycSaldo') || 0), hoy: 0, tope: 30 };
+  const ycSet = r => { if (!r || !Number.isFinite(r.saldo)) return; YCS = r; LS.set('ycSaldo', r.saldo); window.dispatchEvent(new Event('yupicoins')); };
+  function yc(motivo) { post('/api/yc/ganar', { uid: VID, tok, motivo }).then(r => { if (r?.ganado > 0) setTimeout(() => aviso(`+${r.ganado} 💎 Yupicoins`), 2600); ycSet(r); }).catch(() => {}); }
   function aviso(txt) { const d = document.createElement('div'); d.className = 'toast'; d.style.cssText = 'background:linear-gradient(90deg,#ffd166,#ff7aa8);color:#241a00;font-weight:800'; d.textContent = txt; document.body.append(d); setTimeout(() => d.remove(), 3200); try { FX?.son?.('ganar'); } catch (e) {} }
   // Premio diario: día 1 a 7 (el día 7 es un cofre). Si faltas un día, la racha vuelve a empezar.
   const PREMIO_DIA = [20, 30, 40, 50, 60, 80, 150]; let silencioso = false;
@@ -39,14 +43,14 @@
     const h = hoy(); if (D.racha.dia === h) return;
     const ayer = new Date(Date.now() - 5 * 3600000 - 864e5).toISOString().slice(0, 10);
     D.racha.n = D.racha.dia === ayer ? D.racha.n + 1 : 1; D.racha.dia = h; D.racha.max = Math.max(D.racha.max, D.racha.n);
-    const premio = PREMIO_DIA[(D.racha.n - 1) % 7]; D.monedas += premio; if ((D.racha.n - 1) % 7 === 6) sumarXp(50); if (!silencioso) setTimeout(() => aviso(`🔥 Racha de ${D.racha.n} ${D.racha.n === 1 ? 'día' : 'días'} · +${premio} 🪙`), 900);
+    const premio = PREMIO_DIA[(D.racha.n - 1) % 7]; D.monedas += premio; yc('diario'); if ((D.racha.n - 1) % 7 === 6) sumarXp(50); if (!silencioso) setTimeout(() => aviso(`🔥 Racha de ${D.racha.n} ${D.racha.n === 1 ? 'día' : 'días'} · +${premio} 🪙`), 900);
     return premio;
   }
-  function logros() { for (const [id, txt, cond] of LOGROS) if (!D.logros.includes(id) && cond(D)) { D.logros.push(id); D.monedas += 25; aviso(`🏅 Logro: ${txt} · +25 🪙`); } }
-  function sumarXp(n) { const antes = nivelDe(D.xp); D.xp += n; const ahora = nivelDe(D.xp); if (ahora > antes) { D.monedas += 20 * ahora; setTimeout(() => aviso(`⭐ ¡Subiste a nivel ${ahora}! +${20 * ahora} 🪙`), 400); } }
+  function logros() { for (const [id, txt, cond] of LOGROS) if (!D.logros.includes(id) && cond(D)) { D.logros.push(id); D.monedas += 25; aviso(`🏅 Logro: ${txt} · +25 🪙`); yc('logro'); } }
+  function sumarXp(n) { const antes = nivelDe(D.xp); D.xp += n; const ahora = nivelDe(D.xp); if (ahora > antes) { D.monedas += 20 * ahora; yc('nivel'); setTimeout(() => aviso(`⭐ ¡Subiste a nivel ${ahora}! +${20 * ahora} 🪙`), 400); } }
 
   window.PERFIL = {
-    get datos() { return D; }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara, PREMIO_DIA,
+    get datos() { return D; }, get yupicoins() { return YCS; }, ycRefrescar() { post('/api/yc', { uid: VID, tok }).then(ycSet).catch(() => {}); }, get codigo() { return codigo; }, get tok() { return tok; }, get usuario() { return usuario; }, nivelDe, xpPara, PREMIO_DIA,
     diarioPendiente() { return D.racha.dia !== hoy(); },
     diaSiguiente() { const ayer = new Date(Date.now() - 5 * 3600000 - 864e5).toISOString().slice(0, 10); return D.racha.dia === ayer ? D.racha.n + 1 : 1; },
     reclamarDiario() { if (D.racha.dia === hoy()) return null; silencioso = true; let p; try { p = racha(); } finally { silencioso = false; } guardar(); return { n: D.racha.n, premio: p }; },
@@ -61,7 +65,7 @@
       racha(); const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 };
       const record = puntos > J.record && J.partidas > 0; J.partidas++; J.ultimo = Date.now(); if (puntos > J.record) J.record = puntos; Object.assign(J, extra);
       if (Date.now() < (window.HORA_FELIZ_FIN || 0)) { const ex = +window.HORA_FELIZ_EXTRA || 20; D.monedas += ex; setTimeout(() => aviso(`🎉 Hora feliz: +${ex} 🪙 extra`), 1800); } // monedas extra en la Hora feliz
-      D.partidas++; sumarXp(10 + Math.min(40, Math.round(puntos / 50))); avanzar('jugar3'); avanzar('juegos2', 1, juego); if (record) avanzar('record1');
+      D.partidas++; yc('partida'); sumarXp(10 + Math.min(40, Math.round(puntos / 50))); avanzar('jugar3'); avanzar('juegos2', 1, juego); if (record) avanzar('record1');
       logros(); guardar(); return { record };
     },
     evento(tipo, juego) { racha(); if (tipo === 'test') { avanzar('test1'); sumarXp(8); } if (tipo === 'trivia') { avanzar('trivia1'); sumarXp(12); } if (tipo === 'vivo') { avanzar('vivo1'); sumarXp(5); } if (juego) { const J = D.juegos[juego] = D.juegos[juego] || { record: 0, partidas: 0 }; J.ultimo = Date.now(); } logros(); guardar(); },
@@ -76,5 +80,6 @@
     async recuperar(cod) { const r = await post('/api/perfil/recuperar', { uid: VID, codigo: cod }); if (r.error) throw new Error(r.error); D = Object.assign(base(), r.data); guardar(); return true; },
   };
   // Si este navegador no tiene progreso guardado pero el servidor sí (p. ej. borraron datos del sitio sin cambiar de navegador), se recupera.
+  setTimeout(() => window.PERFIL?.ycRefrescar(), 1200);
   post('/api/perfil', { uid: VID, tok }).then(r => { if (r.codigo) { codigo = r.codigo; LS.set('perfilCodigo', codigo); } if (r.data && (tok || (r.data.xp || 0) > (D.xp || 0))) { D = Object.assign(base(), r.data); LS.set('perfil', JSON.stringify(D)); window.pintarHub?.(); } }).catch(() => {});
 })();

@@ -3,7 +3,10 @@
 Orden de trabajo. Cada fase se publica probada y sin romper lo anterior.
 
 ## Fase A · 🪙 Yupicoins (APROBADO)
-- **Valor: 1 Yupicoin = 0.01 USD (1 centavo de dólar).** Una sola moneda.
+- **Valor: 1 Yupicoin = 0.01 USD (1 centavo de dólar).**
+- **Dos monedas:** 🪙 *monedas* (gratis, sin límite, solo dentro de los juegos, sin valor) y 💎 *Yupicoins* (premium).
+- **Jugando: máximo 30 Yupicoins al día** (entrar 5, partida 1, misión 3, logro 3, nivel 5, torneo 30/20/10). Tope de 150 por conexión.
+- **Tareas de anunciantes: sin ese tope** (lo pone cada campaña). Depósitos: sin tope (con límite mensual para menores).
 - Las Yupicoins **se ganan** jugando y **se pueden depositar (comprar)**, pero **NO se cobran**: solo se gastan dentro de Yupitok.
 - Depósitos: método por definir (Yape/Plin con aprobación manual o pasarela). Requiere RUC y boleta (SUNAT), tope mensual para menores y términos de reembolso.
 - Renombrar las monedas a **Yupicoins**.

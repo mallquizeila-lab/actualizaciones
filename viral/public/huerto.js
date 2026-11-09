@@ -660,7 +660,7 @@
       d.querySelectorAll('[data-px]').forEach(c => { const t = parseInt(c.style.width) || 52; c.width = t * dpr; c.height = t * dpr; icono(c, c.dataset.px, t); });
       d.onclick = e => { const id = e.target.id; if (!id) return;
         if (id === 'sig') { d.remove(); nivel(t, n + 1); } if (id === 'map') { d.remove(); vivo = false; mapa(t); } if (id === 'rei') { d.remove(); nivel(t, n); }
-        if (id === 'mas') { if (!PERFIL.gastar(40)) return toast('No tienes suficientes Yupicoins 🪙: juega misiones y otros juegos para ganar más'); d.remove();
+        if (id === 'mas') { if (!PERFIL.gastar(40)) return toast('No tienes suficientes monedas 🪙: juega misiones y otros juegos para ganar más'); d.remove();
           for (const en of enes) if (en.y > TOP + S * (R - 3.5)) { en.hp = 0; chispas(en.x, en.y, '#fff3a0', 14); } ondas.push({ x: W / 2, y: TOP + R * S, r: 0, max: W * .8, v: .45 }); vidas = 1; gallinas = new Set(C.carriles); fin = false; shake = .4; FX.son('ganar'); FX.musica?.('huerto'); FX.intensidad?.(2); }
         if (id === 'comp') { const url = `${location.origin}/r/${t.id}?src=huerto${window.REF?.() || ''}`; if (navigator.share) navigator.share({ title: 'Huerto Defensor', text: `🌱 Ya voy en el nivel ${n + 1} de Huerto Defensor. ¿Me alcanzas?`, url }).catch(() => {}); else { navigator.clipboard?.writeText(url); toast('Enlace copiado'); } } };
     }

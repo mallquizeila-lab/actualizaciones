@@ -1,3 +1,11 @@
+v7.67.0 — 💎 Yupicoins: máximo 30 al día jugando
+- 💎 Ahora hay dos monedas:
+  · 🪙 Monedas: como siempre, se ganan jugando sin límite y sirven dentro de los juegos (movimientos extra, cartas de GLORY, gorros). No valen dinero.
+  · 💎 Yupicoins (1 = 0.01 USD): la moneda de Yupitok. Jugando se ganan como máximo 30 al día: entrar cada día +5, cada partida +1, misión +3, logro +3, subir de nivel +5. Del torneo semanal: +30, +20 o +10 para el top 3.
+- 📣 Las tareas de anunciantes (próximamente) no tendrán ese tope de 30.
+- 🛡️ Todo lo da el servidor y queda en el libro de movimientos: nadie puede sumarse Yupicoins desde su navegador. Tope de 150 al día por conexión, para que nadie haga muchas cuentas.
+- 🏠 La portada muestra "💎 Yupicoins" al lado de tus 🪙 monedas.
+
 v7.66.1 — 🪙 Valor de las Yupicoins
 - 💵 1 Yupicoin = 0.01 USD (1 centavo de dólar) de referencia.
 - ✅ Las Yupicoins se ganan jugando y pronto se podrán comprar (depositar). Se usan solo dentro de Yupitok y NO se cobran como dinero. Así lo dicen ahora los Términos.

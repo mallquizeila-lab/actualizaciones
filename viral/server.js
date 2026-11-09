@@ -447,22 +447,26 @@ const limpiaHtml = h => String(h || '').slice(0, 20000).replace(/<(script|style|
   if (['p', 'h2', 'h3', 'ul', 'ol', 'li', 'b', 'i', 'strong', 'em', 'br'].includes(t)) return cierre ? `</${t}>` : (t === 'ol' && /start="?(\d{1,3})/.test(at) ? `<ol start="${/start="?(\d{1,3})/.exec(at)[1]}">` : `<${t}>`);
   if (t === 'a') { if (cierre) return '</a>'; const hr = (/href\s*=\s*"([^"]*)"/i.exec(at) || [])[1] || ''; return /^\/[a-z0-9/?=&_.-]*$/i.test(hr) ? `<a href="${hr}">` : '<a>'; } return ''; });
 
-// ---------- 🪙 Yupicoins: libro de movimientos ----------
-const YC = () => Object.assign({ topeDia: 1000, topeIp: 6000, inicialMax: 3000, valorUsd: 0.01 }, getS('yupicoins', {})); // 1 Yupicoin = 1 centavo de dólar
+// ---------- 💎 Yupicoins: libro de movimientos (1 Yupicoin = 0.01 USD de referencia) ----------
+// Jugando se ganan como máximo 30 al día (entrar cada día, partidas, misiones, logros, niveles, torneo).
+// Las tareas de anunciantes y los depósitos no tienen ese tope. Se gastan solo dentro de Yupitok y no se cobran.
+const YC = () => Object.assign({ topeDia: 30, topeIp: 150, valorUsd: 0.01 }, getS('yupicoins', {}));
+const YC_JUEGO = { diario: 5, partida: 1, mision: 3, logro: 3, nivel: 5 };
+if (getS('ycVer', 0) !== 2) { try { run('delete from yc_mov'); run('delete from yc_alerta'); } catch (e) {} setS('ycVer', 2); setS('yupicoins', {}); }
 const ycSaldo = perfil => q1('select coalesce(sum(monto),0) s from yc_mov where perfil=?', perfil).s;
-function ycAplicar(perfil, pedido, ip) { // devuelve el saldo real después de registrar lo que cambió en el juego
-  const n = Math.floor(+pedido); if (!Number.isFinite(n) || n < 0) return null;
-  const C = YC(), ipc = ipCorta(ip);
-  if (!q1('select 1 from yc_mov where perfil=? limit 1', perfil)) { const ini = Math.min(n, C.inicialMax); run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'inicial',?,'saldo anterior',?)", perfil, ini, ipc); if (n > C.inicialMax) run('insert into yc_alerta(perfil,detalle) values(?,?)', perfil, `Saldo inicial de ${n} recortado a ${C.inicialMax}`); return ini; }
-  const saldo = ycSaldo(perfil), delta = n - saldo; if (!delta) return saldo;
-  if (delta < 0) { run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'gastado',?,'juegos',?)", perfil, delta, ipc); return n; }
-  const hoyG = q1("select coalesce(sum(monto),0) s from yc_mov where perfil=? and tipo='ganado' and created_at>=datetime('now','-24 hours')", perfil).s;
-  const ipG = q1("select coalesce(sum(monto),0) s from yc_mov where ip=? and tipo='ganado' and created_at>=datetime('now','-24 hours')", ipc).s;
-  const ok = Math.max(0, Math.min(delta, C.topeDia - hoyG, C.topeIp - ipG));
-  if (ok > 0) run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'ganado',?,'juegos',?)", perfil, ok, ipc);
-  if (ok < delta) { const ya = q1("select 1 from yc_alerta where perfil=? and created_at>=datetime('now','-6 hours')", perfil); if (!ya) run('insert into yc_alerta(perfil,detalle) values(?,?)', perfil, `Quiso sumar ${delta} 🪙 y se aceptaron ${ok} (tope diario)`); }
-  return saldo + ok;
+const ycHoyJuego = (col, v) => q1(`select coalesce(sum(monto),0) s from yc_mov where ${col}=? and tipo='ganado' and motivo like 'juego:%' and date(created_at,'-5 hours')=?`, v, hoyPeru()).s;
+function ycDar(perfil, monto, motivo, ip, cat = 'juego') { // devuelve cuántas se dieron de verdad
+  monto = Math.floor(+monto) || 0; if (monto <= 0) return 0; const C = YC(), ipc = ipCorta(ip || '');
+  if (cat === 'juego') {
+    const ok = Math.max(0, Math.min(monto, C.topeDia - ycHoyJuego('perfil', perfil), C.topeIp - ycHoyJuego('ip', ipc)));
+    if (ok < monto && ycHoyJuego('ip', ipc) >= C.topeIp && !q1("select 1 from yc_alerta where perfil=? and created_at>=datetime('now','-12 hours')", perfil)) run('insert into yc_alerta(perfil,detalle) values(?,?)', perfil, `Muchas cuentas ganando Yupicoins desde la misma conexión (${ipc})`);
+    monto = ok;
+  }
+  if (monto > 0) run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'ganado',?,?,?)", perfil, monto, cat + ':' + motivo, ipc);
+  return monto;
 }
+function ycGastar(perfil, monto, motivo, ip) { monto = Math.floor(+monto) || 0; if (monto <= 0 || ycSaldo(perfil) < monto) return false; run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'gastado',?,?,?)", perfil, -monto, motivo, ipCorta(ip || '')); return true; }
+const ycEstado = perfil => { const C = YC(); return { saldo: ycSaldo(perfil), hoy: ycHoyJuego('perfil', perfil), tope: C.topeDia, valorUsd: C.valorUsd }; };
 const proOcultos = () => new Set(q('select id from pro_oculto').map(r => r.id));
 const descEs = g => { if (!g.d) return ''; const r = q1("select dst from i18n where lang='es' and src=?", g.d); return r ? r.dst : g.d; };
 // ---------- 👑 Campeones del mes (por juego; el top 3 puede mostrar su red social, aprobada por el dueño) ----------
@@ -801,7 +805,7 @@ async function api(req, res, u) {
       const b = await json(req), uh = uidh(b.uid); if (!b.uid) return send(res, 400, { error: 'Falta uid' });
       const A = torneoSemana(-1); torneoCerrar(A);
       const p = q1('select * from torneo_premios where semana=? and uid=? and reclamado=0', A.semana, uh); if (!p) return send(res, 200, { monedas: 0 });
-      run('update torneo_premios set reclamado=1 where semana=? and uid=?', A.semana, uh); return send(res, 200, { monedas: p.monedas, puesto: p.puesto, juego: A.juego });
+      run('update torneo_premios set reclamado=1 where semana=? and uid=?', A.semana, uh); const ycg = ycDar(online.perfilId(b), [30, 20, 10][p.puesto - 1] || 0, 'torneo', ip); return send(res, 200, { monedas: p.monedas, puesto: p.puesto, juego: A.juego, yupicoins: ycg });
     }
     const top = q(`select nombre, avatar, max(puntos) puntos from arcade where juego=? and created_at>=? and created_at<? group by uid order by puntos desc limit 10`, T.juego, T.desde, T.hasta);
     let yo = null; const uq = u.searchParams.get('uid'); if (uq) { const uh = uidh(uq), m = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', T.juego, uh, T.desde, T.hasta)?.p; if (m != null) yo = { puntos: m, puesto: q1(`select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?`, T.juego, T.desde, T.hasta, m).n + 1 }; }
@@ -844,17 +848,24 @@ async function api(req, res, u) {
   }
   // 🪙 Yupicoins: el saldo de cada jugador sale de su libro de movimientos (no se edita a mano).
   // Lo que el juego suma o resta se registra como movimiento; lo ganado tiene tope por día (por jugador y por IP) para frenar trampas.
+  if ((u.pathname === '/api/yc' || u.pathname === '/api/yc/ganar') && P) {
+    const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
+    const id = online.perfilId(b); if (u.pathname === '/api/yc') return send(res, 200, ycEstado(id));
+    const m = String(b.motivo || ''); if (!YC_JUEGO[m] || limite(id, 'yc', 40)) return send(res, 200, { ganado: 0, ...ycEstado(id) });
+    if (m === 'diario' && q1("select 1 from yc_mov where perfil=? and motivo='juego:diario' and date(created_at,'-5 hours')=?", id, hoyPeru())) return send(res, 200, { ganado: 0, ...ycEstado(id) });
+    if (m === 'partida' && q1("select 1 from yc_mov where perfil=? and motivo='juego:partida' and created_at>=datetime('now','-90 seconds')", id)) return send(res, 200, { ganado: 0, ...ycEstado(id) });
+    const g = ycDar(id, YC_JUEGO[m], m, ip); return send(res, 200, { ganado: g, ...ycEstado(id) });
+  }
   if (u.pathname === '/api/perfil' && P) {
     const b = await json(req), id = online.perfilId(b);
     if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     let fila = q1('select codigo, data from perfiles where id=?', id);
     if (b.data && typeof b.data === 'object') {
-      const yc = ycAplicar(id, b.data.monedas, ip); if (yc != null) b.data.monedas = yc;
       const d = JSON.stringify(b.data); if (d.length > 30000) return send(res, 400, { error: 'Demasiados datos' });
       if (limite(ip, 'perfil', 40)) return send(res, 429, { error: 'Más despacio' });
       if (!fila) { let cod; do { cod = crypto.randomBytes(4).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase(); } while (cod.length < 6 || q1('select 1 from perfiles where codigo=?', cod)); run('insert into perfiles(id, codigo, data) values(?,?,?)', id, cod, d); fila = { codigo: cod }; }
       else run("update perfiles set data=?, updated_at=datetime('now') where id=?", d, id);
-      return send(res, 200, { ok: 1, codigo: fila.codigo, monedas: b.data.monedas });
+      return send(res, 200, { ok: 1, codigo: fila.codigo });
     }
     return send(res, 200, fila ? { codigo: fila.codigo, data: JSON.parse(fila.data) } : {});
   }
@@ -907,7 +918,7 @@ async function api(req, res, u) {
       hoy: { emitidas: q1("select coalesce(sum(monto),0) s from yc_mov where monto>0 and created_at>=datetime('now','-24 hours')").s, gastadas: -q1("select coalesce(sum(monto),0) s from yc_mov where monto<0 and created_at>=datetime('now','-24 hours')").s },
       jugadores: q1('select count(distinct perfil) n from yc_mov').n, gastan: q1("select count(distinct perfil) n from yc_mov where monto<0").n,
       top: q('select substr(perfil,1,8) perfil, sum(monto) saldo from yc_mov group by perfil order by saldo desc limit 10'), alertas: q('select substr(perfil,1,8) perfil, detalle, created_at from yc_alerta order by id desc limit 30') }); }
-    if (r === 'yupicoins/ajustes' && P) { const b = await json(req), C = YC(); for (const k of ['topeDia', 'topeIp', 'inicialMax']) if (b[k] !== undefined) C[k] = Math.max(100, Math.min(1e6, Math.floor(+b[k]) || C[k])); setS('yupicoins', C); return send(res, 200, { ok: 1, ajustes: C }); }
+    if (r === 'yupicoins/ajustes' && P) { const b = await json(req), C = YC(); for (const k of ['topeDia', 'topeIp']) if (b[k] !== undefined) C[k] = Math.max(1, Math.min(1e6, Math.floor(+b[k]) || C[k])); setS('yupicoins', C); return send(res, 200, { ok: 1, ajustes: C }); }
     if (r === 'guias-extra') return send(res, 200, { guias: getS('guiasExtra', []) });
     if (r === 'guias-extra/guardar' && P) { const b = await json(req), slug = slugDe(String(b.slug || b.titulo || '')).slice(0, 70); if (slug.length < 4 || !b.titulo || !b.html) return send(res, 400, { error: 'Falta título o contenido' });
       if (JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias.some(x => x.slug === slug)) return send(res, 400, { error: 'Ya existe una guía con ese nombre' });
