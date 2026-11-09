@@ -29,8 +29,9 @@
     salir();
     const nom = LS.get('chatNom') || 'Jugador', av = LS.get('chatAv') || 'a01';
     let d = { hoy: [] };
-    try { d = await post('/api/arcade/puntaje', { juego: t.juego, puntos: Math.round(puntos), nombre: nom, avatar: av, uid: VID }); } catch (e) {}
+    try { d = await post('/api/arcade/puntaje', { juego: t.juego, puntos: Math.round(puntos), nombre: nom, avatar: av, uid: VID, tok: window.PERFIL?.tok }); } catch (e) {}
     let pr = {}; try { pr = PERFIL.partida(t.juego, Math.round(puntos)); } catch (e) {}
+    if (d?.reto?.logrado) { setTimeout(() => { try { FX.confeti?.(); } catch (e) {} toast(`🎯 ¡Superaste el RETO DEL DÍA! +25 puntos del 🏆 Yupi Pass${d.reto.yc ? ` y +${d.reto.yc} 💎` : ''}`); window.PERFIL?.ycRefrescar?.(); window.retoCargar?.(); }, 1200); }
     FX.pararMusica?.(); FX.son('nivel');
     FX.voz?.(pr.record ? '¡Nuevo récord personal! ¡Eres un crack!' : ['¡Buena partida!', '¡Bien jugado!', '¡Casi casi! Otra más', '¡Tú puedes superar eso!'][Math.floor(Math.random() * 4)], { forzar: true, cortar: true });
     if (pr.record) texto = '🏅 ¡Nuevo récord personal! ' + (texto || '');

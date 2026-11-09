@@ -1,3 +1,10 @@
+v7.75.0 — 🎯 Reto del día
+- 🎯 Cada día hay un juego y una meta de puntos (Gusanito, Bloques, Frutas, Torre, 2048…). La meta se calcula sola con los puntajes reales de los jugadores: hay que ganarle a 6 de cada 10.
+- 🏆 Premio al superarlo: +25 puntos del Yupi Pass y +3 💎 Yupicoins (una vez al día).
+- 📤 Al lograrlo aparece el botón "Retar a mis amigos": manda por WhatsApp (o lo que tenga el celular) "Superé el reto del día… ¿Tú puedes?" con el enlace al juego. Cada reto compartido trae jugadores nuevos.
+- 📊 Marketing muestra cuánta gente llega por "🎯 Reto del día compartido".
+- 🏠 Banner del reto arriba en la portada, con cuántas personas lo lograron hoy.
+
 v7.74.0 — 🏆 Yupi Pass (pase de temporada gratis)
 - 🏆 Como el pase de batalla de Fortnite, Free Fire o Roblox, pero gratis para todos: cada mes hay una temporada nueva con 30 niveles.
 - 📈 Se sube jugando: entrar cada día (+10 puntos), cada partida (+3), misiones y logros (+8), subir de nivel (+10). Sigue sumando aunque ya hayas ganado tus 30 💎 del día.

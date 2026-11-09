@@ -55,6 +55,7 @@ create table if not exists vistas_seo (id integer primary key, path text, fuente
 create index if not exists vistas_seo_f on vistas_seo(created_at);
 create table if not exists dev_juegos (id text primary key, token text, estudio text, email text, titulo text, url text, descr text, cat text, img text, estado text default 'pendiente', motivo text, jugadas integer default 0, created_at text default (datetime('now')));
 create table if not exists temp_pts (perfil text, temp text, pts integer default 0, reclamados text default '[]', primary key (perfil, temp));
+create table if not exists reto_hecho (uid text, dia text, puntos integer, primary key (uid, dia));
 create table if not exists yc_inv (perfil text, item text, created_at text default (datetime('now')), primary key (perfil, item));
 create table if not exists yc_estilo (uidh text primary key, perfil text, marco text, titulo text, color text);
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
@@ -488,15 +489,25 @@ const estiloCss = r => r ? { m: TIENDA_M.get(r.marco)?.css || '', t: TIENDA_M.ge
 const conEstilo = filas => { if (!filas.length) return filas; const E = new Map(q(`select * from yc_estilo where uidh in (${filas.map(() => '?').join(',')})`, ...filas.map(f => f.uid)).map(r => [r.uidh, r])); return filas.map(f => ({ ...f, est: estiloCss(E.get(f.uid)) })); };
 // 🏆 Yupi Pass: una temporada por mes, 30 niveles gratis. Se sube jugando (los mismos eventos que dan Yupicoins,
 // pero los puntos de temporada NO tienen el tope de 30). Premios: monedas y, en los niveles 10, 20 y 30, artículos exclusivos.
-const TP_PTS = { diario: 10, partida: 3, mision: 8, logro: 8, nivel: 10 }, TP_POR_NIVEL = 60, TP_NIVELES = 30;
+const TP_PTS = { diario: 10, partida: 3, mision: 8, logro: 8, nivel: 10, reto: 25 }, TP_POR_NIVEL = 60, TP_NIVELES = 30;
 const tpPremio = n => n === 10 ? { item: 'tp-titulo' } : n === 20 ? { item: 'tp-color' } : n === 30 ? { item: 'tp-marco' } : { monedas: n % 5 === 0 ? 150 : 40 + n * 2 };
 const tpFila = (perfil, temp) => q1('select pts, reclamados from temp_pts where perfil=? and temp=?', perfil, temp) || { pts: 0, reclamados: '[]' };
-const TP_TOPE = { diario: 1, partida: 40, mision: 4, logro: 5, nivel: 5 }; // eventos que suman puntos de temporada por día
+const TP_TOPE = { diario: 1, partida: 40, mision: 4, logro: 5, nivel: 5, reto: 1 }; // eventos que suman puntos de temporada por día
 function tpSumar(perfil, motivo) { const T = mesPeru().mes, p = TP_PTS[motivo] || 0; const hoyN = q1("select count(*) n from yc_mov where perfil=? and motivo=? and date(created_at,'-5 hours')=?", perfil, 'juego:' + motivo, hoyPeru()).n; if (hoyN > (TP_TOPE[motivo] || 0)) return; if (p) run('insert into temp_pts(perfil,temp,pts) values(?,?,?) on conflict(perfil,temp) do update set pts=pts+excluded.pts', perfil, T, p); }
 function tpEstado(perfil) {
   const M = mesPeru(), f = tpFila(perfil, M.mes), rec = JSON.parse(f.reclamados || '[]'), nivel = Math.min(TP_NIVELES, Math.floor(f.pts / TP_POR_NIVEL)), inv = new Set(q('select item from yc_inv where perfil=?', perfil).map(r => r.item));
   return { temp: M.mes, nombre: M.nombre, fin: M.fin, pts: f.pts, nivel, porNivel: TP_POR_NIVEL, total: TP_NIVELES, enNivel: f.pts % TP_POR_NIVEL,
     niveles: Array.from({ length: TP_NIVELES }, (_, i) => { const n = i + 1, pr = tpPremio(n); return { n, ...pr, nombreItem: pr.item ? TIENDA_M.get(pr.item)?.nombre : null, reclamado: rec.includes(n) || (pr.item && inv.has(pr.item) && rec.includes(n)), listo: n <= nivel && !rec.includes(n) }; }) };
+}
+// 🎯 Reto del día: un juego distinto cada día y una meta de puntos (calculada con los puntajes reales de la gente).
+const RETO_JUEGOS = ['gusanito', 'bloques', 'frutas', 'ladrillos', 'vuela', 'corredor', 'torre', 'n2048', 'flechas', 'memoria'];
+const RETO_DEF = { gusanito: 150, bloques: 3000, frutas: 2500, ladrillos: 800, vuela: 25, corredor: 1500, torre: 20, n2048: 2000, flechas: 60, memoria: 300 };
+function retoDia() {
+  const hoy = hoyPeru(), c = getS('retoDia', {}); if (c.dia === hoy && c.juego) return c;
+  const n = Math.floor(Date.parse(hoy) / 864e5), juego = RETO_JUEGOS[n % RETO_JUEGOS.length];
+  const pts = q("select max(puntos) p from arcade where juego=? and created_at>=datetime('now','-30 days') group by uid order by p", juego).map(r => r.p);
+  let meta = RETO_DEF[juego]; if (pts.length >= 8) meta = Math.max(1, Math.round(pts[Math.floor(pts.length * .6)])); // más difícil que 6 de cada 10 jugadores
+  const r = { dia: hoy, juego, meta }; setS('retoDia', r); return r;
 }
 const ycEstado = perfil => { const C = YC(); return { saldo: ycSaldo(perfil), hoy: ycHoyJuego('perfil', perfil), tope: C.topeDia, valorUsd: C.valorUsd }; };
 // 📺 Yupitok TV: listas y videos de YouTube que elige el dueño (reproductor oficial de YouTube, contenido legal)
@@ -885,12 +896,13 @@ async function api(req, res, u) {
     if (limite(ip, 'arc', 30)) return send(res, 429, { error: 'Más despacio' });
     const ch = require('./chat'), nombre = ch.apodo(b.nombre) || 'Jugador', avatar = FOTOS.valido(b.avatar) ? b.avatar : 'a01', uidh = crypto.createHash('sha256').update(String(b.uid || ip)).digest('hex').slice(0, 16);
     run('insert into arcade(juego, uid, nombre, avatar, puntos) values(?,?,?,?,?)', jg, uidh, nombre, avatar, pts);
+    let reto = null; { const R = retoDia(); if (jg === R.juego && pts >= R.meta && b.uid && !q1('select 1 from reto_hecho where uid=? and dia=?', uidh, R.dia)) { run('insert or ignore into reto_hecho(uid,dia,puntos) values(?,?,?)', uidh, R.dia, pts); const per = online.perfilId({ uid: b.uid, tok: b.tok }); run("insert into yc_mov(perfil,tipo,monto,motivo,ip) values(?,'evento',0,'juego:reto',?)", per, ipCorta(ip)); tpSumar(per, 'reto'); reto = { logrado: true, meta: R.meta, yc: ycDar(per, 3, 'reto', ip) }; } }
     const hoy = hoyPeru();
     const top = conEstilo(q(`select uid, nombre, avatar, max(puntos) puntos from arcade where juego=? and date(created_at,'-5 hours')=? group by uid order by puntos desc limit 10`, jg, hoy));
     const mio = q1(`select max(puntos) p from arcade where juego=? and uid=? and date(created_at,'-5 hours')=?`, jg, uidh, hoy).p;
     const puesto = q1(`select count(*) n from (select uid, max(puntos) p from arcade where juego=? and date(created_at,'-5 hours')=? group by uid) where p > ?`, jg, hoy, mio).n + 1;
     const MM = mesPeru(), mioMes = q1('select max(puntos) p from arcade where juego=? and uid=? and created_at>=? and created_at<?', jg, uidh, MM.desde, MM.hasta).p, mesPuesto = q1('select count(*) n from (select max(puntos) p from arcade where juego=? and created_at>=? and created_at<? group by uid) where p > ?', jg, MM.desde, MM.hasta, mioMes).n + 1;
-    return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto, mesPuesto, mes: MM.nombre });
+    return send(res, 200, { hoy: top.map(({ uid, ...x }) => x), puesto, mesPuesto, mes: MM.nombre, reto });
   }
   // Progreso del jugador (nivel, monedas, niveles de Joyas…): se guarda por navegador y se recupera con un código.
   if (u.pathname === '/api/mundo/mov' && P) { // Mundo 3D: posición de cada jugador (en memoria) y la de los demás del mismo mundo
@@ -929,6 +941,8 @@ async function api(req, res, u) {
       run('update yc_estilo set marco=?, titulo=?, color=? where perfil=?', e.marco || null, e.titulo || null, e.color || null, id); }
     return send(res, 200, { items: TIENDA, inv: inv(), equipo: eq(), ...ycEstado(id) });
   }
+  if (u.pathname === '/api/reto') { const R = retoDia(), uq = u.searchParams.get('uid');
+    return send(res, 200, { ...R, logrados: q1('select count(*) n from reto_hecho where dia=?', R.dia).n, yo: uq ? !!q1('select 1 from reto_hecho where uid=? and dia=?', uidArcade(uq), R.dia) : false }); }
   if ((u.pathname === '/api/pase' || u.pathname === '/api/pase/reclamar') && P) {
     const b = await json(req); if (String(b.uid || '').length < 6) return send(res, 400, { error: 'Falta tu identificador' });
     const id = online.perfilId(b);
