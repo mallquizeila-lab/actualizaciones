@@ -1,3 +1,7 @@
+v7.69.1 — ads.txt más tolerante
+- 📄 El ads.txt ahora acepta líneas con tabulaciones, espacios raros y códigos con símbolos (algunos distribuidores, como GamePix, los usan). Antes esas líneas se descartaban.
+- 🔢 En el panel → Ajustes → Google AdSense ahora ves cuántas líneas del ads.txt tienes guardadas, para comparar con las que te pide tu distribuidor.
+
 v7.69.0 — 🛍️ Tienda Yupitok
 - 🛍️ Nueva Tienda Yupitok, para gastar las 💎 Yupicoins en cosas para lucirse:
   · 🖼️ Marcos para el avatar: dorado (60), neón (90), fuego (120), arcoíris (200), diamante (300).
