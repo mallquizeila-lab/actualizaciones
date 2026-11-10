@@ -107,6 +107,16 @@
    "tipo": "mesa"
   },
   {
+   "id": "arcade-aventura",
+   "juego": "aventura",
+   "cat": "juegos",
+   "e": "👑",
+   "t": "Yupitok: El Universo de las Aventuras",
+   "d": "¡NUEVO! Aventura 3D: ayuda a Yupi a recuperar el Cristal Amarillo que robó Gorgojo Grun. Explora el reino, salta, vence gorgojitos y supera la prueba del Sabio Búho.",
+   "min": 8,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-batalla",
    "juego": "batalla",
    "cat": "juegos",

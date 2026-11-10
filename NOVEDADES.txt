@@ -1,3 +1,9 @@
+v7.80.0 — 👑 Yupitok: El Universo de las Aventuras (prototipo Fase 1)
+- 👑 Nuevo juego 3D en la portada: ayuda a Yupi a recuperar el Cristal Amarillo en el Reino de Yupitok. Movimiento con joystick o WASD, doble salto, giro de corona y cámara que se gira arrastrando.
+- 🎯 3 misiones: junta 10 monedas, supera la prueba del Sabio Búho (preguntas educativas con explicación) y derrota a los gorgojitos para tomar el cristal. Enemigos: gorgojitos y babosas saltarinas.
+- 🦙 Pantalla de selección con los 12 personajes (Yupi jugable; los demás llegan en las próximas fases). Estrellas por tiempo, récord para compartir y premios que suman al Yupi Pass.
+- 📄 Documento de diseño completo: YUPITOK_AVENTURAS_DISENO.md
+
 v7.79.0 — 🛡️ Cuidado con los derechos de autor
 - 🛡️ El agente analista ahora revisa cada video antes de aprobarlo: si ve un personaje, criatura o logo que se parece a uno de una marca famosa (Disney/Pixar, Nintendo, Pokémon, Plants vs. Zombies, Minecraft, Roblox, Free Fire, etc.), NO lo aprueba ni lo publica solo. Lo deja en revisión con el aviso de qué se parece a qué y en qué segundo, y te avisa por Telegram.
 - 🎬 Los prompts de Google Flow describen el Huerto con estilo peruano original (chacra andina con surcos y montañas; choclo guerrero con casco inca, coco caballero y ají con capa) y prohíben expresamente nueces enojadas, lanzaguisantes, girasoles, zombis y el pasto en cuadrícula de ese juego.
