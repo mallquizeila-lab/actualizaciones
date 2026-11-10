@@ -470,10 +470,31 @@ function embajadorCard(E) {
     <h4 style="margin:14px 0 6px">🎯 Misiones para que el mundo te encuentre (${hechas}/${(E.misiones || []).length})</h4>
     ${(E.misiones || []).map(m => `<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:4px 0"><input type="checkbox" style="width:auto;margin-top:4px" ${m.hecha ? 'checked' : ''} data-act-change="embMision" data-id="${m.id}"><span style="${m.hecha ? 'opacity:.55;text-decoration:line-through' : ''}">${esc(m.txt)}${m.url ? ` · <a href="${esc(m.url)}" target="_blank" rel="noopener">abrir ↗</a>` : ''}</span></label>`).join('')}</div>`;
 }
+// 🎬 Videos de Yupitok: canal propio de la página que el agente crea y publica solo (YouTube y Facebook automáticos; TikTok en un toque)
+function yupiVideosCard() {
+  const ch = (S.channels || []).find(c => c.yupitok) || (S.channels || []).find(c => /^yupitok$/i.test(String(c.name || '').trim()));
+  if (!ch) return `<div class="card" style="border:2px solid #8b5cf6"><h3>🎬 Videos de Yupitok</h3><p class="hint">Un canal de videos solo para Yupitok, aparte de tus otros canales. El agente hace los videos (trucos, retos, tops de juegos, Yupi, GLORY, Huerto) con el cierre "¡Juega gratis en yupitok.com!", y los publica solos en YouTube y Facebook. Los clips que hagas en Google Flow también entran aquí.</p><div class="btns"><button class="b" data-act="yvCrear">🎬 Crear el canal de videos de Yupitok</button></div></div>`;
+  const yt = S.publish.google?.[ch.id], pgs = S.publish.facebookPages || [], ap = ch.autoPublish || {};
+  const jobs = (S.jobs || []).filter(j => j.channelId === ch.id), listos = jobs.filter(j => j.result && ['aprobado', 'publicado', 'revisar', 'listo'].includes(j.status)).slice(-6).reverse();
+  const paso = (ok, t) => `<li style="margin:4px 0">${ok ? '✅' : '⬜'} ${t}</li>`;
+  return `<div class="card" style="border:2px solid #8b5cf6"><h3>🎬 Videos de Yupitok <small class="hint">(${jobs.length} videos hechos)</small></h3>
+    <p class="hint">El agente crea ${ch.perDay || 1} video(s) al día para Yupitok y los publica solo. Los clips de Google Flow que guardes en la carpeta "unir" también entran a este canal.</p>
+    <ol style="margin:6px 0 10px 18px;padding:0;list-style:none">
+      ${paso(!!yt, yt ? `YouTube conectado: <b>${esc(yt.title || '')}</b>` : `<a class="b sm" href="/oauth/google/start?channel=${ch.id}" style="text-decoration:none">▶️ Conectar el YouTube de Yupitok</a> <small class="hint">(entra con la cuenta del canal de Yupitok)</small>`)}
+      ${paso(!!ch.fbPageId, pgs.length ? `Página de Facebook: <select data-act-change="yvFb" style="width:auto"><option value="">— elige —</option>${pgs.map(p => `<option value="${p.id}" ${p.id === ch.fbPageId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : 'Facebook: primero conéctalo en <b>Ajustes → Publicación</b> (necesita tu App de Facebook) y luego elige aquí la página @yupitokoficial')}
+      ${paso(ch.autoApprove, `<label style="display:inline-flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" data-act-change="yvAuto" ${ch.autoApprove ? 'checked' : ''} style="width:auto"> Aprobar solo (sin que yo revise cada video)</label>`)}
+      ${paso(ap.youtube || ap.facebook, `<label style="display:inline-flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" data-act-change="yvYt" ${ap.youtube ? 'checked' : ''} ${yt ? '' : 'disabled'} style="width:auto"> Publicar solo en YouTube</label> · <label style="display:inline-flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" data-act-change="yvFbAuto" ${ap.facebook ? 'checked' : ''} ${ch.fbPageId ? '' : 'disabled'} style="width:auto"> en Facebook</label>`)}
+      ${paso(true, `Videos por día: <select data-act-change="yvPer" style="width:auto">${[1, 2, 3].map(n => `<option ${+(ch.perDay || 1) === n ? 'selected' : ''}>${n}</option>`).join('')}</select> <small class="hint">(a las ${esc(ch.times?.youtube || '19:00')} en YouTube y ${esc(ch.times?.facebook || '20:00')} en Facebook, hora Perú)</small>`)}
+    </ol>
+    <p class="hint">🎵 <b>TikTok:</b> TikTok no deja que ningún programa publique solo sin aprobar su app (un trámite largo para empresas). Por eso aquí cada video tiene su botón: <b>descarga el video, copia el texto con hashtags y abre TikTok</b>; tú solo pegas y publicas (unos 20 segundos).</p>
+    ${listos.length ? listos.map(j => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #e5e7eb;padding:6px 0;font-size:.9rem"><span style="flex:1">${esc(j.title || j.topic || 'Video')} <small class="hint">· ${esc(j.status)}${j.pub?.youtube?.ok ? ' · ✅ YouTube' : ''}${j.pub?.facebook?.ok ? ' · ✅ Facebook' : ''}${j.pub?.tiktok?.ok ? ' · ✅ TikTok' : ''}</small></span>${j.pub?.tiktok?.ok ? '' : `<button class="b ghost sm" data-act="pub" data-id="${j.id}" data-p="tiktok">🎵 Subir a TikTok</button>`}</div>`).join('') : '<p class="hint">Cuando el agente termine los primeros videos de Yupitok, aparecerán aquí.</p>'}
+    <div class="btns" style="margin-top:6px"><button class="b ghost sm" data-act="yvAhora">🎬 Hacer un video de Yupitok ahora</button>${ch.active === false ? `<button class="b sm" data-act="yvActivar">▶️ Activar</button>` : ''}</div></div>`;
+}
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
   const v = VS || {};
   return `<h1>📣 Página viral</h1><p class="sub">Juegos para compartir (horóscopo, test de amor, ruleta…) que llevan gente a tus videos y juntan suscriptores para tus notificaciones.</p>
+  ${yupiVideosCard()}
   <div class="card" id="vf-top">${viralTop()}</div>
   ${apoyoCard()}
   <details class="card" ${v.fijo ? '' : 'open'}><summary><b>🔗 Dirección fija (tu dominio) — recomendado</b></summary>
@@ -1012,6 +1033,9 @@ const ACT = {
   guBorrar: guard(async el => { if (!confirm('¿Borrar esta guía?')) return; MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'borrar' }); render(); }),
   devOk: guard(async el => { if (!confirm('¿Ya probaste el juego y es apto para todo público? Se publicará en la portada.')) return; MD = await api('/api/mando/dev', { id: el.dataset.id, estado: 'aprobado' }); toast('✅ Juego publicado'); render(); }),
   devNo: guard(async el => { const m = prompt('¿Por qué no se aprueba? (el desarrollador lo verá en su panel)', 'No carga bien en celular'); if (m === null) return; MD = await api('/api/mando/dev', { id: el.dataset.id, estado: 'rechazado', motivo: m }); render(); }),
+  yvCrear: guard(async () => { await api('/api/viral/yupitok', {}); await refresh(true); toast('🎬 Canal de videos de Yupitok creado: ahora conecta su YouTube'); render(); }),
+  yvActivar: guard(async () => { await api('/api/viral/yupitok', { active: true }); await refresh(true); render(); }),
+  yvAhora: guard(async () => { await api('/api/mando/short', {}); await refresh(true); toast('🎬 Video de Yupitok en producción: míralo en Videos'); render(); }),
   grNuevo: guard(async () => { if (!$('#gr-p').checked) throw new Error('Primero confirma que leíste las reglas del grupo y que permite promociones'); MD = await api('/api/mando/grupo', { nombre: $('#gr-n').value, url: $('#gr-u').value, idioma: $('#gr-i').value, tema: $('#gr-t').value, cada: $('#gr-c').value, permite: true }); toast('🤝 Grupo guardado: ya tiene su propio enlace para medir'); render(); }),
   grPub: guard(async el => { MD = await api('/api/mando/grupo', { id: el.dataset.id, accion: 'publique' }); toast('✅ ¡Bien! Vuelve a tocar en unos días'); render(); }),
   grPausa: guard(async el => { MD = await api('/api/mando/grupo', { id: el.dataset.id, accion: 'pausar' }); render(); }),
@@ -1371,6 +1395,9 @@ document.addEventListener('change', guard(async e => {
   if (t.id === 'chatFile' && t.files.length) { await subirAdj(t.files); t.value = ''; return; }
   if (t.id === 'vf-dest') { VS = await api('/api/viral/ajustes', { destacado: t.checked }); toast(t.checked ? 'Tu último video será el destacado' : 'Desactivado'); return; }
   if (t.dataset.actChange === 'embAj') { if (t.id === 'emb-fb' && t.checked && !confirm('El Embajador publicará 1 post al día (el kit del día, en español) en tu página de Facebook. ¿Activar?')) { t.checked = false; return; } MD = await api('/api/mando/embajador', { fbAuto: $('#emb-fb').checked, hora: $('#emb-hora').value, shortsSemana: $('#emb-sh').value }); toast('🌍 Embajador actualizado'); render(); return; }
+  if (['yvFb', 'yvAuto', 'yvYt', 'yvFbAuto', 'yvPer'].includes(t.dataset.actChange)) { const k = t.dataset.actChange, o = k === 'yvFb' ? { fbPageId: t.value } : k === 'yvAuto' ? { autoApprove: t.checked } : k === 'yvYt' ? { yt: t.checked } : k === 'yvFbAuto' ? { fb: t.checked } : { perDay: +t.value };
+    if (k === 'yvAuto' && t.checked && !confirm('Los videos de Yupitok se aprobarán solos y saldrán sin que los revises. ¿Activar?')) { t.checked = false; return; }
+    await api('/api/viral/yupitok', o); await refresh(true); toast('🎬 Guardado'); render(); return; }
   if (t.dataset.actChange === 'mkGasto') { MD = await api('/api/mando/campana', { gastoDe: t.dataset.id, gasto: t.value }); toast('💸 Gasto anotado'); render(); return; }
   if (t.dataset.actChange === 'embMision') { MD = await api('/api/mando/mision', { id: t.dataset.id, hecha: t.checked }); if (t.checked) toast('🎯 ¡Misión cumplida!'); render(); return; }
   if (t.dataset.actChange === 'radarCh') { store.set('radarCh', t.value); render(); return; }

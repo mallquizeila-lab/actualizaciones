@@ -284,6 +284,20 @@ async function api(u, q, U, r) {
     if (u === '/api/viral/config' && P) { V.configurar(o); return V.estado(); }
     if (u === '/api/viral/voces-glory' && P) { V.vocesGlory(); return V.estado(); }
     if (u === '/api/viral/voces-todas' && P) { V.vocesTodas(); return V.estado(); }
+    // 🎬 Videos de Yupitok: un canal propio de la página (aparte de tus otros canales) que el agente crea y publica solo
+    if (u === '/api/viral/yupitok' && P) {
+      let ch = db.channels.find(c => c.yupitok) || db.channels.find(c => /^yupitok$/i.test(String(c.name || '').trim()));
+      const NICHO = 'Yupitok (yupitok.com): plataforma peruana de juegos gratis sin instalar. Videos de trucos y retos de sus juegos (GLORY BROWN, Huerto Defensor, Joyas, 2048, Gusanito), tops de juegos gratis, el reto del día, el torneo de la semana, el Yupi Pass y la mascota Yupi.';
+      const NOTAS = 'Tono divertido, rápido y emocionante, para jóvenes y familias. Gancho fuerte en el primer segundo. Muestra siempre que es GRATIS y sin descargar. Nunca uses personajes, logos ni nombres de franquicias famosas (Disney, Nintendo, Pokémon, Roblox, Free Fire, etc.). No prometas premios en dinero: las monedas y Yupicoins son del juego.';
+      if (!ch) { ch = saveChannel({ name: 'Yupitok', niche: NICHO, notes: NOTAS, tone: 'divertido y emocionante', frase: '¡Juega gratis en yupitok.com! 🎮', style: 'fotos', perDay: 1, active: true, autoApprove: false, autoPublish: { youtube: false, facebook: false }, times: { youtube: '19:00', tiktok: '19:30', facebook: '20:00' } }); ch.yupitok = true; }
+      ch.yupitok = true;
+      if (o.perDay !== undefined) ch.perDay = Math.max(1, Math.min(3, +o.perDay || 1));
+      if (o.autoApprove !== undefined) ch.autoApprove = !!o.autoApprove;
+      if (o.yt !== undefined || o.fb !== undefined) ch.autoPublish = { ...(ch.autoPublish || {}), ...(o.yt !== undefined ? { youtube: !!o.yt } : {}), ...(o.fb !== undefined ? { facebook: !!o.fb } : {}) };
+      if (o.fbPageId !== undefined) ch.fbPageId = String(o.fbPageId || '');
+      if (o.active !== undefined) ch.active = !!o.active;
+      saveAll.channels(); return { ok: 1, id: ch.id };
+    }
     if (u === '/api/viral/voces-idiomas' && P) { V.vocesIdiomas(o.langs); return V.estado(); }
     if (u === '/api/viral/escenas' && P) { V.escenasIA(); return V.estado(); }
     if (u === '/api/viral/nueva-clave' && P) { V.nuevaClave(); return V.estado(); }

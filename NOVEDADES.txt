@@ -1,3 +1,9 @@
+v7.78.0 — 🎬 Videos de Yupitok en la Página viral
+- 🎬 Nueva tarjeta "Videos de Yupitok" en 📣 Página viral, aparte de tus otros canales. Con un botón se crea el canal de Yupitok ya configurado: su tema (trucos, retos, tops de juegos, Yupi, GLORY, Huerto, reto del día, Yupi Pass), su tono, el cierre "¡Juega gratis en yupitok.com! 🎮" y reglas para no usar personajes de otras marcas.
+- ✅ Lista de pasos con check: ▶️ conectar el YouTube de Yupitok, elegir la página de Facebook, "Aprobar solo", "Publicar solo en YouTube / Facebook" y cuántos videos al día (1 a 3).
+- 🎵 TikTok en un toque: cada video terminado tiene el botón "Subir a TikTok": descarga el video, copia el texto con hashtags y abre TikTok. TikTok no permite que un programa publique solo sin aprobar su app.
+- 🎬 Botón "Hacer un video de Yupitok ahora". Los clips de Google Flow de la carpeta "unir" también entran a este canal.
+
 v7.77.0 — 🧭 Portada más ordenada + 🎯 aviso del reto
 - 🧭 La portada quedó más limpia: el Yupi Pass, la Tienda, Yupitok TV y el Salón de la Fama ahora son una fila de 4 botones (accesos rápidos), como en las apps grandes, en vez de 3 banners gigantes. El Pase muestra tu nivel y avisa con 🎁 si tienes premios por reclamar, y la Tienda muestra tus 💎.
 - 🎯 Nuevo en el panel de la página → Ajustes: "Aviso del reto del día". Una notificación diaria a la hora que elijas, por ejemplo "🎯 Reto del día: Torre · ¿Puedes hacer 20 puntos?". Para no cansar a nadie, no se envía si ese día ya salió otra notificación. Viene apagado: actívalo cuando quieras.
