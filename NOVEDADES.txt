@@ -1,3 +1,7 @@
+v7.79.0 — 🛡️ Cuidado con los derechos de autor
+- 🛡️ El agente analista ahora revisa cada video antes de aprobarlo: si ve un personaje, criatura o logo que se parece a uno de una marca famosa (Disney/Pixar, Nintendo, Pokémon, Plants vs. Zombies, Minecraft, Roblox, Free Fire, etc.), NO lo aprueba ni lo publica solo. Lo deja en revisión con el aviso de qué se parece a qué y en qué segundo, y te avisa por Telegram.
+- 🎬 Los prompts de Google Flow describen el Huerto con estilo peruano original (chacra andina con surcos y montañas; choclo guerrero con casco inca, coco caballero y ají con capa) y prohíben expresamente nueces enojadas, lanzaguisantes, girasoles, zombis y el pasto en cuadrícula de ese juego.
+
 v7.78.0 — 🎬 Videos de Yupitok en la Página viral
 - 🎬 Nueva tarjeta "Videos de Yupitok" en 📣 Página viral, aparte de tus otros canales. Con un botón se crea el canal de Yupitok ya configurado: su tema (trucos, retos, tops de juegos, Yupi, GLORY, Huerto, reto del día, Yupi Pass), su tono, el cierre "¡Juega gratis en yupitok.com! 🎮" y reglas para no usar personajes de otras marcas.
 - ✅ Lista de pasos con check: ▶️ conectar el YouTube de Yupitok, elegir la página de Facebook, "Aprobar solo", "Publicar solo en YouTube / Facebook" y cuántos videos al día (1 a 3).
