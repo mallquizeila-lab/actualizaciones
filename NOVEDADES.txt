@@ -1,3 +1,10 @@
+v7.81.0 — 🎨 Aventuras de Yupi: gráficos mucho más bonitos
+- 🎨 Estilo de dibujo animado: colores por capas y contorno oscuro en los personajes, como en una caricatura.
+- 👑 Yupi nuevo: Y dorada redondeada, ojos grandes con brillo, cejas, sonrisa con lengua, corona con gemas azules, brazos con guantes blancos, zapatillas con suela azul y capa morada con cuello dorado.
+- ⭐ Estrellín ahora es una estrella de 5 puntas con carita y brillo.
+- 🏰 Castillo con almenas, ventanas iluminadas, aros y banderas doradas que ondean, y portón de oro. El Cristal Amarillo brilla con aura y luz propia.
+- 🌈 Cielo degradado con sol y nubes que se mueven, césped pintado, camino de piedras, cientos de flores de colores, matas de pasto, rocas, cristales morados, árboles redondos e islas flotantes con cascadas y brillitos mágicos.
+
 v7.80.0 — 👑 Yupitok: El Universo de las Aventuras (prototipo Fase 1)
 - 👑 Nuevo juego 3D en la portada: ayuda a Yupi a recuperar el Cristal Amarillo en el Reino de Yupitok. Movimiento con joystick o WASD, doble salto, giro de corona y cámara que se gira arrastrando.
 - 🎯 3 misiones: junta 10 monedas, supera la prueba del Sabio Búho (preguntas educativas con explicación) y derrota a los gorgojitos para tomar el cristal. Enemigos: gorgojitos y babosas saltarinas.
