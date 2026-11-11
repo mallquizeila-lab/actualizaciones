@@ -1,3 +1,9 @@
+v7.86.0 — 🎮 Aventuras de Yupi al estilo de los grandes: multijugador, Torre obby y mascotas
+- 👥 Multijugador en vivo: en cada nivel y en la Torre ves a los demás jugadores con su héroe y su apodo, en tiempo real. Contador "👥 N jugando aquí ahora".
+- 😀 Emotes (👋 😂 ❤️ 🔥 👏 😮 🎉 💃) que aparecen sobre tu cabeza para saludar a los demás. Sin chat escrito: seguro para todas las edades.
+- 🏗️ Torre de las Nubes: obby infinito en espiral que se genera solo. Plataformas que se mueven, que desaparecen, vigas angostas, aspas giratorias que te empujan y trampolines. Cada bandera guarda tu avance y da +5 🪙. Récord personal y ranking (juego "obby").
+- 🥚 Mascotas: abre huevos con 150 🪙 (monedas del juego, nunca dinero real). 8 mascotas originales en 4 rarezas: Cuy Pompón, Vicuñita, Pollito Inca, Colibrí Arcoíris, Rana del Titicaca, Cóndor Bebé, Puma Dorado y Dragoncito de Cristal. Te siguen saltando o volando y dan de +5 % a +35 % de monedas extra. Las probabilidades se muestran en pantalla y las repetidas devuelven 50 🪙.
+
 v7.85.0 — 🎬 Aventuras de Yupi: gráficos estilo película animada
 - 🎬 Nueva iluminación realista: color de cine (tono ACES), sol cálido con sombras suaves, luz de cielo y luz de borde que separa a los personajes del fondo.
 - ✨ Materiales físicos: el oro de Yupi, su corona, el casco y el escudo de Choki y las monedas brillan como metal y reflejan el cielo; la lana de Lulú, el coco de Coquito y el césped se ven suaves.
