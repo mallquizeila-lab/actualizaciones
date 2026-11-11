@@ -1,3 +1,7 @@
+v7.83.0 — 🍪 Privacidad lista para AdSense
+- 🍪 La Política de privacidad ahora incluye la sección "Cookies y publicidad" que exige Google AdSense: uso de cookies, anuncios de Google y proveedores externos, y enlaces para desactivar la publicidad personalizada (Configuración de anuncios de Google y aboutads.info). También aclara que los juegos de GamePix pueden mostrar sus propios anuncios.
+- Si en "Plazo" escribiste solo un número (por ejemplo 12), ahora se muestra "12 meses".
+
 v7.82.0 — 🔎 Modo revisión de AdSense
 - 🔎 Nuevo interruptor en Ajustes → 💰 Google AdSense (activado por defecto): mientras Google revisa tu sitio, las miles de fichas de juegos de otros estudios (con el texto copiado del distribuidor) quedan fuera del sitemap y marcadas "noindex". Así Google evalúa solo el contenido propio de Yupitok. Los jugadores siguen viendo y jugando todo igual.
 - Desactívalo unas semanas después de que AdSense te apruebe para que Google vuelva a indexar esas fichas.

@@ -1232,7 +1232,7 @@ http.createServer(async (req, res) => {
       const pv = getS('priv', {}), x = (v, d) => esc(v || d);
       let h = fs.readFileSync(path.join(PUB, 'privacidad.html'), 'utf8')
         .replace('TU NOMBRE O EMPRESA', x(pv.nombre, 'TU NOMBRE O EMPRESA')).replace('TU CIUDAD, PERÚ', x(pv.ciudad, 'TU CIUDAD, PERÚ'))
-        .replaceAll('TU-CORREO@EJEMPLO.COM', x(pv.correo, 'TU-CORREO@EJEMPLO.COM')).replace('PLAZO (por ejemplo, 24 meses)', x(pv.plazo, '24 meses'))
+        .replaceAll('TU-CORREO@EJEMPLO.COM', x(pv.correo, 'TU-CORREO@EJEMPLO.COM')).replace('PLAZO (por ejemplo, 24 meses)', x(/^\s*\d+\s*$/.test(pv.plazo || '') ? pv.plazo.trim() + ' meses' : pv.plazo, '24 meses'))
         .replace('NÚMERO DE INSCRIPCIÓN', x(pv.codigo, 'en trámite'));
       if (pv.nombre && pv.correo) h = h.replace(/<p class="n">[\s\S]*?<\/p>/, '');
       return send(res, 200, h, 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
