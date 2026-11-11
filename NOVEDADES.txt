@@ -1,3 +1,9 @@
+v7.87.0 — 👫 Aventuras de Yupi: salas privadas con amigos, estilo del personaje y ranking de la Torre
+- 👫 Salas privadas: crea una sala con código de 5 letras e invita por WhatsApp (enlace directo). Solo quienes tengan el código juegan juntos los niveles y la Torre. También se puede entrar escribiendo el código.
+- 👕 Tu estilo: bufanda de 8 colores (gratis) y 5 sombreros que se compran con 🪙 del juego (gorra, orejas de gato, vaquero, copa y corona real). Se ven en los 4 héroes y los demás jugadores también los ven.
+- 🏆 Ranking del mes de la Torre de las Nubes en el menú del juego (top 5).
+- Arreglo: el enlace de invitación ahora lleva directo a la sala aunque la página limpie la dirección.
+
 v7.86.0 — 🎮 Aventuras de Yupi al estilo de los grandes: multijugador, Torre obby y mascotas
 - 👥 Multijugador en vivo: en cada nivel y en la Torre ves a los demás jugadores con su héroe y su apodo, en tiempo real. Contador "👥 N jugando aquí ahora".
 - 😀 Emotes (👋 😂 ❤️ 🔥 👏 😮 🎉 💃) que aparecen sobre tu cabeza para saludar a los demás. Sin chat escrito: seguro para todas las edades.

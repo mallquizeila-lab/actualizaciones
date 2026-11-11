@@ -33,6 +33,11 @@
   ], RAREZA = { comun: ['Común', '#9ca3af', 60], raro: ['Rara', '#22e6ff', 28], epico: ['Épica', '#b26bff', 10], legendario: ['Legendaria', '#ffd23f', 2] }, PRECIO_HUEVO = 150;
   const masc = id => MASCOTAS.find(m => m[0] === id);
   const sortearMascota = () => { let r = Math.random() * 100; for (const k of ['comun', 'raro', 'epico', 'legendario']) { r -= RAREZA[k][2]; if (r < 0) { const l = MASCOTAS.filter(m => m[3] === k); return l[Math.floor(Math.random() * l.length)]; } } return MASCOTAS[0]; };
+  // 👕 Estilo: bufanda de color (gratis) y sombreros (con 🪙 del juego). Los demás jugadores también lo ven.
+  const COLORES = ['#ff3d6e', '#ff9a1f', '#ffd23f', '#3fd36b', '#22e6ff', '#2f6bff', '#b26bff', '#ffffff'], SIN_COLOR = '#7c5cff';
+  const GORROS = [['gorra', '🧢', 'Gorra', 200], ['gato', '🐱', 'Orejas de gato', 250], ['vaquero', '🤠', 'Sombrero vaquero', 300], ['copa', '🎩', 'Sombrero de copa', 350], ['corona', '👑', 'Corona real', 500]];
+  // 👫 Sala privada: un código de 5 letras para jugar solo con tus amigos
+  const salaOk = c => /^[a-z0-9]{5}$/.test(c || '') ? c : ''; let SALA = (() => { try { return salaOk(String(new URLSearchParams(typeof QS0 === 'string' ? QS0 : location.search).get('sala') || '').toLowerCase()); } catch (e) { return ''; } })(); // se lee al cargar: la página limpia la dirección después
   let BANCO = null;
   const leerPreg = l => { const p = String(l || '').split('|').map(s => s.trim()); if (p.length < 5 || !p[1] || !p[2] || !p[3]) return null; const ex = p.length >= 6 ? p[p.length - 1] : '', malas = (p.length >= 6 ? p.slice(3, -1) : p.slice(3)).filter(Boolean).slice(0, 3); return malas.length ? { mat: p[0] || 'General', q: p[1], ok: p[2], malas, ex } : null; };
   const cargarBanco = () => BANCO ? Promise.resolve(BANCO) : Promise.all([
@@ -42,16 +47,17 @@
 
   JUEGOS.aventura = t => {
     salir(); try { registrar(t.id); } catch (e) {}
+    
     portada(t);
   };
   const datosJ = () => { const D = PERFIL.datos, prev = D.juegos.aventura || {}; if (prev.nivel === undefined && prev.cristales) { prev.nivel = 1; prev.cristales = 0; } // progreso de la Fase 1 → nivel 1 completado
-    const J = D.juegos.aventura = Object.assign({ partidas: 0, record: 0, cristales: 0, mejorTiempo: 0, nivel: 0, est: [0, 0, 0, 0], pj: 'yupi', mascotas: [], mascota: '', obby: 0 }, prev); if (!Array.isArray(J.est)) J.est = [0, 0, 0, 0]; if (!Array.isArray(J.mascotas)) J.mascotas = []; return J; };
+    const J = D.juegos.aventura = Object.assign({ partidas: 0, record: 0, cristales: 0, mejorTiempo: 0, nivel: 0, est: [0, 0, 0, 0], pj: 'yupi', mascotas: [], mascota: '', obby: 0, estilo: { color: '', gorro: '' }, gorros: [] }, prev); if (!J.estilo) J.estilo = { color: '', gorro: '' }; if (!Array.isArray(J.gorros)) J.gorros = []; if (!Array.isArray(J.est)) J.est = [0, 0, 0, 0]; if (!Array.isArray(J.mascotas)) J.mascotas = []; return J; };
 
   // ---------- Pantalla de inicio: héroe y nivel ----------
   function portada(t) {
     css(); const J = datosJ(); let pj = ORDEN.includes(J.pj) ? J.pj : 'yupi', niv = Math.min(J.nivel, NIVELES.length - 1);
     const ov = document.createElement('div'); ov.id = 'avz'; document.body.append(ov); document.body.style.overflow = 'hidden';
-    const pinta = () => { ov.innerHTML = `<div class="avz-menu"><div class="avz-logo">👑 YUPITOK<small>El Universo de las Aventuras</small></div>
+    let pinta = () => { ov.innerHTML = `<div class="avz-menu"><div class="avz-logo">👑 YUPITOK<small>El Universo de las Aventuras</small></div>
       <p class="avz-lema">¡Juega, ríe, aprende y gana!</p>
       <p class="avz-hist">Gorgojo Grun robó los <b>Cristales del Arcoíris</b> y el reino perdió su color. ¡Forma tu equipo y recupera el <b>Cristal Amarillo</b>!</p>
       <h3>1. Elige tu héroe</h3><div class="avz-pers">${PERS.map(([id, e, n, h, f]) => `<button class="avz-p ${f ? 'lock' : ''} ${id === pj ? 'sel' : ''}" data-p="${id}"><span>${e}</span><b>${n}</b><small>${f ? `🔒 Fase ${f}` : h}</small></button>`).join('')}</div>
@@ -60,12 +66,20 @@
       <p class="avz-hist">${escH(NIVELES[niv].d)}</p>
       ${J.cristales ? '<p class="avz-hist">💛 ¡Ya recuperaste el Cristal Amarillo! El Bosque Encantado y el Imperio Dorado llegan en la Fase 3.</p>' : ''}
       <div class="avz-bts"><button class="avz-go" data-go="1">▶ Jugar con ${EQUIPO[pj].e} ${EQUIPO[pj].n}</button><button class="avz-x" data-x="1">✕ Salir</button></div>
-      <h3>🏗️ Torre de las Nubes <small class="avz-nuevo">NUEVO</small></h3><p class="avz-hist">Un obby que nunca termina: plataformas que se mueven, que desaparecen, aspas giratorias y trampolines. Cada bandera guarda tu avance. ¿Hasta qué etapa llegas?</p>
+      <h3>👫 Jugar con amigos</h3>${SALA ? `<p class="avz-hist">🔒 Estás en la <b>sala privada ${SALA.toUpperCase()}</b>: solo ven tu partida quienes tengan este código.</p><div class="avz-bts"><button class="avz-go" data-inv="1">📤 Invitar amigos</button><button class="avz-x" data-salir="1">🌍 Volver a la sala pública</button></div>`
+        : `<p class="avz-hist">Crea una sala privada y comparte el código: jugarán juntos los niveles y la Torre.</p><div class="avz-bts"><button class="avz-go" data-crear="1">➕ Crear sala privada</button><input class="avz-cod" id="avcod" maxlength="5" placeholder="CÓDIGO" autocomplete="off"><button class="avz-x" data-unir="1">Entrar</button></div>`}
+      <h3>👕 Tu estilo</h3><p class="avz-hist" style="font-size:.85rem">Bufanda de color (gratis) y sombreros para todos tus héroes. ¡Los demás jugadores también los ven!</p>
+      <div class="avz-cols"><button class="avz-sw ${!J.estilo.color ? 'sel' : ''}" data-col="" title="Sin bufanda">✖</button>${COLORES.map(c => `<button class="avz-sw ${J.estilo.color === c ? 'sel' : ''}" data-col="${c}" style="background:${c}"></button>`).join('')}</div>
+      <div class="avz-masc"><button class="avz-m ${!J.estilo.gorro ? 'sel' : ''}" data-gor="" style="--rc:#9ca3af"><span>🙂</span><b>Sin sombrero</b><small>gratis</small></button>${GORROS.map(([id, e, n, pr]) => { const lo = J.gorros.includes(id); return `<button class="avz-m ${J.estilo.gorro === id ? 'sel' : ''}" data-gor="${id}" style="--rc:${lo ? '#3fd36b' : '#ffd23f'}"><span>${e}</span><b>${n}</b><small>${lo ? 'tuyo' : pr + ' 🪙'}</small></button>`; }).join('')}</div>
+      <h3>🏗️ Torre de las Nubes <small class="avz-nuevo">NUEVO</small></h3><div id="avztop" class="avz-top5"></div><p class="avz-hist">Un obby que nunca termina: plataformas que se mueven, que desaparecen, aspas giratorias y trampolines. Cada bandera guarda tu avance. ¿Hasta qué etapa llegas?</p>
       <div class="avz-bts"><button class="avz-go avz-torre" data-obby="1">🏗️ Subir la Torre${J.obby ? ` · récord: etapa ${J.obby}` : ''}</button></div>
       <h3>🥚 Mascotas <small class="avz-nuevo">NUEVO</small></h3><p class="avz-hist">Tu mascota te acompaña en todos los niveles y te da <b>monedas extra</b>. Tienes <b>🪙 ${PERFIL.datos.monedas}</b> monedas.</p>
       <div class="avz-masc">${MASCOTAS.map(([id, e, n, r, b]) => { const la = J.mascotas.includes(id), R = RAREZA[r]; return `<button class="avz-m ${la ? '' : 'no'} ${J.mascota === id ? 'sel' : ''}" data-m="${id}" style="--rc:${R[1]}"><span>${la ? e : '❔'}</span><b>${la ? n : '???'}</b><small>${R[0]} · +${Math.round(b * 100)}% 🪙</small></button>`; }).join('')}</div>
       <div class="avz-bts"><button class="avz-go avz-huevo" data-huevo="1">🥚 Abrir un huevo · ${PRECIO_HUEVO} 🪙</button></div>
       <p class="avz-hist" style="font-size:.78rem;opacity:.75">Probabilidades: común 60 % · rara 28 % · épica 10 % · legendaria 2 %. Los huevos se compran solo con monedas que ganas jugando, nunca con dinero real.</p></div>`; };
+    const invitar = () => { const url = `${location.origin}/?g=arcade-aventura&sala=${SALA}`, txt = `👑 ¡Juega conmigo a Yupitok: El Universo de las Aventuras! Mi sala privada es ${SALA.toUpperCase()}`; if (navigator.share) navigator.share({ text: txt, url }).catch(() => {}); else open('https://wa.me/?text=' + encodeURIComponent(txt + ' ' + url), '_blank'); };
+    const topTorre = () => fetch('/api/aventura/torre').then(r => r.json()).then(d => { const el = ov.querySelector('#avztop'); if (!el || !d.top) return; el.innerHTML = d.top.length ? `<b>🏆 Top de ${escH(d.mes || 'este mes')}</b>${d.top.slice(0, 5).map((x, i) => `<div><span>${['🥇', '🥈', '🥉', '4.', '5.'][i]} ${escH(x.nombre)}</span><b>etapa ${x.puntos}</b></div>`).join('')}` : '<b>🏆 ¡Sé el primero en el ranking de la Torre este mes!</b>'; }).catch(() => {});
+    const pinta0 = pinta; pinta = () => { pinta0(); topTorre(); };
     pinta();
     ov.onclick = e => {
       const p = e.target.closest('[data-p]'), n = e.target.closest('[data-n]');
@@ -74,6 +88,14 @@
       if (e.target.closest('[data-x]')) { cerrar(ov); return; }
       if (e.target.closest('[data-go]')) lanzar(t, ov, pj, niv);
       if (e.target.closest('[data-obby]')) lanzar(t, ov, pj, 0, true);
+      if (e.target.closest('[data-crear]')) { SALA = Math.random().toString(36).slice(2, 7).replace(/[^a-z0-9]/g, 'x').padEnd(5, 'y'); pinta(); invitar(); return; }
+      if (e.target.closest('[data-unir]')) { const c = salaOk(String(ov.querySelector('#avcod')?.value || '').trim().toLowerCase()); if (!c) { toast('El código tiene 5 letras o números'); return; } SALA = c; toast(`🔒 Entraste a la sala ${c.toUpperCase()}`); pinta(); return; }
+      if (e.target.closest('[data-salir]')) { SALA = ''; pinta(); return; }
+      if (e.target.closest('[data-inv]')) { invitar(); return; }
+      const co = e.target.closest('[data-col]'); if (co) { J.estilo.color = co.dataset.col; try { PERFIL.ganar(0); } catch (er) {} pinta(); return; }
+      const go = e.target.closest('[data-gor]'); if (go) { const id = go.dataset.gor, G = GORROS.find(x => x[0] === id);
+        if (id && !J.gorros.includes(id)) { if (!PERFIL.gastar(G[3])) { toast(`Te faltan monedas: el ${G[2].toLowerCase()} cuesta ${G[3]} 🪙`); return; } J.gorros.push(id); toast(`${G[1]} ¡${G[2]} desbloqueado!`); try { FX.son('nivel'); } catch (er) {} }
+        J.estilo.gorro = id; try { PERFIL.ganar(0); } catch (er) {} pinta(); return; }
       const m = e.target.closest('[data-m]'); if (m) { if (!J.mascotas.includes(m.dataset.m)) { toast('🥚 Esta mascota aún no te ha salido: ¡abre huevos!'); return; } J.mascota = J.mascota === m.dataset.m ? '' : m.dataset.m; try { PERFIL.ganar(0); } catch (er) {} pinta(); return; }
       if (e.target.closest('[data-huevo]')) { if (!PERFIL.gastar(PRECIO_HUEVO)) { toast(`Te faltan monedas: necesitas ${PRECIO_HUEVO} 🪙. ¡Gánalas jugando los niveles o la Torre!`); return; }
         const M2 = sortearMascota(), R = RAREZA[M2[3]], repetida = J.mascotas.includes(M2[0]); try { FX.son('pop'); } catch (er) {}
@@ -270,7 +292,7 @@
       const cola = malla(new THREE.SphereGeometry(.22, 12, 10), lana); cola.position.set(0, 1.55, -1.2); cu.add(cola);
       contorno(cu, 1.045);
       const piernas = []; for (const [x, z] of [[-.38, .45], [.38, .45], [.38, -.65], [-.38, -.65]]) { const p = new THREE.Group(); p.position.set(x, .95, z); const l = malla(new THREE.CapsuleGeometry(.12, .55, 4, 8), lana); l.position.y = -.38; p.add(l); const c = malla(new THREE.CylinderGeometry(.13, .14, .16, 10), pezu); c.position.y = -.85; p.add(c); contorno(p, 1.06); g.add(p); piernas.push(p); }
-      g.scale.setScalar(.9); return { g, cu, piernas, brazos: [] }; };
+      g.scale.setScalar(.9); return { g, cu, piernas, brazos: [], cab, ocultar: [chullo, pom] }; };
 
     // 🌽 Choki: choclo peruano de granos blancos, hojas como capa, casco inca dorado, lanza y escudo con sol
     const hacerChoki = () => { const g = new THREE.Group(), cu = new THREE.Group(); g.add(cu); const verde = mat('#3fae3a'), oro = mat('#ffc23d', { emissive: '#4a2d00', emissiveIntensity: .25 }), rojo = mat('#e3262f'), cafe = mat('#7a4a22');
@@ -290,7 +312,7 @@
         cu.add(b); brazos.push(b); }
       contorno(cu, 1.045);
       const piernas = []; for (const s of [-1, 1]) { const p = new THREE.Group(); p.position.set(s * .22, .55, 0); const l = malla(new THREE.CapsuleGeometry(.09, .25, 4, 8), verde); l.position.y = -.2; p.add(l); const bo = malla(new THREE.CapsuleGeometry(.14, .22, 6, 10), cafe); bo.rotation.x = Math.PI / 2; bo.position.set(0, -.45, .08); p.add(bo); contorno(p, 1.06); g.add(p); piernas.push(p); }
-      return { g, cu, piernas, brazos, lanza }; };
+      return { g, cu, piernas, brazos, lanza, ocultar: [pen] }; };
 
     // 🥥 Coquito: coco caballero con armadura de madera tallada, casco con pluma verde y mirada tranquila
     const hacerCoquito = () => { const g = new THREE.Group(), cu = new THREE.Group(); g.add(cu); const madera = mat('#c48a4a'), madera2 = mat('#8a5a2e'), oro = mat('#ffc23d'), verde = mat('#3fae3a'), puno = mat('#7a4a22');
@@ -307,12 +329,25 @@
       contorno(cu, 1.045);
       const piernas = []; for (const s of [-1, 1]) { const p = new THREE.Group(); p.position.set(s * .3, .5, 0); const l = malla(new THREE.CapsuleGeometry(.1, .18, 4, 8), madera2); l.position.y = -.18; p.add(l); const bo = malla(new THREE.CapsuleGeometry(.15, .2, 6, 10), mat('#5a3418')); bo.rotation.x = Math.PI / 2; bo.position.set(0, -.4, .08); p.add(bo); contorno(p, 1.06); g.add(p); piernas.push(p); }
       const burbuja = new THREE.Mesh(new THREE.SphereGeometry(1.75, 24, 18), new THREE.MeshBasicMaterial({ color: '#ffd23f', transparent: true, opacity: .28, depthWrite: false })); burbuja.position.y = 1.3; burbuja.visible = false; g.add(burbuja);
-      return { g, cu, piernas, brazos, burbuja }; };
+      return { g, cu, piernas, brazos, burbuja, ocultar: [pluma] }; };
 
     const SPAWN0 = new V3(0, 0, 24);
+    const hacerGorro = (tipo, col) => { const h = new THREE.Group(), c = col && col !== SIN_COLOR ? col : '#ff3d6e', M2 = (geo, mt, x = 0, y = 0, z = 0) => { const m = malla(geo, mt); m.position.set(x, y, z); h.add(m); return m; };
+      if (tipo === 'gorra') { M2(new THREE.SphereGeometry(.42, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(c)); const v = M2(new THREE.CylinderGeometry(.34, .34, .05, 20, 1, false, -Math.PI / 2, Math.PI), mat(c), 0, .02, .28); v.scale.z = 1.3; M2(new THREE.SphereGeometry(.06, 8, 6), mat('#ffffff'), 0, .42, 0); }
+      else if (tipo === 'gato') { for (const s of [-1, 1]) { const o = M2(new THREE.ConeGeometry(.16, .38, 12), mat(c), s * .26, .18, 0); o.rotation.z = -s * .25; const i = M2(new THREE.ConeGeometry(.09, .24, 10), mat('#ffb3c7'), s * .26, .16, .06); i.rotation.z = -s * .25; } }
+      else if (tipo === 'vaquero') { M2(new THREE.CylinderGeometry(.72, .72, .06, 28), mat('#a0682f')); M2(new THREE.CylinderGeometry(.34, .42, .42, 20), mat('#a0682f'), 0, .23, 0); M2(new THREE.CylinderGeometry(.425, .425, .1, 20), mat(c), 0, .08, 0); }
+      else if (tipo === 'copa') { M2(new THREE.CylinderGeometry(.56, .56, .05, 28), mat('#1d1830')); M2(new THREE.CylinderGeometry(.36, .36, .72, 24), mat('#1d1830'), 0, .38, 0); M2(new THREE.CylinderGeometry(.365, .365, .14, 24), mat(c), 0, .1, 0); }
+      else if (tipo === 'corona') { const a = M2(new THREE.CylinderGeometry(.4, .36, .26, 20, 1, true), mat('#ffc23d', { side: THREE.DoubleSide })); a.userData.sinBorde = 1; for (let i = 0; i < 6; i++) { const an = i / 6 * Math.PI * 2; M2(new THREE.ConeGeometry(.08, .28, 6), mat('#ffc23d'), Math.sin(an) * .38, .26, Math.cos(an) * .38); } M2(new THREE.OctahedronGeometry(.09), mat(c, { emissive: c, emissiveIntensity: .3 }), 0, .05, .4); }
+      contorno(h, 1.05); return h; };
+    const ANC = { yupi: { c: [0, 1.6, 0, .66, .72, 0], h: [0, 3.2, 0, 1] }, lulu: { c: [0, 1.98, .44, .33, 1, .2], h: 'cab' }, choki: { c: [0, 1.3, 0, .6, 1, 0], h: [0, 2.7, 0, 1.08] }, coquito: { c: [0, .6, 0, .9, 1, 0], h: [0, 2.12, 0, 1.15] } };
+    const aplicarEstilo = (m, id, color, gorro) => { (m.est || []).forEach(o => o.parent && o.parent.remove(o)); m.est = []; (m.ocultar || []).forEach(o => o.visible = !gorro);
+      if (color && color !== SIN_COLOR) { const [x, y, z, r, sz, rx] = ANC[id].c, b = new THREE.Group(); b.position.set(x, y, z); b.rotation.x = rx; const an = malla(new THREE.TorusGeometry(r, .1, 10, 28), mat(color)); an.rotation.x = Math.PI / 2; an.scale.y = sz; b.add(an);
+        for (const s of [-1, 1]) { const co = malla(new THREE.CapsuleGeometry(.07, .35, 4, 8), mat(color)); co.position.set(s * .12, -.22, -r * sz - .02); co.rotation.z = s * .25; b.add(co); } contorno(b, 1.06); m.cu.add(b); m.est.push(b); }
+      if (gorro) { const h = hacerGorro(gorro, color); if (ANC[id].h === 'cab') { h.position.set(0, .4, -.02); h.scale.setScalar(.95); m.cab.add(h); } else { const [x, y, z, sc] = ANC[id].h; h.position.set(x, y, z); h.scale.setScalar(sc); m.cu.add(h); } m.est.push(h); } };
     const MODELOS = { yupi: hacerYupi(), lulu: hacerLulu(), choki: hacerChoki(), coquito: hacerCoquito() };
     const jug = new THREE.Group(); scene.add(jug); for (const k of ORDEN) { MODELOS[k].g.visible = false; jug.add(MODELOS[k].g); }
     let pj = ORDEN.includes(cfg.pj) ? cfg.pj : 'yupi', M = MODELOS[pj], E = EQUIPO[pj]; M.g.visible = true;
+    const MIEST = (() => { try { return datosJ().estilo || {}; } catch (e) { return {}; } })(); for (const k of ORDEN) aplicarEstilo(MODELOS[k], k, MIEST.color, MIEST.gorro);
     const sombraY = new THREE.Mesh(new THREE.CircleGeometry(.85, 20), new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: .18, depthWrite: false })); sombraY.rotation.x = -Math.PI / 2; scene.add(sombraY);
     const destello = brillo('#ffffff', .1); scene.add(destello);
 
@@ -504,17 +539,18 @@
     $('#avcambio').addEventListener('click', () => cambiar());
     $('#avhab').addEventListener('click', () => hablar());
     // 👥 Otros jugadores en vivo (mismo nivel o misma torre) y emotes. Sin chat escrito: solo emojis, seguro para todas las edades.
-    const MUNDO = OBBY ? 'obby' : 'av' + niv, otrosJ = new Map(), HACER = { yupi: hacerYupi, lulu: hacerLulu, choki: hacerChoki, coquito: hacerCoquito }; let redOcupada = false, redT = 0, emoteMio = null, emoteSp = null, emoteT = 0;
+    const MUNDO = (OBBY ? 'obby' : 'av' + niv) + (SALA ? '-' + SALA : ''), otrosJ = new Map(), HACER = { yupi: hacerYupi, lulu: hacerLulu, choki: hacerChoki, coquito: hacerCoquito }; let redOcupada = false, redT = 0, emoteMio = null, emoteSp = null, emoteT = 0;
     const spriteTxt = (txt, ancho = 3, fondo = 'rgba(20,10,50,.65)', fuente = 'bold 30px sans-serif', alto = .75) => { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d'); if (fondo) { x.fillStyle = fondo; x.beginPath(); x.roundRect ? x.roundRect(4, 8, 248, 48, 22) : x.rect(4, 8, 248, 48); x.fill(); } x.fillStyle = '#fff'; x.font = fuente; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(txt).slice(0, 16), 128, 34); const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tx, transparent: true, depthWrite: false })); sp.scale.set(ancho, alto, 1); return sp; };
     const emojiSp = e => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); x.font = '96px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 64, 72); const tx = new THREE.CanvasTexture(c); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tx, transparent: true, depthWrite: false })); sp.scale.setScalar(1.4); return sp; };
     function sincronizar(lista) { const vistos = new Set(); for (const p of lista.slice(0, 10)) { vistos.add(p.id); let o = otrosJ.get(p.id); const pjO = HACER[p.pj] ? p.pj : 'yupi';
-        if (!o || o.pj !== pjO) { if (o) scene.remove(o.g); const m = HACER[pjO](); m.g.visible = true; const g = new THREE.Group(); g.add(m.g); const et = spriteTxt(p.nombre || 'Jugador'); et.position.y = 4; g.add(et); g.position.set(p.x, p.y, p.z); scene.add(g); o = { g, m, pj: pjO, t: new V3(p.x, p.y, p.z), ry: p.ry, a: p.a }; otrosJ.set(p.id, o); }
+        if (!o || o.pj !== pjO) { if (o) scene.remove(o.g); const m = HACER[pjO](); o = null; m.g.visible = true; const g = new THREE.Group(); g.add(m.g); const et = spriteTxt(p.nombre || 'Jugador'); et.position.y = 4; g.add(et); g.position.set(p.x, p.y, p.z); scene.add(g); o = { g, m, pj: pjO, t: new V3(p.x, p.y, p.z), ry: p.ry, a: p.a, color: null, gorro: null }; otrosJ.set(p.id, o); }
+        if (o.color !== p.color || o.gorro !== p.gorro) { o.color = p.color; o.gorro = p.gorro; aplicarEstilo(o.m, pjO, p.color, p.gorro); }
         o.t.set(p.x, p.y, p.z); o.ry = p.ry; o.a = p.a;
         if (p.emote && p.emote !== o.emote) { if (o.sp) o.g.remove(o.sp); o.sp = emojiSp(p.emote); o.sp.position.y = 5.1; o.g.add(o.sp); } if (!p.emote && o.sp) { o.g.remove(o.sp); o.sp = null; } o.emote = p.emote; }
       for (const [k, o] of otrosJ) if (!vistos.has(k)) { scene.remove(o.g); otrosJ.delete(k); } }
     async function enviarRed(movio) { if (redOcupada || !vivo) return; redOcupada = true;
-      try { const r = await post('/api/mundo/mov', { uid: VID, mundo: MUNDO, x: +pos.x.toFixed(2), y: +pos.y.toFixed(2), z: +pos.z.toFixed(2), ry: +ry.toFixed(2), a: enSuelo ? (movio ? 'c' : 'q') : 's', nombre: LS.get('chatNom') || 'Jugador', pj, emote: emoteMio }); emoteMio = null;
-        if (r && r.otros && vivo) { sincronizar(r.otros); const n = (r.cuenta || {})[MUNDO] || 1; $('#avon').textContent = n > 1 ? `👥 ${n} jugando aquí ahora` : '👥 Invita a un amigo a jugar contigo'; } } catch (e) {} redOcupada = false; }
+      try { const r = await post('/api/mundo/mov', { uid: VID, mundo: MUNDO, x: +pos.x.toFixed(2), y: +pos.y.toFixed(2), z: +pos.z.toFixed(2), ry: +ry.toFixed(2), a: enSuelo ? (movio ? 'c' : 'q') : 's', nombre: LS.get('chatNom') || 'Jugador', pj, color: MIEST.color || SIN_COLOR, gorro: MIEST.gorro || '', emote: emoteMio }); emoteMio = null;
+        if (r && r.otros && vivo) { sincronizar(r.otros); const n = (r.cuenta || {})[MUNDO] || 1; $('#avon').textContent = (SALA ? `🔒 Sala ${SALA.toUpperCase()} · ` : '') + (n > 1 ? `👥 ${n} jugando aquí ahora` : '👥 Invita a un amigo a jugar contigo'); } } catch (e) {} redOcupada = false; }
     $('#avemo').onclick = () => { const e = $('#avemos'); e.style.display = e.style.display === 'grid' ? 'none' : 'grid'; };
     $('#avemos').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; emoteMio = b.dataset.e; $('#avemos').style.display = 'none'; if (emoteSp) jug.remove(emoteSp); emoteSp = emojiSp(emoteMio); emoteSp.position.y = 4.6; jug.add(emoteSp); emoteT = 3.2; son('pop'); };
     $('#avgiro').textContent = E.btn; $('#avcambio').textContent = `🔄 ${E.e}`;
@@ -673,7 +709,7 @@
     setParar(() => { parar(); cerrar(ov); });
     window.__aventura = { get estado() { return { niv, pj, mi, nm: MIS.length, mon, vidas, prueba, derrotados, rotos, sonadas, rocaOk: !!roca?.ok, jefeHp: jefe ? jefe.hp : null, jefeEstado: jefe ? jefe.estado : null, cristalOk, fin, cd: +cd.toFixed(2), pos: [+pos.x.toFixed(2), +pos.y.toFixed(2), +pos.z.toFixed(2)] }; },
       tp: (x, z, y = 0) => { pos.set(x, y, z); vel.set(0, 0, 0); }, mirar: a => { ry = a; }, usar, cambiar, saltar, ganarMonedas: n => { mon += n; avanzarMision(); }, derrotarTodos: () => enemigos.filter(e => e.tipo === 'gorgojito').forEach(derrotar),
-      marear: () => { if (jefe) { jefe.estado = 'mareado'; jefe.t = 5; } }, obby: () => obby && { cpN: obby.cpN, mejor: obby.mejor, gen: obby.gen, caidas: obby.caidas, piezas: obby.piezas.map(p => ({ x: +p.x.toFixed(2), z: +p.z.toFixed(2), h: +p.h.toFixed(2), r: p.r, cpN: p.cpN, t: p.resorte ? 'resorte' : p.fantasma ? 'fantasma' : p.caja ? 'estrecha' : p.mov ? 'movil' : '' })) }, emote: e => { $('#avemos').style.display = 'grid'; $('#avemos').querySelector(`[data-e="${e}"]`)?.click(); }, otros: () => otrosJ.size, mascota: () => MASC && MASC.info[0], tpJefe: () => { if (jefe) { pos.set(jefe.g.position.x + 2.5, 0, jefe.g.position.z); vel.set(0, 0, 0); } }, roca: () => roca && { x: roca.x, z: roca.z, placa: [roca.placa.position.x, roca.placa.position.z] }, muros: () => muros.map(m => [m.x, m.z, m.roto]), campanas: () => campanas.map(c => [c.x, c.z, c.ok]), camara: (y, pi, d) => { yaw = y; pitch = pi; dist = d; } };
+      marear: () => { if (jefe) { jefe.estado = 'mareado'; jefe.t = 5; } }, obby: () => obby && { cpN: obby.cpN, mejor: obby.mejor, gen: obby.gen, caidas: obby.caidas, piezas: obby.piezas.map(p => ({ x: +p.x.toFixed(2), z: +p.z.toFixed(2), h: +p.h.toFixed(2), r: p.r, cpN: p.cpN, t: p.resorte ? 'resorte' : p.fantasma ? 'fantasma' : p.caja ? 'estrecha' : p.mov ? 'movil' : '' })) }, emote: e => { $('#avemos').style.display = 'grid'; $('#avemos').querySelector(`[data-e="${e}"]`)?.click(); }, otros: () => otrosJ.size, otrosEstilo: () => [...otrosJ.values()].map(o => [o.pj, o.color, o.gorro, o.m.est.length]), mundo: () => MUNDO, miEstilo: () => MIEST, mascota: () => MASC && MASC.info[0], tpJefe: () => { if (jefe) { pos.set(jefe.g.position.x + 2.5, 0, jefe.g.position.z); vel.set(0, 0, 0); } }, roca: () => roca && { x: roca.x, z: roca.z, placa: [roca.placa.position.x, roca.placa.position.z] }, muros: () => muros.map(m => [m.x, m.z, m.roto]), campanas: () => campanas.map(c => [c.x, c.z, c.ok]), camara: (y, pi, d) => { yaw = y; pitch = pi; dist = d; } };
   }
 
   function css() {
@@ -711,6 +747,9 @@
     @media (max-width:600px){#avjefe{top:auto;bottom:112px}}
     #avon{font-size:.78rem;opacity:.85;margin-top:2px}
     #avemos{position:fixed;right:10px;top:60px;display:none;grid-template-columns:repeat(4,46px);gap:6px;padding:8px;border-radius:16px;background:rgba(15,10,40,.8);z-index:3}#avemos button{font-size:1.6rem;border:0;background:rgba(255,255,255,.1);border-radius:12px;cursor:pointer;padding:4px}
+    .avz-cod{width:110px;border-radius:16px;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.35);color:#fff;font:900 1.1rem Figtree,sans-serif;text-align:center;text-transform:uppercase;letter-spacing:.15em;padding:10px}
+    .avz-cols{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}.avz-sw{width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.3);cursor:pointer;color:#fff;background:rgba(0,0,0,.35);font-weight:900}.avz-sw.sel{border-color:#fff;box-shadow:0 0 14px #fff;transform:scale(1.12)}
+    .avz-top5{max-width:420px;margin:6px auto;text-align:left;font-size:.88rem}.avz-top5 div{display:flex;justify-content:space-between;padding:5px 10px;border-radius:10px;background:rgba(255,255,255,.07);margin:4px 0}
     .avz-nuevo{font-size:.65rem;background:#ff3df0;color:#fff;padding:2px 8px;border-radius:99px;vertical-align:middle}
     .avz-torre{background:linear-gradient(90deg,#ff7a1a,#ff3d6e,#b26bff)!important}.avz-huevo{background:linear-gradient(90deg,#ffd23f,#ff9a1f)!important;color:#2b1645!important}
     .avz-masc{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:8px 0 12px}

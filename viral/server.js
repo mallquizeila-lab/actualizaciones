@@ -923,7 +923,7 @@ async function api(req, res, u) {
     if (limite(uidh, 'mundo', 420)) return send(res, 429, { error: 'Más despacio' });
     let pid = MUNDO_ID.get(uidh); if (!pid) { pid = crypto.randomBytes(5).toString('hex'); MUNDO_ID.set(uidh, pid); }
     const num = (v, m) => Math.round(Math.max(-m, Math.min(m, +v || 0)) * 100) / 100, prev = MUNDO_POS.get(pid) || {}, ahora = Date.now();
-    const e = { mundo: MUNDOS3D.includes(b.mundo) ? b.mundo : 'plaza', x: num(b.x, 400), y: num(b.y, 400), z: num(b.z, 400), ry: num(b.ry, 7), a: ['q', 'c', 's'].includes(b.a) ? b.a : 'q',
+    const e = { mundo: MUNDOS3D.includes(b.mundo) || /^(av[0-3]|obby)-[a-z0-9]{5}$/.test(String(b.mundo || '')) ? b.mundo : 'plaza', x: num(b.x, 400), y: num(b.y, 400), z: num(b.z, 400), ry: num(b.ry, 7), a: ['q', 'c', 's'].includes(b.a) ? b.a : 'q',
       nn: String(b.nombre || '').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : '#7c5cff', gorro: ['', 'gorra', 'gato', 'vaquero', 'copa', 'corona'].includes(b.gorro) ? b.gorro : '', emote: prev.emote, et: prev.et, t: ahora, uidh, pj: ['yupi', 'lulu', 'choki', 'coquito'].includes(b.pj) ? b.pj : undefined };
     e.nombre = prev.nn === e.nn && prev.nombre ? prev.nombre : (require('./chat').apodo(e.nn) || 'Jugador');
     if (EMOTES3D.includes(b.emote) && ahora - (prev.et || 0) > 1500) { e.emote = b.emote; e.et = ahora; }
@@ -953,6 +953,8 @@ async function api(req, res, u) {
     return send(res, 200, { items: TIENDA, inv: inv(), equipo: eq(), ...ycEstado(id) });
   }
   // 👑 Aventuras de Yupi: preguntas extra escritas en el panel (se suman al banco base del juego)
+  // 🏆 Ranking del mes de la Torre de las Nubes (obby de las Aventuras de Yupi)
+  if (u.pathname === '/api/aventura/torre') { const MM = mesPeru(); return send(res, 200, { mes: MM.nombre, top: conEstilo(topMes('obby', MM, 10)).map(({ uid, ...x }) => x) }, undefined, { 'cache-control': 'public, max-age=60' }); }
   if (u.pathname === '/api/aventura/preguntas') return send(res, 200, { lineas: String(getS('avPreg', '')).split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#') && l.split('|').length >= 5).slice(0, 3000) }, undefined, { 'cache-control': 'public, max-age=300' });
   if (u.pathname === '/api/reto') { const R = retoDia(), uq = u.searchParams.get('uid');
     return send(res, 200, { ...R, logrados: q1('select count(*) n from reto_hecho where dia=?', R.dia).n, yo: uq ? !!q1('select 1 from reto_hecho where uid=? and dia=?', uidArcade(uq), R.dia) : false }); }
