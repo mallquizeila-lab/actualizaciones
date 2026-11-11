@@ -1,3 +1,9 @@
+v7.85.0 — 🎬 Aventuras de Yupi: gráficos estilo película animada
+- 🎬 Nueva iluminación realista: color de cine (tono ACES), sol cálido con sombras suaves, luz de cielo y luz de borde que separa a los personajes del fondo.
+- ✨ Materiales físicos: el oro de Yupi, su corona, el casco y el escudo de Choki y las monedas brillan como metal y reflejan el cielo; la lana de Lulú, el coco de Coquito y el césped se ven suaves.
+- 🖊️ Contornos más finos para un aspecto 3D más natural, y los personajes ahora reciben sombras.
+- Se restablece el color normal al salir, para que los demás juegos 3D se vean igual que antes.
+
 v7.84.0 — 👑 Aventuras de Yupi: Fase 2 (equipo de 4 héroes, 3 niveles y jefe)
 - 🦙🌽🥥 Ya se puede jugar con Lulú (salto alto y escupitajo de nubes que apunta solo), Choki (lanzazo solar que rompe los muros de oro) y Coquito (coraza y fuerza para empujar rocas), además de Yupi. Se cambia de héroe en cualquier momento con 🔄 (en PC: C o las teclas 1 a 4).
 - 🗺️ Mundo 1 completo: Nivel 1 La Pradera del Búho, Nivel 2 Los Muros de Oro (trabajo en equipo: muros, campanas y roca mágica), Nivel 3 Las Islas del Cielo (islas flotantes y móviles hasta el portal) y el jefe Gorgojo Capitán (embiste, se marea al chocar y llama refuerzos). Al vencerlo se recupera el Cristal Amarillo.
