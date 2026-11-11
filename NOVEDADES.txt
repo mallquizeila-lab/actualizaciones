@@ -1,3 +1,8 @@
+v7.88.0 — 🖼️ Aventuras de Yupi: imágenes 3D en el menú y personajes más detallados
+- 🖼️ El menú ya no usa emojis: muestra retratos 3D reales de Yupi, Lulú, Choki y Coquito (con tu bufanda y sombrero), una foto del equipo completo arriba, los sombreros en 3D y las mascotas en 3D. Las mascotas que aún no tienes aparecen como silueta misteriosa.
+- 🥚 Al abrir un huevo aparece la mascota en 3D con los rayos de su rareza.
+- 🌽 Choki: granos amarillos con relieve y hojas puntiagudas de verdad. 🥥 Coquito: casco de bronce con remaches, cresta y protector de nariz. 🦙 Lulú: poncho que cae como poncho, con flecos de colores. 👑 Yupi: capa que cae por la espalda y bufanda más abajo.
+
 v7.87.0 — 👫 Aventuras de Yupi: salas privadas con amigos, estilo del personaje y ranking de la Torre
 - 👫 Salas privadas: crea una sala con código de 5 letras e invita por WhatsApp (enlace directo). Solo quienes tengan el código juegan juntos los niveles y la Torre. También se puede entrar escribiendo el código.
 - 👕 Tu estilo: bufanda de 8 colores (gratis) y 5 sombreros que se compran con 🪙 del juego (gorra, orejas de gato, vaquero, copa y corona real). Se ven en los 4 héroes y los demás jugadores también los ven.
