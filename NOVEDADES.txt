@@ -1,3 +1,7 @@
+v7.82.0 — 🔎 Modo revisión de AdSense
+- 🔎 Nuevo interruptor en Ajustes → 💰 Google AdSense (activado por defecto): mientras Google revisa tu sitio, las miles de fichas de juegos de otros estudios (con el texto copiado del distribuidor) quedan fuera del sitemap y marcadas "noindex". Así Google evalúa solo el contenido propio de Yupitok. Los jugadores siguen viendo y jugando todo igual.
+- Desactívalo unas semanas después de que AdSense te apruebe para que Google vuelva a indexar esas fichas.
+
 v7.81.0 — 🎨 Aventuras de Yupi: gráficos mucho más bonitos
 - 🎨 Estilo de dibujo animado: colores por capas y contorno oscuro en los personajes, como en una caricatura.
 - 👑 Yupi nuevo: Y dorada redondeada, ojos grandes con brillo, cejas, sonrisa con lengua, corona con gemas azules, brazos con guantes blancos, zapatillas con suela azul y capa morada con cuello dorado.

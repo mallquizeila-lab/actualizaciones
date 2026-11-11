@@ -606,6 +606,8 @@ async function traducirFaltan(lang, textos) {
 }
 // ---------- Google AdSense ----------
 const adsCfg = () => getS('ads', {});
+// 🔎 Modo revisión de AdSense: mientras Google revisa, las miles de fichas de juegos de otros estudios (texto del distribuidor) no se indexan; Google evalúa solo el contenido propio de Yupitok
+const adsRevision = () => adsCfg().rev !== false;
 const adsScript = () => { const c = adsCfg().client; return /^ca-pub-\d{10,20}$/.test(c || '') ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c}" crossorigin="anonymous"></script><meta name="google-adsense-account" content="${c}">` : ''; };
 // ---------- Páginas legales que pide Google (se llenan con tus datos del panel) ----------
 // ---------- Apoya el proyecto: aportes voluntarios (enlaces y direcciones los pone el dueño en el panel) ----------
@@ -1136,7 +1138,7 @@ async function api(req, res, u) {
           if (enC) c = enC[0]; else if (!c && enEx) c = enEx[0];
           if (c && !/^ca-pub-\d{10,20}$/.test(c)) return send(res, 400, { error: 'El ID de AdSense se ve así: ca-pub-1234567890123456' });
           ex = ex.replace(/<script[\s\S]*?<\/script>/gi, '\n').replace(/<[^>]*>/g, '\n');
-          setS('ads', { client: c, extra: clip(ex, 120000) }); }
+          setS('ads', { client: c, extra: clip(ex, 120000), rev: b.ads.rev !== false }); }
         if (b.marca) setS('marca', { nombre: clip(b.marca.nombre, 40).trim(), eslogan: clip(b.marca.eslogan, 90).trim() });
         if (b.bienvenida) setS('bienvenida', { on: !!b.bienvenida.on, title: clip(b.bienvenida.title, 80), body: clip(b.bienvenida.body, 200) });
         if (b.tope !== undefined) setS('tope', Math.max(1, Math.min(10, +b.tope || 3)));
@@ -1212,11 +1214,11 @@ http.createServer(async (req, res) => {
     { const mk = /^\/([a-f0-9]{32})\.txt$/.exec(u.pathname); if (mk && mk[1] === getS('indexnowKey', '')) return send(res, 200, mk[1], 'text/plain; charset=utf-8'); }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
-      const juegosPro = getS('pro', {}).on ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
+      const juegosPro = getS('pro', {}).on && !adsRevision() ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
       const proOn = getS('pro', {}).on, cp = proOn ? await catsPro() : [], vis = proOn ? (await proVisibles()).slice(0, 5000) : [];
       const catsUrls = proOn ? [['/juegos', '0.8'], ...cp.map(([c]) => ['/juegos/' + slugDe(c), '0.8']), ...LANGS.flatMap(l => [['/' + l, '0.9'], [`/${l}/games`, '0.8'], ...cp.map(([c]) => [`/${l}/games/` + slugDe(catEn(c)), '0.7'])])] : [];
       // En otros idiomas solo entran los juegos que ya tienen su descripción traducida (páginas con contenido real)
-      const juegosEn = proOn ? LANGS.flatMap(l => { const ok = l === 'en' ? null : new Set(q('select src from i18n where lang=?', l).map(r => r.src)); return vis.filter(g => l === 'en' ? descL(g, 'en') : g.d && ok.has(g.d)).map(g => [`/${l}/game/` + g.s, '0.5']); }) : [];
+      const juegosEn = proOn && !adsRevision() ? LANGS.flatMap(l => { const ok = l === 'en' ? null : new Set(q('select src from i18n where lang=?', l).map(r => r.src)); return vis.filter(g => l === 'en' ? descL(g, 'en') : g.d && ok.has(g.d)).map(g => [`/${l}/game/` + g.s, '0.5']); }) : [];
       const hoy = new Date().toISOString().slice(0, 10), urls = [['/', '1.0'], ['/glory', '0.9'], ...CATALOGO.map(t => ['/?g=' + t.id, t.id.startsWith('arcade-') ? '0.8' : '0.6']), ['/campeones', '0.7'], ['/guias', '0.7'], ['/para-tu-web', '0.6'], ['/prensa', '0.5'], ['/desarrolladores', '0.6'], ...guiasTodas().map(x => ['/guias/' + x.slug, '0.8']), ['/nosotros.html', '0.3'], ['/terminos.html', '0.2'], ['/privacidad.html', '0.2'], ['/contacto.html', '0.2'], ...catsUrls, ...juegosPro, ...juegosEn];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([l, pr]) => `<url><loc>${esc(PUBLIC_URL + l)}</loc><lastmod>${hoy}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`, 'application/xml; charset=utf-8', { 'cache-control': 'public, max-age=3600' });
     }
@@ -1313,7 +1315,7 @@ http.createServer(async (req, res) => {
       const ce = cn(g.cat), cl = lc(g.cat), url = PUBLIC_URL + `/${L}/game/` + g.s, d = descL(g, L), desc = (d ? d.replace(/\s+/g, ' ').slice(0, 150) + ' ' : '') + T.gTail(cl);
       const rel = masJ(todos.filter(x => x.cat === g.cat && x.id !== g.id)).slice(0, 12), jugar = `/juego/${esc(g.s)}?hl=${L}&src=web-${L}`;
       const ld = [{ '@context': 'https://schema.org', '@type': 'VideoGame', name: g.t, description: d || desc, url, image: g.img || undefined, genre: ce, inLanguage: L, isAccessibleForFree: true, gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web', publisher: { '@type': 'Organization', name: sitio } }, migas([['Yupitok', '/' + L], [T.games, `/${L}/games`], [ce, `/${L}/games/` + cs(g.cat)], [g.t, `/${L}/game/` + g.s]])];
-      return enviarHtml(req, res, headNeon(T.tGame(g.t, sitio), desc, url, ld, altDe('game', g.s), L).replace('</head>', g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"></head>` : '</head>')
+      return enviarHtml(req, res, headNeon(T.tGame(g.t, sitio), desc, url, ld, altDe('game', g.s), L).replace('</head>', adsRevision() ? '<meta name="robots" content="noindex, follow"></head>' : '</head>').replace('</head>', g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"></head>` : '</head>')
         + `<p class="miga"><a href="/${L}">Yupitok</a> › <a href="/${L}/games">${T.games}</a> › <a href="/${L}/games/${cs(g.cat)}">${esc(ce)}</a></p><h1>🎮 ${esc(g.t)}</h1><p>${esc(T.gMeta(ce))}</p><a class="btn" href="${jugar}">${T.playG}</a>${g.img ? `<a href="${jugar}"><img src="${esc(g.img)}" alt="${esc(g.t)}" width="512" height="384" style="width:100%;height:auto;max-height:300px;object-fit:cover;border-radius:16px;display:block"></a>` : ''}${d ? `<p>${esc(d)}</p>` : ''}`
         + `<h2>${T.howT}</h2><p>${T.how(esc(cl), `<a href="/${L}/games">${n}</a>`)}</p>`
         + (rel.length ? `<h2>${T.more(esc(cl))}</h2><div class="grid">${rel.map(tile).join('')}</div>` : '') + `<p style="font-size:.8rem;opacity:.7">${T.third}</p>` + pie, { 'cache-control': 'public, max-age=600' });
@@ -1374,7 +1376,7 @@ http.createServer(async (req, res) => {
       const sitio = getS('marca', null)?.nombre || 'Yupitok', d = descEs(g), titulo = `${g.t}: juega gratis online · ${sitio}`, url = PUBLIC_URL + '/juego/' + g.s;
       const desc = (d ? d.replace(/\s+/g, ' ').slice(0, 150) + ' ' : '') + `Juego de ${g.cat.toLowerCase()} gratis, sin instalar, en celular y PC.`;
       const J7r = jugadas7(), rel = todos.filter(x => x.cat === g.cat && x.id !== g.id).sort((a, b) => (J7r.get(b.id) || 0) - (J7r.get(a.id) || 0)).slice(0, 12);
-      const og = `<title>${esc(titulo)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(url)}">
+      const og = `<title>${esc(titulo)}</title>${adsRevision() ? '<meta name="robots" content="noindex, follow">' : ''}<meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(url)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(sitio)}"><meta property="og:title" content="${esc(g.t)} · ¡Juega gratis!"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">${g.img ? `<meta property="og:image" content="${esc(g.img)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(g.img)}">` : ''}<meta property="og:locale" content="es_LA">${hrefl(altDe('game', g.s))}
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'VideoGame', name: g.t, description: d || desc, url, image: g.img || undefined, genre: g.cat, inLanguage: 'es', isAccessibleForFree: true, gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web', publisher: { '@type': 'Organization', name: sitio } }).replace(/</g, '\\u003c')}</script>
 <script type="application/ld+json">${JSON.stringify(migas([['Yupitok', '/'], ['Juegos', '/juegos'], [g.cat, '/juegos/' + slugDe(g.cat)], [g.t, '/juego/' + g.s]])).replace(/</g, '\\u003c')}</script>
