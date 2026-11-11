@@ -1,3 +1,11 @@
+v7.84.0 — 👑 Aventuras de Yupi: Fase 2 (equipo de 4 héroes, 3 niveles y jefe)
+- 🦙🌽🥥 Ya se puede jugar con Lulú (salto alto y escupitajo de nubes que apunta solo), Choki (lanzazo solar que rompe los muros de oro) y Coquito (coraza y fuerza para empujar rocas), además de Yupi. Se cambia de héroe en cualquier momento con 🔄 (en PC: C o las teclas 1 a 4).
+- 🗺️ Mundo 1 completo: Nivel 1 La Pradera del Búho, Nivel 2 Los Muros de Oro (trabajo en equipo: muros, campanas y roca mágica), Nivel 3 Las Islas del Cielo (islas flotantes y móviles hasta el portal) y el jefe Gorgojo Capitán (embiste, se marea al chocar y llama refuerzos). Al vencerlo se recupera el Cristal Amarillo.
+- ⭐ Menú de niveles con estrellas por tiempo; cada nivel se abre al completar el anterior. Tu progreso de la Fase 1 cuenta como nivel 1 superado.
+- 🦉 Banco de 102 preguntas (matemáticas, ciencias, historia y geografía, lectura, lógica y valores) con explicación de cada respuesta.
+- ✍️ Nuevo en Ajustes de la Página viral: 👑 Aventuras de Yupi: preguntas. Agrega tus propias preguntas (una por línea) y el Sabio Búho las mezcla con las demás.
+- 📝 2 guías nuevas: cómo pasar los 4 niveles y vencer al Gorgojo Capitán, y los poderes de Yupi, Lulú, Choki y Coquito (contenido propio para Google y AdSense).
+
 v7.83.0 — 🍪 Privacidad lista para AdSense
 - 🍪 La Política de privacidad ahora incluye la sección "Cookies y publicidad" que exige Google AdSense: uso de cookies, anuncios de Google y proveedores externos, y enlaces para desactivar la publicidad personalizada (Configuración de anuncios de Google y aboutads.info). También aclara que los juegos de GamePix pueden mostrar sus propios anuncios.
 - Si en "Plazo" escribiste solo un número (por ejemplo 12), ahora se muestra "12 meses".

@@ -25,9 +25,9 @@ Aventura 3D de exploración para toda la familia que **se juega en el navegador*
 | Personaje | Rol | Habilidad (diseño) | Estado |
 |---|---|---|---|
 | 👑 **Yupi** | Protagonista | Doble salto + **Giro de corona** (ataque en área) | ✅ Jugable en el prototipo |
-| 🦙 **Lulú** | Exploradora | **Escupitajo de nubes**: alcanza botones lejanos | 🔒 Fase 2 |
-| 🌽 **Choki** | Guerrero | **Lanzazo solar**: rompe muros dorados | 🔒 Fase 2 |
-| 🥥 **Coquito** | Defensor | **Coraza**: resiste golpes, empuja rocas | 🔒 Fase 2 |
+| 🦙 **Lulú** | Exploradora | **Salto alto + escupitajo de nubes**: alcanza campanas y enemigos lejanos | ✅ Jugable (Fase 2) |
+| 🌽 **Choki** | Guerrero | **Lanzazo solar**: rompe muros de oro | ✅ Jugable (Fase 2) |
+| 🥥 **Coquito** | Defensor | **Coraza**: resiste golpes, empuja rocas | ✅ Jugable (Fase 2) |
 | 🌶️ **Rocoto Rojo** | Velocista | **Carrera picante**: cruza fuego y lava | 🔒 Fase 3 |
 | 🦉 **Sabio Búho** | Maestro (NPC) | Da las **pruebas de conocimiento** | ✅ En el prototipo (NPC) |
 | 🤖 **Robo Yuki** | Inventor | **Gancho magnético** | 🔒 Fase 3 |
@@ -121,7 +121,7 @@ viral/public/
 | Fase | Contenido | Estado |
 |---|---|---|
 | **1 · Prototipo** | Yupi jugable, Reino de Yupitok, movimiento, salto, interacción, 3 misiones, 2 enemigos, 1 prueba educativa, monedas, selección de personajes | ✅ **Entregado** |
-| 2 · Equipo | Lulú, Choki y Coquito jugables (cambio de personaje en el nivel), 3 niveles del Reino + jefe, banco de 100 preguntas, editor de preguntas en el panel | Siguiente |
-| 3 · Mundos 2 y 3 | Bosque Encantado e Imperio Dorado, cartas de habilidad, Rocoto Rojo, Robo Yuki y Hada | |
+| 2 · Equipo | Lulú, Choki y Coquito jugables (cambio de personaje en el nivel), 3 niveles del Reino + jefe Gorgojo Capitán, banco de 100 preguntas, editor de preguntas en el panel | ✅ **Entregado** |
+| 3 · Mundos 2 y 3 | Bosque Encantado e Imperio Dorado, cartas de habilidad, Rocoto Rojo, Robo Yuki y Hada | Siguiente |
 | 4 · Mundos 4 y 5 | Volcán de Fuego, Fortaleza de Grun, Tortugo, Drakito y jefe final | |
 | 5 · Online | Cooperativo de 2 jugadores, eventos de temporada, modelos 3D finales (glTF) | |

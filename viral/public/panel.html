@@ -223,6 +223,9 @@ const V = {
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="ad-rev" style="width:auto" ${a.ads?.rev !== false ? 'checked' : ''}> 🔎 Modo revisión de AdSense</label><p class="hint">Déjalo activado mientras Google revisa tu sitio: las fichas de juegos de otros estudios (texto copiado del distribuidor) no se muestran a Google, así evalúa solo el contenido propio de Yupitok (tus juegos, guías y páginas). Los jugadores siguen viendo todo. Desactívalo unas semanas después de la aprobación.</p>
       <p class="hint">Páginas que pide Google (ya creadas con tus datos de Privacidad): <a href="/terminos.html" target="_blank">Términos</a> · <a href="/contacto.html" target="_blank">Contacto</a> · <a href="/nosotros.html" target="_blank">Quiénes somos</a> · <a href="/privacidad.html" target="_blank">Privacidad</a></p>
       <p style="margin-top:10px"><button class="btn" id="ad-go">Guardar</button></p></div>
+    <div class="card"><h2>👑 Aventuras de Yupi: preguntas</h2><p class="hint">El juego ya trae 100 preguntas. Aquí puedes <b>agregar las tuyas</b> (una por línea) y el Sabio Búho las mezclará con las demás. Formato:<br><code>materia|pregunta|respuesta correcta|incorrecta|incorrecta|explicación</code><br>Ejemplo: <code>Valores|¿Qué hacemos al recibir un regalo?|Dar las gracias|Nada|Quejarnos|Agradecer muestra cariño y respeto.</code><br>Las líneas que empiezan con # se ignoran.</p>
+      <textarea id="av-p" rows="7" placeholder="Matemáticas|¿Cuánto es 3 × 4?|12|7|34|3 × 4 = 12.">${esc(a.avPreg || '')}</textarea><p class="hint">✅ Preguntas válidas: <b>${String(a.avPreg || '').split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#') && l.split('|').length >= 5).length}</b></p>
+      <p style="margin-top:10px"><button class="btn" id="av-go">Guardar preguntas</button></p></div>
     <div class="card"><h2>🎬 Video destacado</h2><p class="hint">Aparece en la página y después de cada resultado. Pon tu último Short o Reel.</p>
       <label>Enlace del video</label><input id="v-u" value="${esc(a.video?.url || '')}" placeholder="https://youtube.com/shorts/...">
       <label>Texto del botón</label><input id="v-t" value="${esc(a.video?.title || 'Mira el video de hoy')}" maxlength="80">
@@ -291,6 +294,7 @@ const V = {
     $('#lg-go').onclick = () => api('ajustes', { login: { google: $('#lg-g').value, facebook: $('#lg-f').value } }).then(ok, e => alert(e.message));
     $('#ap-go').onclick = () => api('ajustes', { apoyo: { on: $('#ap-on').checked, mensaje: $('#ap-m').value } }).then(ok, e => alert(e.message));
     $('#g-go').onclick = () => api('ajustes', { pro: { on: $('#g-on').checked, feed: $('#g-f').value, plantilla: $('#g-p').value } }).then(() => ir('ajustes'), e => alert(e.message));
+    $('#av-go').onclick = () => api('ajustes', { avPreg: $('#av-p').value }).then(ok, e => alert(e.message));
     $('#ad-go').onclick = () => api('ajustes', { ads: { client: $('#ad-c').value, extra: $('#ad-x').value, rev: $('#ad-rev').checked } }).then(ok, e => alert(e.message));
     $('#m-go').onclick = () => api('ajustes', { marca: { nombre: $('#m-n').value, eslogan: $('#m-e').value } }).then(ok, e => alert(e.message));
     $('#b-go').onclick = () => api('ajustes', { bienvenida: { on: $('#b-on').checked, title: $('#b-t').value, body: $('#b-b').value } }).then(ok, e => alert(e.message));
