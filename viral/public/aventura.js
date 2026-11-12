@@ -278,6 +278,7 @@
     return { grad, ORO, MT, mat, tinta, contorno, lienzo, resplandor, brillo, malla, hacerYupi, hacerLulu, hacerChoki, hacerCoquito, hacerGorro, ANC, aplicarEstilo, hacerMascota, ojos, sonrisa, oscuroB, blancoB };
   }
 
+  window.AV_FABRICA = fabrica; // la usan el agente del juego y las vistas previas
   function jugar(t, ov, cfg) {
     const THREE = window.THREE, V3 = THREE.Vector3;
     ov.innerHTML = `<canvas id="avc"></canvas>

@@ -1,3 +1,6 @@
+v7.88.2 — 🧩 Base para modelos 3D profesionales
+- 🧩 El juego ya puede cargar modelos 3D profesionales (.glb) con sus animaciones (cargador glTF de three.js, licencia MIT). Es la base para el futuro Agente del Juego que convertirá tus imágenes de Flow en personajes 3D con Meshy.
+
 v7.88.1 — ↩️ Personajes de vuelta a la versión anterior
 - ↩️ Yupi, Lulú, Choki y Coquito vuelven a verse como en la v7.87 (se deshicieron los cambios de modelo de la v7.88). Los retratos 3D del menú se mantienen.
 
