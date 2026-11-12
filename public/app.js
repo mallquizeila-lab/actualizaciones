@@ -350,8 +350,9 @@ function viralTop() {
     <details style="margin-top:8px"><summary class="hint">Registro</summary><pre style="white-space:pre-wrap;font-size:12px;max-height:180px;overflow:auto">${esc((v.log || []).join('\n'))}</pre></details>`;
 }
 // ---------- 🧭 Centro de Mando ----------
-let MD = null, MDt = 0, MDcargando = false;
-async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
+let MD = null, MDt = 0, MDcargando = false, JG = null;
+setInterval(async () => { if (tab === 'mando' && JG?.modelos?.some(m => ['creando', 'enviando'].includes(m.estado)) && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { try { JG = await api('/api/mando/juego'); render(); } catch (e) {} } }, 20000);
+async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } try { JG = await api('/api/mando/juego'); } catch (e) { JG = null; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
 VIEWS.mando = () => {
   if (!MD || Date.now() - MDt > 15000) loadMando().catch(() => {});
   if (!MD) return '<h1>🧭 Centro de Mando</h1><p class="sub">Cargando a los agentes…</p>';
@@ -379,6 +380,7 @@ VIEWS.mando = () => {
       ${l.motivo ? `<p style="margin:4px 0;font-size:.9rem">${l.decision === 'armar' ? '✅' : 'ℹ️'} ${esc(l.motivo)}</p>` : ''}${l.idea ? `<p style="margin:4px 0;font-size:.9rem">💡 <b>Nuestra idea:</b> ${esc(l.idea)}${l.gancho ? ` · <i>"${esc(l.gancho)}"</i>` : ''}</p>` : ''}
       <div class="btns" style="margin-top:4px">${['decidido', 'dejado'].includes(l.estado) ? `<select data-mdcanal="${l.id}" style="width:auto">${chs.map(c => `<option value="${c.id}" ${c.id === l.canal ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select><button class="b sm" data-act="mdArmar" data-id="${l.id}">🎬 Armarlo</button>` : ''}${l.estado === 'decidido' && l.decision === 'armar' ? `<button class="b ghost sm" data-act="mdDejar" data-id="${l.id}">⏭️ Dejarlo</button>` : ''}${l.estado === 'error' ? `<button class="b ghost sm" data-act="mdRe" data-id="${l.id}">🔁 Reintentar</button>` : ''}<button class="b ghost sm" data-act="mdBorrar" data-id="${l.id}">🗑️</button></div></div>`).join('')}</div>` : ''}</div>
   ${guiasCard(MD)}
+  ${juegoCard(JG)}
   ${(() => { const Y = D.yupicoins; if (!Y) return ''; const pct = Y.jugadores ? Math.round(Y.gastan * 100 / Y.jugadores) : 0; return `<div class="card"><h3>🪙 Yupicoins</h3><p class="hint">La moneda de Yupitok: <b>1 Yupicoin = 0.01 USD</b>. Se ganan jugando y (pronto) se podrán comprar; se gastan solo dentro de Yupitok y <b>no se cobran</b>. Cada movimiento queda registrado en el servidor, con tope diario para frenar trampas. En circulación: <b>${((Y.emitidas - Y.gastadas) * (Y.ajustes?.valorUsd || 0.01)).toLocaleString('es', { style: 'currency', currency: 'USD' })}</b> de referencia.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">${[['Emitidas (total)', Y.emitidas], ['Gastadas (total)', Y.gastadas], ['Emitidas hoy', Y.hoy?.emitidas], ['Jugadores con saldo', Y.jugadores], ['% que gasta', pct + ' %']].map(([t, n]) => `<div class="card" style="margin:0;padding:8px;text-align:center"><div style="font-size:.75rem;opacity:.75">${t}</div><b style="font-size:1.2rem">${typeof n === 'number' ? n.toLocaleString('es') : n}</b></div>`).join('')}</div>
     <p class="hint" style="margin-top:6px">Tope por jugador: <b>${Y.ajustes?.topeDia}</b> al día · por conexión (IP): <b>${Y.ajustes?.topeIp}</b> al día. ${Y.emitidas > Y.gastadas * 4 && Y.emitidas > 5000 ? '⚠️ Se gana mucho más de lo que se gasta: pronto conviene abrir la tienda para que las Yupicoins tengan valor.' : ''}</p>
@@ -412,6 +414,43 @@ function flowCard(MD) {
     <div class="row" style="margin-top:8px"><label>Tema (opcional)<input id="fl-tema" maxlength="160" placeholder="Vacío = el tema del día" list="fl-temas"><datalist id="fl-temas">${(MD.flowTemas || []).map(t => `<option value="${esc(t)}">`).join('')}</datalist></label></div>
     <div class="btns"><button class="b sm" data-act="flNuevo">✍️ Crear 6 prompts nuevos</button></div>
     <p class="hint" style="font-size:.8rem;margin-top:6px">⚠️ Si Flow te pone un personaje famoso (por ejemplo, un monstruo de Disney), descarta ese clip: puede traerte reclamos de derechos.</p></div>`;
+}
+function juegoCard(G) {
+  if (!G) return '';
+  const EST = { enviando: '📤 Enviando a Meshy…', creando: '⏳ Creando', listo: '✅ Listo para revisar', error: '⚠️ Error' }, S = G.salud;
+  const modelos = (G.modelos || []).map(m => `<div style="border-top:1px solid #e5e7eb;padding:8px 0;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+      ${m.thumb ? `<img src="/api/mando/juego/archivo?id=${m.id}&t=png" alt="" style="width:110px;height:110px;object-fit:contain;background:#f3f4f6;border-radius:10px">` : `<div style="width:110px;height:110px;border-radius:10px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:2rem">🧊</div>`}
+      <div style="flex:1;min-width:200px"><b>${esc(m.nombre)}</b> ${m.usado ? '<span style="background:#dcfce7;color:#166534;border-radius:99px;padding:1px 8px;font-size:.75rem">🎮 En el juego</span>' : ''}${m.prueba ? ' <small class="hint">(modo prueba)</small>' : ''}
+        <p class="hint" style="margin:2px 0">${EST[m.estado] || m.estado}${m.estado === 'creando' ? ` · ${m.progreso || 0}%${m.fase === 'preview' ? ' (forma)' : m.fase === 'refine' ? ' (texturas)' : ''}` : ''} · ${m.tipo === 'imagen' ? '🖼️ desde tu imagen' : '✍️ desde la descripción'} · ${new Date(m.creado).toLocaleString('es-PE')}${m.kb ? ` · ${(m.kb / 1024).toFixed(1)} MB` : ''}</p>
+        ${m.motivo && m.estado === 'error' ? `<p class="hint" style="color:#b91c1c;margin:2px 0">${esc(m.motivo)}</p>` : ''}
+        <div class="btns" style="margin-top:4px">${m.estado === 'listo' ? `${m.usado ? `<button class="b ghost sm" data-act="jgMod" data-a="quitar" data-id="${m.id}">↩️ Volver al personaje de código</button>` : `<button class="b sm" data-act="jgMod" data-a="usar" data-id="${m.id}">✅ Usar en el juego</button>`}
+          <button class="b ghost sm" data-act="jgMod" data-a="giro" data-id="${m.id}" data-g="${((m.giro || 0) + Math.PI / 2) % (Math.PI * 2)}" title="Si en el juego mira para otro lado">🔄 Girar 90°</button><a class="b ghost sm" href="/api/mando/juego/archivo?id=${m.id}&t=glb" download="${m.pj}.glb">⬇️ .glb</a>` : ''}
+          <button class="b ghost sm" data-act="jgMod" data-a="borrar" data-id="${m.id}">🗑️</button></div></div></div>`).join('');
+  return `<div class="card" style="border:2px solid #0ea5e9"><h3>🎮 Agente del Juego</h3><p class="hint">Mejora todos los juegos de Yupitok: crea personajes 3D profesionales, vigila la salud de cada juego y propone mejoras. <b>Nada llega a la página sin tu aprobación.</b></p>
+    <h4 style="margin:10px 0 4px">🧊 Taller de personajes 3D (Meshy)</h4>
+    ${G.tieneClave ? `<p class="hint" style="margin:0 0 6px">✅ Clave de Meshy conectada${G.creditos !== null && G.creditos !== undefined ? ` · te quedan <b>${G.creditos}</b> créditos` : ''}. Cada modelo gasta créditos: el agente te pide confirmación.</p>` : `<p class="hint" style="margin:0 0 6px;color:#b45309">Falta tu clave de Meshy (plan Pro con API). Pégala en <b>Ajustes → Claves → Meshy</b>. Mientras tanto puedes probar con el <b>modo prueba</b> (modelo de ejemplo, gratis).</p>`}
+    <div class="row"><label>Personaje<select id="jg-pj">${(G.personajes || []).map(p => `<option value="${p.k}">${esc(p.n)}</option>`).join('')}</select></label>
+      <label>Estilo (si no subes imagen)<select id="jg-est">${(G.estilos || []).map(e => `<option value="${e.k}">${esc(e.n)}</option>`).join('')}</select></label></div>
+    <label>Imagen del personaje (recomendado: la de Flow, solo el personaje, de frente y fondo limpio)<input type="file" id="jg-img" accept="image/png,image/jpeg,image/webp"></label>
+    <label>Detalle extra (opcional, en inglés o español)<input id="jg-extra" maxlength="200" placeholder="Ej: armadura más detallada, mirada seria"></label>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="jg-prueba" style="width:auto"> Modo prueba (no gasta créditos, devuelve un modelo de ejemplo de Meshy)</label>
+    <div class="btns"><button class="b sm" data-act="jgCrear">🚀 Crear modelo 3D</button></div>
+    ${modelos || '<p class="hint">Aún no has creado modelos.</p>'}
+    <h4 style="margin:14px 0 4px">🩺 Salud de todos los juegos ${S ? `<small class="hint">(${new Date(S.fecha).toLocaleString('es-PE')})</small>` : ''}</h4>
+    ${S ? `<ul style="margin:0 0 6px 18px">${S.consejos.map(c => `<li style="margin:3px 0">${esc(c)}</li>`).join('')}</ul>
+      <details><summary class="hint" style="cursor:pointer">📊 Ver números</summary>
+        <p class="hint" style="margin:6px 0 2px"><b>Juegos más abiertos (7 días)</b>: ${(S.juegos || []).map(j => `${esc(j.game)} ${j.n}${j.antes ? ` (antes ${j.antes})` : ''}`).join(' · ') || '—'}</p>
+        <p class="hint" style="margin:2px 0"><b>Partidas con puntaje</b>: ${(S.puntajes || []).map(j => `${esc(j.juego)} ${j.n} (${j.jugadores} jug.)`).join(' · ') || '—'}</p>
+        <p class="hint" style="margin:2px 0"><b>Aventuras de Yupi</b>: ${(S.embudo || []).map(e => `${esc(e.nombre)}: ${e.ini} empiezan, ${e.fin} terminan${e.pct !== null ? ` (${e.pct}%)` : ''}`).join(' · ')}</p>
+        ${(S.errores || []).length ? `<p class="hint" style="margin:2px 0"><b>Errores</b>: ${S.errores.map(e => `${esc(String(e.msg).slice(0, 80))} ×${e.n}`).join(' · ')}</p>` : ''}</details>` : '<p class="hint">Todavía no hay revisión. Se hace sola cada día a las 9 a. m. (y te llega por Telegram).</p>'}
+    <div class="btns"><button class="b ghost sm" data-act="jgSalud">🩺 Revisar ahora</button><button class="b ghost sm" data-act="jgIdeas">💡 Ideas de mejora con IA (1 consulta)</button></div>
+    ${G.ideas?.lista?.length ? `<ol style="margin:6px 0 0 18px">${G.ideas.lista.map(i => `<li style="margin:4px 0"><b>${esc(i.titulo)}</b>${i.juego ? ` <small class="hint">(${esc(i.juego)})</small>` : ''}<br><span class="hint">${esc(i.detalle)}</span></li>`).join('')}</ol>` : ''}
+    <h4 style="margin:14px 0 4px">🦉 Preguntas nuevas para el Sabio Búho</h4><p class="hint" style="margin:0 0 6px">La IA escribe 10 preguntas con su explicación; tú las revisas y apruebas antes de que entren al juego.</p>
+    <div class="row"><label>Tema (opcional)<input id="jg-mat" maxlength="60" placeholder="Ej: animales del Perú, fracciones"></label></div>
+    <div class="btns"><button class="b ghost sm" data-act="jgPreg">✍️ Crear 10 preguntas</button></div>
+    ${(G.preguntas || []).length ? `<div style="margin-top:6px">${G.preguntas.map(p => { const [m, q, ok, a, b, ex] = p.l.split('|'); return `<div class="hint" style="border-top:1px solid #e5e7eb;padding:5px 0"><b>${esc(m)}</b> · ${esc(q)}<br>✅ ${esc(ok)} · ❌ ${esc(a)} · ❌ ${esc(b)}<br><i>${esc(ex)}</i></div>`; }).join('')}
+      <div class="btns"><button class="b sm" data-act="jgPregOk">✅ Aprobar todas (${G.preguntas.length})</button><button class="b ghost sm" data-act="jgPregNo">🗑️ Descartar</button></div></div>` : ''}
+  </div>`;
 }
 function guiasCard(MD) {
   const G = MD.guias || [], EST = { nuevo: '⏳ En cola', escribiendo: '✍️ Escribiendo…', borrador: '👀 Borrador: revísalo', publicada: '✅ Publicada', error: '⚠️ Error' };
@@ -630,6 +669,7 @@ const KEYINFO = [
   ['MISTRAL_API_KEY', 'Mistral (reserva)', 'Plan gratis "Experiment"; buen español y mira imágenes. console.mistral.ai → API Keys', 'https://console.mistral.ai/api-keys'],
   ['OPENROUTER_API_KEY', 'OpenRouter (reserva)', 'Usa solo modelos gratis (:free). openrouter.ai → Keys', 'https://openrouter.ai/settings/keys'],
   ['TELEGRAM_BOT_TOKEN', 'Telegram: token del bot', 'Avisos al celular gratis. En Telegram habla con @BotFather → /newbot → copia el token', 'https://t.me/BotFather'],
+  ['MESHY_API_KEY', 'Meshy (modelos 3D)', 'Agente del Juego: convierte tus imágenes en personajes 3D profesionales. Necesita el plan Pro con API. meshy.ai → Settings → API', 'https://www.meshy.ai/settings/api'],
   ['FREESOUND_API_KEY', 'Freesound', 'Biblioteca gratis de efectos y música CC0', 'https://freesound.org/apiv2/apply'],
   ['GOOGLE_CLIENT_ID', 'Google OAuth: Client ID', 'Para publicar en YouTube (ver guía abajo)', 'https://console.cloud.google.com/apis/credentials'],
   ['GOOGLE_CLIENT_SECRET', 'Google OAuth: Client Secret', 'Para publicar en YouTube', 'https://console.cloud.google.com/apis/credentials'],
@@ -1027,6 +1067,17 @@ const ACT = {
   mdIngreso: guard(async () => { MD = await api('/api/mando/ingreso', { fuente: $('#md-fu').value, monto: $('#md-mo').value, fecha: $('#md-fe').value }); toast('💰 Ingreso anotado'); render(); }),
   flNuevo: guard(async () => { toast('✍️ Escribiendo los prompts…'); MD = await api('/api/mando/flow', { tema: $('#fl-tema').value }); toast('🎬 Prompts listos: cópialos en Flow'); render(); }),
   guIdea: el => { const i = $('#gu-tema'); if (i) { i.value = el.dataset.t; i.focus(); } },
+  jgCrear: guard(async () => { const prueba = $('#jg-prueba').checked, f = $('#jg-img').files[0];
+    if (!prueba && !confirm('Crear un modelo 3D gasta créditos de tu cuenta de Meshy. ¿Continuar?')) return;
+    let imagen = null; if (f) { if (f.size > 10e6) throw new Error('La imagen pesa más de 10 MB'); imagen = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(f); }); }
+    JG = await api('/api/mando/juego/crear', { pj: $('#jg-pj').value, estilo: $('#jg-est').value, extra: $('#jg-extra').value, imagen, prueba }); toast('🧊 Enviado a Meshy. Tarda unos minutos; te aviso por Telegram cuando esté listo.'); render(); }),
+  jgMod: guard(async el => { const a = el.dataset.a; if (a === 'borrar' && !confirm('¿Borrar este modelo?')) return; if (a === 'usar' && !confirm('¿Poner este modelo en el juego? Reemplaza al personaje hecho con código (puedes volver atrás cuando quieras).')) return;
+    JG = await api('/api/mando/juego/modelo', { id: el.dataset.id, accion: a, giro: +el.dataset.g || 0 }); toast(a === 'usar' ? '🎮 ¡Listo! El personaje nuevo ya está en el juego' : a === 'quitar' ? '↩️ Volvió el personaje de código' : a === 'giro' ? '🔄 Girado' : '🗑️ Borrado'); render(); }),
+  jgSalud: guard(async () => { JG = await api('/api/mando/juego/salud', {}); toast('🩺 Revisión lista'); render(); }),
+  jgIdeas: guard(async () => { toast('💡 Pensando ideas…'); JG = await api('/api/mando/juego/ideas', {}); render(); }),
+  jgPreg: guard(async () => { toast('✍️ Escribiendo preguntas…'); JG = await api('/api/mando/juego/preguntas', { materia: $('#jg-mat').value }); render(); }),
+  jgPregOk: guard(async () => { JG = await api('/api/mando/juego/preguntas', { accion: 'aprobar' }); toast('✅ Preguntas agregadas al Sabio Búho'); render(); }),
+  jgPregNo: guard(async () => { JG = await api('/api/mando/juego/preguntas', { accion: 'descartar' }); render(); }),
   guNueva: guard(async () => { MD = await api('/api/mando/guia', { tema: $('#gu-tema').value }); toast('✍️ El Creativo está escribiendo tu guía (1–2 min)'); render(); }),
   guPub: guard(async el => { if (!confirm('¿Ya leíste el borrador y quieres publicarlo en Yupitok?')) return; MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'publicar' }); toast('✅ Guía publicada: ' + (MD.url || '')); render(); }),
   guRe: guard(async el => { MD = await api('/api/mando/guia', { id: el.dataset.id, accion: 'rehacer' }); render(); }),

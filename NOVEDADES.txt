@@ -1,3 +1,10 @@
+v7.89.0 — 🎮 Nuevo: Agente del Juego (mejora todos los juegos)
+- 🧊 Taller de personajes 3D (Centro de Mando → 🎮 Agente del Juego): sube la imagen de un personaje (la de Flow o tu póster) o elige su descripción y un estilo (Profesional / Profesional para adultos). El agente la convierte en un modelo 3D profesional con Meshy, te avisa por Telegram cuando está listo y te muestra la vista previa. Con "✅ Usar en el juego" reemplaza al personaje hecho con código en el juego, en el menú y en el multijugador. Puedes girarlo, descargarlo o volver al de código cuando quieras.
+- 🔑 Necesita tu clave de Meshy (plan Pro con API) en Ajustes → Claves → Meshy. Muestra tus créditos y pide confirmación antes de gastar. Tiene un modo prueba que no gasta créditos.
+- 🩺 Salud de todos los juegos (cada día a las 9 a. m. y por Telegram): juegos que crecen o caen, juegos que nadie abre, errores de jugadores, en qué nivel de las Aventuras se traba la gente y cómo va la Torre.
+- 💡 Ideas de mejora con IA (1 consulta, cuando tú lo pides) y 🦉 10 preguntas nuevas para el Sabio Búho que apruebas antes de que entren al juego.
+- El juego ahora registra de forma anónima cuándo se empieza, termina o abandona cada nivel (sin datos personales).
+
 v7.88.2 — 🧩 Base para modelos 3D profesionales
 - 🧩 El juego ya puede cargar modelos 3D profesionales (.glb) con sus animaciones (cargador glTF de three.js, licencia MIT). Es la base para el futuro Agente del Juego que convertirá tus imágenes de Flow en personajes 3D con Meshy.
 

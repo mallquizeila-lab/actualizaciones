@@ -58,6 +58,7 @@ create table if not exists temp_pts (perfil text, temp text, pts integer default
 create table if not exists reto_hecho (uid text, dia text, puntos integer, primary key (uid, dia));
 create table if not exists yc_inv (perfil text, item text, created_at text default (datetime('now')), primary key (perfil, item));
 create table if not exists yc_estilo (uidh text primary key, perfil text, marco text, titulo text, color text);
+create table if not exists av_ev (dia text, niv text, tipo text, n integer default 0, primary key (dia, niv, tipo));
 create table if not exists arcade (id integer primary key, juego text, uid text, nombre text, avatar text, puntos integer, created_at text default (datetime('now')));
 create index if not exists ix_arc on arcade(juego, created_at);
 create table if not exists pro_jugadas (id text, dia text, n integer default 0, primary key (id, dia));
@@ -953,6 +954,12 @@ async function api(req, res, u) {
     return send(res, 200, { items: TIENDA, inv: inv(), equipo: eq(), ...ycEstado(id) });
   }
   // 👑 Aventuras de Yupi: preguntas extra escritas en el panel (se suman al banco base del juego)
+  // 🧊 Modelos 3D profesionales aprobados por el Agente del Juego (Meshy → ShortForge → aquí)
+  if (u.pathname === '/api/aventura/modelos') { const M3 = getS('modelos3d', {}); return send(res, 200, { modelos: Object.fromEntries(Object.entries(M3).map(([k, v]) => [k, { url: `/modelos/${k}.glb?v=${v.v}`, giro: v.giro || 0 }])) }, undefined, { 'cache-control': 'no-cache' }); }
+  // 📈 Eventos anónimos de las Aventuras (inicio / fin / abandono por nivel) para que el agente vea dónde se traba la gente
+  if (u.pathname === '/api/aventura/ev' && P) { if (limite(ip, 'avev', 60)) return send(res, 429, { error: 'Más despacio' }); const b = await json(req), tipo = String(b.e || ''), niv = String(b.niv || '');
+    if (!['inicio', 'fin', 'abandono'].includes(tipo) || !/^(n[0-3]|obby)$/.test(niv)) return send(res, 400, { error: 'Evento no válido' });
+    run('insert into av_ev(dia, niv, tipo, n) values(?,?,?,1) on conflict(dia, niv, tipo) do update set n = n + 1', hoyPeru(), niv, tipo); return send(res, 200, { ok: 1 }); }
   // 🏆 Ranking del mes de la Torre de las Nubes (obby de las Aventuras de Yupi)
   if (u.pathname === '/api/aventura/torre') { const MM = mesPeru(); return send(res, 200, { mes: MM.nombre, top: conEstilo(topMes('obby', MM, 10)).map(({ uid, ...x }) => x) }, undefined, { 'cache-control': 'public, max-age=60' }); }
   if (u.pathname === '/api/aventura/preguntas') return send(res, 200, { lineas: String(getS('avPreg', '')).split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#') && l.split('|').length >= 5).slice(0, 3000) }, undefined, { 'cache-control': 'public, max-age=300' });
@@ -1046,6 +1053,18 @@ async function api(req, res, u) {
       jugadores: q1('select count(distinct perfil) n from yc_mov').n, gastan: q1("select count(distinct perfil) n from yc_mov where monto<0").n,
       top: q('select substr(perfil,1,8) perfil, sum(monto) saldo from yc_mov group by perfil order by saldo desc limit 10'), alertas: q('select substr(perfil,1,8) perfil, detalle, created_at from yc_alerta order by id desc limit 30') }); }
     if (r === 'yupicoins/ajustes' && P) { const b = await json(req), C = YC(); for (const k of ['topeDia', 'topeIp']) if (b[k] !== undefined) C[k] = Math.max(1, Math.min(1e6, Math.floor(+b[k]) || C[k])); setS('yupicoins', C); return send(res, 200, { ok: 1, ajustes: C }); }
+    if (r === 'juegos-salud') { const v7 = q(`select game, count(*) n from visitors where game is not null and game<>'' and created_at>=datetime('now','-7 days') group by game order by n desc limit 40`), v14 = new Map(q(`select game, count(*) n from visitors where game is not null and game<>'' and created_at>=datetime('now','-14 days') and created_at<datetime('now','-7 days') group by game`).map(x => [x.game, x.n]));
+      return send(res, 200, { juegos: v7.map(x => ({ ...x, antes: v14.get(x.game) || 0 })), sinVisitas: CATALOGO.filter(t => !v7.some(x => x.game === t.id) && !v14.has(t.id)).map(t => ({ id: t.id, t: t.t })).slice(0, 40),
+        puntajes: q(`select juego, count(*) n, count(distinct uid) jugadores, max(puntos) mejor, round(avg(puntos)) promedio from arcade where created_at>=datetime('now','-7 days') group by juego order by n desc limit 40`),
+        errores: q(`select msg, src, ruta, n, ultimo from errores where ultimo>=datetime('now','-7 days') order by n desc limit 15`),
+        aventura: q(`select niv, tipo, sum(n) n from av_ev where dia>=date('now','-7 days') group by niv, tipo`),
+        torre: q1(`select count(*) jugadores, round(avg(p),1) promedio, max(p) mejor from (select max(puntos) p from arcade where juego='obby' and created_at>=datetime('now','-30 days') group by uid)`),
+        pro: (() => { try { return q(`select id, sum(n) n from pro_jugadas where dia>=date('now','-7 days') group by id order by n desc limit 10`); } catch (e) { return []; } })(),
+        modelos: getS('modelos3d', {}) }); }
+    if (r === 'modelo' && P) { const b = await json(req, 80e6), pj = String(b.pj || ''); if (!/^(yupi|lulu|choki|coquito|gorgojo|m_[a-z]{2,12})$/.test(pj)) return send(res, 400, { error: 'Personaje no válido' });
+      const buf = Buffer.from(String(b.glb || ''), 'base64'); if (buf.length < 1000 || buf.slice(0, 4).toString() !== 'glTF') return send(res, 400, { error: 'El archivo no es un modelo .glb válido' }); if (buf.length > 60e6) return send(res, 400, { error: 'Modelo demasiado pesado (máx. 60 MB)' });
+      fs.mkdirSync(path.join(DATA, 'modelos'), { recursive: true }); fs.writeFileSync(path.join(DATA, 'modelos', pj + '.glb'), buf); const M3 = getS('modelos3d', {}); M3[pj] = { v: Date.now(), giro: Math.max(-7, Math.min(7, +b.giro || 0)), kb: Math.round(buf.length / 1024) }; setS('modelos3d', M3); return send(res, 200, { ok: 1, modelos: M3 }); }
+    if (r === 'modelo/quitar' && P) { const b = await json(req), pj = String(b.pj || ''), M3 = getS('modelos3d', {}); delete M3[pj]; setS('modelos3d', M3); try { fs.unlinkSync(path.join(DATA, 'modelos', pj.replace(/[^a-z0-9_]/g, '') + '.glb')); } catch (e) {} return send(res, 200, { ok: 1, modelos: M3 }); }
     if (r === 'guias-extra') return send(res, 200, { guias: getS('guiasExtra', []) });
     if (r === 'guias-extra/guardar' && P) { const b = await json(req), slug = slugDe(String(b.slug || b.titulo || '')).slice(0, 70); if (slug.length < 4 || !b.titulo || !b.html) return send(res, 400, { error: 'Falta título o contenido' });
       if (JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias.some(x => x.slug === slug)) return send(res, 400, { error: 'Ya existe una guía con ese nombre' });
@@ -1211,6 +1230,7 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, 'voces_juegos', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/voces\/glory\/([a-z0-9_]{3,80}\.mp3|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'voces_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
+    { const mm = /^\/modelos\/([a-z0-9_]{2,30})\.glb$/.exec(u.pathname); if (mm) { const f = path.join(DATA, 'modelos', mm[1] + '.glb'); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return archivo(req, res, f, 'model/gltf-binary', { 'cache-control': 'public, max-age=31536000, immutable' }); } } // 🧊 modelos 3D aprobados
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
     { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';

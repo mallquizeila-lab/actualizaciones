@@ -38,6 +38,13 @@
   const GORROS = [['gorra', '🧢', 'Gorra', 200], ['gato', '🐱', 'Orejas de gato', 250], ['vaquero', '🤠', 'Sombrero vaquero', 300], ['copa', '🎩', 'Sombrero de copa', 350], ['corona', '👑', 'Corona real', 500]];
   // 👫 Sala privada: un código de 5 letras para jugar solo con tus amigos
   const salaOk = c => /^[a-z0-9]{5}$/.test(c || '') ? c : ''; let SALA = (() => { try { return salaOk(String(new URLSearchParams(typeof QS0 === 'string' ? QS0 : location.search).get('sala') || '').toLowerCase()); } catch (e) { return ''; } })(); // se lee al cargar: la página limpia la dirección después
+  // 🧊 Modelos 3D profesionales (.glb) aprobados en ShortForge por el Agente del Juego. Si no hay, se usan los personajes hechos con código.
+  let MOD3D = null, glbProm = null; const GLBT = {};
+  const cargarScript = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.append(s); });
+  const prepararGLB = () => glbProm || (glbProm = fetch('/api/aventura/modelos').then(r => r.json()).then(async j => { MOD3D = j.modelos || {}; const ks = Object.keys(MOD3D); if (!ks.length) return;
+    if (!window.GLTFLoader) await cargarScript('/gltf-loader.js?v=1'); const L = new window.GLTFLoader();
+    await Promise.all(ks.map(k => fetch(MOD3D[k].url).then(r => r.arrayBuffer()).then(buf => new Promise(ok => L.parse(buf, '', g => { GLBT[k] = { g, giro: MOD3D[k].giro || 0 }; ok(); }, () => ok()))).catch(() => {}))); }).catch(() => { MOD3D = {}; }));
+  const evento = (e, niv) => { try { post('/api/aventura/ev', { e, niv }).catch(() => {}); } catch (x) {} };
   let BANCO = null;
   const leerPreg = l => { const p = String(l || '').split('|').map(s => s.trim()); if (p.length < 5 || !p[1] || !p[2] || !p[3]) return null; const ex = p.length >= 6 ? p[p.length - 1] : '', malas = (p.length >= 6 ? p.slice(3, -1) : p.slice(3)).filter(Boolean).slice(0, 3); return malas.length ? { mat: p[0] || 'General', q: p[1], ok: p[2], malas, ex } : null; };
   const cargarBanco = () => BANCO ? Promise.resolve(BANCO) : Promise.all([
@@ -106,13 +113,13 @@
     };
     setParar(() => cerrar(ov));
   }
-  function lanzar(t, ov, pj, niv, obby = false) { ov.onclick = null; ov.innerHTML = `<div class="avz-carga"><div style="font-size:3rem">${obby ? '🏗️' : EQUIPO[pj].e}</div>Preparando ${obby ? 'la Torre de las Nubes' : escH(NIVELES[niv].n)}…</div>`; Promise.all([cargarThree(), cargarBanco()]).then(() => jugar(t, ov, { pj, niv, obby })).catch(() => { toast('No se pudo cargar el 3D'); cerrar(ov); }); }
+  function lanzar(t, ov, pj, niv, obby = false) { ov.onclick = null; ov.innerHTML = `<div class="avz-carga"><div style="font-size:3rem">${obby ? '🏗️' : EQUIPO[pj].e}</div>Preparando ${obby ? 'la Torre de las Nubes' : escH(NIVELES[niv].n)}…</div>`; Promise.all([cargarThree().then(prepararGLB), cargarBanco()]).then(() => jugar(t, ov, { pj, niv, obby })).catch(() => { toast('No se pudo cargar el 3D'); cerrar(ov); }); }
   function cerrar(ov) { ov?.remove(); document.body.style.overflow = ''; }
 
   // ---------- El juego ----------
   // 📸 Estudio de fotos: dibuja en 3D a los héroes, mascotas y sombreros para el menú (una vez, en segundo plano)
   const RETR = {}; let retrProm = null;
-  const retratos = (forzar = false) => { if (forzar) retrProm = null; if (!retrProm) retrProm = cargarThree().then(() => new Promise(ok => setTimeout(() => { try { hacerRetratos(); } catch (e) { console.warn('retratos', e); } ok(RETR); }, 20))); return retrProm; };
+  const retratos = (forzar = false) => { if (forzar) retrProm = null; if (!retrProm) retrProm = cargarThree().then(prepararGLB).then(() => new Promise(ok => setTimeout(() => { try { hacerRetratos(); } catch (e) { console.warn('retratos', e); } ok(RETR); }, 20))); return retrProm; };
   function hacerRetratos() {
     const THREE = window.THREE, CM = THREE.ColorManagement, antes = CM ? CM.legacyMode : true; if (CM) CM.legacyMode = false;
     const cv = document.createElement('canvas'); let r;
@@ -258,7 +265,8 @@
       else if (tipo === 'corona') { const a = M2(new THREE.CylinderGeometry(.4, .36, .26, 20, 1, true), mat('#ffc23d', { side: THREE.DoubleSide })); a.userData.sinBorde = 1; for (let i = 0; i < 6; i++) { const an = i / 6 * Math.PI * 2; M2(new THREE.ConeGeometry(.08, .28, 6), mat('#ffc23d'), Math.sin(an) * .38, .26, Math.cos(an) * .38); } M2(new THREE.OctahedronGeometry(.09), mat(c, { emissive: c, emissiveIntensity: .3 }), 0, .05, .4); }
       contorno(h, 1.05); return h; };
     const ANC = { yupi: { c: [0, 1.36, 0, .6, .75, 0], h: [0, 3.2, 0, 1] }, lulu: { c: [0, 1.98, .44, .33, 1, .2], h: 'cab' }, choki: { c: [0, 1.3, 0, .6, 1, 0], h: [0, 2.7, 0, 1.08] }, coquito: { c: [0, .6, 0, .9, 1, 0], h: [0, 2.12, 0, 1.15] } };
-    const aplicarEstilo = (m, id, color, gorro) => { (m.est || []).forEach(o => o.parent && o.parent.remove(o)); m.est = []; (m.ocultar || []).forEach(o => o.visible = !gorro);
+    const aplicarEstilo = (m, id, color, gorro) => { (m.est || []).forEach(o => o.parent && o.parent.remove(o)); m.est = [];
+      if (m.glb) { if (gorro) { const h = hacerGorro(gorro, color); h.position.set(0, m.alto - .12, 0); h.scale.setScalar(m.alto / 3); m.cu.add(h); m.est.push(h); } return; } (m.ocultar || []).forEach(o => o.visible = !gorro);
       if (color && color !== SIN_COLOR) { const [x, y, z, r, sz, rx] = ANC[id].c, b = new THREE.Group(); b.position.set(x, y, z); b.rotation.x = rx; const an = malla(new THREE.TorusGeometry(r, .1, 10, 28), mat(color)); an.rotation.x = Math.PI / 2; an.scale.y = sz; b.add(an);
         for (const s of [-1, 1]) { const co = malla(new THREE.CapsuleGeometry(.07, .35, 4, 8), mat(color)); co.position.set(s * .12, -.22, -r * sz - .02); co.rotation.z = s * .25; b.add(co); } contorno(b, 1.06); m.cu.add(b); m.est.push(b); }
       if (gorro) { const h = hacerGorro(gorro, color); if (ANC[id].h === 'cab') { h.position.set(0, .4, -.02); h.scale.setScalar(.95); m.cab.add(h); } else { const [x, y, z, sc] = ANC[id].h; h.position.set(x, y, z); h.scale.setScalar(sc); m.cu.add(h); } m.est.push(h); } };
@@ -275,7 +283,17 @@
       else if (id === 'puma') { esf(.36, '#e0a336', 0, .45, -.1, 1, .85, 1.4); esf(.3, '#e0a336', 0, .8, .4); esf(.15, '#fff1d6', 0, .72, .62, 1, .8, .8); for (const s of [-1, 1]) cono(.09, .18, '#e0a336', s * .18, 1.08, .36); ojos(c, .88, .62, .12, .07, '#3fae3a', false); const cola = malla(new THREE.CapsuleGeometry(.06, .6, 4, 8), mat('#e0a336')); cola.position.set(0, .7, -.75); cola.rotation.x = -.8; c.add(cola); for (const [x, z] of [[-.18, .25], [.18, .25], [-.18, -.45], [.18, -.45]]) { const l = malla(new THREE.CapsuleGeometry(.07, .2, 4, 6), mat('#d18f26')); l.position.set(x, .18, z); c.add(l); } }
       else { vuela = true; const cri = { emissive: '#1ba6d6', emissiveIntensity: .5, transparent: true, opacity: .9 }; const cu = malla(new THREE.OctahedronGeometry(.35, 1), mat('#7be0ff', cri)); cu.scale.set(1, .9, 1.3); c.add(cu); const ca = malla(new THREE.OctahedronGeometry(.22, 1), mat('#a8efff', cri)); ca.position.set(0, .3, .38); c.add(ca); ojos(c, .36, .52, .09, .06, '#ff3df0', false); for (const s of [-1, 1]) { cono(.05, .2, '#ffffff', s * .1, .55, .32, 0, -s * .3); const a = esf(.45, '#c9f6ff', s * .45, .15, -.05, 1, .06, .5, { transparent: true, opacity: .75 }); alas.push(a); } c.add(brillo('#7be0ff', 2.2)); }
       contorno(c, 1.05); g.scale.setScalar(.8); return { g, c, vuela, alas }; };
-    return { grad, ORO, MT, mat, tinta, contorno, lienzo, resplandor, brillo, malla, hacerYupi, hacerLulu, hacerChoki, hacerCoquito, hacerGorro, ANC, aplicarEstilo, hacerMascota, ojos, sonrisa, oscuroB, blancoB };
+    // modelos profesionales: se escalan a la altura del héroe, se centran y se animan solos (o con sus propias animaciones si las traen)
+    const ALTO = { yupi: 3.2, lulu: 3.0, choki: 3.0, coquito: 2.5, gorgojo: 2.0 };
+    const hacerGLB = (k, alto) => { const T = GLBT[k]; if (!T) return null; let piel = false; T.g.scene.traverse(o => { if (o.isSkinnedMesh) piel = true; });
+      const esc = piel && window.SkeletonUtils ? window.SkeletonUtils.clone(T.g.scene) : T.g.scene.clone(true), g = new THREE.Group(), cu = new THREE.Group(), adentro = new THREE.Group(); g.add(cu); cu.add(adentro); adentro.add(esc); adentro.rotation.y = T.giro || 0;
+      esc.updateWorldMatrix(true, true); const bx = new THREE.Box3().setFromObject(esc), sz = bx.getSize(new V3()), c = bx.getCenter(new V3()), f = alto / (sz.y || 1); esc.scale.multiplyScalar(f); esc.position.set(esc.position.x - c.x * f, esc.position.y - bx.min.y * f, esc.position.z - c.z * f);
+      esc.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      let mixer = null, aCam = null, aQuieto = null; if (T.g.animations && T.g.animations.length) { mixer = new THREE.AnimationMixer(esc); for (const a of T.g.animations) { const n = a.name.toLowerCase(); if (!aCam && /walk|run|camin|corr/.test(n)) aCam = mixer.clipAction(a); if (!aQuieto && /idle|stand|breath|quiet/.test(n)) aQuieto = mixer.clipAction(a); } if (!aQuieto) aQuieto = mixer.clipAction(T.g.animations[0]); aQuieto.play(); }
+      return { g, cu, piernas: [], brazos: [], glb: true, alto, mixer, aCam, aQuieto, actual: aQuieto }; };
+    const conGLB = (k, base) => () => { const m = hacerGLB(k, ALTO[k]); if (!m) return base(); if (k === 'coquito') { const b = new THREE.Mesh(new THREE.SphereGeometry(1.75, 24, 18), new THREE.MeshBasicMaterial({ color: '#ffd23f', transparent: true, opacity: .28, depthWrite: false })); b.position.y = 1.3; b.visible = false; m.g.add(b); m.burbuja = b; } return m; };
+    const mascotaF = id => { const m = hacerGLB('m_' + id, 1.1); return m ? { g: m.g, c: m.cu, vuela: ['colibri', 'condor', 'dragon'].includes(id), alas: [], mixer: m.mixer } : hacerMascota(id); };
+    return { grad, ORO, MT, mat, tinta, contorno, lienzo, resplandor, brillo, malla, hacerYupi: conGLB('yupi', hacerYupi), hacerLulu: conGLB('lulu', hacerLulu), hacerChoki: conGLB('choki', hacerChoki), hacerCoquito: conGLB('coquito', hacerCoquito), hacerGorro, ANC, aplicarEstilo, hacerMascota: mascotaF, ojos, sonrisa, oscuroB, blancoB, hacerGLB };
   }
 
   window.AV_FABRICA = fabrica; // la usan el agente del juego y las vistas previas
@@ -514,6 +532,7 @@
 
     // Controles: teclado, joystick táctil, cámara orbital
     const pos = SPAWN.clone(), vel = new V3(), emp = new V3(); let ry = Math.PI, yaw = 0, pitch = .42, dist = innerHeight > innerWidth ? 13 : 10, enSuelo = true, saltos = 0, cerca = false, sobre = null;
+    evento('inicio', OBBY ? 'obby' : 'n' + niv);
     pintarHUD(); setTimeout(() => OBBY ? msg('🏗️ Torre de las Nubes', '¡Sube lo más alto que puedas! Cada bandera guarda tu avance', 4200) : msg(`${N.e} ${N.n}`, niv === 1 ? '🔄 Cambia de héroe: Choki rompe el oro, Lulú toca campanas y Coquito empuja la roca' : niv === 3 ? '¡Cuidado con sus embestidas! Esquívalo y ataca cuando se maree 💫' : N.d, 4200), 500);
     const tec = {}, joy = { id: null, x0: 0, y0: 0, x: 0, y: 0 }, giro = { id: null, x: 0, y: 0 }, tactil = matchMedia('(pointer:coarse)').matches;
     const kd = e => { if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return; const k = e.key.toLowerCase(); tec[k] = true; if (k === ' ') { e.preventDefault(); saltar(); } if (k === 'q') usar(); if (k === 'e') hablar(); if (k === 'c') cambiar(); if (/^[1-4]$/.test(k)) cambiar(ORDEN[+k - 1]); };
@@ -600,7 +619,7 @@
     }
 
     function completarNivel() {
-      fin = true; const seg = Math.round(tiempo), est = seg < N.t[0] ? 3 : seg < N.t[1] ? 2 : 1, J = datosJ();
+      fin = true; evento('fin', 'n' + niv); const seg = Math.round(tiempo), est = seg < N.t[0] ? 3 : seg < N.t[1] ? 2 : 1, J = datosJ();
       J.partidas++; J.est[niv] = Math.max(J.est[niv] || 0, est); J.nivel = Math.max(J.nivel, niv + 1); J.pj = pj;
       if (N.jefe) { J.cristales = Math.max(J.cristales, 1); J.mejorTiempo = J.mejorTiempo ? Math.min(J.mejorTiempo, seg) : seg; }
       const ganadas = Math.round(mon * (1 + BONO)); try { PERFIL.ganar(ganadas); PERFIL.partida('aventura', mon * 10 + est * 100 + niv * 200); } catch (e) {}
@@ -701,8 +720,9 @@
       jug.position.copy(pos); jug.rotation.y = ry; const mov = Math.hypot(joy.x, joy.y) > .1 || ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].some(k => tec[k]);
       const sw = mov && enSuelo ? Math.sin(tt * 12) * .7 : 0; M.piernas.forEach((p, i) => p.rotation.x = i % 2 ? -sw : sw);
       if (M.brazos.length) { M.brazos[0].rotation.x = -sw * .8; M.brazos[1].rotation.x = sw * .8; M.brazos[0].rotation.z = enSuelo ? 0 : -.6; M.brazos[1].rotation.z = enSuelo ? 0 : .6; }
-      if (pj === 'choki' && lanzaT > 0) { M.brazos[1].rotation.x = -1.5 * Math.sin((1 - lanzaT / .35) * Math.PI); M.brazos[1].rotation.z = 0; }
+      if (pj === 'choki' && lanzaT > 0 && M.brazos[1]) { M.brazos[1].rotation.x = -1.5 * Math.sin((1 - lanzaT / .35) * Math.PI); M.brazos[1].rotation.z = 0; }
       M.cu.position.y = mov && enSuelo ? Math.abs(Math.sin(tt * 12)) * .08 : Math.sin(tt * 2) * .03;
+      if (M.glb) { M.cu.rotation.x = mov && enSuelo ? .1 : 0; if (M.mixer) { const quiero = mov && enSuelo && M.aCam ? M.aCam : M.aQuieto; if (quiero && quiero !== M.actual) { quiero.reset().play(); if (M.actual) M.actual.crossFadeTo(quiero, .25, false); M.actual = quiero; } M.mixer.update(dt); } else { M.cu.scale.y = 1 + (mov && enSuelo ? Math.abs(Math.sin(tt * 12)) * .05 : Math.sin(tt * 2) * .015); } }
       M.cu.rotation.y = pj === 'yupi' && giroT > 0 ? (1 - giroT / .9) * Math.PI * 4 : 0;
       if (M.capa) M.capa.rotation.x = .12 + (mov ? .35 : .05) + Math.sin(tt * 6) * .05;
       if (M.burbuja) { M.burbuja.visible = corazaT > 0; M.burbuja.scale.setScalar(1 + Math.sin(tt * 8) * .04); }
@@ -722,11 +742,11 @@
       estrellin.quaternion.copy(cam.quaternion); estrellin.rotateZ(Math.sin(tt * 3) * .2);
       // otros jugadores, mascota y emote propio
       if (ts - redT > 380) { redT = ts; enviarRed(mov); }
-      for (const o of otrosJ.values()) { o.g.position.lerp(o.t, .18); o.m.g.rotation.y += ((o.ry - o.m.g.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .2; const sw2 = o.a === 'c' ? Math.sin(tt * 12) * .7 : 0; o.m.piernas.forEach((p, i) => p.rotation.x = i % 2 ? -sw2 : sw2); }
+      for (const o of otrosJ.values()) { o.g.position.lerp(o.t, .18); o.m.g.rotation.y += ((o.ry - o.m.g.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .2; const sw2 = o.a === 'c' ? Math.sin(tt * 12) * .7 : 0; o.m.piernas.forEach((p, i) => p.rotation.x = i % 2 ? -sw2 : sw2); if (o.m.mixer) o.m.mixer.update(dt); }
       if (emoteSp) { emoteT -= dt; if (emoteT <= 0) { jug.remove(emoteSp); emoteSp = null; } }
       if (MASC) { const bx = pos.x - Math.sin(ry) * 1.7 + Math.cos(ry) * 1.3, bz = pos.z - Math.cos(ry) * 1.7 - Math.sin(ry) * 1.3, hm = sueloEn(bx, bz, pos.y + .5)[0]; const g = MASC.g, dxm = bx - g.position.x, dzm = bz - g.position.z;
         g.position.x += dxm * .08; g.position.z += dzm * .08; const ym = MASC.vuela ? pos.y + 2.2 + Math.sin(tt * 3) * .25 : Math.max(hm, pos.y - 3) + Math.abs(Math.sin(tt * 9)) * (Math.hypot(dxm, dzm) > .3 ? .35 : .05); g.position.y += (ym - g.position.y) * .2;
-        if (Math.hypot(dxm, dzm) > .05) g.rotation.y = Math.atan2(dxm, dzm); if (g.position.distanceTo(pos) > 25) g.position.set(bx, pos.y, bz); MASC.alas.forEach((a, i) => a.rotation.z = (i ? -1 : 1) * Math.sin(tt * (MASC.info[0] === 'colibri' ? 40 : 8)) * .5); }
+        if (Math.hypot(dxm, dzm) > .05) g.rotation.y = Math.atan2(dxm, dzm); if (g.position.distanceTo(pos) > 25) g.position.set(bx, pos.y, bz); if (MASC.mixer) MASC.mixer.update(dt); MASC.alas.forEach((a, i) => a.rotation.z = (i ? -1 : 1) * Math.sin(tt * (MASC.info[0] === 'colibri' ? 40 : 8)) * .5); }
       // cámara
       const cx = pos.x + Math.sin(yaw) * Math.cos(pitch) * dist, cz = pos.z + Math.cos(yaw) * Math.cos(pitch) * dist, cy = pos.y + 1.5 + Math.sin(pitch) * dist;
       cam.position.lerp(tmp.set(cx, cy, cz), .15); cam.lookAt(pos.x, pos.y + 1.8, pos.z); sol.position.set(pos.x + 30, pos.y + 50, pos.z + 20); sol.target.position.copy(pos);
@@ -734,7 +754,7 @@
     }
     raf = requestAnimationFrame(t0 => { last = t0; raf = requestAnimationFrame(bucle); });
     setTimeout(() => { const a = $('#avayuda'); if (a) a.style.opacity = 0; }, 8000);
-    function parar() { if (OBBY && !fin) { fin = true; try { PERFIL.ganar(Math.round(mon * (1 + BONO))); PERFIL.partida('aventura', obby.mejor * 50); } catch (e) {} } vivo = false; if (CM) CM.legacyMode = cmAntes; cancelAnimationFrame(raf); removeEventListener('keydown', kd); removeEventListener('keyup', ku); removeEventListener('resize', tam); try { renderer.dispose(); } catch (e) {} }
+    function parar() { if (!fin && vivo) evento(OBBY ? 'fin' : 'abandono', OBBY ? 'obby' : 'n' + niv); if (OBBY && !fin) { fin = true; try { PERFIL.ganar(Math.round(mon * (1 + BONO))); PERFIL.partida('aventura', obby.mejor * 50); } catch (e) {} } vivo = false; if (CM) CM.legacyMode = cmAntes; cancelAnimationFrame(raf); removeEventListener('keydown', kd); removeEventListener('keyup', ku); removeEventListener('resize', tam); try { renderer.dispose(); } catch (e) {} }
     setParar(() => { parar(); cerrar(ov); });
     window.__aventura = { get estado() { return { niv, pj, mi, nm: MIS.length, mon, vidas, prueba, derrotados, rotos, sonadas, rocaOk: !!roca?.ok, jefeHp: jefe ? jefe.hp : null, jefeEstado: jefe ? jefe.estado : null, cristalOk, fin, cd: +cd.toFixed(2), pos: [+pos.x.toFixed(2), +pos.y.toFixed(2), +pos.z.toFixed(2)] }; },
       tp: (x, z, y = 0) => { pos.set(x, y, z); vel.set(0, 0, 0); }, mirar: a => { ry = a; }, usar, cambiar, saltar, ganarMonedas: n => { mon += n; avanzarMision(); }, derrotarTodos: () => enemigos.filter(e => e.tipo === 'gorgojito').forEach(derrotar),

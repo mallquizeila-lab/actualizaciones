@@ -14,6 +14,7 @@ const comments = require('./lib/comments');
 const cerebro = require('./lib/cerebro');
 const avisos = require('./lib/avisos');
 const mando = require('./lib/mando');
+const juego = require('./lib/juego');
 const desarmar = require('./lib/desarmar');
 const salud = require('./lib/salud');
 const actualizar = require('./lib/actualizar');
@@ -21,7 +22,7 @@ const freesound = require('./lib/freesound');
 const { chatSystem } = require('./lib/prompts');
 
 const PORT = E.PORT || 3200, PUB = path.join(ROOT, 'public');
-const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY'];
+const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY', 'MESHY_API_KEY'];
 const MIME = { '.webm': 'audio/webm', '.html': 'text/html;charset=utf-8', '.js': 'text/javascript;charset=utf-8', '.css': 'text/css;charset=utf-8', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aiff': 'audio/aiff', '.png': 'image/png', '.jpg': 'image/jpeg', '.txt': 'text/plain;charset=utf-8', '.svg': 'image/svg+xml' };
 const DEFAULT_TIMES = { youtube: '18:00', tiktok: '20:00', facebook: '13:00' };
 
@@ -318,6 +319,8 @@ async function api(u, q, U, r) {
   // Miniaturas de los archivos del asistente (se piden con <img>).
   if (u === '/api/chat/adjunto' && !P) { const f = require('./lib/adjuntos').imagen(U.searchParams.get('id')); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': 'image/jpeg', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (u === '/api/mando') return await mando.estado();
+  if (u === '/api/mando/juego') return await juego.estado();
+  if (u === '/api/mando/juego/archivo' && !P) { const t = U.searchParams.get('t') === 'png' ? '.png' : '.glb', f = juego.archivo(U.searchParams.get('id') || '', t); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': t === '.png' ? 'image/png' : 'model/gltf-binary', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (!P) return null;
   if (!q.headers['x-sf']) throw Object.assign(new Error('Prohibido'), { code: 403 });
 
@@ -379,6 +382,12 @@ async function api(u, q, U, r) {
   if (u === '/api/job/action') return jobAction(await json(q));
   // 🧭 Centro de Mando (4 agentes, bandeja de links de YouTube, ingresos y reporte diario)
   if (u === '/api/mando/reporte' && P) return await mando.reporte(true);
+  // 🎮 Agente del Juego
+  if (u === '/api/mando/juego/crear' && P) { const o = JSON.parse((await body(q, 16e6)).toString() || '{}'); await juego.crear(o); return await juego.estado(); }
+  if (u === '/api/mando/juego/modelo' && P) { await juego.accion(await json(q)); return await juego.estado(); }
+  if (u === '/api/mando/juego/salud' && P) { await juego.salud(); return await juego.estado(); }
+  if (u === '/api/mando/juego/ideas' && P) { await juego.ideas(); return await juego.estado(); }
+  if (u === '/api/mando/juego/preguntas' && P) { const o = await json(q); if (o.accion) await juego.accionPreguntas(o); else await juego.crearPreguntas(o.materia); return await juego.estado(); }
   if (u === '/api/mando/link' && P) { const o = await json(q); mando.nuevoLink(o); return await mando.estado(); }
   if (u === '/api/mando/link/accion' && P) { await mando.accionLink(await json(q)); return await mando.estado(); }
   if (u === '/api/mando/dev' && P) { await mando.devEstado(await json(q)); return await mando.estado(); }
@@ -560,7 +569,7 @@ http.createServer(async (q, r) => {
   publish.start();
   comments.start();
   cerebro.start();
-  avisos.start(); mando.start();
+  avisos.start(); mando.start(); juego.start();
   salud.start();
   actualizar.start();
   require('./lib/crecer').start();
