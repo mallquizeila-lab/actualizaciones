@@ -1,3 +1,6 @@
+v7.88.1 — ↩️ Personajes de vuelta a la versión anterior
+- ↩️ Yupi, Lulú, Choki y Coquito vuelven a verse como en la v7.87 (se deshicieron los cambios de modelo de la v7.88). Los retratos 3D del menú se mantienen.
+
 v7.88.0 — 🖼️ Aventuras de Yupi: imágenes 3D en el menú y personajes más detallados
 - 🖼️ El menú ya no usa emojis: muestra retratos 3D reales de Yupi, Lulú, Choki y Coquito (con tu bufanda y sombrero), una foto del equipo completo arriba, los sombreros en 3D y las mascotas en 3D. Las mascotas que aún no tienes aparecen como silueta misteriosa.
 - 🥚 Al abrir un huevo aparece la mascota en 3D con los rayos de su rareza.

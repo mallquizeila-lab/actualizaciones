@@ -169,7 +169,7 @@
         const gu = malla(new THREE.SphereGeometry(.22, 14, 10), blanco); gu.scale.set(1, .9, .85); gu.position.set(s * .55, -.35, .05); b.add(gu); const pul = malla(new THREE.CapsuleGeometry(.06, .12, 4, 6), blanco); pul.position.set(s * .5, -.17, .15); b.add(pul);
         const pu2 = malla(new THREE.TorusGeometry(.13, .05, 6, 14), blanco); pu2.rotation.y = Math.PI / 2; pu2.rotation.z = s * 1.0; pu2.position.set(s * .38, -.24, .02); b.add(pu2); cuerpoY.add(b); brazos.push(b); }
       // capa morada curva, con forro dorado
-      const capa = new THREE.Group(); capa.position.set(0, 2.38, -.2); const tela = new THREE.Mesh(new THREE.CylinderGeometry(.42, .82, 1.5, 22, 1, true, Math.PI * .66, Math.PI * .68), mat('#7b2ff7', { side: THREE.DoubleSide })); tela.position.y = -.72; tela.castShadow = true; capa.add(tela);
+      const capa = new THREE.Group(); capa.position.set(0, 2.35, -.1); const tela = new THREE.Mesh(new THREE.CylinderGeometry(.5, .75, 1.25, 18, 1, true, Math.PI / 2, Math.PI), mat('#7b2ff7', { side: THREE.DoubleSide })); tela.position.y = -.6; tela.castShadow = true; capa.add(tela);
       const cuello = new THREE.Mesh(new THREE.TorusGeometry(.55, .07, 6, 16, Math.PI), mat('#ffcf2e')); cuello.rotation.x = Math.PI / 2; cuello.rotation.z = Math.PI; capa.add(cuello); cuerpoY.add(capa); yupi.userData.capa = capa; capa.traverse(m => m.userData.sinBorde = 1);
       contorno(cuerpoY, 1.045); }
     const piernas = []; for (const s of [-1, 1]) { const g = new THREE.Group(); const pi = malla(new THREE.CapsuleGeometry(.09, .32, 4, 8), mat('#ffc81f')); pi.position.y = -.22; g.add(pi);
@@ -181,7 +181,7 @@
       for (let x = 0; x < w; x += 32) { g.fillStyle = '#1fc8c8'; g.beginPath(); g.moveTo(x + 16, 16); g.lineTo(x + 30, 32); g.lineTo(x + 16, 48); g.lineTo(x + 2, 32); g.closePath(); g.fill(); g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(x + 16, 25); g.lineTo(x + 23, 32); g.lineTo(x + 16, 39); g.lineTo(x + 9, 32); g.closePath(); g.fill(); } }, 3, 1);
     const texChullo = lienzo(128, 128, (g, w) => { const c = ['#d7263d', '#ffd23f', '#1fc8c8', '#7b2ff7', '#ff8a3d']; for (let i = 0; i < 8; i++) { g.fillStyle = c[i % 5]; g.fillRect(0, i * 16, w, 16); }
       g.fillStyle = '#fff'; for (let x = 0; x < w; x += 16) for (let y = 2; y < w; y += 32) { g.beginPath(); g.moveTo(x + 8, y); g.lineTo(x + 14, y + 6); g.lineTo(x + 8, y + 12); g.lineTo(x + 2, y + 6); g.fill(); } }, 2, 1);
-    const texGrano = lienzo(128, 256, (g, w, h) => { g.fillStyle = '#b8861a'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 16) for (let x = (y / 16 % 2) * 8 - 8; x < w; x += 16) { const r = g.createRadialGradient(x + 5, y + 5, 1, x + 8, y + 8, 9); r.addColorStop(0, '#fffbe0'); r.addColorStop(.45, '#ffe066'); r.addColorStop(1, '#e8b52a'); g.fillStyle = r; g.beginPath(); g.ellipse(x + 8, y + 8, 7.2, 7.4, 0, 0, Math.PI * 2); g.fill(); } }, 4, 3);
+    const texGrano = lienzo(128, 256, (g, w, h) => { g.fillStyle = '#d9c27a'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 16) for (let x = (y / 16 % 2) * 8 - 8; x < w; x += 16) { const r = g.createRadialGradient(x + 6, y + 5, 1, x + 8, y + 8, 9); r.addColorStop(0, '#fffbe6'); r.addColorStop(1, '#efd98f'); g.fillStyle = r; g.beginPath(); g.ellipse(x + 8, y + 8, 7, 7.2, 0, 0, Math.PI * 2); g.fill(); } }, 3, 2);
     const texCoco = lienzo(256, 128, (g, w, h) => { g.fillStyle = '#8b5a2b'; g.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { g.strokeStyle = ['#6e4420', '#a06a38', '#5c3618'][i % 3]; g.lineWidth = 1.5; const x = Math.random() * w, y = Math.random() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - .5) * 6, y + 6 + Math.random() * 8); g.stroke(); } }, 2, 1);
     const oscuroB = new THREE.MeshBasicMaterial({ color: '#24113d' }), blancoB = new THREE.MeshBasicMaterial({ color: '#ffffff' });
     const ojos = (padre, y, z, sep, r, iris, ceja = true) => { for (const s of [-1, 1]) { const o = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), blancoB); o.scale.set(.9, 1.1, .55); o.position.set(s * sep, y, z); padre.add(o);
@@ -196,8 +196,7 @@
     const hacerLulu = () => { const g = new THREE.Group(), cu = new THREE.Group(); g.add(cu); const lana = mat('#fbf6ee'), crema = mat('#f1dcc0'), pezu = mat('#5a3a22'), morado = mat('#8b3dff');
       const cuerpo = malla(new THREE.SphereGeometry(.8, 20, 16), lana); cuerpo.scale.set(1, .85, 1.25); cuerpo.position.set(0, 1.3, -.15); cu.add(cuerpo);
       const geoB = new THREE.SphereGeometry(.3, 12, 10); for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, b = malla(geoB, lana); b.position.set(Math.cos(a) * .75, 1.1 + (i % 2) * .3, Math.sin(a) * .95 - .15); cu.add(b); }
-      const poncho = malla(new THREE.CylinderGeometry(.6, 1.06, .78, 28, 1, true), MT({ map: texPoncho, side: THREE.DoubleSide })); poncho.scale.z = 1.2; poncho.position.set(0, 1.55, -.12);
-      for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2, f = malla(new THREE.CapsuleGeometry(.035, .14, 3, 6), mat(['#d7263d', '#ffd23f', '#1fc8c8'][i % 3])); f.position.set(Math.sin(a) * 1.04, 1.1, Math.cos(a) * 1.04 * 1.2 - .12); cu.add(f); } poncho.userData.sinBorde = 1; cu.add(poncho);
+      const poncho = malla(new THREE.CylinderGeometry(.8, 1.0, .6, 24, 1, true), MT({ map: texPoncho, gradientMap: grad, side: THREE.DoubleSide })); poncho.scale.z = 1.22; poncho.position.set(0, 1.5, -.12); poncho.userData.sinBorde = 1; cu.add(poncho);
       const cuello = malla(new THREE.CapsuleGeometry(.27, .75, 6, 12), lana); cuello.position.set(0, 2.1, .45); cuello.rotation.x = .2; cu.add(cuello);
       const cab = new THREE.Group(); cab.position.set(0, 2.72, .62); cu.add(cab);
       cab.add(malla(new THREE.SphereGeometry(.45, 20, 16), lana));
@@ -218,8 +217,8 @@
     // 🌽 Choki: choclo peruano de granos blancos, hojas como capa, casco inca dorado, lanza y escudo con sol
     const hacerChoki = () => { const g = new THREE.Group(), cu = new THREE.Group(); g.add(cu); const verde = mat('#3fae3a'), oro = mat('#ffc23d', { emissive: '#4a2d00', emissiveIntensity: .25 }), rojo = mat('#e3262f'), cafe = mat('#7a4a22');
       const maz = malla(new THREE.CapsuleGeometry(.55, 1.15, 8, 20), MT({ map: texGrano, gradientMap: grad })); maz.position.y = 1.62; cu.add(maz);
-      const geoH = new THREE.ConeGeometry(1, 2.6, 16); geoH.translate(0, .2, 0); const verde2 = mat('#5cc94a');
-      for (const [x, y, z, ry2, rz, sy] of [[-.42, 1.15, -.3, -.6, .3, 1], [.42, 1.15, -.3, .6, -.3, 1], [0, 1.2, -.5, 0, 0, 1.1], [-.62, .95, .1, -1.3, .45, .75], [.62, .95, .1, 1.3, -.45, .75]]) { const h = malla(geoH, sy > .9 ? verde : verde2); h.scale.set(.34, .62 * sy, .1); h.position.set(x, y, z); h.rotation.set(-.15, ry2, rz); cu.add(h); }
+      const geoH = new THREE.SphereGeometry(1, 16, 12);
+      for (const [x, y, z, ry2, rz, sy] of [[-.42, 1.15, -.3, -.6, .3, 1], [.42, 1.15, -.3, .6, -.3, 1], [0, 1.2, -.5, 0, 0, 1.1], [-.62, .95, .1, -1.3, .45, .75], [.62, .95, .1, 1.3, -.45, .75]]) { const h = malla(geoH, verde); h.scale.set(.32, .85 * sy, .1); h.position.set(x, y, z); h.rotation.set(-.15, ry2, rz); cu.add(h); }
       const casco = malla(new THREE.SphereGeometry(.62, 22, 12, 0, Math.PI * 2, 0, Math.PI / 2), oro); casco.position.y = 2.27; casco.scale.y = .85; cu.add(casco);
       const ala = malla(new THREE.TorusGeometry(.6, .07, 8, 24), oro); ala.rotation.x = Math.PI / 2; ala.position.y = 2.29; cu.add(ala);
       const pen = malla(new THREE.SphereGeometry(1, 14, 10), rojo); pen.scale.set(.12, .42, .55); pen.position.set(0, 2.92, -.05); cu.add(pen);
@@ -242,10 +241,8 @@
       for (const y of [1.1, .6]) { const b = malla(new THREE.TorusGeometry(y > 1 ? .92 : .86, .05, 6, 24), madera2); b.rotation.x = Math.PI / 2; b.position.y = y; cu.add(b); }
       const heb = malla(new THREE.BoxGeometry(.32, .26, .08), oro); heb.position.set(0, .85, .92); cu.add(heb);
       for (const s of [-1, 1]) { const h = malla(new THREE.SphereGeometry(.3, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), madera); h.position.set(s * .8, 1.55, 0); h.rotation.z = -s * .6; cu.add(h); }
-      const bronce = mat('#c98a3a', { metalness: .45, roughness: .35 }); const casco = malla(new THREE.SphereGeometry(.7, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), bronce); casco.scale.y = .72; casco.position.y = 1.88; cu.add(casco);
-      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, rv = malla(new THREE.SphereGeometry(.05, 8, 6), oro); rv.position.set(Math.sin(a) * .68, 1.95, Math.cos(a) * .68); cu.add(rv); } const nar = malla(new THREE.BoxGeometry(.1, .32, .08), oro); nar.position.set(0, 1.82, .86); cu.add(nar);
-      const cresta = malla(new THREE.BoxGeometry(.08, .2, .9), bronce); cresta.position.set(0, 2.32, 0); cu.add(cresta);
-      const ala = malla(new THREE.TorusGeometry(.69, .06, 8, 28), oro); ala.rotation.x = Math.PI / 2; ala.position.y = 1.9; cu.add(ala);
+      const casco = malla(new THREE.SphereGeometry(.7, 22, 12, 0, Math.PI * 2, 0, Math.PI / 2), madera2); casco.scale.y = .7; casco.position.y = 1.88; cu.add(casco);
+      const ala = malla(new THREE.TorusGeometry(.68, .05, 6, 24), madera); ala.rotation.x = Math.PI / 2; ala.position.y = 1.9; cu.add(ala);
       const pluma = malla(new THREE.SphereGeometry(1, 14, 10), verde); pluma.scale.set(.1, .5, .22); pluma.position.set(.25, 2.45, -.1); pluma.rotation.z = -.5; cu.add(pluma);
       ojos(cu, 1.5, .78, .25, .17, '#6b3b16'); sonrisa(cu, 1.2, .88, .15);
       const brazos = []; for (const s of [-1, 1]) { const b = new THREE.Group(); b.position.set(s * .85, 1.3, 0); const br = malla(new THREE.CapsuleGeometry(.1, .35, 4, 8), madera2); br.rotation.z = s * 1.1; br.position.set(s * .2, -.12, 0); b.add(br); const pu = malla(new THREE.SphereGeometry(.18, 12, 10), puno); pu.position.set(s * .38, -.28, .05); b.add(pu); cu.add(b); brazos.push(b); }
