@@ -1,3 +1,7 @@
+v7.89.4 — 🛠️ Las actualizaciones ya no se traban por el antivirus
+- 🛠️ Windows Defender bloqueaba un archivo del paquete (el instalador para VPS) y la actualización se quedaba a medias sin avisar. Se retiró ese archivo del paquete y el actualizador ahora sigue aunque el antivirus bloquee algún archivo suelto.
+- Incluye todo lo de la 7.89.2 y 7.89.3 (Quiénes somos completo, revisión estricta para AdSense, cierre de la página vieja al reiniciar).
+
 v7.89.3 — 🔎 Revisión estricta para AdSense + arreglo de actualizaciones en el VPS
 - 🔎 Modo revisión de AdSense más estricto: el mapa del sitio queda solo con contenido propio (122 páginas). Las listas de juegos de otros estudios (/juegos/...) y las páginas traducidas automáticamente (/en, /pt, /fr, /de, /it, /id) quedan sin indexar mientras dure la revisión.
 - 💬 Salas de chat y mesas en vivo (contenido de usuarios, solo +18): sin anuncios y fuera de Google, como pide la política de contenido generado por usuarios.
@@ -9,7 +13,7 @@ v7.89.2 — 🔎 Repaso para AdSense
 - ⚖️ Términos: las Yupicoins se describen como moneda virtual que se gana jugando y no tiene valor en dinero (sin equivalencia en dólares), para que no haya contradicciones.
 
 v7.89.1 — ☁️ Instaladores para llevar todo a un VPS
-- ☁️ vps/instalar-windows.ps1: instala en un VPS con Windows todo lo necesario (Node.js 22, FFmpeg, Python y voces de Edge) y ShortForge en C:\ShortForge, con tus datos en C:\ShortForge-datos. ShortForge y yupitok.com arrancan solos al prender el VPS (aunque nadie inicie sesión) y se levantan solos si se caen.
+- ☁️ (instalador para Windows, ya retirado del paquete) instalaba en un VPS con Windows todo lo necesario (Node.js 22, FFmpeg, Python y voces de Edge) y ShortForge en C:\ShortForge, con tus datos en C:\ShortForge-datos. ShortForge y yupitok.com arrancan solos al prender el VPS (aunque nadie inicie sesión) y se levantan solos si se caen.
 - 🐧 vps/instalar.sh: versión para un VPS con Ubuntu o Debian (solo la página), con actualizaciones automáticas.
 - La página ahora responde /api/donde (si corre en la PC o en el VPS) y acepta mudanza segura de datos con enlace de un solo uso.
 
