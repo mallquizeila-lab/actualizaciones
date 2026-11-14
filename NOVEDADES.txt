@@ -1,3 +1,8 @@
+v7.89.2 — 🔎 Repaso para AdSense
+- 📄 "Quiénes somos" más completo (de 115 a 345 palabras): qué juegos creamos, cómo cuidamos a los jugadores (chat solo para adultos, sin compras con dinero real, borrar datos), cómo nos sostenemos y contacto.
+- 👑 La portada ahora presenta Yupitok: El Universo de las Aventuras entre nuestros juegos propios.
+- ⚖️ Términos: las Yupicoins se describen como moneda virtual que se gana jugando y no tiene valor en dinero (sin equivalencia en dólares), para que no haya contradicciones.
+
 v7.89.1 — ☁️ Instaladores para llevar todo a un VPS
 - ☁️ vps/instalar-windows.ps1: instala en un VPS con Windows todo lo necesario (Node.js 22, FFmpeg, Python y voces de Edge) y ShortForge en C:\ShortForge, con tus datos en C:\ShortForge-datos. ShortForge y yupitok.com arrancan solos al prender el VPS (aunque nadie inicie sesión) y se levantan solos si se caen.
 - 🐧 vps/instalar.sh: versión para un VPS con Ubuntu o Debian (solo la página), con actualizaciones automáticas.
