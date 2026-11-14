@@ -88,6 +88,9 @@ const GAMES = CATALOGO.map(t => t.id);
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clip = (s, n) => String(s ?? '').slice(0, n);
+// 🌍 Algunas traducciones llegan con los emojis convertidos en "??": se reponen con los emojis del texto original.
+const EMOJI_RE = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D(?:\p{Extended_Pictographic}|\p{Regional_Indicator})|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}])*/gu;
+const repararEmoji = (src, dst) => { dst = String(dst || ''); if (!/\?\?|\uFFFD/.test(dst)) return dst; const em = String(src || '').match(EMOJI_RE) || []; if (!em.length) return dst; let i = 0; return dst.replace(/\?{2,}|\uFFFD+/g, x => em[i] !== undefined ? em[i++] : x).replace(/\s{2,}/g, ' ').trim(); };
 const hoyPeru = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
 const horaPeru = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
 function clientIp(req) {
@@ -598,7 +601,7 @@ async function traducirFaltan(lang, textos) {
   for (let i = 0; i < pedir.length; i += 30) {
     const lote = pedir.slice(i, i + 30);
     const pr = fetch(E.SF_URL + '/api/traducir', { method: 'POST', headers: { 'content-type': 'application/json', 'x-sf-token': LOCAL_TOKEN }, body: JSON.stringify({ lang, textos: lote }), signal: AbortSignal.timeout(60000) })
-      .then(r => r.ok ? r.json() : null).then(j => { const m = {}; (j?.t || []).forEach((d, k) => { if (d && lote[k]) { m[lote[k]] = d; try { run('insert or ignore into i18n(lang,src,dst) values(?,?,?)', lang, lote[k], String(d).slice(0, 800)); } catch (e) {} } }); usoHoy.n += lote.length; return m; }).catch(() => ({}));
+      .then(r => r.ok ? r.json() : null).then(j => { const m = {}; (j?.t || []).forEach((d, k) => { if (d && lote[k]) { m[lote[k]] = d; try { run('insert or ignore into i18n(lang,src,dst) values(?,?,?)', lang, lote[k], repararEmoji(lote[k], d).slice(0, 800)); } catch (e) {} } }); usoHoy.n += lote.length; return m; }).catch(() => ({}));
     for (const t of lote) { prom[t] = pr.then(m => m[t]); enCurso.set(lang + '|' + t, prom[t]); }
     pr.finally(() => { for (const t of lote) enCurso.delete(lang + '|' + t); });
   }
@@ -1257,7 +1260,7 @@ http.createServer(async (req, res) => {
     { const mm = /^\/modelos\/([a-z0-9_]{2,30})\.glb$/.exec(u.pathname); if (mm) { const f = path.join(DATA, 'modelos', mm[1] + '.glb'); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return archivo(req, res, f, 'model/gltf-binary', { 'cache-control': 'public, max-age=31536000, immutable' }); } } // 🧊 modelos 3D aprobados
     m = /^\/m\/([a-f0-9]{16}\.(jpg|png|webp|gif))$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'media', m[1]); if (!fs.existsSync(f)) return send(res, 404, 'No encontrado', 'text/plain'); return send(res, 200, fs.readFileSync(f), MIME['.' + m[2]] || 'image/' + m[2], { 'cache-control': 'public, max-age=604800' }); }
-    { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, f.dst]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
+    { const mi = /^\/i18n\/([a-z]{2})\.json$/.exec(u.pathname); if (mi && IDIOMAS.includes(mi[1])) { const filas = q('select src, dst from i18n where lang=? order by rowid limit 30000', mi[1]), cuerpo = JSON.stringify(Object.fromEntries(filas.map(f => [f.src, repararEmoji(f.src, f.dst)]))), et = '"' + crypto.createHash('sha1').update(cuerpo).digest('base64').slice(0, 16) + '"';
       if (req.headers['if-none-match'] === et) { res.writeHead(304, { etag: et }); return res.end(); } const gz = /gzip/.test(req.headers['accept-encoding'] || ''); return send(res, 200, gz ? zlib.gzipSync(cuerpo) : cuerpo, 'application/json; charset=utf-8', { etag: et, 'cache-control': 'no-cache', vary: 'Accept-Encoding', ...(gz ? { 'content-encoding': 'gzip' } : {}) }); } }
     if (u.pathname.startsWith('/fotos/')) { const r = await fotos.http(req, res, u, { ip: clientIp(req), json, send, limite, archivoEstatico: archivo }); if (r !== false) return; }
     { const mk = /^\/([a-f0-9]{32})\.txt$/.exec(u.pathname); if (mk && mk[1] === getS('indexnowKey', '')) return send(res, 200, mk[1], 'text/plain; charset=utf-8'); }

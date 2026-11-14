@@ -1,3 +1,6 @@
+v7.89.5 — 🌍 Traducciones: emojis reparados
+- 🌍 Si una traducción llega con los emojis convertidos en "??" (pasa cuando alguna herramienta externa, como la vista previa de AdSense, muestra la página), se reponen automáticamente con los emojis del texto original.
+
 v7.89.4 — 🛠️ Las actualizaciones ya no se traban por el antivirus
 - 🛠️ Windows Defender bloqueaba un archivo del paquete (el instalador para VPS) y la actualización se quedaba a medias sin avisar. Se retiró ese archivo del paquete y el actualizador ahora sigue aunque el antivirus bloquee algún archivo suelto.
 - Incluye todo lo de la 7.89.2 y 7.89.3 (Quiénes somos completo, revisión estricta para AdSense, cierre de la página vieja al reiniciar).
