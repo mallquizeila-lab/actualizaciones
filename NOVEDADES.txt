@@ -1,3 +1,8 @@
+v7.89.3 — 🔎 Revisión estricta para AdSense + arreglo de actualizaciones en el VPS
+- 🔎 Modo revisión de AdSense más estricto: el mapa del sitio queda solo con contenido propio (122 páginas). Las listas de juegos de otros estudios (/juegos/...) y las páginas traducidas automáticamente (/en, /pt, /fr, /de, /it, /id) quedan sin indexar mientras dure la revisión.
+- 💬 Salas de chat y mesas en vivo (contenido de usuarios, solo +18): sin anuncios y fuera de Google, como pide la política de contenido generado por usuarios.
+- 🛠️ Arreglo: al actualizarse o reiniciarse, ShortForge cierra la página vieja que seguía abierta (y túneles viejos) para que la nueva versión arranque de verdad. En el VPS las actualizaciones ya no se quedan a medias.
+
 v7.89.2 — 🔎 Repaso para AdSense
 - 📄 "Quiénes somos" más completo (de 115 a 345 palabras): qué juegos creamos, cómo cuidamos a los jugadores (chat solo para adultos, sin compras con dinero real, borrar datos), cómo nos sostenemos y contacto.
 - 👑 La portada ahora presenta Yupitok: El Universo de las Aventuras entre nuestros juegos propios.
