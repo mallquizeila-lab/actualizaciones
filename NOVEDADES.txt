@@ -1,3 +1,11 @@
+v7.98.0 — 📣 Difusión mundial (automática y semi-automática)
+- 📣 Nuevo en Centro de Mando: Difusión mundial, para llevar Yupitok a todo el mundo desde tus cuentas oficiales (nunca crea cuentas ni usa cuentas ajenas).
+- 📋 Lista para registrarte: 29 plataformas en orden de prioridad, con su enlace, los pasos y una casilla para ir marcando.
+- ⚡ Difusión automática: conectas tus cuentas de Telegram, Discord, Bluesky, Mastodon, X, Threads, Instagram, página de Facebook, Pinterest, VK y Tumblr (una por idioma si quieres) y el agente publica solo 3 veces al día en cada una, en su idioma y siguiendo al sol (6, 8, 12, 17, 20 y 23 h de Perú). Botón «Probar» para la primera publicación.
+- ✋ Difusión semi-automática: cada día te prepara los textos en los idiomas que elijas para WhatsApp, Reddit, Quora, Snapchat, LinkedIn, Kwai y grupos, y 3 foros del día (rotan entre 52 foros del mundo) con un borrador de respuesta; copias, pegas y marcas.
+- 🎨 Cada dibujo tiene ahora su imagen PNG (para Pinterest, Instagram y la vista previa al compartir); los nuevos de la fábrica la traen solos.
+- 🔗 Todos los enlaces llevan el idioma del público y una marca para saber de qué red llegó cada visita.
+
 v7.97.0 — 🌱 La Academy crece sola cada día + fábrica de dibujos modernos + voz cálida en tu idioma
 - 🌱 Crecimiento automático: cada noche (1 am) el agente prepara dibujos, cuentos, lecciones y preguntas de trivia nuevas y te deja todo en la cola (cantidades ajustables; por defecto 15 dibujos, 1 cuento, 1 lección y 1 trivia). Por la mañana te avisa cuántos hay.
 - 🖼️ Fábrica de dibujos modernos: usa la IA de imágenes de Cloudflare (estilo libro de colorear actual, líneas limpias) y convierte cada imagen en zonas para pintar con un toque. Tiene 210 temas preparados (animales, Perú y Latinoamérica, transportes, espacio, comida, profesiones, fantasía, fiestas y mandalas) y siempre deja cupo de imágenes para tus videos.

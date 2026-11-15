@@ -351,10 +351,10 @@ function viralTop() {
 }
 // ---------- 🧭 Centro de Mando ----------
 let MD = null, MDt = 0, MDcargando = false, JG = null;
-let AG = null;
+let AG = null, DF = null;
 setInterval(async () => { if (tab === 'mando' && (AG?.narrando || AG?.cola?.some(x => x.estado === 'trabajando')) && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { try { AG = await api('/api/mando/academia'); render(); } catch (e) {} } }, 8000);
 setInterval(async () => { if (tab === 'mando' && JG?.modelos?.some(m => ['creando', 'enviando'].includes(m.estado)) && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { try { JG = await api('/api/mando/juego'); render(); } catch (e) {} } }, 20000);
-async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } try { JG = await api('/api/mando/juego'); } catch (e) { JG = null; } try { AG = await api('/api/mando/academia'); } catch (e) { AG = null; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
+async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } try { JG = await api('/api/mando/juego'); } catch (e) { JG = null; } try { AG = await api('/api/mando/academia'); } catch (e) { AG = null; } try { DF = await api('/api/mando/difusion'); } catch (e) { DF = null; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
 VIEWS.mando = () => {
   if (!MD || Date.now() - MDt > 15000) loadMando().catch(() => {});
   if (!MD) return '<h1>🧭 Centro de Mando</h1><p class="sub">Cargando a los agentes…</p>';
@@ -382,6 +382,7 @@ VIEWS.mando = () => {
       ${l.motivo ? `<p style="margin:4px 0;font-size:.9rem">${l.decision === 'armar' ? '✅' : 'ℹ️'} ${esc(l.motivo)}</p>` : ''}${l.idea ? `<p style="margin:4px 0;font-size:.9rem">💡 <b>Nuestra idea:</b> ${esc(l.idea)}${l.gancho ? ` · <i>"${esc(l.gancho)}"</i>` : ''}</p>` : ''}
       <div class="btns" style="margin-top:4px">${['decidido', 'dejado'].includes(l.estado) ? `<select data-mdcanal="${l.id}" style="width:auto">${chs.map(c => `<option value="${c.id}" ${c.id === l.canal ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select><button class="b sm" data-act="mdArmar" data-id="${l.id}">🎬 Armarlo</button>` : ''}${l.estado === 'decidido' && l.decision === 'armar' ? `<button class="b ghost sm" data-act="mdDejar" data-id="${l.id}">⏭️ Dejarlo</button>` : ''}${l.estado === 'error' ? `<button class="b ghost sm" data-act="mdRe" data-id="${l.id}">🔁 Reintentar</button>` : ''}<button class="b ghost sm" data-act="mdBorrar" data-id="${l.id}">🗑️</button></div></div>`).join('')}</div>` : ''}</div>
   ${guiasCard(MD)}
+  ${difusionCard(DF)}
   ${academiaCard(AG)}
   ${juegoCard(JG)}
   ${(() => { const Y = D.yupicoins; if (!Y) return ''; const pct = Y.jugadores ? Math.round(Y.gastan * 100 / Y.jugadores) : 0; return `<div class="card"><h3>🪙 Yupicoins</h3><p class="hint">La moneda de Yupitok: <b>1 Yupicoin = 0.01 USD</b>. Se ganan jugando y (pronto) se podrán comprar; se gastan solo dentro de Yupitok y <b>no se cobran</b>. Cada movimiento queda registrado en el servidor, con tope diario para frenar trampas. En circulación: <b>${((Y.emitidas - Y.gastadas) * (Y.ajustes?.valorUsd || 0.01)).toLocaleString('es', { style: 'currency', currency: 'USD' })}</b> de referencia.</p>
@@ -417,6 +418,40 @@ function flowCard(MD) {
     <div class="row" style="margin-top:8px"><label>Tema (opcional)<input id="fl-tema" maxlength="160" placeholder="Vacío = el tema del día" list="fl-temas"><datalist id="fl-temas">${(MD.flowTemas || []).map(t => `<option value="${esc(t)}">`).join('')}</datalist></label></div>
     <div class="btns"><button class="b sm" data-act="flNuevo">✍️ Crear 6 prompts nuevos</button></div>
     <p class="hint" style="font-size:.8rem;margin-top:6px">⚠️ Si Flow te pone un personaje famoso (por ejemplo, un monstruo de Disney), descarta ese clip: puede traerte reclamos de derechos.</p></div>`;
+}
+function difusionCard(F) {
+  if (!F) return '';
+  const MODO = { auto: ['⚡ Automática', '#dcfce7', '#166534'], aprob: ['⏳ Pide aprobación', '#fef9c3', '#854d0e'], manual: ['✋ Manual', '#e0e7ff', '#3730a3'], pronto: ['🔜 Próximamente', '#f3f4f6', '#374151'] };
+  const badge = m => { const [t, bg, c] = MODO[m] || MODO.manual; return `<span style="background:${bg};color:${c};border-radius:99px;padding:1px 8px;font-size:.75rem;white-space:nowrap">${t}</span>`; };
+  const RN = Object.fromEntries(F.redes.map(r => [r.k, r])), hechos = F.registro.filter(r => r.hecho).length, K = F.kit, ID = F.idiomas;
+  const copiar = (txt, extra = '') => `<button class="b ghost sm" data-act="dfCopiar" data-t="${esc(txt)}" ${extra}>📋 Copiar</button>`;
+  return `<div class="card" style="border:2px solid #7c3aed"><h3>📣 Difusión mundial</h3>
+    <p class="hint">Lleva Yupitok a todo el mundo desde <b>tus cuentas oficiales</b>: nunca crea cuentas ni publica desde cuentas ajenas. Últimos 7 días: <b>${F.semana.ok}</b> publicaciones${F.semana.fallos ? ` · ${F.semana.fallos} con error` : ''}.</p>
+    <details ${hechos < 6 ? 'open' : ''}><summary style="cursor:pointer;font-weight:700">📋 Lista para registrarte (${hechos} de ${F.registro.length} hechas)</summary>
+      <p class="hint">Usa el mismo nombre en todas (<b>@yupitok</b>) y un correo solo para redes. Marca cada una cuando la tengas lista; las «Automáticas» luego se conectan abajo.</p>
+      ${F.registro.map(r => `<div style="display:flex;gap:8px;align-items:flex-start;border-top:1px solid #f1f5f9;padding:6px 0"><input type="checkbox" data-act="dfReg" data-k="${r.k}" ${r.hecho ? 'checked' : ''} style="width:auto;margin-top:4px"><div style="flex:1"><a href="${esc(r.url)}" target="_blank" rel="noopener" style="font-weight:700${r.hecho ? ';text-decoration:line-through;opacity:.6' : ''}">${esc(r.n)}</a> ${badge(r.modo)}<br><small class="hint">${esc(r.pasos)}</small></div></div>`).join('')}</details>
+    <h4 style="margin:14px 0 4px">⚡ Difusión automática</h4>
+    <p class="hint" style="margin:0 0 6px">El agente publica solo en cada cuenta conectada, en su idioma, en 3 de estos horarios (hora de Perú, siguiendo al sol): ${F.horarios.map(h => `<b>${h.h}:00</b> ${esc(h.zona)}`).join(' · ')}.</p>
+    ${F.conexiones.length ? F.conexiones.map(c => `<div style="border-top:1px solid #e5e7eb;padding:8px 0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="flex:1">${c.on ? '🟢' : '⏸️'} ${esc(RN[c.red]?.n || c.red)} · ${esc(c.nombre)} <small class="hint">(${esc(ID[c.idioma] || c.idioma)})</small></b><small class="hint">hoy: ${c.hoy}</small></div>
+      <div class="hint" style="display:flex;gap:10px;flex-wrap:wrap;margin:4px 0">${F.horarios.map(h => `<label style="display:flex;gap:3px;align-items:center"><input type="checkbox" class="df-h" data-id="${c.id}" value="${h.h}" ${c.horas.includes(h.h) ? 'checked' : ''} style="width:auto">${h.h}:00</label>`).join('')}</div>
+      ${c.ultimo ? `<small class="hint" style="${c.ultimo.ok ? '' : 'color:#b91c1c'}">${c.ultimo.ok ? '✅ Última publicación' : '⚠️ ' + esc(c.ultimo.error || 'Error')} · ${new Date(c.ultimo.fecha).toLocaleString('es-PE')}</small>` : '<small class="hint">Aún no publica: pulsa «Probar» para la primera.</small>'}
+      <div class="btns"><button class="b ghost sm" data-act="dfAcc" data-a="horas" data-id="${c.id}">💾 Guardar horarios</button><button class="b sm" data-act="dfAcc" data-a="probar" data-id="${c.id}">🚀 Probar (publica ahora)</button><button class="b ghost sm" data-act="dfAcc" data-a="onoff" data-id="${c.id}">${c.on ? '⏸️ Pausar' : '▶️ Activar'}</button><button class="b ghost sm" data-act="dfAcc" data-a="borrar" data-id="${c.id}">🗑️</button></div></div>`).join('') : '<p class="hint">Todavía no conectas ninguna cuenta.</p>'}
+    <details style="margin-top:6px"><summary class="b sm" style="display:inline-block;cursor:pointer">➕ Conectar una cuenta</summary>
+      <div class="row" style="margin-top:8px"><label>Red<select id="df-red">${F.redes.map(r => `<option value="${r.k}">${esc(r.n)}${r.imagen ? ' (solo con imagen)' : ''}</option>`).join('')}</select></label><label>Idioma de esta cuenta<select id="df-idioma">${Object.entries(ID).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</select></label><label>Nombre (para ti)<input id="df-nombre" maxlength="60" placeholder="Ej: Canal en inglés"></label></div>
+      ${F.redes.map((r, i) => `<div class="df-campos" data-red="${r.k}" ${i ? 'hidden' : ''}>${r.campos.map(c => `<label>${esc(c.n)}<input data-campo="${c.k}" autocomplete="off" ${/token|secret|password|webhook/i.test(c.k) ? 'type="password"' : ''}></label>`).join('')}</div>`).join('')}
+      <p class="hint">Las claves se guardan solo en este ShortForge (tu VPS). No las compartas con nadie ni las pegues en chats.</p>
+      <div class="btns"><button class="b sm" data-act="dfConectar">🔗 Conectar</button></div></details>
+    <h4 style="margin:16px 0 4px">✋ Difusión semi-automática</h4>
+    <p class="hint" style="margin:0 0 6px">Para donde no hay conexión oficial (WhatsApp, Reddit, Quora, foros…): el agente te deja cada día el texto listo; tú lo copias, lo pegas con tu cuenta y lo marcas. Regla de oro en foros: aporta 9 respuestas útiles por cada 1 que menciona Yupitok, y di que eres el creador.</p>
+    <div class="hint" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">Idiomas del kit: ${Object.entries(ID).map(([k, v]) => `<label style="display:flex;gap:3px;align-items:center"><input type="checkbox" class="df-kl" value="${k}" ${F.kitIdiomas.includes(k) ? 'checked' : ''} style="width:auto">${esc(v)}</label>`).join('')}<button class="b ghost sm" data-act="dfKitIdiomas">💾</button></div>
+    <div class="btns"><button class="b sm" data-act="dfKit">${K ? '🔄 Preparar otro kit' : '✍️ Preparar el kit de hoy'}</button></div>
+    ${K ? `<div style="background:#faf5ff;border-radius:10px;padding:10px;margin-top:6px"><b>${esc(K.emoji || '')} Hoy: ${esc(K.titulo)}</b>${K.imagen ? ` · <a href="${esc(K.imagen)}" target="_blank" rel="noopener">🖼️ imagen</a>` : ''}
+      ${Object.entries(K.textos).map(([l, t]) => `<p style="margin:8px 0 2px"><b>${esc(ID[l] || l)}</b></p><textarea readonly rows="4" style="width:100%">${esc(t.texto + '\n' + t.url)}</textarea>${copiar(t.texto + '\n' + t.url)}`).join('')}
+      <p style="margin:10px 0 2px"><b>Pégalo hoy en:</b></p>${K.redes.map(r => `<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="dfKitHecho" data-k="${r.k}" ${K.hechos[r.k] ? 'checked' : ''} style="width:auto">${esc(r.n)}</label>`).join('')}
+      <p style="margin:10px 0 2px"><b>🗣️ Foros y comunidades de hoy</b> <small class="hint">(rotan entre ${F.totalForos})</small></p>${K.foros.map(f => `<div style="border-top:1px solid #ede9fe;padding:6px 0"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="dfKitHecho" data-k="foro:${esc(f.n)}" ${K.hechos['foro:' + f.n] ? 'checked' : ''} style="width:auto"><a href="${esc(f.url)}" target="_blank" rel="noopener"><b>${esc(f.n)}</b></a> <small class="hint">(${esc(ID[f.l] || f.l)})</small></label>
+        <small class="hint">Lee sus reglas, busca un hilo donde alguien pida actividades o juegos para niños y responde con tus palabras. Borrador:</small><textarea readonly rows="3" style="width:100%">${esc((f.texto || '') + '\n' + (f.link || ''))}</textarea>${copiar((f.texto || '') + '\n' + (f.link || ''))}</div>`).join('')}</div>` : ''}
+    ${F.historial.length ? `<details style="margin-top:8px"><summary class="hint" style="cursor:pointer">🗂️ Últimas publicaciones (${F.historial.length})</summary>${F.historial.map(h => `<div class="hint">${h.ok ? '✅' : '⚠️'} ${new Date(h.fecha).toLocaleString('es-PE')} · ${esc(RN[h.red]?.n || h.red)} (${esc(h.idioma)}) · ${esc(h.titulo || h.error || '')}${h.fake ? ' · (prueba)' : ''}</div>`).join('')}</details>` : ''}
+  </div>`;
 }
 function academiaCard(G) {
   if (!G) return '';
@@ -1135,6 +1170,16 @@ const ACT = {
   agNarrar: guard(async el => { AG = await api('/api/mando/academia/narrar', { slug: el.dataset.slug }); toast('🎙️ Narrando el cuento… tarda unos minutos'); render(); }),
   agAcc: guard(async el => { const a = el.dataset.a; let motivo; if (a === 'rechazar') { motivo = prompt('¿Por qué lo rechazas? Escribe una frase corta (ej: "da miedo", "muy largo", "esa palabra es difícil"). El agente aprende de esto.'); if (!motivo) return; }
     if (a === 'ocultar' && !confirm('¿Ocultar este cuento de yupitok.com?')) return; AG = await api('/api/mando/academia/accion', { id: el.dataset.id, accion: a, motivo }); toast(a === 'aprobar' ? '✅ Publicado en yupitok.com/academia/cuentos' : a === 'rechazar' ? '❌ Rechazado: el agente lo tendrá en cuenta' : '✅ Listo'); render(); }),
+  dfReg: guard(async el => { DF = await api('/api/mando/difusion', { accion: 'registro', k: el.dataset.k }); render(); }),
+  dfAcc: guard(async el => { const a = el.dataset.a, id = el.dataset.id; if (a === 'borrar' && !confirm('¿Desconectar esta cuenta?')) return;
+    const o = { accion: a, id }; if (a === 'horas') o.horas = [...document.querySelectorAll(`.df-h[data-id="${id}"]:checked`)].map(x => +x.value); if (a === 'probar') toast('🚀 Publicando…');
+    DF = await api('/api/mando/difusion', o); toast(a === 'probar' ? '✅ Publicado: ' + (DF.resultado?.titulo || '') : '✅ Listo'); render(); }),
+  dfConectar: guard(async () => { const red = $('#df-red').value, box = document.querySelector(`.df-campos[data-red="${red}"]`), cred = {}; box.querySelectorAll('[data-campo]').forEach(i => cred[i.dataset.campo] = i.value);
+    DF = await api('/api/mando/difusion', { accion: 'conectar', red, idioma: $('#df-idioma').value, nombre: $('#df-nombre').value, cred }); toast('🔗 Cuenta conectada. Pulsa «Probar» para la primera publicación.'); render(); }),
+  dfKit: guard(async () => { toast('✍️ Preparando los textos de hoy…'); DF = await api('/api/mando/difusion', { accion: 'kit', forzar: !!DF?.kit }); render(); }),
+  dfKitHecho: guard(async el => { DF = await api('/api/mando/difusion', { accion: 'kitHecho', k: el.dataset.k }); render(); }),
+  dfKitIdiomas: guard(async () => { DF = await api('/api/mando/difusion', { accion: 'kitIdiomas', idiomas: [...document.querySelectorAll('.df-kl:checked')].map(x => x.value) }); toast('💾 Idiomas del kit guardados'); render(); }),
+  dfCopiar: guard(async el => { try { await navigator.clipboard.writeText(el.dataset.t); toast('📋 Copiado'); } catch (e) { prompt('Copia el texto:', el.dataset.t); } }),
   agCrecer: guard(async () => { const g = k => +$('#cr-' + k).value; AG = await api('/api/mando/academia/ajustes', { crecer: { on: $('#cr-on').checked, dibujos: g('dibujos'), cuentos: g('cuentos'), lecciones: g('lecciones'), trivia: g('trivia') } }); toast('🌱 Plan de crecimiento guardado'); render(); }),
   agCrecerYa: guard(async () => { if (!confirm('¿Hacer crecer la Academy ahora? El agente trabajará varios minutos y te dejará todo en la cola.')) return; AG = await api('/api/mando/academia/crecer', {}); toast('🌱 Creciendo… revisa la cola en unos minutos'); render(); }),
   agAprobarVarios: guard(async () => { const ids = [...document.querySelectorAll('.ag-dib:checked')].map(x => x.value); if (!ids.length) return toast('Marca al menos un dibujo'); toast('Publicando ' + ids.length + ' dibujos…'); AG = await api('/api/mando/academia/accion', { accion: 'aprobarVarios', ids }); toast('✅ Dibujos publicados en yupitok.com/academia/colorear'); render(); }),
@@ -1491,6 +1536,7 @@ async function openCloneModal(jobId) {
    <label style="font-weight:600"><input type="checkbox" id="vf-consent">Confirmo que es mi voz, la de alguien que me dio permiso, o una voz sintética que mi plan me permite usar. No es una imitación de una persona o personaje famoso.</label>
    <div class="btns"><button class="b" data-act="vfSave" data-job="${jobId}">Guardar en Mis voces</button><button class="b ghost" data-act="closeModal">Cancelar</button></div>`;
 }
+document.addEventListener('change', e => { if (e.target.id === 'df-red') document.querySelectorAll('.df-campos').forEach(d => d.hidden = d.dataset.red !== e.target.value); });
 document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.vf !== undefined) { const t = [...document.querySelectorAll('[data-vf]:checked')].reduce((a, x) => a + +x.dataset.d, 0); const el = $('#vf-total'); if (el) el.textContent = t.toFixed(0) + ' s'; } });
 Object.assign(ACT, {
   renVoice: guard(async el => { const n = prompt('Nuevo nombre de la voz (ej: Ajo, Limón, Narrador):', el.dataset.n); if (!n) return; await api('/api/voices/rename', { id: el.dataset.id, name: n }); toast('Nombre cambiado'); await refresh(true); }),

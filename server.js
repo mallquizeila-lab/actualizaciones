@@ -16,6 +16,7 @@ const avisos = require('./lib/avisos');
 const mando = require('./lib/mando');
 const juego = require('./lib/juego');
 const academiaAg = require('./lib/academia');
+const difusion = require('./lib/difusion');
 const desarmar = require('./lib/desarmar');
 const salud = require('./lib/salud');
 const actualizar = require('./lib/actualizar');
@@ -322,6 +323,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando') return await mando.estado();
   if (u === '/api/mando/juego') return await juego.estado();
   if (u === '/api/mando/academia') return await academiaAg.estado();
+  if (u === '/api/mando/difusion' && !P) return difusion.estado();
   if (u === '/api/mando/juego/archivo' && !P) { const t = U.searchParams.get('t') === 'png' ? '.png' : '.glb', f = juego.archivo(U.searchParams.get('id') || '', t); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': t === '.png' ? 'image/png' : 'model/gltf-binary', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (!P) return null;
   if (!q.headers['x-sf']) throw Object.assign(new Error('Prohibido'), { code: 403 });
@@ -390,6 +392,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/juego/salud' && P) { await juego.salud(); return await juego.estado(); }
   if (u === '/api/mando/juego/ideas' && P) { await juego.ideas(); return await juego.estado(); }
   if (u === '/api/mando/academia/crear' && P) { await academiaAg.crear(await json(q)); return await academiaAg.estado(); }
+  if (u === '/api/mando/difusion' && P) { const o = await json(q), r = await difusion.accion(o); return { ...difusion.estado(), resultado: r }; }
   if (u === '/api/mando/academia/crecer' && P) { academiaAg.crecerHoy().catch(e => console.log('[Academy] ' + e.message)); return await academiaAg.estado(); }
   if (u === '/api/mando/academia/narrar' && P) { await academiaAg.narrar((await json(q)).slug); return await academiaAg.estado(); }
   if (u === '/api/mando/academia/accion' && P) { await academiaAg.accion(await json(q)); return await academiaAg.estado(); }
@@ -576,7 +579,7 @@ http.createServer(async (q, r) => {
   publish.start();
   comments.start();
   cerebro.start();
-  avisos.start(); mando.start(); juego.start(); academiaAg.start();
+  avisos.start(); mando.start(); juego.start(); academiaAg.start(); difusion.start();
   salud.start();
   actualizar.start();
   require('./lib/crecer').start();
