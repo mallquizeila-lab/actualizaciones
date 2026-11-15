@@ -1,0 +1,600 @@
+{
+ "nota": "Cuentos interactivos de Yupitok Academy (originales). paginas: esc (escena con emojis), t (texto, admite <b> e <i>), sig / opciones / fin.",
+ "cuentos": [
+  {
+   "slug": "gotita-viaja-al-cielo",
+   "titulo": "Gotita viaja al cielo",
+   "emoji": "💧",
+   "edad": "6-8",
+   "tema": "Ciencia",
+   "curso": "ciencia-curiosa",
+   "min": 5,
+   "resumen": "Gotita vive en el mar y sueña con conocer el cielo. Acompáñala a descubrir el ciclo del agua y decide su camino.",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🌊☀️💧",
+     "t": "En el gran mar azul vivía una gota muy curiosa llamada Gotita. Todos los días miraba el cielo y pensaba: «¿Qué habrá allá arriba, entre las nubes?». Una mañana, el sol brilló más fuerte que nunca y Gotita sintió un cosquilleo calientito.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "☀️💧🌬️",
+     "t": "—¡Me estoy volviendo ligera! —gritó Gotita. El calor del sol la estaba convirtiendo en vapor. Su amiga, la ola Marina, le dijo: —Si quieres, puedes quedarte conmigo un rato más. ¿Qué debe hacer Gotita?",
+     "opciones": [
+      {
+       "t": "☁️ Subir con el sol hacia el cielo",
+       "ir": "p3"
+      },
+      {
+       "t": "🌊 Quedarse un rato más con Marina",
+       "ir": "p3b"
+      }
+     ]
+    },
+    "p3b": {
+     "esc": "🌊🐠💧",
+     "t": "Gotita se quedó jugando con Marina y con los peces de colores. Pero el sol seguía calentando el mar, y poco a poco Gotita volvió a sentirse ligera. —Ya entiendo —dijo Marina sonriendo—: el sol siempre termina llevándonos al cielo. Eso se llama evaporación.",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "💨⬆️☁️",
+     "t": "Gotita subió y subió, convertida en vapor invisible. Arriba hacía mucho frío, así que se juntó con otras gotitas para abrigarse. ¡Juntas formaron una nube blanca y esponjosa! Eso se llama condensación.",
+     "sig": "p4"
+    },
+    "p4": {
+     "esc": "☁️☁️🌧️",
+     "t": "La nube creció y creció con miles de gotitas. Se puso gris y pesada. Gotita vio abajo dos lugares: una montaña con nieve y un campo con flores sedientas. ¿Hacia dónde quiere caer Gotita?",
+     "opciones": [
+      {
+       "t": "🏔️ Caer como nieve en la montaña",
+       "ir": "f1"
+      },
+      {
+       "t": "🌻 Caer como lluvia en el campo de flores",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "🏔️❄️➡️🏞️",
+     "t": "Gotita cayó como un copo de nieve sobre la montaña. Durmió todo el invierno y, en primavera, se derritió y bajó por un río alegre hasta llegar… ¡otra vez al mar! —Hola, Marina —dijo—. Ya conozco el cielo. El agua siempre da la vuelta: ¡es el ciclo del agua!",
+     "fin": true,
+     "moraleja": "El agua no se acaba: viaja en círculo entre el mar, el cielo y la tierra."
+    },
+    "f2": {
+     "esc": "🌧️🌻🌱",
+     "t": "Gotita cayó como lluvia sobre una flor amarilla que tenía mucha sed. —¡Gracias, Gotita! —dijo la flor, y abrió sus pétalos. Luego Gotita bajó por la tierra hasta un río que la llevó de vuelta al mar. ¡Había dado la vuelta completa al ciclo del agua!",
+     "fin": true,
+     "moraleja": "La lluvia da vida a las plantas y luego vuelve a los ríos y al mar."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "¿Qué convirtió a Gotita en vapor?",
+     "ops": [
+      "El calor del sol",
+      "El viento frío",
+      "Un pez"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Cómo se llama cuando el vapor se junta y forma nubes?",
+     "ops": [
+      "Condensación",
+      "Evaporación",
+      "Respiración"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿A dónde vuelve siempre Gotita al final?",
+     "ops": [
+      "Al mar",
+      "A la Luna",
+      "A una casa"
+     ],
+     "ok": 0
+    }
+   ]
+  },
+  {
+   "slug": "yupi-bot-y-el-camino-perdido",
+   "titulo": "Yupi-bot y el camino perdido",
+   "emoji": "🤖",
+   "edad": "6-8",
+   "tema": "Programación",
+   "curso": "programa-con-yupi",
+   "min": 5,
+   "resumen": "Yupi-bot debe llevar una carta a Lulú, pero solo hace lo que le ordenan. Ayúdalo a dar las órdenes correctas y a arreglar los errores.",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🤖✉️🦙",
+     "t": "Yupi-bot era un robot muy obediente: hacía exactamente lo que le decían, ni más ni menos. Un día, Yupi le dio una carta: —Llévasela a Lulú, que vive al otro lado del puente. Yupi-bot pitó: —Bip, bip. Necesito órdenes, paso por paso.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "🤖🌳🌉",
+     "t": "Frente a Yupi-bot había un árbol. Para llegar al puente tenía que rodearlo. ¿Qué orden le das primero?",
+     "opciones": [
+      {
+       "t": "➡️ «Avanza derecho»",
+       "ir": "p3a"
+      },
+      {
+       "t": "↪️ «Gira a la derecha y luego avanza»",
+       "ir": "p3"
+      }
+     ]
+    },
+    "p3a": {
+     "esc": "🤖💥🌳",
+     "t": "¡Pum! Yupi-bot avanzó derecho y chocó con el árbol. —Bip. Error —dijo, sin enojarse. Yupi se rió: —¡Es un bug! Los robots no adivinan: hay que revisar la orden y cambiarla. Esta vez le dijeron: «Gira a la derecha y luego avanza».",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "🤖🌉🌊",
+     "t": "Yupi-bot rodeó el árbol y llegó al puente. Pero el puente era largo: tenía diez tablas. —Bip. ¿Debo escuchar «avanza» diez veces? —preguntó. ¿Cómo le ayudas?",
+     "opciones": [
+      {
+       "t": "🔁 «Repite avanzar 10 veces»",
+       "ir": "p4"
+      },
+      {
+       "t": "🗣️ Decir «avanza» diez veces seguidas",
+       "ir": "p4b"
+      }
+     ]
+    },
+    "p4b": {
+     "esc": "🗣️😮‍💨🤖",
+     "t": "—Avanza, avanza, avanza, avanza… —repitió Yupi hasta quedarse sin aire. Yupi-bot cruzó, pero Yupi dijo: —¡Uf! La próxima vez usaré un bucle: «repite avanzar 10 veces». ¡Es mucho más corto!",
+     "sig": "p4"
+    },
+    "p4": {
+     "esc": "🤖🏡🦙",
+     "t": "Yupi-bot cruzó el puente y llegó a la casa de Lulú. —Bip, bip. ¿Toco la puerta o espero?",
+     "opciones": [
+      {
+       "t": "🚪 «Si la puerta está cerrada, toca»",
+       "ir": "f1"
+      },
+      {
+       "t": "⏳ «Espera sin hacer nada»",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "🚪🦙💌",
+     "t": "Yupi-bot vio que la puerta estaba cerrada, así que tocó: toc, toc. Lulú abrió y leyó la carta: ¡era una invitación a la fiesta de Yupi! —¡Gracias, Yupi-bot! —dijo Lulú—. Seguiste las órdenes perfectas: un paso, un bucle y una condición.",
+     "fin": true,
+     "moraleja": "Los programas son órdenes en orden; los bucles repiten y las condiciones deciden."
+    },
+    "f2": {
+     "esc": "⏳🌙🤖",
+     "t": "Yupi-bot esperó… y esperó… hasta que salió la luna. Al final, Lulú abrió la ventana: —¿Yupi-bot? ¡Llevas horas ahí! Yupi-bot pitó: —Bip. Nadie me dijo que tocara. Lulú se rió y leyó la carta. Desde ese día, Yupi le enseña a dar órdenes completas.",
+     "fin": true,
+     "moraleja": "Una computadora solo hace lo que le decimos: hay que pensar en todos los pasos."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "¿Por qué chocó Yupi-bot con el árbol?",
+     "ops": [
+      "Porque la orden estaba mal",
+      "Porque estaba enojado",
+      "Porque tenía sueño"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Qué sirve para repetir una orden muchas veces?",
+     "ops": [
+      "Un bucle",
+      "Una carta",
+      "Un puente"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Cómo se llama un error en un programa?",
+     "ops": [
+      "Bug",
+      "Bip",
+      "Bote"
+     ],
+     "ok": 0
+    }
+   ]
+  },
+  {
+   "slug": "lulu-y-las-palabras-magicas",
+   "titulo": "Lulú y las palabras mágicas",
+   "emoji": "🦙",
+   "edad": "6-8",
+   "tema": "Inglés",
+   "curso": "ingles-con-yupi",
+   "min": 5,
+   "resumen": "Lulú la llama viaja a un mercado donde todos hablan inglés. Elige las palabras mágicas que abren puertas y hacen amigos.",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🦙🎒🌎",
+     "t": "Lulú la llama empacó su mochila para un gran viaje. El Sabio Búho le regaló un cuaderno: —Aquí hay palabras mágicas en inglés. Úsalas y harás amigos en todas partes. Lulú lo abrió y leyó: <b>hello</b>, <b>please</b>, <b>thank you</b> y <b>goodbye</b>.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "🏪🧑‍🌾🍎",
+     "t": "Lulú llegó a un mercado lleno de frutas. Una señora sonriente la miró desde su puesto. ¿Qué dice Lulú para saludar?",
+     "opciones": [
+      {
+       "t": "👋 «Hello!»",
+       "ir": "p3"
+      },
+      {
+       "t": "🙋 «Goodbye!»",
+       "ir": "p2b"
+      }
+     ]
+    },
+    "p2b": {
+     "esc": "🧑‍🌾🤔🦙",
+     "t": "—Goodbye! —dijo Lulú. La señora se rió: —¿Ya te vas? ¡Si recién llegas! Lulú revisó su cuaderno: <i>goodbye</i> es para despedirse. —¡Ups! Hello! —dijo entonces, y la señora la saludó feliz.",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "🍎🦙😋",
+     "t": "—Hello! —respondió la señora—. Would you like an apple? (¿Quieres una manzana?). Lulú tenía mucha hambre. ¿Qué palabra mágica usa para pedirla?",
+     "opciones": [
+      {
+       "t": "🥺 «Yes, please!»",
+       "ir": "p4"
+      },
+      {
+       "t": "😤 «¡Dame!»",
+       "ir": "p3b"
+      }
+     ]
+    },
+    "p3b": {
+     "esc": "😮🍎🦙",
+     "t": "—¡Dame! —dijo Lulú. La señora levantó una ceja. Lulú se puso roja y buscó en su cuaderno. —Sorry… Yes, <b>please</b>! —dijo bajito. —¡Así sí! —sonrió la señora, y le dio la manzana más roja.",
+     "sig": "p4"
+    },
+    "p4": {
+     "esc": "🍎❤️🦙",
+     "t": "Lulú mordió la manzana: ¡estaba deliciosa! La señora le dio otra para el camino. ¿Qué dice Lulú ahora?",
+     "opciones": [
+      {
+       "t": "🙏 «Thank you! Goodbye!»",
+       "ir": "f1"
+      },
+      {
+       "t": "🏃 Se va corriendo sin decir nada",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "🙏👋🦙",
+     "t": "—Thank you! Goodbye! —dijo Lulú con una reverencia. La señora la abrazó: —Come back soon! (¡Vuelve pronto!). Lulú siguió su viaje feliz. Ese día aprendió que las palabras amables son mágicas en cualquier idioma.",
+     "fin": true,
+     "moraleja": "Hello, please, thank you y goodbye abren puertas en todo el mundo."
+    },
+    "f2": {
+     "esc": "🏃🦙💭",
+     "t": "Lulú se fue corriendo… pero a mitad del camino se detuvo. —¡No le di las gracias! Volvió al mercado y dijo: —Thank you! Goodbye! La señora sonrió: —You are welcome! Lulú aprendió que nunca es tarde para ser amable.",
+     "fin": true,
+     "moraleja": "Nunca es tarde para decir gracias."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "¿Cómo se dice «hola» en inglés?",
+     "ops": [
+      "Hello",
+      "Goodbye",
+      "Please"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Qué palabra usamos para pedir algo con amabilidad?",
+     "ops": [
+      "Please",
+      "Apple",
+      "Hello"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "«Thank you» significa…",
+     "ops": [
+      "Gracias",
+      "Adiós",
+      "Manzana"
+     ],
+     "ok": 0
+    }
+   ]
+  },
+  {
+   "slug": "la-pizza-de-choki",
+   "titulo": "La pizza de Choki",
+   "emoji": "🍕",
+   "edad": "9-12",
+   "tema": "Mates",
+   "curso": "mates-divertidas",
+   "min": 6,
+   "resumen": "Choki el choclo guerrero prepara una pizza para sus amigos, pero repartirla es todo un reto de fracciones. ¿Cómo la cortarás?",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🌽🍕👨‍🍳",
+     "t": "Choki, el choclo guerrero, no solo era valiente: también era un gran cocinero. Ese sábado preparó una pizza enorme para compartir con sus amigos Yupi, Lulú y Coquito. Cuando la sacó del horno, olía tan rico que todos llegaron corriendo.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "🍕🔪🤔",
+     "t": "—Somos cuatro —dijo Choki con el cuchillo en la mano—. Quiero que a todos nos toque lo mismo. ¿En cuántos trozos iguales corta la pizza?",
+     "opciones": [
+      {
+       "t": "✂️ En 4 trozos iguales",
+       "ir": "p3"
+      },
+      {
+       "t": "✂️ En 3 trozos",
+       "ir": "p2b"
+      }
+     ]
+    },
+    "p2b": {
+     "esc": "🍕😟🥥",
+     "t": "Choki cortó 3 trozos… y Coquito se quedó mirando su plato vacío. —¡Somos cuatro! —dijo Lulú. Choki se rascó la cabeza: para repartir entre 4, cada uno debe recibir 1/4 (un cuarto). Juntaron la pizza y la volvieron a cortar en 4.",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "🍕🍕🍕🍕",
+     "t": "Cada amigo recibió 1/4 de pizza. ¡Estaba deliciosa! Justo entonces, tocaron la puerta: eran cuatro amigos más que olían la pizza desde la calle. Choki todavía tenía otra pizza igual. ¿Qué hace?",
+     "opciones": [
+      {
+       "t": "🍕 Cortar la segunda pizza en 4 y dar medio trozo a cada uno",
+       "ir": "f1"
+      },
+      {
+       "t": "🍕 Cortar la segunda pizza en 8 trozos",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "🍕➗👫",
+     "t": "Choki cortó la segunda pizza en 4 trozos y partió cada trozo por la mitad. ¡Le salieron 8 trozos! —Mitad de un cuarto es un octavo —explicó Yupi—. 1/2 de 1/4 = 1/8. Cada nuevo amigo recibió 1/8 y todos quedaron felices.",
+     "fin": true,
+     "moraleja": "Partir en mitades también reparte: la mitad de 1/4 es 1/8."
+    },
+    "f2": {
+     "esc": "🍕8️⃣😄",
+     "t": "Choki cortó la segunda pizza en 8 trozos iguales y le dio 2 a cada nuevo amigo. —¡2/8 es lo mismo que 1/4! —dijo Coquito—. Así a todos nos tocó igual. Choki sonrió: repartir bien es la receta secreta de una buena fiesta.",
+     "fin": true,
+     "moraleja": "2/8 y 1/4 son fracciones equivalentes: valen lo mismo."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "Si 4 amigos comparten una pizza por igual, ¿cuánto le toca a cada uno?",
+     "ops": [
+      "1/4",
+      "1/3",
+      "4/1"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Qué fracción es igual a 1/4?",
+     "ops": [
+      "2/8",
+      "1/8",
+      "3/4"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "La mitad de 1/4 es…",
+     "ops": [
+      "1/8",
+      "1/2",
+      "2/4"
+     ],
+     "ok": 0
+    }
+   ]
+  },
+  {
+   "slug": "coquito-y-la-semilla",
+   "titulo": "Coquito y la semilla",
+   "emoji": "🌱",
+   "edad": "6-8",
+   "tema": "Ciencia",
+   "curso": "ciencia-curiosa",
+   "min": 5,
+   "resumen": "Coquito encuentra una semilla y quiere que crezca fuerte. ¿Qué necesitan las plantas para vivir? Descúbrelo con tus decisiones.",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🥥🌰✨",
+     "t": "Un día, Coquito encontró una semilla pequeñita en el jardín. —¡Voy a cuidarte hasta que seas una planta grande! —le prometió. La puso en una maceta con tierra y se quedó pensando dónde dejarla.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "🪴🏠☀️",
+     "t": "En la casa había dos lugares: un rincón oscuro debajo de la mesa y una ventana donde entraba el sol. ¿Dónde pone Coquito la maceta?",
+     "opciones": [
+      {
+       "t": "☀️ Junto a la ventana con sol",
+       "ir": "p3"
+      },
+      {
+       "t": "🌑 Debajo de la mesa, en lo oscuro",
+       "ir": "p2b"
+      }
+     ]
+    },
+    "p2b": {
+     "esc": "🌑🪴😢",
+     "t": "Pasaron unos días y la plantita salió muy flaquita y pálida. —¿Qué te pasa? —preguntó Coquito. El Sabio Búho llegó volando: —Las plantas fabrican su comida con la luz del sol. ¡Sin luz no pueden crecer! Coquito llevó la maceta a la ventana.",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "☀️🌱💚",
+     "t": "Con el sol, la plantita se puso verde y fuerte. —Sus hojas atrapan la luz con algo llamado clorofila —explicó el Búho. Pero un día, la tierra se veía seca y las hojas un poco caídas. ¿Qué hace Coquito?",
+     "opciones": [
+      {
+       "t": "💧 Regarla con un poco de agua",
+       "ir": "f1"
+      },
+      {
+       "t": "🥤 Echarle su refresco de colores",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "💧🌻🥥",
+     "t": "Coquito la regó con agua fresca. Las raíces la tomaron y la subieron hasta las hojas. Semanas después, ¡la planta tenía una flor amarilla enorme! —Luz, agua y aire —dijo el Búho—. Esos son los ingredientes de la fotosíntesis.",
+     "fin": true,
+     "moraleja": "Las plantas necesitan luz, agua y aire para fabricar su alimento."
+    },
+    "f2": {
+     "esc": "🥤🪴🦉",
+     "t": "Coquito iba a echarle refresco, pero el Búho lo detuvo: —¡Espera! Las plantas no toman azúcar ni colorantes: necesitan agua limpia. Coquito la regó con agua y, semanas después, la planta dio una flor amarilla preciosa. —Gracias por enseñarme —dijo Coquito.",
+     "fin": true,
+     "moraleja": "Para cuidar bien a alguien, primero hay que saber qué necesita."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "¿Qué necesitan las plantas para fabricar su comida?",
+     "ops": [
+      "Luz, agua y aire",
+      "Refresco y dulces",
+      "Oscuridad"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Qué atrapa la luz en las hojas?",
+     "ops": [
+      "La clorofila",
+      "La tierra",
+      "La maceta"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "¿Por qué la planta salió pálida en lo oscuro?",
+     "ops": [
+      "Porque le faltaba luz",
+      "Porque tenía frío",
+      "Porque estaba triste"
+     ],
+     "ok": 0
+    }
+   ]
+  },
+  {
+   "slug": "el-tesoro-de-yupi",
+   "titulo": "El tesoro de Yupi",
+   "emoji": "🪙",
+   "edad": "9-12",
+   "tema": "Valores",
+   "curso": "finanzas-personales",
+   "min": 6,
+   "resumen": "Yupi gana sus primeras monedas y tiene que decidir qué hacer con ellas. Una aventura sobre ahorrar, compartir y no caer en trampas.",
+   "inicio": "p1",
+   "paginas": {
+    "p1": {
+     "esc": "🧒🪙🪙",
+     "t": "Yupi ayudó toda la semana en la tienda de su abuela: ordenó cajas, barrió y saludó a los clientes. El sábado, su abuela le dio 20 monedas. —Son tuyas —le dijo—. Tú decides qué hacer con ellas.",
+     "sig": "p2"
+    },
+    "p2": {
+     "esc": "🍭🐷🪙",
+     "t": "Yupi quería una pelota de fútbol que costaba 50 monedas. Pero en la esquina vendían dulces riquísimos a 20 monedas. ¿Qué hace Yupi?",
+     "opciones": [
+      {
+       "t": "🐷 Guardar las monedas en su alcancía",
+       "ir": "p3"
+      },
+      {
+       "t": "🍭 Gastarlas todas en dulces",
+       "ir": "p2b"
+      }
+     ]
+    },
+    "p2b": {
+     "esc": "🍭😋😕",
+     "t": "Yupi se compró los dulces y los disfrutó mucho… por diez minutos. Luego pensó en la pelota: ahora le faltaban las 50 monedas completas. Su abuela le guiñó un ojo: —Darse un gusto está bien, pero si guardas una parte, llegas a tu meta. La semana siguiente, Yupi guardó sus monedas.",
+     "sig": "p3"
+    },
+    "p3": {
+     "esc": "🐷📅🪙",
+     "t": "Semana tras semana, la alcancía se llenaba: 20, 40… ¡ya casi! Un día, un desconocido le dijo: —Dame tus monedas y mañana te devuelvo el doble. ¡Es un negocio garantizado! ¿Qué hace Yupi?",
+     "opciones": [
+      {
+       "t": "🚫 Decir que no y contárselo a su abuela",
+       "ir": "f1"
+      },
+      {
+       "t": "🤔 Darle algunas monedas para probar",
+       "ir": "f2"
+      }
+     ]
+    },
+    "f1": {
+     "esc": "👵🛡️⚽",
+     "t": "—No, gracias —dijo Yupi, y se lo contó a su abuela. —¡Muy bien! —dijo ella—. Nadie puede prometer el doble sin riesgo: eso es una trampa. A la semana siguiente, Yupi juntó las 50 monedas y se compró su pelota. ¡Y le sobró para invitar helados a sus amigos!",
+     "fin": true,
+     "moraleja": "Ahorrar paso a paso funciona; las promesas de ganar fácil suelen ser trampas."
+    },
+    "f2": {
+     "esc": "😟🏃🪙",
+     "t": "Yupi le dio 10 monedas. Al día siguiente, el desconocido no apareció… nunca más. Yupi se puso triste y se lo contó a su abuela. —Aprendiste una lección importante —le dijo—: si prometen el doble rápido, es una trampa. Yupi volvió a ahorrar y, aunque tardó más, consiguió su pelota.",
+     "fin": true,
+     "moraleja": "Si alguien promete duplicar tu dinero rápido, desconfía y avisa a un adulto."
+    }
+   },
+   "preguntas": [
+    {
+     "p": "¿Qué ayudó a Yupi a comprar su pelota?",
+     "ops": [
+      "Ahorrar cada semana",
+      "Gastar en dulces",
+      "Darle monedas a un desconocido"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "«Te devuelvo el doble mañana, garantizado» es…",
+     "ops": [
+      "Una señal de trampa",
+      "Un buen negocio",
+      "Un regalo"
+     ],
+     "ok": 0
+    },
+    {
+     "p": "Si alguien te ofrece algo raro con dinero, ¿qué haces?",
+     "ops": [
+      "Contárselo a un adulto",
+      "Guardar el secreto",
+      "Aceptar rápido"
+     ],
+     "ok": 0
+    }
+   ]
+  }
+ ]
+}

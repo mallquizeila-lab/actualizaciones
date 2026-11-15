@@ -1,3 +1,10 @@
+v7.93.0 — 📖 Academy: cuentos interactivos
+- 📖 Nueva biblioteca yupitok.com/academia/cuentos con 6 cuentos originales de Yupi y sus amigos (ciclo del agua, programación, inglés, fracciones, plantas y ahorro).
+- 👉 El lector decide qué pasa: cada cuento tiene decisiones y 2 finales distintos, con contador de finales descubiertos.
+- 🔊 Lectura en voz alta con cada palabra iluminada (se puede apagar), letra grande y escenas ilustradas.
+- 🦉 Al final, 3 preguntas del Sabio Búho con estrellas, botones para recomendar el cuento y enlace al curso del tema.
+- 📄 Versión completa para leer en familia o imprimir; sin anuncios, sin chat y sin pedir datos.
+
 v7.92.0 — 🎨 Academy: dibujos para colorear
 - 🎨 Nueva zona yupitok.com/academia/colorear con 8 dibujos originales (Yupi-bot, loro, sistema solar, ciclo del agua, pizza de fracciones, flor, pez y computadora), cada uno con su edad.
 - 👆 Toca un color y luego la parte que quieres pintar; cada color dice su nombre en inglés. Hay deshacer, empezar de nuevo y guardado automático.
