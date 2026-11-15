@@ -10,10 +10,26 @@
   const hablar = t => { try { const u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = .8; const v = speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} };
   const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').trim();
 
+  // ---------- Cuenta: con cuenta gratis, el avance sigue en cualquier celular o PC ----------
+  const ls = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+  let VID = ls('vid'); if (!VID) { VID = Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem('vid', VID); } catch (e) {} }
+  const TOK = ls('perfilTok'), USU = ls('perfilUsuario');
+  const sincronizar = premio => fetch('/api/academia/progreso', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ uid: VID, tok: TOK || undefined, prog: leer(), premio: !!premio }) }).then(r => r.json()).then(r => { if (!r || !r.acad) return r; const p = leer(); for (const [k, v] of Object.entries(r.acad)) p[k] = Math.max(p[k] || 0, v); guardar(p); pintarProgreso(); return r; }).catch(() => null);
+  const volver = encodeURIComponent(location.pathname);
+  const invitacion = (ninos, corta) => h('div', { class: 'card acta' },
+    h('b', { style: 'font-size:1.15rem' }, corta ? '💾 ¡Guarda tus estrellas para siempre!' : '💾 Crea tu cuenta gratis y nunca pierdas tu avance'),
+    corta ? h('p', { style: 'margin:6px 0' }, 'Con tu cuenta sigues donde te quedaste en cualquier celular o computadora, ganas 💎 Yupicoins por cada lección nueva y puedes retar a tus amigos.')
+      : h('ul', { class: 'aben' }, h('li', {}, '📱 Sigue justo donde te quedaste, en cualquier celular, tablet o computadora.'), h('li', {}, '💎 Gana Yupicoins y puntos del 🏆 Yupi Pass por cada lección nueva que termines.'), h('li', {}, '🏅 Tus estrellas e insignias quedan guardadas en tu perfil de Yupitok.'), h('li', {}, '📣 Comparte tus logros en tus redes y reta a tus amigos a superarte.')),
+    h('div', { class: 'aops' }, h('a', { class: 'ab prim', href: '/?cuenta=crear&volver=' + volver }, '✨ Crear mi cuenta gratis'), h('a', { class: 'ab', href: '/?cuenta=entrar&volver=' + volver }, 'Ya tengo cuenta')),
+    h('small', { style: 'opacity:.8' }, ninos ? '👨‍👩‍👧 Si eres peque, pide a un adulto que la cree contigo. Solo se pide un nombre de usuario y una clave, nada más.' : 'Gratis para siempre. Solo pides un nombre de usuario y una clave (o entras con Google).'));
+  const conectado = () => h('div', { class: 'card acta ok' }, h('b', {}, `✅ ¡Hola, ${USU}!`), ' Tu avance se guarda en tu cuenta y ganas 💎 Yupicoins por cada lección nueva.');
+  $$('#acad-cuenta').forEach(e => e.append(USU && TOK ? conectado() : invitacion(e.dataset.ninos === '1')));
+
   // ---------- Progreso en el centro de cursos y en la página del curso ----------
-  const P = leer();
-  $$('[data-clave]').forEach(e => { const n = P[e.dataset.clave]; if (n) { e.textContent = estrellas(n); e.title = 'Completada'; } });
-  $$('[data-claves]').forEach(e => { const ks = e.dataset.claves.split(','), hechas = ks.filter(k => P[k]).length; if (hechas) e.textContent = hechas === ks.length ? '🏅 ¡Curso completado!' : `✅ ${hechas} de ${ks.length} lecciones`; });
+  function pintarProgreso() { const P = leer();
+    $$('[data-clave]').forEach(e => { const n = P[e.dataset.clave]; if (n) { e.textContent = estrellas(n); e.title = 'Completada'; } });
+    $$('[data-claves]').forEach(e => { const ks = e.dataset.claves.split(','), hechas = ks.filter(k => P[k]).length; if (hechas) e.textContent = hechas === ks.length ? '🏅 ¡Curso completado!' : `✅ ${hechas} de ${ks.length} lecciones`; }); }
+  pintarProgreso(); if (TOK) sincronizar(false);
   $$('[data-voz]').forEach(e => e.addEventListener('click', () => hablar(e.dataset.voz)));
   const chips = $$('[data-filtro]');
   if (chips.length) {
@@ -116,6 +132,18 @@
     },
   };
 
+  // ---------- Compartir y retar a amigos ----------
+  const RETO = (() => { const n = Math.floor(+new URLSearchParams(location.search).get('reto')); return n >= 1 && n <= 3 ? n : 0; })();
+  function compartir(texto, url) {
+    const t = encodeURIComponent(texto), u = encodeURIComponent(url), tu = encodeURIComponent(texto + ' ' + url);
+    const red = (nom, href, bg) => h('a', { class: 'ab red', href, target: '_blank', rel: 'noopener', style: 'background:' + bg }, nom);
+    const fila = h('div', { class: 'aops' }, red('🟢 WhatsApp', 'https://wa.me/?text=' + tu, '#16a34a'), red('🔵 Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u, '#1d4ed8'), red('✈️ Telegram', `https://t.me/share/url?url=${u}&text=${t}`, '#0284c7'), red('✖️ X', `https://twitter.com/intent/tweet?text=${t}&url=${u}`, '#111827'),
+      boton('🔗 Copiar enlace', ev => { const b = ev.currentTarget; (navigator.clipboard ? navigator.clipboard.writeText(texto + ' ' + url) : Promise.reject()).then(() => { b.textContent = '✅ ¡Copiado!'; }).catch(() => { prompt('Copia este enlace:', url); }); }));
+    if (navigator.share) fila.prepend(boton('📤 Compartir', () => navigator.share({ title: 'Yupitok Academy', text: texto, url }).catch(() => {}), 'prim'));
+    return fila;
+  }
+  if (RETO && caja) caja.before(h('div', { class: 'card areto' }, h('b', {}, '🏆 ¡Te retaron!'), ` Un amigo sacó ${estrellas(RETO)} en esta lección. ¿Puedes igualarlo o superarlo?`));
+
   function terminar() {
     const n = errores === 0 ? 3 : errores <= 2 ? 2 : 1, p = leer(); p[D.clave] = Math.max(p[D.clave] || 0, n); guardar(p);
     const curso = (D.claves || []).every(k => p[k]);
@@ -123,6 +151,12 @@
       curso ? h('p', { class: 'ains' }, `🏅 ¡Ganaste la insignia del curso «${D.cursoT}»!`) : null,
       D.sig ? h('a', { class: 'btn', href: D.sig }, 'Siguiente lección: ' + D.sigT + ' →') : h('a', { class: 'btn', href: D.cursoU }, 'Volver al curso'),
       boton('🔄 Repetir esta lección', () => { paso = 0; errores = 0; mostrar(); })));
+    const fin = $('.afin', caja), base = location.origin + location.pathname;
+    if (RETO) fin.prepend(h('p', { class: 'ains' }, n > RETO ? '🥇 ¡Ganaste el reto! Superaste a tu amigo.' : n === RETO ? '🤝 ¡Empate! Igualaste a tu amigo.' : '💪 Casi: tu amigo sacó más estrellas. ¡Repite y gánale!'));
+    fin.append(h('div', { class: 'card acomp' }, h('b', { style: 'font-size:1.1rem' }, curso ? '📣 ¡Presume tu insignia y reta a tus amigos!' : '📣 Reta a tus amigos a superarte'), D.ninos ? h('p', { class: 'meta', style: 'margin:4px 0' }, '👨‍👩‍👧 Comparte con ayuda de un adulto.') : null,
+      compartir(curso ? `🏅 ¡Terminé el curso «${D.cursoT}» en Yupitok Academy! ¿Te animas a lograrlo tú también?` : `🎓 Saqué ${estrellas(n)} en «${D.titulo}» de Yupitok Academy. ¿Puedes superarme? 😎`, curso ? location.origin + D.cursoU : base + '?reto=' + n)));
+    if (TOK && USU) sincronizar(true).then(r => { if (r && r.yc > 0) fin.append(h('p', { class: 'aok' }, `💎 +${r.yc} Yupicoins por terminar una lección nueva`)); });
+    else { fin.append(invitacion(D.ninos, true)); sincronizar(false); }
     try { navigator.sendBeacon('/api/academia/ev', JSON.stringify({ c: D.clave, e: n })); } catch (e) {}
   }
   const ini = h('div', { class: 'afin' }, h('p', {}, `Esta lección tiene ${A.length} retos. ¿Listo?`), boton('🚀 ¡Empezar los retos!', mostrar, 'prim grande'));
