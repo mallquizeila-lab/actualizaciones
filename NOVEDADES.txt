@@ -1,3 +1,9 @@
+v7.94.0 — 🏆 Academy: trivia en vivo con amigos
+- 🏆 Nueva yupitok.com/academia/trivia: crea una sala con código de 4 letras, comparte el enlace por WhatsApp y jueguen de 1 a 6 personas al mismo tiempo.
+- 📚 Preguntas de los cursos y cuentos (o mezcla de todo), 8 por partida con 15 segundos cada una; puntos por acertar y bonus por rapidez, podio final y revancha.
+- 🤖 Si juegas solo, te acompaña Yupi-bot.
+- 🛡️ Sin chat: solo 6 emojis para reaccionar; cada jugador recibe un nombre de animal, nunca su nombre real. Sin anuncios.
+
 v7.93.1 — 🔄 Actualizaciones que no se cortan
 - 🔄 El botón "Instalar la mejora" ya no se corta en conexiones lentas (como algunos VPS): la descarga puede tardar lo que necesite y el botón muestra cuántos MB lleva.
 - ✅ Al terminar, ShortForge se reinicia solo y la página se recarga sola mostrando la versión nueva; si algo falla, avisa el motivo.
