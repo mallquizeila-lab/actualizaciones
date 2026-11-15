@@ -1,3 +1,7 @@
+v7.93.1 — 🔄 Actualizaciones que no se cortan
+- 🔄 El botón "Instalar la mejora" ya no se corta en conexiones lentas (como algunos VPS): la descarga puede tardar lo que necesite y el botón muestra cuántos MB lleva.
+- ✅ Al terminar, ShortForge se reinicia solo y la página se recarga sola mostrando la versión nueva; si algo falla, avisa el motivo.
+
 v7.93.0 — 📖 Academy: cuentos interactivos
 - 📖 Nueva biblioteca yupitok.com/academia/cuentos con 6 cuentos originales de Yupi y sus amigos (ciclo del agua, programación, inglés, fracciones, plantas y ahorro).
 - 👉 El lector decide qué pasa: cada cuento tiene decisiones y 2 finales distintos, con contador de finales descubiertos.
