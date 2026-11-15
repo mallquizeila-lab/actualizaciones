@@ -15,6 +15,7 @@ const cerebro = require('./lib/cerebro');
 const avisos = require('./lib/avisos');
 const mando = require('./lib/mando');
 const juego = require('./lib/juego');
+const academiaAg = require('./lib/academia');
 const desarmar = require('./lib/desarmar');
 const salud = require('./lib/salud');
 const actualizar = require('./lib/actualizar');
@@ -320,6 +321,7 @@ async function api(u, q, U, r) {
   if (u === '/api/chat/adjunto' && !P) { const f = require('./lib/adjuntos').imagen(U.searchParams.get('id')); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': 'image/jpeg', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (u === '/api/mando') return await mando.estado();
   if (u === '/api/mando/juego') return await juego.estado();
+  if (u === '/api/mando/academia') return academiaAg.estado();
   if (u === '/api/mando/juego/archivo' && !P) { const t = U.searchParams.get('t') === 'png' ? '.png' : '.glb', f = juego.archivo(U.searchParams.get('id') || '', t); if (!f) throw new Error('No encontrado'); r.writeHead(200, { 'content-type': t === '.png' ? 'image/png' : 'model/gltf-binary', 'cache-control': 'max-age=86400' }); r.end(fs.readFileSync(f)); return STREAMED; }
   if (!P) return null;
   if (!q.headers['x-sf']) throw Object.assign(new Error('Prohibido'), { code: 403 });
@@ -387,6 +389,9 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/juego/modelo' && P) { await juego.accion(await json(q)); return await juego.estado(); }
   if (u === '/api/mando/juego/salud' && P) { await juego.salud(); return await juego.estado(); }
   if (u === '/api/mando/juego/ideas' && P) { await juego.ideas(); return await juego.estado(); }
+  if (u === '/api/mando/academia/crear' && P) { await academiaAg.crearCuento(await json(q)); return academiaAg.estado(); }
+  if (u === '/api/mando/academia/accion' && P) { await academiaAg.accion(await json(q)); return academiaAg.estado(); }
+  if (u === '/api/mando/academia/ajustes' && P) { academiaAg.ajustes(await json(q)); return academiaAg.estado(); }
   if (u === '/api/mando/juego/preguntas' && P) { const o = await json(q); if (o.accion) await juego.accionPreguntas(o); else await juego.crearPreguntas(o.materia); return await juego.estado(); }
   if (u === '/api/mando/link' && P) { const o = await json(q); mando.nuevoLink(o); return await mando.estado(); }
   if (u === '/api/mando/link/accion' && P) { await mando.accionLink(await json(q)); return await mando.estado(); }
@@ -569,7 +574,7 @@ http.createServer(async (q, r) => {
   publish.start();
   comments.start();
   cerebro.start();
-  avisos.start(); mando.start(); juego.start();
+  avisos.start(); mando.start(); juego.start(); academiaAg.start();
   salud.start();
   actualizar.start();
   require('./lib/crecer').start();

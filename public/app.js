@@ -351,8 +351,10 @@ function viralTop() {
 }
 // ---------- 🧭 Centro de Mando ----------
 let MD = null, MDt = 0, MDcargando = false, JG = null;
+let AG = null;
+setInterval(async () => { if (tab === 'mando' && AG?.cola?.some(x => x.estado === 'trabajando') && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { try { AG = await api('/api/mando/academia'); render(); } catch (e) {} } }, 8000);
 setInterval(async () => { if (tab === 'mando' && JG?.modelos?.some(m => ['creando', 'enviando'].includes(m.estado)) && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { try { JG = await api('/api/mando/juego'); render(); } catch (e) {} } }, 20000);
-async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } try { JG = await api('/api/mando/juego'); } catch (e) { JG = null; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
+async function loadMando() { if (MDcargando) return; MDcargando = true; try { MD = await api('/api/mando'); MDt = Date.now(); } catch (e) { MD = { error: e.message }; } try { JG = await api('/api/mando/juego'); } catch (e) { JG = null; } try { AG = await api('/api/mando/academia'); } catch (e) { AG = null; } MDcargando = false; if (tab === 'mando' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render(); }
 VIEWS.mando = () => {
   if (!MD || Date.now() - MDt > 15000) loadMando().catch(() => {});
   if (!MD) return '<h1>🧭 Centro de Mando</h1><p class="sub">Cargando a los agentes…</p>';
@@ -380,6 +382,7 @@ VIEWS.mando = () => {
       ${l.motivo ? `<p style="margin:4px 0;font-size:.9rem">${l.decision === 'armar' ? '✅' : 'ℹ️'} ${esc(l.motivo)}</p>` : ''}${l.idea ? `<p style="margin:4px 0;font-size:.9rem">💡 <b>Nuestra idea:</b> ${esc(l.idea)}${l.gancho ? ` · <i>"${esc(l.gancho)}"</i>` : ''}</p>` : ''}
       <div class="btns" style="margin-top:4px">${['decidido', 'dejado'].includes(l.estado) ? `<select data-mdcanal="${l.id}" style="width:auto">${chs.map(c => `<option value="${c.id}" ${c.id === l.canal ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select><button class="b sm" data-act="mdArmar" data-id="${l.id}">🎬 Armarlo</button>` : ''}${l.estado === 'decidido' && l.decision === 'armar' ? `<button class="b ghost sm" data-act="mdDejar" data-id="${l.id}">⏭️ Dejarlo</button>` : ''}${l.estado === 'error' ? `<button class="b ghost sm" data-act="mdRe" data-id="${l.id}">🔁 Reintentar</button>` : ''}<button class="b ghost sm" data-act="mdBorrar" data-id="${l.id}">🗑️</button></div></div>`).join('')}</div>` : ''}</div>
   ${guiasCard(MD)}
+  ${academiaCard(AG)}
   ${juegoCard(JG)}
   ${(() => { const Y = D.yupicoins; if (!Y) return ''; const pct = Y.jugadores ? Math.round(Y.gastan * 100 / Y.jugadores) : 0; return `<div class="card"><h3>🪙 Yupicoins</h3><p class="hint">La moneda de Yupitok: <b>1 Yupicoin = 0.01 USD</b>. Se ganan jugando y (pronto) se podrán comprar; se gastan solo dentro de Yupitok y <b>no se cobran</b>. Cada movimiento queda registrado en el servidor, con tope diario para frenar trampas. En circulación: <b>${((Y.emitidas - Y.gastadas) * (Y.ajustes?.valorUsd || 0.01)).toLocaleString('es', { style: 'currency', currency: 'USD' })}</b> de referencia.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">${[['Emitidas (total)', Y.emitidas], ['Gastadas (total)', Y.gastadas], ['Emitidas hoy', Y.hoy?.emitidas], ['Jugadores con saldo', Y.jugadores], ['% que gasta', pct + ' %']].map(([t, n]) => `<div class="card" style="margin:0;padding:8px;text-align:center"><div style="font-size:.75rem;opacity:.75">${t}</div><b style="font-size:1.2rem">${typeof n === 'number' ? n.toLocaleString('es') : n}</b></div>`).join('')}</div>
@@ -414,6 +417,31 @@ function flowCard(MD) {
     <div class="row" style="margin-top:8px"><label>Tema (opcional)<input id="fl-tema" maxlength="160" placeholder="Vacío = el tema del día" list="fl-temas"><datalist id="fl-temas">${(MD.flowTemas || []).map(t => `<option value="${esc(t)}">`).join('')}</datalist></label></div>
     <div class="btns"><button class="b sm" data-act="flNuevo">✍️ Crear 6 prompts nuevos</button></div>
     <p class="hint" style="font-size:.8rem;margin-top:6px">⚠️ Si Flow te pone un personaje famoso (por ejemplo, un monstruo de Disney), descarta ese clip: puede traerte reclamos de derechos.</p></div>`;
+}
+function academiaCard(G) {
+  if (!G) return '';
+  const EST = { trabajando: '⚙️ Trabajando', pendiente: '👀 Por aprobar', aprobado: '✅ Publicado', rechazado: '❌ Rechazado', descartado: '🗑️ Descartado por el supervisor', oculto: '🙈 Oculto' }, W = G.semana || {};
+  const pend = G.cola.filter(x => x.estado === 'pendiente'), resto = G.cola.filter(x => x.estado !== 'pendiente').slice(0, 12);
+  const vista = c => { const P = c.paginas || {}, orden = [], v = new Set(); (function r(k) { if (!k || v.has(k) || !P[k]) return; v.add(k); orden.push(k); if (P[k].sig) r(P[k].sig); (P[k].opciones || []).forEach(o => r(o.ir)); })(c.inicio);
+    return `<details><summary style="cursor:pointer;font-weight:700">📖 Leer el cuento completo</summary><div style="background:#fafaf9;border-radius:10px;padding:10px;margin-top:6px">${orden.map(k => { const p = P[k]; return `<p style="margin:6px 0"><b>${esc(k)}</b> ${esc(p.esc)} ${esc(String(p.t).replace(/<[^>]+>/g, ''))}${p.opciones ? `<br><i>👉 ${p.opciones.map(o => esc(o.t) + ' → ' + esc(o.ir)).join(' · ')}</i>` : ''}${p.fin ? `<br>🦉 <b>Moraleja:</b> ${esc(p.moraleja)}` : ''}</p>`; }).join('')}
+      <p style="margin:8px 0 2px"><b>Preguntas del Búho</b></p>${(c.preguntas || []).map(q => `<p class="hint" style="margin:2px 0">${esc(q.p)}<br>${q.ops.map((o, i) => (i === q.ok ? '✅ ' : '▫️ ') + esc(o)).join(' · ')}</p>`).join('')}</div></details>`; };
+  return `<div class="card" style="border:2px solid #16a34a"><h3>🎓 Agente de la Academy</h3>
+    <p class="hint">Escribe cuentos interactivos nuevos para <b>yupitok.com/academia/cuentos</b>. Un <b>redactor</b> (IA) los escribe, pasan <b>revisiones automáticas</b> (largo, estructura, palabras prohibidas, sin enlaces) y un <b>supervisor</b> (otra IA) les pone nota de 0 a 100. Solo llegan aquí los que sacan <b>85 o más</b>. <b>Nada se publica sin que tú lo apruebes.</b></p>
+    ${G.pausa ? '<p style="background:#fef3c7;border-radius:8px;padding:8px">⏸️ <b>Academy en pausa:</b> los agentes no crean nada nuevo.</p>' : ''}
+    <div class="row"><label>Curso / tema<select id="ag-curso">${(G.temas || []).map(t => `<option value="${t.k}">${esc(t.v)}</option>`).join('')}</select></label><label>Edad<select id="ag-edad"><option value="6-8">Peques (6 a 8)</option><option value="9-12">Chicos (9 a 12)</option></select></label></div>
+    <label>Idea (opcional)<input id="ag-idea" maxlength="200" placeholder="Ej: Lulú descubre por qué el arcoíris tiene colores"></label>
+    <div class="btns"><button class="b sm" data-act="agCrear" ${G.pausa ? 'disabled' : ''}>✍️ Crear un cuento</button><button class="b ghost sm" data-act="agPausa">${G.pausa ? '▶️ Reanudar Academy' : '⏸️ Pausar Academy'}</button>
+      <label class="hint" style="display:flex;gap:6px;align-items:center">🌙 Cuentos por noche (2 am) <select id="ag-auto" style="width:auto">${[0, 1, 2, 3].map(n => `<option ${G.auto === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    <p class="hint" style="margin:6px 0">📊 Últimos 7 días: ${W.creados || 0} creados · ${W.aprobados || 0} aprobados · ${W.rechazados || 0} rechazados por ti · ${W.descartados || 0} descartados por el supervisor${(W.motivos || []).length ? ` · Motivos más repetidos: ${W.motivos.map(m => esc(m[0]) + ' (' + m[1] + ')').join(', ')}` : ''}</p>
+    <h4 style="margin:12px 0 4px">👀 Por aprobar (${pend.length})</h4>
+    ${pend.length ? pend.map(x => `<div style="border-top:1px solid #e5e7eb;padding:8px 0"><b>${esc(x.cuento.emoji || '📖')} ${esc(x.cuento.titulo)}</b> <small class="hint">· ${esc(x.edad)} años · ${esc(x.cuento.tema || '')} · nota del supervisor <b>${x.nota}/100</b></small>
+      <p class="hint" style="margin:2px 0">${esc(x.resumen || x.cuento.resumen || '')}</p>${vista(x.cuento)}
+      <p class="hint" style="margin:4px 0">Antes de aprobar, pregúntate: ¿está bien lo que enseña?, ¿un niño de esa edad lo entendería? y ¿dejaría que mi sobrino lo lea sin supervisión?</p>
+      <div class="btns"><button class="b sm" data-act="agAcc" data-a="aprobar" data-id="${x.id}">✅ Aprobar y publicar</button><button class="b ghost sm" data-act="agAcc" data-a="rechazar" data-id="${x.id}">❌ Rechazar (con motivo)</button></div></div>`).join('') : '<p class="hint">No hay nada esperando. Crea un cuento o activa los cuentos por noche.</p>'}
+    ${resto.length ? `<details style="margin-top:8px"><summary class="hint" style="cursor:pointer">🗂️ Historial (${resto.length})</summary>${resto.map(x => `<div class="hint" style="border-top:1px solid #e5e7eb;padding:6px 0">${EST[x.estado] || x.estado}${x.fase ? ' · ' + esc(x.fase) + '…' : ''} · <b>${esc(x.cuento?.titulo || x.tema)}</b> (${esc(x.edad)})${x.motivo ? ` · ${esc(x.motivo)}` : ''}${x.url ? ` · <a href="${esc(x.url)}" target="_blank" rel="noopener">ver</a>` : ''}
+      ${(x.log || []).length ? `<br><small>${x.log.map(esc).join('<br>')}</small>` : ''}<div class="btns">${x.estado === 'aprobado' ? `<button class="b ghost sm" data-act="agAcc" data-a="ocultar" data-id="${x.id}">🙈 Ocultar de la página</button>` : ''}${x.estado !== 'trabajando' ? `<button class="b ghost sm" data-act="agAcc" data-a="borrar" data-id="${x.id}">🗑️</button>` : ''}</div></div>`).join('')}</details>` : ''}
+    ${(G.memoria || []).length ? `<details><summary class="hint" style="cursor:pointer">🧠 Lo que el agente aprendió de tus rechazos (${G.memoria.length})</summary>${G.memoria.map(m => `<div class="hint">• ${esc(m)}</div>`).join('')}</details>` : ''}
+  </div>`;
 }
 function juegoCard(G) {
   if (!G) return '';
@@ -1076,6 +1104,11 @@ const ACT = {
   jgSalud: guard(async () => { JG = await api('/api/mando/juego/salud', {}); toast('🩺 Revisión lista'); render(); }),
   jgIdeas: guard(async () => { toast('💡 Pensando ideas…'); JG = await api('/api/mando/juego/ideas', {}); render(); }),
   jgPreg: guard(async () => { toast('✍️ Escribiendo preguntas…'); JG = await api('/api/mando/juego/preguntas', { materia: $('#jg-mat').value }); render(); }),
+  agCrear: guard(async () => { AG = await api('/api/mando/academia/crear', { curso: $('#ag-curso').value, edad: $('#ag-edad').value, idea: $('#ag-idea').value }); toast('✍️ El redactor está escribiendo. Tarda 1 o 2 minutos; luego lo revisa el supervisor.'); render(); }),
+  agAcc: guard(async el => { const a = el.dataset.a; let motivo; if (a === 'rechazar') { motivo = prompt('¿Por qué lo rechazas? Escribe una frase corta (ej: "da miedo", "muy largo", "esa palabra es difícil"). El agente aprende de esto.'); if (!motivo) return; }
+    if (a === 'ocultar' && !confirm('¿Ocultar este cuento de yupitok.com?')) return; AG = await api('/api/mando/academia/accion', { id: el.dataset.id, accion: a, motivo }); toast(a === 'aprobar' ? '✅ Publicado en yupitok.com/academia/cuentos' : a === 'rechazar' ? '❌ Rechazado: el agente lo tendrá en cuenta' : '✅ Listo'); render(); }),
+  agPausa: guard(async () => { AG = await api('/api/mando/academia/ajustes', { pausa: !AG?.pausa }); render(); }),
+  agAuto: guard(async el => { AG = await api('/api/mando/academia/ajustes', { auto: +el.value }); toast(+el.value ? `🌙 El agente escribirá ${el.value} cuento(s) cada noche` : 'Cuentos por noche apagados'); }),
   jgPregOk: guard(async () => { JG = await api('/api/mando/juego/preguntas', { accion: 'aprobar' }); toast('✅ Preguntas agregadas al Sabio Búho'); render(); }),
   jgPregNo: guard(async () => { JG = await api('/api/mando/juego/preguntas', { accion: 'descartar' }); render(); }),
   guNueva: guard(async () => { MD = await api('/api/mando/guia', { tema: $('#gu-tema').value }); toast('✍️ El Creativo está escribiendo tu guía (1–2 min)'); render(); }),
@@ -1427,6 +1460,7 @@ async function openCloneModal(jobId) {
    <label style="font-weight:600"><input type="checkbox" id="vf-consent">Confirmo que es mi voz, la de alguien que me dio permiso, o una voz sintética que mi plan me permite usar. No es una imitación de una persona o personaje famoso.</label>
    <div class="btns"><button class="b" data-act="vfSave" data-job="${jobId}">Guardar en Mis voces</button><button class="b ghost" data-act="closeModal">Cancelar</button></div>`;
 }
+document.addEventListener('change', e => { if (e.target.id === 'ag-auto') ACT.agAuto(e.target); });
 document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.vf !== undefined) { const t = [...document.querySelectorAll('[data-vf]:checked')].reduce((a, x) => a + +x.dataset.d, 0); const el = $('#vf-total'); if (el) el.textContent = t.toFixed(0) + ' s'; } });
 Object.assign(ACT, {
   renVoice: guard(async el => { const n = prompt('Nuevo nombre de la voz (ej: Ajo, Limón, Narrador):', el.dataset.n); if (!n) return; await api('/api/voices/rename', { id: el.dataset.id, name: n }); toast('Nombre cambiado'); await refresh(true); }),

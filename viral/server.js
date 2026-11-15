@@ -468,7 +468,14 @@ let ACAD = { t: 0, d: null };
 const academia = () => { const f = path.join(__dirname, 'academia.json'); try { const st = fs.statSync(f); if (st.mtimeMs !== ACAD.t) ACAD = { t: st.mtimeMs, d: JSON.parse(fs.readFileSync(f, 'utf8')) }; } catch (e) { if (!ACAD.d) ACAD.d = { edades: {}, cursos: [] }; } return ACAD.d; };
 const acadLecc = c => c.modulos.flatMap(m => m.lecciones);
 let CUENT = { t: 0, d: null };
-const cuentos = () => { const f = path.join(__dirname, 'cuentos.json'); try { const st = fs.statSync(f); if (st.mtimeMs !== CUENT.t) CUENT = { t: st.mtimeMs, d: JSON.parse(fs.readFileSync(f, 'utf8')).cuentos || [] }; } catch (e) { if (!CUENT.d) CUENT.d = []; } return CUENT.d; };
+const cuentos = () => { const f = path.join(__dirname, 'cuentos.json'); try { const st = fs.statSync(f); if (st.mtimeMs !== CUENT.t) CUENT = { t: st.mtimeMs, d: JSON.parse(fs.readFileSync(f, 'utf8')).cuentos || [] }; } catch (e) { if (!CUENT.d) CUENT.d = []; } const ya = new Set(CUENT.d.map(x => x.slug)); return [...CUENT.d, ...getS('cuentosExtra', []).filter(x => !ya.has(x.slug))]; };
+// Limpia un cuento que llega del Agente de la Academy: solo texto, <b> e <i>, y la estructura esperada.
+const limpiarCuento = c => { const txt = (v, n) => String(v ?? '').replace(/<[^>]*>/g, '').slice(0, n), rico = v => String(v ?? '').replace(/<(?!\/?(b|i)>)[^>]*>/gi, '').slice(0, 1200);
+  if (!c || typeof c !== 'object' || !c.paginas || typeof c.paginas !== 'object') return null; const slug = String(c.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 60); if (slug.length < 3) return null;
+  const P = {}; for (const [k, p] of Object.entries(c.paginas).slice(0, 12)) { const id = String(k).replace(/[^a-z0-9]/gi, '').slice(0, 8); if (!id) return null; P[id] = { esc: txt(p.esc, 24), t: rico(p.t) }; if (p.fin) { P[id].fin = true; P[id].moraleja = txt(p.moraleja, 200); } else if (Array.isArray(p.opciones)) P[id].opciones = p.opciones.slice(0, 3).map(o => ({ t: txt(o.t, 100), ir: String(o.ir || '').replace(/[^a-z0-9]/gi, '') })); else P[id].sig = String(p.sig || '').replace(/[^a-z0-9]/gi, ''); }
+  if (!P[c.inicio] || Object.values(P).some(p => (p.sig && !P[p.sig]) || (p.opciones || []).some(o => !P[o.ir]))) return null;
+  const preguntas = (Array.isArray(c.preguntas) ? c.preguntas : []).slice(0, 3).map(q => ({ p: txt(q.p, 200), ops: (q.ops || []).slice(0, 3).map(o => txt(o, 100)), ok: Math.floor(+q.ok) || 0 })); if (preguntas.length < 3 || preguntas.some(q => q.ops.length !== 3 || q.ok < 0 || q.ok > 2)) return null;
+  return { slug, titulo: txt(c.titulo, 60), emoji: txt(c.emoji, 8) || '📖', edad: c.edad === '9-12' ? '9-12' : '6-8', tema: txt(c.tema, 30), curso: String(c.curso || '').replace(/[^a-z0-9-]/g, '').slice(0, 60), min: Math.max(3, Math.min(10, +c.min || 5)), resumen: txt(c.resumen, 200), inicio: String(c.inicio), paginas: P, preguntas, ia: true }; };
 let COLOR = { t: 0, d: null };
 const laminas = () => { const f = path.join(__dirname, 'colorear.json'); try { const st = fs.statSync(f); if (st.mtimeMs !== COLOR.t) COLOR = { t: st.mtimeMs, d: JSON.parse(fs.readFileSync(f, 'utf8')).laminas || [] }; } catch (e) { if (!COLOR.d) COLOR.d = []; } return COLOR.d; };
 const acadNinos = e => e === '6-8' || e === '9-12';
@@ -1121,6 +1128,9 @@ async function api(req, res, u) {
       if (JSON.parse(fs.readFileSync(path.join(__dirname, 'guias.json'), 'utf8')).guias.some(x => x.slug === slug)) return send(res, 400, { error: 'Ya existe una guía con ese nombre' });
       const g = { slug, titulo: clip(textoP(b.titulo), 110), desc: clip(textoP(b.desc || ''), 200), emoji: clip(String(b.emoji || '📝'), 4), juego: /^[a-z0-9-]{2,40}$/.test(b.juego || '') && GAMES.includes(b.juego) ? b.juego : '', fecha: hoyPeru(), html: limpiaHtml(b.html) };
       setS('guiasExtra', [...getS('guiasExtra', []).filter(x => x.slug !== slug), g].slice(-300)); return send(res, 200, { ok: 1, url: PUBLIC_URL + '/guias/' + slug }); }
+    if (r === 'academia/cuento' && P) { const b = await json(req, 200000), c = limpiarCuento(b.cuento); if (!c) return send(res, 400, { error: 'El cuento no tiene el formato correcto' });
+      if (cuentos().some(x => x.slug === c.slug && !x.ia)) c.slug += '-2'; setS('cuentosExtra', [...getS('cuentosExtra', []).filter(x => x.slug !== c.slug), c].slice(-200)); return send(res, 200, { ok: 1, url: PUBLIC_URL + '/academia/cuentos/' + c.slug }); }
+    if (r === 'academia/cuento/quitar' && P) { const b = await json(req); setS('cuentosExtra', getS('cuentosExtra', []).filter(x => x.slug !== String(b.slug || ''))); return send(res, 200, { ok: 1 }); }
     if (r === 'guias-extra/borrar' && P) { const b = await json(req); setS('guiasExtra', getS('guiasExtra', []).filter(x => x.slug !== String(b.slug || ''))); return send(res, 200, { ok: 1 }); }
     if (r === 'errores-borrar' && P) { run('delete from errores'); return send(res, 200, { ok: 1 }); }
     if (r === 'fotos' || r.startsWith('fotos/')) { const fr = fotos.admin(r, P ? await json(req) : {}); if (fr) return send(res, 200, fr); }
