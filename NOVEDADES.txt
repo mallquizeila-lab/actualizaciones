@@ -1,3 +1,7 @@
+v7.98.1 — 🛡️ Seguro para la revisión de AdSense
+- 🛡️ Mientras esté encendido el «Modo revisión» de AdSense, lo nuevo creado por la IA (dibujos, cuentos y lecciones) se publica igual en la página pero no entra a Google ni al sitemap; así el revisor evalúa solo el contenido hecho a mano. Al apagar el modo revisión, todo aparece en Google solo.
+- 🌱 Crecimiento por noche: 5 dibujos por defecto (puedes subirlo cuando te aprueben).
+
 v7.98.0 — 📣 Difusión mundial (automática y semi-automática)
 - 📣 Nuevo en Centro de Mando: Difusión mundial, para llevar Yupitok a todo el mundo desde tus cuentas oficiales (nunca crea cuentas ni usa cuentas ajenas).
 - 📋 Lista para registrarte: 29 plataformas en orden de prioridad, con su enlace, los pasos y una casilla para ir marcando.
