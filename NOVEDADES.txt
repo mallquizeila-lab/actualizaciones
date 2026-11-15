@@ -1,3 +1,10 @@
+v7.97.0 — 🌱 La Academy crece sola cada día + fábrica de dibujos modernos + voz cálida en tu idioma
+- 🌱 Crecimiento automático: cada noche (1 am) el agente prepara dibujos, cuentos, lecciones y preguntas de trivia nuevas y te deja todo en la cola (cantidades ajustables; por defecto 15 dibujos, 1 cuento, 1 lección y 1 trivia). Por la mañana te avisa cuántos hay.
+- 🖼️ Fábrica de dibujos modernos: usa la IA de imágenes de Cloudflare (estilo libro de colorear actual, líneas limpias) y convierte cada imagen en zonas para pintar con un toque. Tiene 210 temas preparados (animales, Perú y Latinoamérica, transportes, espacio, comida, profesiones, fantasía, fiestas y mandalas) y siempre deja cupo de imágenes para tus videos.
+- ✅ Los dibujos se aprueban de a varios: cuadrícula con vista previa y casillas (desmarca los feos y aprueba el resto).
+- 🌍 La Academy se traduce sola al idioma de cada visitante (detecta país e idioma del equipo), incluidos los cuentos: el texto se traduce entero y la voz lee en ese idioma.
+- 🗣️ Voces cálidas de narrador para niños: se elige la voz femenina más natural del idioma, lectura pausada; la narración grabada (Kokoro) va más lenta y cálida. Nuevo botón «🔊 Escuchar la explicación» en cada lección.
+
 v7.96.0 — 🎨 25 dibujos + agente que crea lecciones, dibujos y trivia + cuentos narrados
 - 🎨 Colorear: ahora hay 25 dibujos originales (antes 8), ordenados por categorías: Yupi y amigos, Animales, Espacio y ciencia, Comida, Naturaleza, Transportes, Mi mundo y 4 Mandalas.
 - 🎓 El Agente de la Academy ya crea 4 tipos de contenido: cuentos, lecciones nuevas (se suman como «Módulo extra» de cada curso), dibujos para colorear y preguntas para la trivia en vivo.

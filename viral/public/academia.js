@@ -7,7 +7,27 @@
   const guardar = p => { try { localStorage.setItem('acad', JSON.stringify(p)); } catch (e) {} };
   const mezclar = (l, distinto) => { for (let t = 0; t < 8; t++) { const m = [...l].sort(() => Math.random() - .5); if (!distinto || l.length < 2 || m.some((x, i) => x !== l[i])) return m; } return [...l].reverse(); };
   const estrellas = n => '⭐'.repeat(n) + '☆'.repeat(3 - n);
-  const hablar = t => { try { const u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = .8; const v = speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} };
+  // 🗣️ Voz de narrador cálida para niños, en el idioma de cada visitante (lo detecta i18n.js por país e idioma del equipo).
+  // Se prefiere una voz femenina natural ("Natural", "Neural", Paulina, Dalia, Jenny…) y se lee pausado, por frases.
+  const VOZ = (() => {
+    const PREF = ['natural', 'neural', 'online', 'dalia', 'paulina', 'mónica', 'monica', 'sabina', 'elvira', 'helena', 'laura', 'jenny', 'aria', 'emma', 'ava', 'samantha', 'karen', 'moira', 'tessa', 'francisca', 'luciana', 'amélie', 'amelie', 'denise', 'katja', 'elsa', 'alice', 'nanami', 'sunhi', 'xiaoxiao', 'google'];
+    const MASC = /(jorge|pablo|diego|alvaro|álvaro|raul|raúl|david|mark|daniel|thomas|alex|fred|juan|carlos|enrique|george|james|guy|ryan|andrew|brian|conrad|henri|keita|yunxi|male)/i;
+    const idioma = () => (window.IDIOMA && window.IDIOMA.codigoVoz) || 'es';
+    const elegir = l => { let vs = []; try { vs = speechSynthesis.getVoices(); } catch (e) {} const base = l.slice(0, 2).toLowerCase(), c = vs.filter(v => v.lang.toLowerCase().startsWith(base)); if (!c.length) return null;
+      const punt = v => { const n = v.name.toLowerCase(); let p = 0; PREF.forEach((k, i) => { if (n.includes(k)) p += 40 - i; }); if (MASC.test(n)) p -= 60; if (v.lang.toLowerCase() === l.toLowerCase()) p += 6; if (base === 'es' && /(mx|us|419|pe|co|ar|cl)/i.test(v.lang)) p += 10; return p; };
+      return c.sort((a, b) => punt(b) - punt(a))[0]; };
+    function hablar(t, { l, onb, onend, lento } = {}) {
+      try { speechSynthesis.cancel(); } catch (e) { return; } const L = l || idioma(), lang = L === 'es' ? 'es-MX' : L, v = elegir(lang), texto = String(t).replace(/[—«»*_#]/g, ' ').replace(/\s+/g, ' ').trim();
+      const trozos = []; let ini = 0; for (const f of texto.match(/[^.!?¡¿]+[.!?]*\s*/g) || [texto]) { if (trozos.length && (trozos[trozos.length - 1].t + f).length < 180) trozos[trozos.length - 1].t += f; else trozos.push({ t: f, ini }); ini += f.length; }
+      trozos.forEach((z, i) => { const u = new SpeechSynthesisUtterance(z.t); u.lang = lang; if (v) u.voice = v; u.rate = lento ? .8 : .9; u.pitch = 1.08;
+        if (onb) u.onboundary = e => onb({ name: e.name, charIndex: e.charIndex + z.ini }); if (onend && i === trozos.length - 1) u.onend = onend; speechSynthesis.speak(u); });
+    }
+    try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
+    return { hablar, parar: () => { try { speechSynthesis.cancel(); } catch (e) {} }, idioma, hay: 'speechSynthesis' in window };
+  })();
+  window.VOZ_ACAD = VOZ;
+  const hablar = t => VOZ.hablar(t, { l: 'en-US', lento: true });
+  const _viejoHablar = t => { try { const u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = .8; const v = speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} };
   const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').trim();
 
   // ---------- Cuenta: con cuenta gratis, el avance sigue en cualquier celular o PC ----------
@@ -37,6 +57,9 @@
     chips.forEach(c => c.addEventListener('click', () => aplicar(c.dataset.filtro)));
     let f0 = 'todas'; try { f0 = localStorage.getItem('acadEdad') || 'todas'; } catch (e) {} if (!chips.some(c => c.dataset.filtro === f0)) f0 = 'todas'; aplicar(f0);
   }
+
+  const bl = document.getElementById('leerLeccion');
+  if (bl && VOZ.hay) { let leyendo = false; bl.onclick = () => { if (leyendo) { VOZ.parar(); leyendo = false; bl.textContent = '🔊 Escuchar la explicación'; return; } const art = document.querySelector('article'); if (!art) return; leyendo = true; bl.textContent = '⏹️ Detener'; VOZ.hablar(art.innerText, { onend: () => { leyendo = false; bl.textContent = '🔊 Escuchar la explicación'; } }); }; } else if (bl) bl.hidden = true;
 
   // ---------- Actividades de una lección ----------
   const datos = $('#acad-data'), caja = $('#acad-act'); if (!datos || !caja) return;

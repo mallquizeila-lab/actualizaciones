@@ -23,7 +23,8 @@
   document.getElementById('colBorrar').onclick = () => { if (!confirm('¿Borrar todos los colores de esta lámina?')) return; zonas.forEach(z => { pila.push([z, z.getAttribute('fill') || BLANCO]); z.setAttribute('fill', BLANCO); }); guardar(); revisar(); };
   document.getElementById('colBajar').onclick = () => {
     const c = svg.cloneNode(true); c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.setAttribute('width', 1200); c.setAttribute('height', 1200);
-    c.querySelectorAll('.z').forEach(z => { if (!z.getAttribute('fill')) z.setAttribute('fill', BLANCO); z.setAttribute('stroke', '#1f1f1f'); z.setAttribute('stroke-width', '4'); z.setAttribute('stroke-linejoin', 'round'); });
+    c.querySelectorAll('.z').forEach(z => { if (!z.getAttribute('fill')) z.setAttribute('fill', BLANCO); z.setAttribute('stroke', '#1f1f1f'); z.setAttribute('stroke-width', z.classList.contains('zt') ? '0.8' : '4'); z.setAttribute('stroke-linejoin', 'round'); });
+    c.querySelectorAll('.n').forEach(n => n.setAttribute('fill', '#1f1f1f'));
     c.querySelectorAll('.l').forEach(l => { l.setAttribute('fill', 'none'); l.setAttribute('stroke', '#1f1f1f'); l.setAttribute('stroke-width', '4'); l.setAttribute('stroke-linecap', 'round'); });
     const img = new Image(); img.onload = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 1200; const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 1200, 1200); g.drawImage(img, 0, 0, 1200, 1200);
       g.font = 'bold 34px system-ui,sans-serif'; g.fillStyle = '#7c3aed'; g.textAlign = 'right'; g.fillText('yupitok.com/academia', 1176, 1176);

@@ -390,6 +390,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/juego/salud' && P) { await juego.salud(); return await juego.estado(); }
   if (u === '/api/mando/juego/ideas' && P) { await juego.ideas(); return await juego.estado(); }
   if (u === '/api/mando/academia/crear' && P) { await academiaAg.crear(await json(q)); return await academiaAg.estado(); }
+  if (u === '/api/mando/academia/crecer' && P) { academiaAg.crecerHoy().catch(e => console.log('[Academy] ' + e.message)); return await academiaAg.estado(); }
   if (u === '/api/mando/academia/narrar' && P) { await academiaAg.narrar((await json(q)).slug); return await academiaAg.estado(); }
   if (u === '/api/mando/academia/accion' && P) { await academiaAg.accion(await json(q)); return await academiaAg.estado(); }
   if (u === '/api/mando/academia/ajustes' && P) { academiaAg.ajustes(await json(q)); return await academiaAg.estado(); }

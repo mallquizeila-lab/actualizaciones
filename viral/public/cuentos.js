@@ -7,14 +7,16 @@
   const guardar = p => { try { localStorage.setItem('cuentos', JSON.stringify(p)); } catch (e) {} };
   const mio = () => leer()[C.slug] || { fines: [], estrellas: 0 };
   let voz = true; try { voz = localStorage.getItem('cuentoVoz') !== '0'; } catch (e) {}
-  const hayVoz = 'speechSynthesis' in window;
+  const hayVoz = 'speechSynthesis' in window, VZ = () => window.VOZ_ACAD, LANG = () => (window.IDIOMA && window.IDIOMA.actual) || 'es';
+  // En otro idioma, el texto de cada página se traduce entero (así la voz y las palabras iluminadas coinciden)
+  const traducir = t => new Promise(ok => { if (LANG() === 'es' || !window.IDIOMA) return ok(t); let n = 0; const mira = () => { const r = window.IDIOMA.t(t); if (r !== t || n++ > 14) return ok(r); setTimeout(mira, 300); }; mira(); });
   const vozEs = () => { const vs = speechSynthesis.getVoices(); return vs.find(v => /^es[-_](MX|US|419|PE|CO|AR)/i.test(v.lang)) || vs.find(v => /^es/i.test(v.lang)) || null; };
   let sonando = null; const callar = () => { try { speechSynthesis.cancel(); } catch (e) {} if (sonando) { sonando.pause(); sonando = null; } };
-  const conAudio = id => C.audio && (C.audio.paginas || []).includes(id);
+  const conAudio = id => LANG() === 'es' && C.audio && (C.audio.paginas || []).includes(id); // la narración grabada está en español
 
   // Convierte el texto (con <b> e <i>) en palabras sueltas para resaltarlas mientras se lee
   function palabras(html) {
-    const cont = h('p', { class: 'ctexto' }), lista = []; let plano = '', b = false, i = false;
+    const cont = h('p', { class: 'ctexto', translate: 'no' }), lista = []; let plano = '', b = false, i = false;
     for (const parte of html.split(/(<\/?[bi]>)/)) {
       if (/^<\/?[bi]>$/.test(parte)) { const on = parte[1] !== '/', t = parte.replace(/[<>/]/g, ''); if (t === 'b') b = on; else i = on; continue; }
       for (const tok of parte.split(/(\s+)/)) { if (!tok) continue; if (/^\s+$/.test(tok)) { cont.append(' '); plano += ' '; continue; }
@@ -28,14 +30,13 @@
       a.ontimeupdate = () => { if (!a.duration) return; const ch = a.currentTime / a.duration * L; let act = null; for (const x of w.lista) { if (x.ini <= ch) act = x; else break; } w.lista.forEach(x => x.s.classList.toggle('on', x === act)); };
       a.onended = () => w.lista.forEach(x => x.s.classList.remove('on')); a.play().catch(() => {}); return;
     }
-    if (!hayVoz) return; callar(); const u = new SpeechSynthesisUtterance(w.plano.replace(/[—«»]/g, ' ')); u.lang = 'es-MX'; u.rate = .9; u.pitch = 1.05; const v = vozEs(); if (v) u.voice = v;
-    u.onboundary = e => { if (e.name && e.name !== 'word') return; let act = null; for (const x of w.lista) { if (x.ini <= e.charIndex) act = x; else break; } w.lista.forEach(x => x.s.classList.toggle('on', x === act)); };
-    u.onend = () => w.lista.forEach(x => x.s.classList.remove('on')); speechSynthesis.speak(u);
+    if (!hayVoz || !VZ()) return; callar();
+    VZ().hablar(w.plano, { onb: e => { if (e.name && e.name !== 'word') return; let act = null; for (const x of w.lista) { if (x.ini <= e.charIndex) act = x; else break; } w.lista.forEach(x => x.s.classList.toggle('on', x === act)); }, onend: () => w.lista.forEach(x => x.s.classList.remove('on')) });
   }
 
   const camino = [];
-  function pagina(id) {
-    callar(); camino.push(id); const p = P[id], w = palabras(p.t); caja.innerHTML = '';
+  async function pagina(id) {
+    callar(); camino.push(id); const p = P[id], w = palabras(LANG() === 'es' ? p.t : await traducir(String(p.t).replace(/<[^>]+>/g, ''))); caja.innerHTML = '';
     const barra = h('div', { class: 'cbarra' }, camino.length > 1 ? h('button', { type: 'button', class: 'cbt', onclick: () => { camino.pop(); pagina(camino.pop()); } }, '← Atrás') : h('span'),
       hayVoz || conAudio(id) ? h('button', { type: 'button', class: 'cbt', onclick: () => narrar(w, id) }, '🔊 Escuchar') : null,
       hayVoz || conAudio(id) ? h('button', { type: 'button', class: 'cbt', 'aria-pressed': String(voz), onclick: ev => { voz = !voz; try { localStorage.setItem('cuentoVoz', voz ? '1' : '0'); } catch (e) {} ev.currentTarget.textContent = voz ? '🗣️ Voz: sí' : '🔇 Voz: no'; if (!voz) callar(); } }, voz ? '🗣️ Voz: sí' : '🔇 Voz: no') : null);
