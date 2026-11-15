@@ -1,0 +1,85 @@
+{
+ "nota": "Láminas para colorear de Yupitok Academy (dibujos originales en SVG; class z = zona que se pinta, class l = línea).",
+ "laminas": [
+  {
+   "slug": "yupi-bot",
+   "titulo": "Yupi-bot, el robot programador",
+   "emoji": "🤖",
+   "edad": "6-8",
+   "curso": "programa-con-yupi",
+   "svg": "<rect class=\"z\" x=\"196\" y=\"42\" width=\"8\" height=\"30\"/><circle class=\"z\" cx=\"200\" cy=\"36\" r=\"13\"/><rect class=\"z\" x=\"102\" y=\"100\" width=\"20\" height=\"46\" rx=\"7\"/><rect class=\"z\" x=\"278\" y=\"100\" width=\"20\" height=\"46\" rx=\"7\"/><rect class=\"z\" x=\"118\" y=\"70\" width=\"164\" height=\"112\" rx=\"26\"/><circle class=\"z\" cx=\"165\" cy=\"118\" r=\"21\"/><circle class=\"z\" cx=\"235\" cy=\"118\" r=\"21\"/><circle class=\"z\" cx=\"168\" cy=\"121\" r=\"8\"/><circle class=\"z\" cx=\"238\" cy=\"121\" r=\"8\"/><rect class=\"z\" x=\"162\" y=\"150\" width=\"76\" height=\"16\" rx=\"8\"/><rect class=\"z\" x=\"184\" y=\"182\" width=\"32\" height=\"16\"/><rect class=\"z\" x=\"58\" y=\"208\" width=\"56\" height=\"24\" rx=\"12\"/><rect class=\"z\" x=\"286\" y=\"208\" width=\"56\" height=\"24\" rx=\"12\"/><circle class=\"z\" cx=\"50\" cy=\"220\" r=\"19\"/><circle class=\"z\" cx=\"350\" cy=\"220\" r=\"19\"/><rect class=\"z\" x=\"140\" y=\"322\" width=\"40\" height=\"40\" rx=\"8\"/><rect class=\"z\" x=\"220\" y=\"322\" width=\"40\" height=\"40\" rx=\"8\"/><rect class=\"z\" x=\"124\" y=\"356\" width=\"68\" height=\"24\" rx=\"12\"/><rect class=\"z\" x=\"208\" y=\"356\" width=\"68\" height=\"24\" rx=\"12\"/><rect class=\"z\" x=\"108\" y=\"196\" width=\"184\" height=\"130\" rx=\"22\"/><path class=\"z\" d=\"M200 296 C168 272 156 240 180 234 C192 231 200 242 200 250 C200 242 208 231 220 234 C244 240 232 272 200 296Z\"/><circle class=\"z\" cx=\"135\" cy=\"222\" r=\"9\"/><circle class=\"z\" cx=\"265\" cy=\"222\" r=\"9\"/>",
+   "texto": "Yupi-bot es el robot del curso Programa con Yupi. Los robots siguen las órdenes que les damos, paso a paso, como un algoritmo. Píntalo de tus colores favoritos y dale un corazón brillante.",
+   "reto": "Pinta las antenas de <b>yellow</b> (amarillo) y el corazón de <b>red</b> (rojo)."
+  },
+  {
+   "slug": "loro-colorido",
+   "titulo": "El loro de los colores",
+   "emoji": "🦜",
+   "edad": "6-8",
+   "curso": "ingles-con-yupi",
+   "svg": "<path class=\"z\" d=\"M24 334 L376 300 L378 320 L26 356Z\"/><path class=\"z\" d=\"M178 296 L146 392 L188 388 L216 298Z\"/><ellipse class=\"z\" cx=\"210\" cy=\"218\" rx=\"70\" ry=\"96\"/><ellipse class=\"z\" cx=\"228\" cy=\"240\" rx=\"40\" ry=\"60\"/><path class=\"z\" d=\"M162 176 C118 228 138 300 192 312 C204 262 198 210 162 176Z\"/><ellipse class=\"z\" cx=\"196\" cy=\"320\" rx=\"15\" ry=\"9\"/><ellipse class=\"z\" cx=\"242\" cy=\"316\" rx=\"15\" ry=\"9\"/><circle class=\"z\" cx=\"232\" cy=\"108\" r=\"56\"/><path class=\"z\" d=\"M276 96 C318 100 324 142 292 164 C294 142 286 126 270 124Z\"/><circle class=\"z\" cx=\"248\" cy=\"96\" r=\"15\"/><circle class=\"z\" cx=\"251\" cy=\"96\" r=\"6\"/><circle class=\"z\" cx=\"258\" cy=\"128\" r=\"10\"/><path class=\"z\" d=\"M210 56 C200 30 214 18 226 24 C222 36 228 46 238 52Z\"/>",
+   "texto": "Los loros viven en la selva y algunos pueden imitar palabras. En el Perú hay muchos loros y guacamayos de colores muy vivos en la Amazonía.",
+   "reto": "Toca cada color de la paleta para escuchar su nombre en inglés. ¿Puedes pintar el loro de <b>green</b>, <b>blue</b> y <b>yellow</b>?"
+  },
+  {
+   "slug": "sistema-solar",
+   "titulo": "El sistema solar",
+   "emoji": "🪐",
+   "edad": "9-12",
+   "curso": "ciencia-curiosa",
+   "svg": "<circle class=\"z\" cx=\"62\" cy=\"200\" r=\"86\"/><circle class=\"z\" cx=\"62\" cy=\"200\" r=\"62\"/><circle class=\"z\" cx=\"162\" cy=\"200\" r=\"10\"/><circle class=\"z\" cx=\"196\" cy=\"200\" r=\"16\"/><circle class=\"z\" cx=\"242\" cy=\"200\" r=\"21\"/><path class=\"z\" d=\"M232 190 C242 186 248 196 244 204 C238 210 230 204 232 190Z\"/><path class=\"z\" d=\"M248 208 C256 204 262 212 256 218 C250 220 246 214 248 208Z\"/><circle class=\"z\" cx=\"288\" cy=\"200\" r=\"14\"/><circle class=\"z\" cx=\"322\" cy=\"96\" r=\"40\"/><path class=\"z\" d=\"M286 84 Q322 74 358 84 L360 94 Q322 84 284 94Z\"/><path class=\"z\" d=\"M284 106 Q322 96 360 106 L358 116 Q322 106 286 116Z\"/><ellipse class=\"z\" cx=\"336\" cy=\"100\" rx=\"9\" ry=\"6\"/><ellipse class=\"z\" cx=\"322\" cy=\"308\" rx=\"60\" ry=\"15\"/><circle class=\"z\" cx=\"322\" cy=\"300\" r=\"28\"/><polygon class=\"z\" points=\"150.0,64.0 154.2,74.2 165.2,75.1 156.8,82.2 159.4,92.9 150.0,87.2 140.6,92.9 143.2,82.2 134.8,75.1 145.8,74.2\"/><polygon class=\"z\" points=\"232.0,48.0 235.2,55.6 243.4,56.3 237.1,61.7 239.1,69.7 232.0,65.4 224.9,69.7 226.9,61.7 220.6,56.3 228.8,55.6\"/><polygon class=\"z\" points=\"196.0,329.0 200.0,338.5 210.3,339.4 202.4,346.1 204.8,356.1 196.0,350.8 187.2,356.1 189.6,346.1 181.7,339.4 192.0,338.5\"/><polygon class=\"z\" points=\"122.0,320.0 124.6,326.4 131.5,326.9 126.3,331.4 127.9,338.1 122.0,334.5 116.1,338.1 117.7,331.4 112.5,326.9 119.4,326.4\"/><polygon class=\"z\" points=\"380.0,188.0 383.2,195.6 391.4,196.3 385.1,201.7 387.1,209.7 380.0,205.4 372.9,209.7 374.9,201.7 368.6,196.3 376.8,195.6\"/>",
+   "texto": "El Sol está en el centro y los planetas giran a su alrededor. Aquí ves a Mercurio, Venus, la Tierra y Marte cerca del Sol, y a los gigantes Júpiter y Saturno más lejos.",
+   "reto": "Pinta Marte de rojo, la Tierra de azul y verde, y los anillos de Saturno de color arena."
+  },
+  {
+   "slug": "ciclo-del-agua",
+   "titulo": "El ciclo del agua",
+   "emoji": "💧",
+   "edad": "9-12",
+   "curso": "ciencia-curiosa",
+   "svg": "<circle class=\"z\" cx=\"68\" cy=\"74\" r=\"40\"/><path class=\"z\" d=\"M216 128 A34 34 0 0 1 270 96 A42 42 0 0 1 348 112 A32 32 0 0 1 350 176 H226 A28 28 0 0 1 216 128Z\"/><path class=\"z\" d=\"M210 302 L296 168 L386 302Z\"/><path class=\"z\" d=\"M274 202 L296 168 L318 202 L307 194 L296 206 L285 194Z\"/><path class=\"z\" d=\"M250 196 q-12 18 0 26 q12 -8 0 -26Z\"/><path class=\"z\" d=\"M290 210 q-12 18 0 26 q12 -8 0 -26Z\"/><path class=\"z\" d=\"M330 196 q-12 18 0 26 q12 -8 0 -26Z\"/><path class=\"z\" d=\"M0 300 Q50 284 100 300 T200 300 T300 300 T400 300 V400 H0Z\"/><path class=\"z\" d=\"M0 340 Q50 326 100 340 T200 340 T300 340 T400 340 V400 H0Z\"/><path class=\"l\" d=\"M90 286 q-12 -20 0 -40 q12 -20 0 -40\"/><path class=\"l\" d=\"M140 286 q-12 -20 0 -40 q12 -20 0 -40\"/><path class=\"z\" d=\"M150 362 q10 -14 26 -6 q-8 12 -26 6Z\"/>",
+   "texto": "El sol calienta el mar y el agua sube como vapor (evaporación), forma nubes (condensación), cae como lluvia (precipitación) y vuelve al mar y a los ríos (recolección).",
+   "reto": "Pinta el mar y las gotas de azul, la nube de gris claro y la nieve de la montaña de blanco."
+  },
+  {
+   "slug": "pizza-de-fracciones",
+   "titulo": "La pizza de las fracciones",
+   "emoji": "🍕",
+   "edad": "9-12",
+   "curso": "mates-divertidas",
+   "svg": "<circle class=\"z\" cx=\"200\" cy=\"200\" r=\"184\"/><circle class=\"z\" cx=\"200\" cy=\"200\" r=\"156\"/><path class=\"z\" d=\"M200 200 L332.0 200.0 A132 132 0 0 1 293.3 293.3 Z\"/><path class=\"z\" d=\"M200 200 L293.3 293.3 A132 132 0 0 1 200.0 332.0 Z\"/><path class=\"z\" d=\"M200 200 L200.0 332.0 A132 132 0 0 1 106.7 293.3 Z\"/><path class=\"z\" d=\"M200 200 L106.7 293.3 A132 132 0 0 1 68.0 200.0 Z\"/><path class=\"z\" d=\"M200 200 L68.0 200.0 A132 132 0 0 1 106.7 106.7 Z\"/><path class=\"z\" d=\"M200 200 L106.7 106.7 A132 132 0 0 1 200.0 68.0 Z\"/><path class=\"z\" d=\"M200 200 L200.0 68.0 A132 132 0 0 1 293.3 106.7 Z\"/><path class=\"z\" d=\"M200 200 L293.3 106.7 A132 132 0 0 1 332.0 200.0 Z\"/><circle class=\"z\" cx=\"200\" cy=\"120\" r=\"17\"/><circle class=\"z\" cx=\"262\" cy=\"158\" r=\"15\"/><circle class=\"z\" cx=\"270\" cy=\"236\" r=\"17\"/><circle class=\"z\" cx=\"212\" cy=\"284\" r=\"15\"/><circle class=\"z\" cx=\"140\" cy=\"254\" r=\"17\"/><circle class=\"z\" cx=\"130\" cy=\"172\" r=\"15\"/><circle class=\"z\" cx=\"200\" cy=\"200\" r=\"14\"/><circle class=\"z\" cx=\"236\" cy=\"110\" r=\"7\"/><circle class=\"z\" cx=\"296\" cy=\"200\" r=\"7\"/><circle class=\"z\" cx=\"240\" cy=\"300\" r=\"7\"/><circle class=\"z\" cx=\"160\" cy=\"300\" r=\"7\"/><circle class=\"z\" cx=\"110\" cy=\"210\" r=\"7\"/><circle class=\"z\" cx=\"162\" cy=\"128\" r=\"7\"/>",
+   "texto": "Esta pizza está cortada en 8 trozos iguales, así que cada trozo es 1/8. Si pintas 4 trozos, pintaste 4/8, que es lo mismo que la mitad (1/2).",
+   "reto": "Pinta 3/8 de la pizza de un color y 5/8 de otro. ¿Cuántos trozos pintaste en total?"
+  },
+  {
+   "slug": "flor-y-sol",
+   "titulo": "La flor que come luz",
+   "emoji": "🌻",
+   "edad": "9-12",
+   "curso": "ciencia-curiosa",
+   "svg": "<circle class=\"z\" cx=\"340\" cy=\"60\" r=\"38\"/><rect class=\"z\" x=\"194\" y=\"170\" width=\"12\" height=\"150\"/><path class=\"z\" d=\"M200 270 C160 236 120 250 112 262 C140 286 176 286 200 270Z\"/><path class=\"z\" d=\"M200 236 C240 200 282 212 290 226 C262 250 226 252 200 236Z\"/><circle class=\"z\" cx=\"246.0\" cy=\"122.0\" r=\"32\"/><circle class=\"z\" cx=\"223.0\" cy=\"161.8\" r=\"32\"/><circle class=\"z\" cx=\"177.0\" cy=\"161.8\" r=\"32\"/><circle class=\"z\" cx=\"154.0\" cy=\"122.0\" r=\"32\"/><circle class=\"z\" cx=\"177.0\" cy=\"82.2\" r=\"32\"/><circle class=\"z\" cx=\"223.0\" cy=\"82.2\" r=\"32\"/><circle class=\"z\" cx=\"200\" cy=\"122\" r=\"30\"/><path class=\"z\" d=\"M132 330 H268 L250 392 H150Z\"/><rect class=\"z\" x=\"120\" y=\"310\" width=\"160\" height=\"28\" rx=\"8\"/><ellipse class=\"z\" cx=\"72\" cy=\"330\" rx=\"30\" ry=\"16\"/><ellipse class=\"z\" cx=\"60\" cy=\"312\" rx=\"16\" ry=\"10\"/>",
+   "texto": "Las plantas fabrican su alimento con la luz del sol, el agua y el aire: es la fotosíntesis. Las hojas son verdes por la clorofila, que atrapa la luz.",
+   "reto": "Pinta las hojas de verde (por la clorofila) y el sol de amarillo y anaranjado."
+  },
+  {
+   "slug": "pez-del-mar",
+   "titulo": "Fish: el pez del mar",
+   "emoji": "🐟",
+   "edad": "6-8",
+   "curso": "ingles-con-yupi",
+   "svg": "<path class=\"z\" d=\"M40 380 C30 330 60 300 46 250 C70 300 52 340 70 380Z\"/><path class=\"z\" d=\"M350 384 C340 340 370 300 354 262 C380 300 362 344 380 384Z\"/><circle class=\"z\" cx=\"330\" cy=\"110\" r=\"12\"/><circle class=\"z\" cx=\"352\" cy=\"70\" r=\"8\"/><circle class=\"z\" cx=\"318\" cy=\"50\" r=\"6\"/><path class=\"z\" d=\"M276 196 L346 136 L332 196 L346 256Z\"/><path class=\"z\" d=\"M180 132 C200 100 236 104 248 136Z\"/><path class=\"z\" d=\"M190 262 C206 288 232 286 242 258Z\"/><ellipse class=\"z\" cx=\"180\" cy=\"196\" rx=\"106\" ry=\"70\"/><path class=\"z\" d=\"M150 130 C138 170 138 222 150 262 C166 262 176 262 186 264 C172 222 172 170 186 128 C174 128 162 128 150 130Z\"/><path class=\"z\" d=\"M214 132 C202 170 202 222 214 260 C224 258 232 254 240 248 C230 214 230 178 240 142 C232 138 224 134 214 132Z\"/><circle class=\"z\" cx=\"110\" cy=\"180\" r=\"17\"/><circle class=\"z\" cx=\"106\" cy=\"180\" r=\"7\"/><path class=\"l\" d=\"M78 212 q14 10 26 2\"/>",
+   "texto": "En inglés, pez se dice <b>fish</b>. Los peces respiran bajo el agua con sus branquias y usan sus aletas para nadar.",
+   "reto": "Pinta las rayas del pez de <b>orange</b> (anaranjado) y las algas de <b>green</b> (verde)."
+  },
+  {
+   "slug": "mi-computadora",
+   "titulo": "Mi computadora",
+   "emoji": "💻",
+   "edad": "6-8",
+   "curso": "programa-con-yupi",
+   "svg": "<rect class=\"z\" x=\"60\" y=\"40\" width=\"280\" height=\"200\" rx=\"16\"/><rect class=\"z\" x=\"80\" y=\"60\" width=\"240\" height=\"160\" rx=\"6\"/><rect class=\"z\" x=\"96\" y=\"76\" width=\"208\" height=\"24\" rx=\"4\"/><rect class=\"z\" x=\"96\" y=\"112\" width=\"120\" height=\"92\" rx=\"4\"/><rect class=\"z\" x=\"226\" y=\"112\" width=\"78\" height=\"40\" rx=\"4\"/><rect class=\"z\" x=\"226\" y=\"162\" width=\"78\" height=\"42\" rx=\"4\"/><rect class=\"z\" x=\"182\" y=\"240\" width=\"36\" height=\"40\"/><rect class=\"z\" x=\"140\" y=\"278\" width=\"120\" height=\"18\" rx=\"6\"/><rect class=\"z\" x=\"88\" y=\"306\" width=\"224\" height=\"72\" rx=\"10\"/><rect class=\"z\" x=\"100\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"126\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"152\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"178\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"204\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"230\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"256\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"282\" y=\"318\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"100\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"126\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"152\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"178\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"204\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"230\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"256\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"282\" y=\"336\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"100\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"126\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"152\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"178\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"204\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"230\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"256\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><rect class=\"z\" x=\"282\" y=\"354\" width=\"22\" height=\"14\" rx=\"3\"/><ellipse class=\"z\" cx=\"350\" cy=\"346\" rx=\"22\" ry=\"32\"/><path class=\"l\" d=\"M350 314 C350 290 330 290 318 300\"/><path class=\"l\" d=\"M328 340 H372\"/>",
+   "texto": "En una computadora escribimos programas, dibujamos y aprendemos. En la pantalla hay ventanas, y con el teclado y el ratón le damos órdenes.",
+   "reto": "Pinta cada ventana de la pantalla de un color distinto, como si fuera tu propia página web."
+  }
+ ]
+}

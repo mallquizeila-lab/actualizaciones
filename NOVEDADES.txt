@@ -1,3 +1,10 @@
+v7.92.0 — 🎨 Academy: dibujos para colorear
+- 🎨 Nueva zona yupitok.com/academia/colorear con 8 dibujos originales (Yupi-bot, loro, sistema solar, ciclo del agua, pizza de fracciones, flor, pez y computadora), cada uno con su edad.
+- 👆 Toca un color y luego la parte que quieres pintar; cada color dice su nombre en inglés. Hay deshacer, empezar de nuevo y guardado automático.
+- 💾 Descarga tu dibujo en alta calidad (PNG) para imprimirlo o compartirlo.
+- 📚 Cada dibujo trae un dato para aprender, un reto de color y un enlace a su curso; los cursos muestran sus dibujos para repasar.
+- 👨‍👩‍👧 Sin anuncios, sin chat y sin pedir datos.
+
 v7.91.0 — 💾 Academy: cuenta gratis, compartir y retos
 - 💾 Invitación a crear la cuenta gratis en la Academy, con sus beneficios: seguir donde te quedaste en cualquier celular o PC, 💎 Yupicoins y puntos del Yupi Pass por cada lección nueva, y estrellas e insignias guardadas en tu perfil.
 - 🔄 El avance de la Academy se guarda en la cuenta y se recupera en otro equipo; al crear la cuenta o entrar, vuelves directo a tu lección.
