@@ -9,7 +9,8 @@
   let voz = true; try { voz = localStorage.getItem('cuentoVoz') !== '0'; } catch (e) {}
   const hayVoz = 'speechSynthesis' in window;
   const vozEs = () => { const vs = speechSynthesis.getVoices(); return vs.find(v => /^es[-_](MX|US|419|PE|CO|AR)/i.test(v.lang)) || vs.find(v => /^es/i.test(v.lang)) || null; };
-  const callar = () => { try { speechSynthesis.cancel(); } catch (e) {} };
+  let sonando = null; const callar = () => { try { speechSynthesis.cancel(); } catch (e) {} if (sonando) { sonando.pause(); sonando = null; } };
+  const conAudio = id => C.audio && (C.audio.paginas || []).includes(id);
 
   // Convierte el texto (con <b> e <i>) en palabras sueltas para resaltarlas mientras se lee
   function palabras(html) {
@@ -21,7 +22,12 @@
     }
     return { cont, lista, plano };
   }
-  function narrar(w) {
+  function narrar(w, id) {
+    if (conAudio(id)) { // 🔊 narración grabada (voz Kokoro): las palabras se iluminan según el avance del audio
+      callar(); const a = new Audio(`/audio/cuentos/${C.slug}/${id}.mp3?v=${C.audio.v}`); sonando = a; const L = w.plano.length || 1;
+      a.ontimeupdate = () => { if (!a.duration) return; const ch = a.currentTime / a.duration * L; let act = null; for (const x of w.lista) { if (x.ini <= ch) act = x; else break; } w.lista.forEach(x => x.s.classList.toggle('on', x === act)); };
+      a.onended = () => w.lista.forEach(x => x.s.classList.remove('on')); a.play().catch(() => {}); return;
+    }
     if (!hayVoz) return; callar(); const u = new SpeechSynthesisUtterance(w.plano.replace(/[—«»]/g, ' ')); u.lang = 'es-MX'; u.rate = .9; u.pitch = 1.05; const v = vozEs(); if (v) u.voice = v;
     u.onboundary = e => { if (e.name && e.name !== 'word') return; let act = null; for (const x of w.lista) { if (x.ini <= e.charIndex) act = x; else break; } w.lista.forEach(x => x.s.classList.toggle('on', x === act)); };
     u.onend = () => w.lista.forEach(x => x.s.classList.remove('on')); speechSynthesis.speak(u);
@@ -31,13 +37,13 @@
   function pagina(id) {
     callar(); camino.push(id); const p = P[id], w = palabras(p.t); caja.innerHTML = '';
     const barra = h('div', { class: 'cbarra' }, camino.length > 1 ? h('button', { type: 'button', class: 'cbt', onclick: () => { camino.pop(); pagina(camino.pop()); } }, '← Atrás') : h('span'),
-      hayVoz ? h('button', { type: 'button', class: 'cbt', onclick: () => narrar(w) }, '🔊 Escuchar') : null,
-      hayVoz ? h('button', { type: 'button', class: 'cbt', 'aria-pressed': String(voz), onclick: ev => { voz = !voz; try { localStorage.setItem('cuentoVoz', voz ? '1' : '0'); } catch (e) {} ev.currentTarget.textContent = voz ? '🗣️ Voz: sí' : '🔇 Voz: no'; if (!voz) callar(); } }, voz ? '🗣️ Voz: sí' : '🔇 Voz: no') : null);
+      hayVoz || conAudio(id) ? h('button', { type: 'button', class: 'cbt', onclick: () => narrar(w, id) }, '🔊 Escuchar') : null,
+      hayVoz || conAudio(id) ? h('button', { type: 'button', class: 'cbt', 'aria-pressed': String(voz), onclick: ev => { voz = !voz; try { localStorage.setItem('cuentoVoz', voz ? '1' : '0'); } catch (e) {} ev.currentTarget.textContent = voz ? '🗣️ Voz: sí' : '🔇 Voz: no'; if (!voz) callar(); } }, voz ? '🗣️ Voz: sí' : '🔇 Voz: no') : null);
     caja.append(barra, h('div', { class: 'cesc', 'aria-hidden': 'true' }, p.esc), w.cont);
     if (p.opciones) caja.append(h('p', { class: 'cpreg' }, '👉 Tú decides:'), h('div', { class: 'cops' }, ...p.opciones.map(o => h('button', { type: 'button', class: 'cop', onclick: () => pagina(o.ir) }, o.t))));
     else if (p.sig) caja.append(h('button', { type: 'button', class: 'cop prim', onclick: () => pagina(p.sig) }, 'Seguir leyendo →'));
     else if (p.fin) final(id, p);
-    caja.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (voz) setTimeout(() => narrar(w), 350);
+    caja.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (voz) setTimeout(() => narrar(w, id), 350);
   }
   function final(id, p) {
     const m = mio(); if (!m.fines.includes(id)) m.fines.push(id); const t = leer(); t[C.slug] = m; guardar(t);

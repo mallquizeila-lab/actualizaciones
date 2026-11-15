@@ -1,3 +1,11 @@
+v7.96.0 — 🎨 25 dibujos + agente que crea lecciones, dibujos y trivia + cuentos narrados
+- 🎨 Colorear: ahora hay 25 dibujos originales (antes 8), ordenados por categorías: Yupi y amigos, Animales, Espacio y ciencia, Comida, Naturaleza, Transportes, Mi mundo y 4 Mandalas.
+- 🎓 El Agente de la Academy ya crea 4 tipos de contenido: cuentos, lecciones nuevas (se suman como «Módulo extra» de cada curso), dibujos para colorear y preguntas para la trivia en vivo.
+- 🧐 Todo pasa revisiones automáticas y el supervisor (otra IA) antes de llegar a tu cola; ves la vista previa (el dibujo, la lección con sus retos o las preguntas con la respuesta marcada) y apruebas o rechazas.
+- 🌙 «Contenidos por noche» (hasta 4) va rotando entre cuentos, lecciones, dibujos y trivia.
+- 🔊 Narración de cuentos: botón «Narrar» por cuento; usa la voz Kokoro (sin internet) o, si no está instalada, una voz natural de Microsoft. Los cuentos que apruebas se narran solos y en la página la voz grabada reemplaza a la del navegador.
+- 🛡️ La página limpia todo lo que llega del agente (sin código, sin enlaces, solo formas de dibujo seguras).
+
 v7.95.0 — 🎓 Agente de la Academy
 - 🎓 Nuevo en Centro de Mando: el Agente de la Academy escribe cuentos interactivos nuevos (elige curso, edad e idea).
 - 🧐 Cada cuento pasa por revisiones automáticas (largo, estructura, 2 finales, palabras prohibidas, sin enlaces) y por un supervisor que es OTRA IA y le pone nota de 0 a 100 con rúbrica pedagógica; si saca menos de 85 se corrige solo (máx. 2 veces).

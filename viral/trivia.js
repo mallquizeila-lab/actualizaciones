@@ -15,7 +15,7 @@ const EXTRA = {
   'finanzas-personales': [['En la regla 50/30/20, ¿qué porcentaje va al ahorro?', ['20 %', '50 %', '30 %'], 0], ['¿Cuántos meses de gastos se recomienda en el fondo de emergencia?', ['De 3 a 6', 'Medio mes', 'De 20 a 30'], 0]],
 };
 
-function crear({ academia, cuentos }) {
+function crear({ academia, cuentos, extra = () => ({}) }) {
   const salas = new Map();
   const tok = () => crypto.randomBytes(12).toString('hex');
   const codigo = () => { let c; do { c = Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[crypto.randomInt(24)]).join(''); } while (salas.has(c)); return c; };
@@ -26,6 +26,7 @@ function crear({ academia, cuentos }) {
     for (const c of cursos) {
       for (const m of c.modulos) for (const l of m.lecciones) for (const a of l.actividad) if (a.tipo === 'quiz' && !a.voz) pool.push({ p: a.p, ops: a.ops, ok: a.ok });
       for (const q of (EXTRA[c.slug] || [])) pool.push({ p: q[0], ops: q[1], ok: q[2] });
+      for (const q of (extra()[c.slug] || [])) pool.push({ p: q.p, ops: q.ops, ok: q.ok });
       for (const k of C.filter(x => x.curso === c.slug)) for (const q of k.preguntas) pool.push({ p: q.p, ops: q.ops, ok: q.ok });
     }
     return pool.sort(() => Math.random() - .5).slice(0, NPREG).map(q => { const ord = q.ops.map((t, i) => ({ t, i })).sort(() => Math.random() - .5); return { p: q.p, ops: ord.map(o => o.t), ok: ord.findIndex(o => o.i === q.ok) }; });
