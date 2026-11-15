@@ -1,0 +1,1399 @@
+{
+ "nota": "Yupitok Academy: cursos con módulos y lecciones (contenido propio). edad: 6-8, 9-12, 13-17 o 18+. Actividades: quiz, parejas, ordenar, escribir, robot, codigo.",
+ "edades": {
+  "6-8": {
+   "n": "Peques",
+   "r": "6 a 8 años",
+   "c": "#22c55e"
+  },
+  "9-12": {
+   "n": "Chicos",
+   "r": "9 a 12 años",
+   "c": "#22e6ff"
+  },
+  "13-17": {
+   "n": "Jóvenes",
+   "r": "13 a 17 años",
+   "c": "#a78bfa"
+  },
+  "18+": {
+   "n": "Adultos",
+   "r": "18 años o más",
+   "c": "#f59e0b"
+  }
+ },
+ "cursos": [
+  {
+   "slug": "programa-con-yupi",
+   "titulo": "Programa con Yupi",
+   "emoji": "🤖",
+   "edad": "6-8",
+   "desc": "Curso gratis de programación para niños de 6 a 8 años: secuencias, errores y bucles guiando a Yupi-bot hasta la estrella, sin teclado.",
+   "intro": "<p>En este curso tu hijo aprende a <b>pensar como programador</b> sin escribir código: arrastra flechas para darle órdenes a Yupi-bot y llevarlo hasta la estrella. Así descubre qué es una secuencia, cómo encontrar errores y para qué sirve un bucle.</p><p>Cada lección dura unos 10 minutos: primero una explicación corta con ejemplos de la vida diaria y luego retos que suben de dificultad poco a poco.</p>",
+   "aprende": [
+    "Dar órdenes en el orden correcto (secuencias)",
+    "Encontrar y arreglar errores (depurar)",
+    "Repetir acciones con bucles",
+    "Planificar antes de actuar"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: Secuencias",
+     "lecciones": [
+      {
+       "slug": "ordenes-en-orden",
+       "titulo": "Las órdenes en orden",
+       "emoji": "➡️",
+       "min": 10,
+       "desc": "Primera lección de programación para niños: qué es un algoritmo y por qué el orden de las órdenes importa.",
+       "html": "<p>¿Sabías que las computadoras no piensan solas? Hacen <b>exactamente</b> lo que les decimos, paso por paso. A esa lista de pasos se le llama <b>algoritmo</b>.</p><h2>Un algoritmo es como una receta</h2><p>Para hacer un pan con mantequilla primero sacas el pan, luego abres la mantequilla y al final la untas. Si untas antes de sacar el pan… ¡la mantequilla cae en la mesa! Con las computadoras pasa lo mismo: el <b>orden</b> de las órdenes cambia el resultado.</p><h2>Conoce a Yupi-bot</h2><p>Yupi-bot es un robot que solo entiende cuatro órdenes:</p><ul><li>⬆️ subir una casilla</li><li>⬇️ bajar una casilla</li><li>⬅️ ir a la izquierda</li><li>➡️ ir a la derecha</li></ul><p>Tú escribes la lista de flechas y luego aprietas <b>▶ Ejecutar</b>. Yupi-bot la sigue de principio a fin. Si llega a la ⭐, ¡ganaste!</p><h2>Consejo para empezar</h2><p>Antes de tocar las flechas, sigue el camino con tu dedo en la pantalla y cuenta las casillas. Los buenos programadores siempre <b>planifican primero</b>.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Qué es un algoritmo?",
+         "ops": [
+          "Una lista de pasos en orden",
+          "Un juego de pelota",
+          "Un animal del bosque"
+         ],
+         "ok": 0,
+         "exp": "Un algoritmo es una lista de pasos que se siguen en orden, como una receta."
+        },
+        {
+         "tipo": "ordenar",
+         "p": "Ordena los pasos para lavarte los dientes:",
+         "items": [
+          "Abrir la pasta",
+          "Poner pasta en el cepillo",
+          "Cepillar los dientes",
+          "Enjuagar la boca"
+         ],
+         "exp": "¡Bien! Si cambias el orden, no funciona."
+        },
+        {
+         "tipo": "robot",
+         "p": "Lleva a Yupi-bot hasta la estrella.",
+         "n": 4,
+         "ini": [
+          0,
+          3
+         ],
+         "meta": [
+          3,
+          3
+         ],
+         "muros": []
+        },
+        {
+         "tipo": "robot",
+         "p": "Ahora hay una roca en el camino. ¡Rodéala!",
+         "n": 4,
+         "ini": [
+          0,
+          3
+         ],
+         "meta": [
+          2,
+          1
+         ],
+         "muros": [
+          [
+           1,
+           3
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "slug": "detective-de-errores",
+       "titulo": "Detective de errores",
+       "emoji": "🔍",
+       "min": 10,
+       "desc": "Los niños aprenden a depurar: encontrar el error en una lista de órdenes y arreglarlo, como verdaderos programadores.",
+       "html": "<p>A veces Yupi-bot no llega a la estrella. ¿Se portó mal? ¡No! Solo hizo lo que le dijimos. Si algo sale mal, es que hay un <b>error</b> en las órdenes. Los programadores llaman a los errores <b>bugs</b> (que en inglés significa «bichitos»).</p><h2>¿Qué hace un detective de errores?</h2><ol><li><b>Mira</b> dónde se detuvo o chocó Yupi-bot.</li><li><b>Busca</b> la flecha que lo llevó por mal camino.</li><li><b>Cambia</b> solo esa flecha y vuelve a probar.</li></ol><p>No hace falta borrar todo y empezar de cero. Arreglar un error pequeño es más rápido y es lo que hacen los programadores todos los días.</p><h2>Equivocarse es parte de aprender</h2><p>Hasta los mejores programadores del mundo se equivocan muchas veces al día. La diferencia es que no se rinden: prueban, miran qué pasó y corrigen. ¡Tú también puedes!</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "Yupi-bot debía subir, pero bajó. ¿Qué hacemos?",
+         "ops": [
+          "Cambiar la flecha ⬇️ por ⬆️",
+          "Borrar todo el juego",
+          "Apagar la computadora"
+         ],
+         "ok": 0,
+         "exp": "Un buen detective cambia solo la orden que está mal."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cómo se llama un error en un programa?",
+         "ops": [
+          "Bug",
+          "Pizza",
+          "Estrella"
+         ],
+         "ok": 0,
+         "exp": "Bug significa «bichito» en inglés."
+        },
+        {
+         "tipo": "robot",
+         "p": "El camino tiene rocas. Planifica y llega a la estrella.",
+         "n": 5,
+         "ini": [
+          0,
+          4
+         ],
+         "meta": [
+          4,
+          0
+         ],
+         "muros": [
+          [
+           1,
+           4
+          ],
+          [
+           1,
+           3
+          ],
+          [
+           3,
+           1
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        {
+         "tipo": "robot",
+         "p": "Un laberinto pequeño. ¡Tú puedes!",
+         "n": 5,
+         "ini": [
+          0,
+          0
+         ],
+         "meta": [
+          4,
+          4
+         ],
+         "muros": [
+          [
+           1,
+           0
+          ],
+          [
+           1,
+           1
+          ],
+          [
+           1,
+           2
+          ],
+          [
+           3,
+           2
+          ],
+          [
+           3,
+           3
+          ],
+          [
+           3,
+           4
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: Bucles",
+     "lecciones": [
+      {
+       "slug": "repetir-sin-cansarse",
+       "titulo": "Repetir sin cansarse",
+       "emoji": "🔁",
+       "min": 12,
+       "desc": "Qué es un bucle en programación explicado para niños: repetir órdenes sin escribirlas muchas veces.",
+       "html": "<p>Imagina que tienes que decir «salta» diez veces seguidas. Es más fácil decir: «<b>salta 10 veces</b>». ¡Eso es un <b>bucle</b>!</p><h2>¿Qué es un bucle?</h2><p>Un bucle es una caja de órdenes que se <b>repite</b> varias veces. En vez de escribir ➡️➡️➡️➡️➡️, pones ➡️ dentro del bucle y eliges «repetir 5 veces».</p><h2>Cómo usarlo con Yupi-bot</h2><ol><li>Toca <b>«Escribir en: 🔁 Bucle»</b> y pon las flechas que se repiten.</li><li>Elige cuántas veces se repite con los botones − y +.</li><li>Vuelve a <b>«Principal»</b> y pon el bloque 🔁 donde quieras que el bucle trabaje.</li></ol><p>En estos retos hay un <b>límite de bloques</b> en el programa principal. ¡Sin bucles no te alcanzan!</p><h2>Los bucles en la vida real</h2><p>Las lavadoras repiten giros, los semáforos repiten sus colores y tu corazón repite latidos. Los programadores usan bucles todo el tiempo para no escribir lo mismo mil veces.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Para qué sirve un bucle?",
+         "ops": [
+          "Para repetir órdenes",
+          "Para borrar el juego",
+          "Para cambiar de color"
+         ],
+         "ok": 0,
+         "exp": "Un bucle repite las órdenes que tiene dentro."
+        },
+        {
+         "tipo": "robot",
+         "p": "Usa un bucle: el programa principal solo acepta 2 bloques.",
+         "n": 6,
+         "ini": [
+          0,
+          5
+         ],
+         "meta": [
+          5,
+          5
+         ],
+         "muros": [],
+         "bucle": true,
+         "max": 2
+        },
+        {
+         "tipo": "robot",
+         "p": "¡Una escalera! Pon dos flechas dentro del bucle.",
+         "n": 5,
+         "ini": [
+          0,
+          4
+         ],
+         "meta": [
+          4,
+          0
+         ],
+         "muros": [
+          [
+           0,
+           3
+          ],
+          [
+           1,
+           2
+          ],
+          [
+           2,
+           1
+          ],
+          [
+           3,
+           0
+          ]
+         ],
+         "bucle": true,
+         "max": 2
+        }
+       ]
+      },
+      {
+       "slug": "bucles-y-secuencias",
+       "titulo": "Bucles y secuencias juntos",
+       "emoji": "🧩",
+       "min": 12,
+       "desc": "Combina bucles con órdenes sueltas para resolver retos de programación para niños con pocos bloques.",
+       "html": "<p>Ya sabes dar órdenes en orden y ya sabes repetir con bucles. ¡Ahora vamos a <b>combinarlos</b>!</p><h2>Primero piensa en patrones</h2><p>Un <b>patrón</b> es algo que se repite. Mira el camino de Yupi-bot y pregúntate: ¿hay una parte que se repite? Esa parte va dentro del bucle. Lo que no se repite va suelto en el programa principal.</p><h2>Ejemplo</h2><p>Si el camino es ⬆️⬆️➡️➡️➡️➡️, la parte que se repite es ➡️. Puedes escribir: ⬆️ ⬆️ 🔁 y dentro del bucle ➡️ repetido 4 veces. Son solo 3 bloques en el principal, en vez de 6.</p><h2>¿Por qué es importante?</h2><p>Los programas cortos son más fáciles de leer y de arreglar. Cuando seas grande y hagas videojuegos o aplicaciones, vas a usar este truco todos los días.</p><p>Al terminar este módulo ganas la insignia <b>Programador Yupi</b>. ¡Muéstrasela a tu familia!</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "Camino: ⬆️⬆️➡️➡️➡️➡️. ¿Qué parte va dentro del bucle?",
+         "ops": [
+          "➡️",
+          "⬆️⬆️",
+          "Ninguna"
+         ],
+         "ok": 0,
+         "exp": "➡️ se repite 4 veces: esa parte va dentro del bucle."
+        },
+        {
+         "tipo": "robot",
+         "p": "Combina flechas sueltas y un bucle. Máximo 3 bloques en el principal.",
+         "n": 5,
+         "ini": [
+          0,
+          4
+         ],
+         "meta": [
+          4,
+          2
+         ],
+         "muros": [
+          [
+           1,
+           4
+          ],
+          [
+           1,
+           3
+          ]
+         ],
+         "bucle": true,
+         "max": 3
+        },
+        {
+         "tipo": "robot",
+         "p": "Reto final: ¡la gran escalera! Máximo 2 bloques en el principal.",
+         "n": 7,
+         "ini": [
+          0,
+          6
+         ],
+         "meta": [
+          6,
+          0
+         ],
+         "muros": [
+          [
+           1,
+           6
+          ],
+          [
+           2,
+           5
+          ],
+          [
+           3,
+           4
+          ],
+          [
+           4,
+           3
+          ],
+          [
+           5,
+           2
+          ],
+          [
+           6,
+           1
+          ]
+         ],
+         "bucle": true,
+         "max": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "ingles-con-yupi",
+   "titulo": "Inglés con Yupi",
+   "emoji": "🦜",
+   "edad": "6-8",
+   "desc": "Curso de inglés gratis para niños de 6 a 8 años: saludos, colores, animales y números con voz en inglés y juegos de parejas.",
+   "intro": "<p>Un primer curso de inglés para los más pequeños, con <b>voz en inglés</b> en cada palabra. El niño escucha, repite en voz alta y juega a unir parejas. No se graba su voz ni se pide ningún dato.</p><p>Está pensado para el nivel inicial (Pre-A1): palabras del día a día que se aprenden jugando.</p>",
+   "aprende": [
+    "Saludar y despedirse en inglés",
+    "Los colores",
+    "Animales y sus sonidos",
+    "Contar del 1 al 10"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: Hello, world!",
+     "lecciones": [
+      {
+       "slug": "hello-saludos",
+       "titulo": "Hello! Saludos en inglés",
+       "emoji": "👋",
+       "min": 8,
+       "desc": "Aprende a saludar en inglés: hello, goodbye, good morning, thank you y please, con audio para niños.",
+       "html": "<p>¡Vamos a saludar en inglés! Toca cada palabra para <b>escuchar</b> cómo se dice y repítela en voz alta. 🔊</p><h2>Las palabras de hoy</h2><ul><li><b>Hello</b> (jelóu) = Hola 👋</li><li><b>Goodbye</b> (gudbái) = Adiós 🙋</li><li><b>Good morning</b> (gud mórning) = Buenos días ☀️</li><li><b>Thank you</b> (zénkiu) = Gracias 🙏</li><li><b>Please</b> (plis) = Por favor 🥺</li></ul><h2>Un diálogo con Yupi</h2><p>— <b>Hello!</b> I am Yupi. (¡Hola! Soy Yupi.)<br>— <b>Hello</b>, Yupi! (¡Hola, Yupi!)<br>— <b>Thank you</b> for playing! (¡Gracias por jugar!)<br>— <b>Goodbye!</b> (¡Adiós!)</p><h2>Truco para recordar</h2><p>Usa estas palabras hoy con tu familia: di <b>good morning</b> en el desayuno y <b>thank you</b> cuando te pasen la comida. Lo que se usa, no se olvida.</p>",
+       "voz": [
+        "Hello",
+        "Goodbye",
+        "Good morning",
+        "Thank you",
+        "Please"
+       ],
+       "actividad": [
+        {
+         "tipo": "parejas",
+         "p": "Une cada palabra en inglés con su significado:",
+         "pares": [
+          [
+           "Hello",
+           "Hola 👋"
+          ],
+          [
+           "Goodbye",
+           "Adiós 🙋"
+          ],
+          [
+           "Thank you",
+           "Gracias 🙏"
+          ],
+          [
+           "Please",
+           "Por favor 🥺"
+          ]
+         ],
+         "voz": true
+        },
+        {
+         "tipo": "quiz",
+         "p": "Escucha y elige: ¿qué significa?",
+         "voz": "Good morning",
+         "ops": [
+          "Buenos días ☀️",
+          "Buenas noches 🌙",
+          "Adiós 🙋"
+         ],
+         "ok": 0,
+         "exp": "Good morning = Buenos días."
+        },
+        {
+         "tipo": "quiz",
+         "p": "Te regalan un helado 🍦. ¿Qué dices?",
+         "ops": [
+          "Thank you!",
+          "Goodbye!",
+          "Good morning!"
+         ],
+         "ok": 0,
+         "exp": "Cuando te dan algo, decimos Thank you (gracias)."
+        }
+       ]
+      },
+      {
+       "slug": "colores-en-ingles",
+       "titulo": "Colors: los colores",
+       "emoji": "🎨",
+       "min": 8,
+       "desc": "Los colores en inglés para niños: red, blue, yellow, green, orange y purple, con audio y juegos.",
+       "html": "<p>¡El mundo está lleno de colores! Aprende a decirlos en inglés. Toca cada palabra para escucharla. 🔊</p><h2>Los colores de hoy</h2><ul><li>🟥 <b>Red</b> (red) = rojo</li><li>🟦 <b>Blue</b> (blu) = azul</li><li>🟨 <b>Yellow</b> (iélou) = amarillo</li><li>🟩 <b>Green</b> (grin) = verde</li><li>🟧 <b>Orange</b> (óranch) = anaranjado</li><li>🟪 <b>Purple</b> (pérpol) = morado</li></ul><h2>Frases con colores</h2><p>The apple is <b>red</b> 🍎 (La manzana es roja).<br>The sky is <b>blue</b> 🌤️ (El cielo es azul).<br>The banana is <b>yellow</b> 🍌 (El plátano es amarillo).</p><h2>Juego en casa</h2><p>Busca en tu casa algo de cada color y di su nombre en inglés: «¡<b>Green</b>! Mi planta es green». Así aprendes mientras juegas.</p>",
+       "voz": [
+        "Red",
+        "Blue",
+        "Yellow",
+        "Green",
+        "Orange",
+        "Purple"
+       ],
+       "actividad": [
+        {
+         "tipo": "parejas",
+         "p": "Une cada color con su nombre en inglés:",
+         "pares": [
+          [
+           "Red",
+           "🟥"
+          ],
+          [
+           "Blue",
+           "🟦"
+          ],
+          [
+           "Yellow",
+           "🟨"
+          ],
+          [
+           "Green",
+           "🟩"
+          ]
+         ],
+         "voz": true
+        },
+        {
+         "tipo": "quiz",
+         "p": "Escucha y elige el color:",
+         "voz": "Purple",
+         "ops": [
+          "🟪",
+          "🟧",
+          "🟦"
+         ],
+         "ok": 0,
+         "exp": "Purple = morado."
+        },
+        {
+         "tipo": "quiz",
+         "p": "The banana is…",
+         "ops": [
+          "Yellow 🟨",
+          "Blue 🟦",
+          "Red 🟥"
+         ],
+         "ok": 0,
+         "exp": "The banana is yellow: el plátano es amarillo."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: Animales y números",
+     "lecciones": [
+      {
+       "slug": "animales-en-ingles",
+       "titulo": "Animals: los animales",
+       "emoji": "🐶",
+       "min": 8,
+       "desc": "Animales en inglés para niños: dog, cat, bird, fish, cow y duck, con sus sonidos y audio.",
+       "html": "<p>¡Vamos a la granja! Aprende los animales en inglés y descubre cómo hacen sus sonidos. 🔊</p><h2>Los animales de hoy</h2><ul><li>🐶 <b>Dog</b> (dog) = perro: <i>woof woof</i></li><li>🐱 <b>Cat</b> (cat) = gato: <i>meow</i></li><li>🐦 <b>Bird</b> (berd) = pájaro: <i>tweet tweet</i></li><li>🐟 <b>Fish</b> (fish) = pez</li><li>🐮 <b>Cow</b> (cáu) = vaca: <i>moo</i></li><li>🦆 <b>Duck</b> (dak) = pato: <i>quack quack</i></li></ul><h2>¿Sabías que…?</h2><p>¡Los animales «suenan» distinto en cada idioma! En español el perro dice «guau» y en inglés dice «<i>woof</i>». El pato dice «cuac» en español y «<i>quack</i>» en inglés.</p><h2>Frase útil</h2><p>I like <b>dogs</b> (Me gustan los perros). Cambia el animal y di cuál te gusta más.</p>",
+       "voz": [
+        "Dog",
+        "Cat",
+        "Bird",
+        "Fish",
+        "Cow",
+        "Duck"
+       ],
+       "actividad": [
+        {
+         "tipo": "parejas",
+         "p": "Une cada animal con su nombre en inglés:",
+         "pares": [
+          [
+           "Dog",
+           "🐶"
+          ],
+          [
+           "Cat",
+           "🐱"
+          ],
+          [
+           "Cow",
+           "🐮"
+          ],
+          [
+           "Duck",
+           "🦆"
+          ]
+         ],
+         "voz": true
+        },
+        {
+         "tipo": "quiz",
+         "p": "What animal says «moo»?",
+         "ops": [
+          "Cow 🐮",
+          "Cat 🐱",
+          "Fish 🐟"
+         ],
+         "ok": 0,
+         "exp": "The cow says moo: la vaca dice muu."
+        },
+        {
+         "tipo": "quiz",
+         "p": "Escucha y elige el animal:",
+         "voz": "Bird",
+         "ops": [
+          "🐦",
+          "🐟",
+          "🐶"
+         ],
+         "ok": 0,
+         "exp": "Bird = pájaro."
+        }
+       ]
+      },
+      {
+       "slug": "numeros-en-ingles",
+       "titulo": "Numbers: del 1 al 10",
+       "emoji": "🔢",
+       "min": 10,
+       "desc": "Los números del 1 al 10 en inglés para niños, con audio, juegos de contar y parejas.",
+       "html": "<p>¡A contar en inglés! Toca cada número para escucharlo y cuenta con tus dedos. 🔊</p><h2>Los números</h2><p>1 <b>one</b> (uan) · 2 <b>two</b> (tu) · 3 <b>three</b> (zri) · 4 <b>four</b> (for) · 5 <b>five</b> (fáiv) · 6 <b>six</b> (siks) · 7 <b>seven</b> (séven) · 8 <b>eight</b> (éit) · 9 <b>nine</b> (náin) · 10 <b>ten</b> (ten)</p><h2>¿Cómo preguntar cuántos hay?</h2><p>En inglés se dice <b>How many?</b> (jau méni) = ¿Cuántos?<br>How many apples? 🍎🍎🍎 — <b>Three!</b></p><h2>Juego en casa</h2><p>Cuenta en inglés las gradas de tu casa, tus juguetes o tus dedos de los pies. ¡Contar todos los días es la mejor forma de no olvidarlo!</p>",
+       "voz": [
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+        "Ten"
+       ],
+       "actividad": [
+        {
+         "tipo": "parejas",
+         "p": "Une cada número con su nombre:",
+         "pares": [
+          [
+           "Three",
+           "3"
+          ],
+          [
+           "Five",
+           "5"
+          ],
+          [
+           "Eight",
+           "8"
+          ],
+          [
+           "Ten",
+           "10"
+          ]
+         ],
+         "voz": true
+        },
+        {
+         "tipo": "quiz",
+         "p": "How many apples? 🍎🍎🍎🍎",
+         "ops": [
+          "Four",
+          "Two",
+          "Nine"
+         ],
+         "ok": 0,
+         "exp": "Hay 4 manzanas: four."
+        },
+        {
+         "tipo": "escribir",
+         "p": "Escucha y escribe el número (con cifras):",
+         "voz": "Seven",
+         "ok": [
+          "7",
+          "siete",
+          "seven"
+         ],
+         "exp": "Seven = 7."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "mates-divertidas",
+   "titulo": "Mates divertidas",
+   "emoji": "➗",
+   "edad": "9-12",
+   "desc": "Curso gratis de matemáticas para niños de 9 a 12 años: trucos para multiplicar, problemas de la vida real y fracciones con pizza.",
+   "intro": "<p>Las matemáticas se entienden mejor cuando sirven para algo. En este curso los chicos aprenden <b>trucos para multiplicar rápido</b>, resuelven problemas de compras y descubren las <b>fracciones repartiendo pizza</b>.</p><p>Cada lección trae una explicación con ejemplos y retos con respuesta inmediata, para practicar sin miedo a equivocarse.</p>",
+   "aprende": [
+    "Trucos para las tablas del 9, del 5 y del 11",
+    "Resolver problemas de compras",
+    "Qué es una fracción",
+    "Fracciones equivalentes"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: Multiplicar como un campeón",
+     "lecciones": [
+      {
+       "slug": "trucos-para-multiplicar",
+       "titulo": "Trucos para multiplicar",
+       "emoji": "✋",
+       "min": 10,
+       "desc": "Trucos fáciles para la tabla del 9 con los dedos, la tabla del 5 y la del 11, explicados para niños.",
+       "html": "<p>Multiplicar es sumar el mismo número varias veces: 4 × 3 es 3 + 3 + 3 + 3 = 12. Pero hay <b>trucos</b> que lo hacen mucho más rápido.</p><h2>La tabla del 9 con los dedos</h2><p>Abre tus 10 dedos. Para calcular 9 × 4, baja el <b>cuarto dedo</b> desde la izquierda. Cuenta: a la izquierda del dedo bajado quedan <b>3</b> dedos y a la derecha quedan <b>6</b>. ¡9 × 4 = 36! Funciona del 9 × 1 al 9 × 10.</p><h2>La tabla del 5</h2><p>Multiplica por 10 y divide entre 2. Por ejemplo, 5 × 8: primero 8 × 10 = 80 y la mitad de 80 es <b>40</b>.</p><h2>La tabla del 11 (hasta el 9)</h2><p>Repite el número: 11 × 3 = <b>33</b>, 11 × 7 = <b>77</b>.</p><h2>Comprueba siempre</h2><p>Un truco ayuda, pero comprueba: en la tabla del 9, las dos cifras del resultado suman 9 (3 + 6 = 9). Si no suman 9, revisa.</p>",
+       "actividad": [
+        {
+         "tipo": "escribir",
+         "p": "Usa el truco de los dedos: 9 × 7 =",
+         "ok": [
+          "63"
+         ],
+         "exp": "Quedan 6 dedos a la izquierda y 3 a la derecha: 63."
+        },
+        {
+         "tipo": "escribir",
+         "p": "Truco del 5: 5 × 14 =",
+         "ok": [
+          "70"
+         ],
+         "exp": "14 × 10 = 140, y la mitad es 70."
+        },
+        {
+         "tipo": "quiz",
+         "p": "11 × 6 =",
+         "ops": [
+          "66",
+          "61",
+          "76"
+         ],
+         "ok": 0,
+         "exp": "Repite el número: 66."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cuál resultado NO puede ser de la tabla del 9?",
+         "ops": [
+          "46",
+          "45",
+          "54"
+         ],
+         "ok": 0,
+         "exp": "4 + 6 = 10, no 9. Los resultados de la tabla del 9 suman 9."
+        }
+       ]
+      },
+      {
+       "slug": "problemas-de-la-tienda",
+       "titulo": "Problemas de la tienda",
+       "emoji": "🛒",
+       "min": 12,
+       "desc": "Problemas de multiplicación de la vida real para niños: compras, vueltos y repartos, paso a paso.",
+       "html": "<p>Las matemáticas están en todas partes, sobre todo cuando vamos a la tienda. Resolver un problema es como ser detective: hay que leer bien, encontrar los datos y elegir la operación.</p><h2>Los 4 pasos para resolver un problema</h2><ol><li><b>Lee</b> el problema dos veces.</li><li><b>Subraya</b> los números y lo que te preguntan.</li><li><b>Elige</b> la operación: ¿juntas cantidades iguales? Multiplica. ¿Quitas? Resta.</li><li><b>Comprueba</b> si tu respuesta tiene sentido.</li></ol><h2>Ejemplo</h2><p>Un pan cuesta 0,50 soles. Mamá compra 6 panes. ¿Cuánto paga?<br>Datos: 6 panes de 0,50. Operación: 6 × 0,50 = <b>3 soles</b>. Si paga con 5 soles, el vuelto es 5 − 3 = <b>2 soles</b>.</p><h2>¿Tiene sentido?</h2><p>Si te sale que 6 panes cuestan 300 soles, algo salió mal. Pensar si la respuesta es razonable evita muchos errores.</p>",
+       "actividad": [
+        {
+         "tipo": "escribir",
+         "p": "Un cuaderno cuesta 4 soles. ¿Cuánto cuestan 7 cuadernos? (solo el número)",
+         "ok": [
+          "28"
+         ],
+         "exp": "7 × 4 = 28 soles."
+        },
+        {
+         "tipo": "escribir",
+         "p": "Pagas 30 soles por 3 entradas iguales. ¿Cuánto cuesta cada una?",
+         "ok": [
+          "10"
+         ],
+         "exp": "30 ÷ 3 = 10 soles cada entrada."
+        },
+        {
+         "tipo": "ordenar",
+         "p": "Ordena los pasos para resolver un problema:",
+         "items": [
+          "Leer el problema",
+          "Buscar los datos",
+          "Elegir la operación",
+          "Comprobar la respuesta"
+         ],
+         "exp": "¡Así trabajan los buenos detectives de las matemáticas!"
+        },
+        {
+         "tipo": "quiz",
+         "p": "Compras 5 caramelos de 0,20 soles y pagas con 2 soles. ¿Cuál es el vuelto?",
+         "ops": [
+          "1 sol",
+          "1,80 soles",
+          "0,50 soles"
+         ],
+         "ok": 0,
+         "exp": "5 × 0,20 = 1 sol. 2 − 1 = 1 sol de vuelto."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: Fracciones con pizza",
+     "lecciones": [
+      {
+       "slug": "fracciones-con-pizza",
+       "titulo": "¿Qué es una fracción?",
+       "emoji": "🍕",
+       "min": 10,
+       "desc": "Las fracciones explicadas con pizza para niños: numerador, denominador y cómo leer 1/2, 1/4 y 3/8.",
+       "html": "<p>Imagina una pizza 🍕 cortada en 4 trozos iguales. Si te comes 1 trozo, te comiste <b>un cuarto</b>, que se escribe <b>1/4</b>. ¡Eso es una fracción!</p><h2>Las dos partes de una fracción</h2><ul><li>El número de <b>abajo</b> (denominador) dice en cuántas partes iguales se cortó todo.</li><li>El número de <b>arriba</b> (numerador) dice cuántas partes tomamos.</li></ul><p>En 3/8, la pizza se cortó en 8 trozos y tomamos 3.</p><h2>Cómo se leen</h2><p>1/2 un medio · 1/3 un tercio · 1/4 un cuarto · 3/8 tres octavos.</p><h2>¿Cuál es más grande?</h2><p>Con el mismo número arriba, <b>mientras más grande el de abajo, más pequeño el trozo</b>. 1/2 es más que 1/4, porque si repartes una pizza entre 2 te toca más que si la repartes entre 4.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "Una pizza se cortó en 8 trozos y comiste 3. ¿Qué fracción comiste?",
+         "ops": [
+          "3/8",
+          "8/3",
+          "3/5"
+         ],
+         "ok": 0,
+         "exp": "Abajo van las partes totales (8) y arriba las que tomaste (3)."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Qué es más grande?",
+         "ops": [
+          "1/2",
+          "1/4",
+          "1/8"
+         ],
+         "ok": 0,
+         "exp": "Repartir entre menos personas da trozos más grandes."
+        },
+        {
+         "tipo": "parejas",
+         "p": "Une cada fracción con su nombre:",
+         "pares": [
+          [
+           "1/2",
+           "un medio"
+          ],
+          [
+           "1/3",
+           "un tercio"
+          ],
+          [
+           "1/4",
+           "un cuarto"
+          ],
+          [
+           "3/8",
+           "tres octavos"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "slug": "fracciones-equivalentes",
+       "titulo": "Fracciones equivalentes",
+       "emoji": "⚖️",
+       "min": 12,
+       "desc": "Qué son las fracciones equivalentes y cómo encontrarlas multiplicando o dividiendo, con ejemplos para niños.",
+       "html": "<p>¿Es lo mismo comer <b>1/2</b> pizza que <b>2/4</b>? ¡Sí! Si cortas cada mitad en dos, tienes 2 trozos de 4. Son <b>fracciones equivalentes</b>: se escriben distinto pero valen lo mismo.</p><h2>El truco</h2><p>Multiplica (o divide) el número de arriba y el de abajo por el <b>mismo número</b>:</p><ul><li>1/2 = (1×2)/(2×2) = <b>2/4</b></li><li>1/2 = (1×3)/(2×3) = <b>3/6</b></li><li>6/8 = (6÷2)/(8÷2) = <b>3/4</b></li></ul><h2>Simplificar</h2><p>Cuando divides arriba y abajo hasta que ya no se puede más, la fracción queda <b>simplificada</b>. Por ejemplo, 4/8 se simplifica a 1/2.</p><h2>¿Para qué sirve?</h2><p>Para comparar y sumar fracciones, y en la vida diaria: media hora es lo mismo que 30/60 de hora.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Cuál es equivalente a 1/2?",
+         "ops": [
+          "3/6",
+          "2/6",
+          "1/4"
+         ],
+         "ok": 0,
+         "exp": "1×3 = 3 y 2×3 = 6: 3/6."
+        },
+        {
+         "tipo": "escribir",
+         "p": "Simplifica 6/8. Escribe el resultado como a/b:",
+         "ok": [
+          "3/4"
+         ],
+         "exp": "Divide arriba y abajo entre 2: 3/4."
+        },
+        {
+         "tipo": "quiz",
+         "p": "Media hora es…",
+         "ops": [
+          "30 minutos",
+          "50 minutos",
+          "15 minutos"
+         ],
+         "ok": 0,
+         "exp": "1/2 de 60 minutos = 30 minutos."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "ciencia-curiosa",
+   "titulo": "Ciencia curiosa",
+   "emoji": "🔬",
+   "edad": "9-12",
+   "desc": "Curso de ciencias para niños de 9 a 12 años: el sistema solar, el ciclo del agua y cómo se alimentan las plantas.",
+   "intro": "<p>¿Por qué llueve? ¿Cuántos planetas hay? ¿Cómo comen las plantas? Este curso responde las preguntas que todo niño curioso se hace, con explicaciones claras y retos para ordenar y adivinar.</p>",
+   "aprende": [
+    "Los planetas del sistema solar en orden",
+    "El ciclo del agua",
+    "La fotosíntesis",
+    "Pensar como un científico"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: La Tierra y el espacio",
+     "lecciones": [
+      {
+       "slug": "sistema-solar",
+       "titulo": "Viaje por el sistema solar",
+       "emoji": "🪐",
+       "min": 10,
+       "desc": "El sistema solar para niños: los 8 planetas en orden, el Sol y datos curiosos de cada planeta.",
+       "html": "<p>Nuestro hogar, la Tierra, viaja alrededor de una estrella: el <b>Sol</b> ☀️. Junto con otros 7 planetas formamos el <b>sistema solar</b>.</p><h2>Los 8 planetas, del más cercano al Sol al más lejano</h2><ol><li><b>Mercurio</b>: el más pequeño y el más rápido.</li><li><b>Venus</b>: el más caliente, por sus nubes que atrapan el calor.</li><li><b>Tierra</b>: el único con vida conocida.</li><li><b>Marte</b>: el planeta rojo, por el óxido de su suelo.</li><li><b>Júpiter</b>: el más grande; cabrían más de mil Tierras dentro.</li><li><b>Saturno</b>: famoso por sus anillos de hielo y roca.</li><li><b>Urano</b>: gira «acostado», de lado.</li><li><b>Neptuno</b>: el más lejano, con vientos muy fuertes.</li></ol><h2>Truco para recordar el orden</h2><p>«<b>M</b>i <b>V</b>ieja <b>T</b>ía <b>M</b>aría <b>J</b>amás <b>S</b>upo <b>U</b>sar <b>N</b>etflix»: la primera letra de cada palabra es la de un planeta.</p><h2>¿Y Plutón?</h2><p>Desde 2006 los astrónomos lo llaman <b>planeta enano</b>, porque es muy pequeño y comparte su órbita con otros objetos.</p>",
+       "actividad": [
+        {
+         "tipo": "ordenar",
+         "p": "Ordena los planetas desde el más cercano al Sol:",
+         "items": [
+          "Mercurio",
+          "Venus",
+          "Tierra",
+          "Marte",
+          "Júpiter"
+         ],
+         "exp": "¡Perfecto! Después vienen Saturno, Urano y Neptuno."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cuál es el planeta más grande?",
+         "ops": [
+          "Júpiter",
+          "Marte",
+          "Mercurio"
+         ],
+         "ok": 0,
+         "exp": "Júpiter es tan grande que cabrían más de mil Tierras."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Por qué Marte se ve rojo?",
+         "ops": [
+          "Por el óxido de su suelo",
+          "Porque está en llamas",
+          "Porque es de lava"
+         ],
+         "ok": 0,
+         "exp": "Su suelo tiene mucho óxido de hierro, como el metal oxidado."
+        }
+       ]
+      },
+      {
+       "slug": "ciclo-del-agua",
+       "titulo": "El ciclo del agua",
+       "emoji": "💧",
+       "min": 10,
+       "desc": "El ciclo del agua para niños: evaporación, condensación, precipitación y recolección explicadas con ejemplos.",
+       "html": "<p>El agua que tomas hoy pudo haber estado en un océano, en una nube o hasta en un glaciar hace miles de años. El agua de la Tierra <b>viaja en círculo</b> y no se acaba: es el <b>ciclo del agua</b>.</p><h2>Las 4 etapas</h2><ol><li><b>Evaporación</b>: el Sol calienta el agua de mares y ríos, y se convierte en vapor que sube.</li><li><b>Condensación</b>: arriba hace frío; el vapor se junta en gotitas y forma las nubes.</li><li><b>Precipitación</b>: cuando las gotas pesan mucho, caen como lluvia, granizo o nieve.</li><li><b>Recolección</b>: el agua llega a ríos, lagos, mares y al suelo… ¡y todo vuelve a empezar!</li></ol><h2>Experimento en casa</h2><p>Con ayuda de un adulto, pon agua caliente en un vaso y tápalo con un plato frío. Verás gotitas debajo del plato: ¡es la condensación!</p><h2>Cuidemos el agua</h2><p>Aunque el agua no se acaba, el agua limpia para beber es poca. Cierra el caño mientras te cepillas los dientes.</p>",
+       "actividad": [
+        {
+         "tipo": "ordenar",
+         "p": "Ordena las etapas del ciclo del agua:",
+         "items": [
+          "Evaporación",
+          "Condensación",
+          "Precipitación",
+          "Recolección"
+         ],
+         "exp": "¡Y vuelve a empezar!"
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cómo se forman las nubes?",
+         "ops": [
+          "El vapor se enfría y forma gotitas",
+          "El humo de los carros sube",
+          "El viento junta polvo"
+         ],
+         "ok": 0,
+         "exp": "Es la condensación: el vapor frío forma gotitas."
+        },
+        {
+         "tipo": "parejas",
+         "p": "Une cada etapa con lo que pasa:",
+         "pares": [
+          [
+           "Evaporación",
+           "el agua sube como vapor"
+          ],
+          [
+           "Condensación",
+           "se forman nubes"
+          ],
+          [
+           "Precipitación",
+           "cae la lluvia"
+          ],
+          [
+           "Recolección",
+           "el agua llega al río"
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: Seres vivos",
+     "lecciones": [
+      {
+       "slug": "fotosintesis",
+       "titulo": "¿Cómo comen las plantas?",
+       "emoji": "🌱",
+       "min": 10,
+       "desc": "La fotosíntesis explicada para niños: cómo las plantas fabrican su alimento con luz, agua y aire.",
+       "html": "<p>Las plantas no van a la tienda ni cazan. ¡Fabrican su propia comida! A ese proceso se le llama <b>fotosíntesis</b>, que quiere decir «juntar con luz».</p><h2>Los ingredientes</h2><ul><li>☀️ <b>Luz del sol</b>, que atrapan sus hojas verdes gracias a la <b>clorofila</b>.</li><li>💧 <b>Agua</b>, que suben desde las raíces.</li><li>🌬️ <b>Dióxido de carbono</b>, un gas del aire que entra por las hojas.</li></ul><h2>El resultado</h2><p>Con esos ingredientes la planta fabrica <b>azúcar</b> para crecer y suelta <b>oxígeno</b> al aire. ¡El oxígeno que respiras viene en gran parte de las plantas y de las algas del mar!</p><h2>Experimento</h2><p>Pon una planta en un lugar oscuro durante una semana y otra junto a la ventana. ¿Cuál está más verde y fuerte? Así compruebas que necesitan luz.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Qué sueltan las plantas al aire durante la fotosíntesis?",
+         "ops": [
+          "Oxígeno",
+          "Humo",
+          "Azúcar"
+         ],
+         "ok": 0,
+         "exp": "Sueltan oxígeno; el azúcar lo guardan para crecer."
+        },
+        {
+         "tipo": "parejas",
+         "p": "Une cada ingrediente con de dónde viene:",
+         "pares": [
+          [
+           "Luz",
+           "el sol"
+          ],
+          [
+           "Agua",
+           "las raíces"
+          ],
+          [
+           "Dióxido de carbono",
+           "el aire"
+          ]
+         ]
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Qué hace verdes a las hojas?",
+         "ops": [
+          "La clorofila",
+          "La pintura",
+          "El oxígeno"
+         ],
+         "ok": 0,
+         "exp": "La clorofila atrapa la luz y es de color verde."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "crea-tu-pagina-web",
+   "titulo": "Crea tu primera página web",
+   "emoji": "💻",
+   "edad": "13-17",
+   "desc": "Curso gratis de HTML, CSS y JavaScript para adolescentes: crea tu primera página web con un editor en vivo, sin instalar nada.",
+   "intro": "<p>Toda página de internet está hecha con tres lenguajes: <b>HTML</b> (el contenido), <b>CSS</b> (el diseño) y <b>JavaScript</b> (lo que se mueve y responde). En este curso los escribes tú mismo en un <b>editor en vivo</b> y ves el resultado al instante.</p>",
+   "aprende": [
+    "Etiquetas HTML: títulos, párrafos e imágenes",
+    "Dar color y estilo con CSS",
+    "Hacer un botón que responde con JavaScript",
+    "Leer y corregir código"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: HTML y CSS",
+     "lecciones": [
+      {
+       "slug": "html-desde-cero",
+       "titulo": "HTML desde cero",
+       "emoji": "🧱",
+       "min": 15,
+       "desc": "Aprende HTML desde cero: etiquetas h1, p y listas, con un editor en vivo para practicar sin instalar nada.",
+       "html": "<p><b>HTML</b> es el lenguaje que le dice al navegador qué hay en una página: títulos, textos, imágenes y enlaces. Se escribe con <b>etiquetas</b> entre los signos &lt; y &gt;.</p><h2>Cómo funciona una etiqueta</h2><p>Casi todas se abren y se cierran. La de cierre lleva una barra <code>/</code>:</p><pre>&lt;h1&gt;Hola, soy Ana&lt;/h1&gt;\n&lt;p&gt;Me gusta el fútbol y los videojuegos.&lt;/p&gt;</pre><ul><li><code>&lt;h1&gt;</code> es el título principal (hay de h1 a h6, de mayor a menor).</li><li><code>&lt;p&gt;</code> es un párrafo.</li><li><code>&lt;ul&gt;</code> con <code>&lt;li&gt;</code> dentro hace una lista con viñetas.</li><li><code>&lt;b&gt;</code> pone el texto en negrita.</li></ul><h2>El error más común</h2><p>Olvidar cerrar una etiqueta. Si abres <code>&lt;b&gt;</code> y no lo cierras, ¡todo el resto de la página saldrá en negrita! Revisa siempre que cada etiqueta tenga su pareja.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Qué etiqueta crea el título más importante?",
+         "ops": [
+          "<h1>",
+          "<p>",
+          "<li>"
+         ],
+         "ok": 0,
+         "exp": "<h1> es el título principal."
+        },
+        {
+         "tipo": "codigo",
+         "p": "Escribe un título <h1> con tu nombre y un párrafo <p> que diga qué te gusta.",
+         "ini": "<!-- Escribe aquí tu código -->\n",
+         "debe": [
+          "<h1>[^<]{2,}</h1>",
+          "<p>[^<]{3,}</p>"
+         ],
+         "exp": "¡Tu primera página web! Así empiezan todas."
+        },
+        {
+         "tipo": "codigo",
+         "p": "Crea una lista <ul> con 3 juegos favoritos, cada uno dentro de <li>.",
+         "ini": "<ul>\n  <li>Ajedrez</li>\n</ul>\n",
+         "debe": [
+          "<ul>",
+          "(<li>[^<]+</li>[\\s\\S]*){3}",
+          "</ul>"
+         ],
+         "exp": "Las listas ordenan la información de tu página."
+        }
+       ]
+      },
+      {
+       "slug": "css-colores-y-estilo",
+       "titulo": "CSS: colores y estilo",
+       "emoji": "🎨",
+       "min": 15,
+       "desc": "Aprende CSS básico: color, background, font-size y text-align, con ejemplos y un editor en vivo.",
+       "html": "<p>Si HTML es el esqueleto de la página, <b>CSS</b> es la ropa: colores, tamaños y posiciones. Se escribe dentro de una etiqueta <code>&lt;style&gt;</code>.</p><h2>Una regla CSS</h2><pre>h1 {\n  color: purple;\n  font-size: 40px;\n}</pre><p>Primero va el <b>selector</b> (a qué etiqueta se aplica), luego llaves <code>{ }</code> y dentro las <b>propiedades</b> con su valor, terminando en punto y coma.</p><h2>Propiedades para empezar</h2><ul><li><code>color</code>: color del texto (red, blue o códigos como #ff3df0).</li><li><code>background</code>: color de fondo.</li><li><code>font-size</code>: tamaño de la letra.</li><li><code>text-align: center</code>: centra el texto.</li></ul><h2>Consejo de diseñador</h2><p>Usa pocos colores (2 o 3) y que el texto contraste con el fondo. Una página bonita es, primero, una página fácil de leer.</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Qué propiedad cambia el color del texto?",
+         "ops": [
+          "color",
+          "background",
+          "font-size"
+         ],
+         "ok": 0,
+         "exp": "color cambia el texto; background, el fondo."
+        },
+        {
+         "tipo": "codigo",
+         "p": "Dentro de <style>, pon el h1 de color (color) y centrado (text-align: center).",
+         "ini": "<style>\n  h1 {\n\n  }\n</style>\n<h1>Mi página</h1>\n",
+         "debe": [
+          "color\\s*:\\s*[#\\w]+",
+          "text-align\\s*:\\s*center"
+         ],
+         "exp": "¡Así se diseña una página!"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: JavaScript",
+     "lecciones": [
+      {
+       "slug": "javascript-tu-primer-boton",
+       "titulo": "Tu primer botón con JavaScript",
+       "emoji": "⚡",
+       "min": 15,
+       "desc": "JavaScript para principiantes: crea un botón que cambia un texto con onclick y textContent.",
+       "html": "<p><b>JavaScript</b> hace que una página <b>responda</b>: botones que hacen cosas, juegos y animaciones. Es el lenguaje de programación más usado del mundo.</p><h2>Un botón que cambia un texto</h2><pre>&lt;p id=\"msg\"&gt;Hola&lt;/p&gt;\n&lt;button onclick=\"cambiar()\"&gt;Toca&lt;/button&gt;\n&lt;script&gt;\n  function cambiar() {\n    document.getElementById('msg').textContent = '¡Funciona!';\n  }\n&lt;/script&gt;</pre><ul><li><code>id=\"msg\"</code> le pone nombre al párrafo para encontrarlo.</li><li><code>onclick</code> dice qué función correr al tocar el botón.</li><li><code>function</code> agrupa órdenes con un nombre.</li><li><code>textContent</code> cambia el texto de un elemento.</li></ul><h2>Variables: cajas con nombre</h2><p><code>let puntos = 0;</code> crea una caja llamada puntos. Con <code>puntos = puntos + 1;</code> le sumas uno. ¡Así cuentan los puntos los videojuegos!</p>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "¿Qué atributo ejecuta una función al tocar un botón?",
+         "ops": [
+          "onclick",
+          "href",
+          "style"
+         ],
+         "ok": 0,
+         "exp": "onclick se ejecuta con cada toque o clic."
+        },
+        {
+         "tipo": "codigo",
+         "p": "Completa la función para que al tocar el botón el párrafo diga otra cosa (usa textContent).",
+         "ini": "<p id=\"msg\">Hola</p>\n<button onclick=\"cambiar()\">Toca</button>\n<script>\n  function cambiar() {\n\n  }\n</script>\n",
+         "debe": [
+          "getElementById\\(\\s*['\"]msg['\"]\\s*\\)",
+          "textContent\\s*="
+         ],
+         "js": true,
+         "exp": "¡Ya programas en JavaScript! Toca el botón de la vista previa."
+        },
+        {
+         "tipo": "ordenar",
+         "p": "Ordena las líneas para contar puntos:",
+         "items": [
+          "let puntos = 0;",
+          "puntos = puntos + 1;",
+          "alert(puntos);"
+         ],
+         "exp": "Primero se crea la variable, luego se cambia y al final se muestra."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "finanzas-personales",
+   "titulo": "Finanzas personales",
+   "emoji": "💰",
+   "edad": "18+",
+   "desc": "Curso gratis de finanzas personales: presupuesto 50/30/20, fondo de emergencia, interés compuesto, deudas y cómo evitar estafas.",
+   "intro": "<p>Nadie nos enseña a manejar el dinero en el colegio. Este curso explica, con ejemplos en soles y sin palabras complicadas, cómo <b>armar un presupuesto</b>, <b>ahorrar para emergencias</b>, entender los <b>intereses</b> y <b>reconocer estafas</b>. Es información educativa general, no asesoría financiera personalizada.</p>",
+   "aprende": [
+    "Hacer un presupuesto con la regla 50/30/20",
+    "Crear un fondo de emergencia",
+    "Cómo crecen los ahorros y las deudas",
+    "Detectar estafas y promesas de dinero fácil"
+   ],
+   "modulos": [
+    {
+     "titulo": "Módulo 1: Ordena tu dinero",
+     "lecciones": [
+      {
+       "slug": "presupuesto-50-30-20",
+       "titulo": "Tu presupuesto con la regla 50/30/20",
+       "emoji": "📊",
+       "min": 12,
+       "desc": "Cómo hacer un presupuesto personal con la regla 50/30/20: necesidades, gustos y ahorro, con ejemplos en soles.",
+       "html": "<p>Un presupuesto es un plan para tu dinero: decides <b>antes</b> de gastar a dónde va cada sol. Sin plan, el dinero «se va» y no sabes en qué.</p><h2>La regla 50/30/20</h2><ul><li><b>50 % necesidades</b>: alquiler, comida, luz, agua, transporte, deudas mínimas.</li><li><b>30 % gustos</b>: salidas, ropa que no es urgente, suscripciones.</li><li><b>20 % ahorro</b>: fondo de emergencia, metas, inversión.</li></ul><h2>Ejemplo con un sueldo de 2 000 soles</h2><p>Necesidades: 1 000 soles · Gustos: 600 soles · Ahorro: 400 soles.</p><h2>Cómo empezar hoy</h2><ol><li>Anota todo lo que gastas durante un mes, hasta el último sol.</li><li>Clasifica cada gasto en necesidad, gusto o ahorro.</li><li>Compara con 50/30/20 y ajusta poco a poco.</li></ol><p>Si tus necesidades pasan del 50 %, no te desanimes: es una guía, no una ley. Lo importante es <b>ahorrar algo cada mes</b> y pagarte a ti primero: separa el ahorro el mismo día que cobras.</p>",
+       "actividad": [
+        {
+         "tipo": "escribir",
+         "p": "Ganas 3 000 soles. Según 50/30/20, ¿cuánto deberías ahorrar? (solo el número)",
+         "ok": [
+          "600"
+         ],
+         "exp": "20 % de 3 000 = 600 soles."
+        },
+        {
+         "tipo": "parejas",
+         "p": "Clasifica cada gasto:",
+         "pares": [
+          [
+           "Alquiler",
+           "Necesidad"
+          ],
+          [
+           "Cine con amigos",
+           "Gusto"
+          ],
+          [
+           "Fondo de emergencia",
+           "Ahorro"
+          ]
+         ]
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cuándo conviene separar el ahorro?",
+         "ops": [
+          "El mismo día que cobras",
+          "A fin de mes, si sobra",
+          "Solo en diciembre"
+         ],
+         "ok": 0,
+         "exp": "Pagarte primero evita que el ahorro se gaste."
+        }
+       ]
+      },
+      {
+       "slug": "fondo-de-emergencia",
+       "titulo": "Tu fondo de emergencia",
+       "emoji": "🛟",
+       "min": 10,
+       "desc": "Qué es un fondo de emergencia, cuánto ahorrar (3 a 6 meses de gastos) y dónde guardarlo de forma segura.",
+       "html": "<p>Un <b>fondo de emergencia</b> es dinero guardado solo para imprevistos: perder el trabajo, una enfermedad o un arreglo urgente de la casa. Es lo que evita que una mala semana se convierta en una deuda.</p><h2>¿Cuánto ahorrar?</h2><p>La recomendación común es juntar entre <b>3 y 6 meses de gastos necesarios</b>. Si gastas 1 200 soles al mes en necesidades, tu meta sería entre 3 600 y 7 200 soles.</p><h2>Empieza pequeño</h2><p>Juntar 3 meses puede tomar tiempo. Pon una primera meta de un mes de gastos y celébrala cuando la logres.</p><h2>¿Dónde guardarlo?</h2><ul><li>En una cuenta de ahorros separada, en una entidad supervisada por la SBS.</li><li>Que puedas sacar rápido, pero no tan a la mano como para gastarlo por impulso.</li><li>Nunca en inversiones riesgosas ni en «negocios» que prometen duplicar tu dinero.</li></ul><h2>Úsalo bien</h2><p>Una oferta o un viaje no son emergencias. Si lo usas, vuelve a llenarlo antes de ahorrar para otras metas.</p>",
+       "actividad": [
+        {
+         "tipo": "escribir",
+         "p": "Tus gastos necesarios son 1 500 soles al mes. ¿Cuánto es 3 meses de fondo?",
+         "ok": [
+          "4500",
+          "4 500",
+          "4.500"
+         ],
+         "exp": "1 500 × 3 = 4 500 soles."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Cuál de estos es un buen uso del fondo de emergencia?",
+         "ops": [
+          "Pagar una cirugía urgente",
+          "Comprar un celular en oferta",
+          "Un viaje de fin de semana"
+         ],
+         "ok": 0,
+         "exp": "Solo para imprevistos necesarios."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Dónde conviene guardar el fondo?",
+         "ops": [
+          "En una cuenta de ahorros supervisada",
+          "En un negocio que promete duplicarlo",
+          "Prestado a un conocido"
+         ],
+         "ok": 0,
+         "exp": "Seguro y disponible es lo más importante."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "titulo": "Módulo 2: Intereses, deudas y estafas",
+     "lecciones": [
+      {
+       "slug": "interes-compuesto-y-deudas",
+       "titulo": "Interés compuesto: amigo o enemigo",
+       "emoji": "📈",
+       "min": 12,
+       "desc": "Interés compuesto explicado fácil: cómo crecen los ahorros y por qué las deudas de tarjeta de crédito crecen tan rápido.",
+       "html": "<p>El <b>interés compuesto</b> es ganar intereses sobre los intereses. Cuando ahorras, trabaja a tu favor. Cuando debes, trabaja en tu contra.</p><h2>Ejemplo a tu favor</h2><p>Ahorras 1 000 soles a una tasa del 5 % al año. El primer año ganas 50 soles y tienes 1 050. El segundo año ganas el 5 % de 1 050, que son 52,50. Cada año ganas un poco más. Con <b>tiempo</b>, la diferencia es enorme: por eso conviene empezar joven, aunque sea con poco.</p><h2>Ejemplo en tu contra</h2><p>Las tarjetas de crédito pueden cobrar tasas muy altas al año. Si solo pagas el <b>mínimo</b>, la mayor parte de tu pago se va en intereses y la deuda baja muy lento.</p><h2>Reglas prácticas</h2><ul><li>Paga el <b>total</b> de la tarjeta cada mes; si no puedes, paga lo máximo posible.</li><li>Antes de un préstamo, compara la <b>TCEA</b> (el costo total al año): mientras más baja, mejor.</li><li>Si tienes varias deudas, paga primero la de tasa más alta.</li></ul>",
+       "actividad": [
+        {
+         "tipo": "escribir",
+         "p": "Ahorras 2 000 soles al 10 % al año. ¿Cuánto tienes al final del primer año?",
+         "ok": [
+          "2200",
+          "2 200",
+          "2.200"
+         ],
+         "exp": "2 000 + 10 % (200) = 2 200 soles."
+        },
+        {
+         "tipo": "quiz",
+         "p": "¿Qué conviene pagar de la tarjeta de crédito?",
+         "ops": [
+          "El total del mes",
+          "Solo el mínimo",
+          "Nada hasta fin de año"
+         ],
+         "ok": 0,
+         "exp": "Pagar el total evita intereses."
+        },
+        {
+         "tipo": "quiz",
+         "p": "Para comparar préstamos, ¿qué dato miras?",
+         "ops": [
+          "La TCEA",
+          "El color de la tarjeta",
+          "El nombre del banco"
+         ],
+         "ok": 0,
+         "exp": "La TCEA resume el costo total del crédito al año."
+        }
+       ]
+      },
+      {
+       "slug": "como-detectar-estafas",
+       "titulo": "Cómo detectar estafas",
+       "emoji": "🚨",
+       "min": 12,
+       "desc": "Cómo reconocer estafas financieras: pirámides, falsos trabajos por clics, phishing y préstamos fraudulentos.",
+       "html": "<p>Las estafas cambian de forma, pero casi siempre usan las mismas trampas: <b>urgencia</b>, <b>ganancia fácil</b> y <b>secretos</b>.</p><h2>Señales de alerta</h2><ul><li>Te prometen <b>ganancias garantizadas</b> o duplicar tu dinero en poco tiempo.</li><li>Ganas más por <b>meter a otras personas</b> que por vender algo real: es una pirámide.</li><li>Te pagan por «ver anuncios», «dar likes» o «hacer clics» después de pagar una inscripción.</li><li>Te piden <b>claves, códigos SMS o datos de tu tarjeta</b> por llamada, WhatsApp o correo.</li><li>Te presionan: «solo hoy», «últimos cupos».</li></ul><h2>Phishing: el correo falso</h2><p>Un mensaje que parece de tu banco te pide «verificar tu cuenta» con un enlace. Los bancos <b>nunca</b> piden tu clave así. Entra siempre escribiendo tú mismo la dirección del banco o usando su aplicación oficial.</p><h2>¿Qué hacer?</h2><ol><li>No pagues ni compartas datos.</li><li>Verifica si la empresa está autorizada (en Perú, en la SBS o la SMV).</li><li>Si ya caíste, llama a tu banco para bloquear y denuncia.</li></ol>",
+       "actividad": [
+        {
+         "tipo": "quiz",
+         "p": "«Invierte 500 y recibe 1 000 en una semana, garantizado». ¿Qué es?",
+         "ops": [
+          "Una señal de estafa",
+          "Una buena inversión",
+          "Un ahorro seguro"
+         ],
+         "ok": 0,
+         "exp": "Nadie puede garantizar ganancias así."
+        },
+        {
+         "tipo": "quiz",
+         "p": "Te llaman «del banco» y piden el código que te llegó por SMS. ¿Qué haces?",
+         "ops": [
+          "Cuelgo y no lo doy",
+          "Se lo dicto rápido",
+          "Le doy solo la mitad"
+         ],
+         "ok": 0,
+         "exp": "Ningún banco pide tus códigos por teléfono."
+        },
+        {
+         "tipo": "parejas",
+         "p": "Une cada estafa con su señal:",
+         "pares": [
+          [
+           "Pirámide",
+           "ganas por meter gente"
+          ],
+          [
+           "Phishing",
+           "enlace falso para tu clave"
+          ],
+          [
+           "Falso trabajo",
+           "pagas para «ganar por clics»"
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,3 +1,9 @@
+v7.90.0 — 🎓 Yupitok Academy
+- 🎓 Nueva sección yupitok.com/academia: 6 cursos gratis con 22 lecciones y 69 retos interactivos (robot con flechas y bucles, parejas con voz en inglés, ordenar, escribir y editor de código en vivo).
+- 🏷️ Cada curso tiene clasificación por edad: Peques (6–8), Chicos (9–12), Jóvenes (13–17) y Adultos (18+), con filtro en la página.
+- ⭐ Estrellas por lección e insignia al terminar cada curso; el progreso se guarda en el navegador sin pedir datos.
+- 👨‍👩‍👧 Cursos infantiles sin anuncios ni chat; los de 13+ y adultos sí llevan AdSense. Todo entra al sitemap con datos estructurados de curso.
+
 v7.89.5 — 🌍 Traducciones: emojis reparados
 - 🌍 Si una traducción llega con los emojis convertidos en "??" (pasa cuando alguna herramienta externa, como la vista previa de AdSense, muestra la página), se reponen automáticamente con los emojis del texto original.
 
