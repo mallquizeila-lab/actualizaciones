@@ -1,3 +1,7 @@
+v7.98.2 — 🔄 Actualizador más robusto
+- 🔄 La instalación de mejoras ya no congela ShortForge: copia los archivos en segundo plano, con un respaldo liviano (solo el código, sin carpetas pesadas).
+- 📝 Cada paso queda anotado; si una instalación se corta, al volver ShortForge te dice en qué paso fue y puedes reintentarla con el mismo botón (el botón ya no se queda en «Reiniciando…»).
+
 v7.98.1 — 🛡️ Seguro para la revisión de AdSense
 - 🛡️ Mientras esté encendido el «Modo revisión» de AdSense, lo nuevo creado por la IA (dibujos, cuentos y lecciones) se publica igual en la página pero no entra a Google ni al sitemap; así el revisor evalúa solo el contenido hecho a mano. Al apagar el modo revisión, todo aparece en Google solo.
 - 🌱 Crecimiento por noche: 5 dibujos por defecto (puedes subirlo cuando te aprueben).

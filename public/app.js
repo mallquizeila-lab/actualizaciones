@@ -1370,12 +1370,13 @@ Object.assign(ACT, {
 Object.assign(ACT, {
   actBuscar: guard(async el => { el.disabled = true; try { const r = await api('/api/actualizar/buscar', {}); toast(r.nueva ? '¡Hay una mejora nueva: v' + r.nueva + '!' : r.error || 'Ya tienes la última versión ✓'); await refresh(true); } finally { el.disabled = false; } }),
   actInstalar: guard(async el => { if (!confirm('¿Instalar la mejora? ShortForge se reiniciará solo al terminar (si tu internet es lento, la descarga puede tardar unos minutos).')) return; el.disabled = true; el.textContent = 'Preparando…';
-    const antes = S.act?.version, r = await api('/api/actualizar/instalar', {}), meta = r.version, t0 = Date.now();
+    const antes = S.act?.version, r = await api('/api/actualizar/instalar', {}), meta = r.version, t0 = Date.now(); let cayo = false;
     const mirar = async () => { let s = null; try { s = await api('/api/actualizar'); } catch (e) {}
       if (s && s.version && s.version !== antes) { toast('✅ ShortForge actualizado a la v' + s.version); return setTimeout(() => location.reload(), 1500); }
+      if (s && cayo && !s.instalando && s.version === antes) { el.disabled = false; el.textContent = '⬇ Instalar la mejora'; return alert('ShortForge se reinició pero la mejora no terminó de instalarse.' + (s.error ? '\n' + s.error : '') + '\nVuelve a pulsar «Instalar la mejora».'); }
       if (s && s.error && !s.instalando) { el.disabled = false; el.textContent = '⬇ Instalar la mejora'; return alert('No se pudo actualizar: ' + s.error + '\nVuelve a intentarlo en unos minutos.'); }
       if (s && s.instalando) el.textContent = s.fase === 'Descargando' ? `Descargando… ${(s.bajado / 1e6).toFixed(1)}${s.total ? ' de ' + (s.total / 1e6).toFixed(1) : ''} MB` : (s.fase || 'Instalando') + '…';
-      else if (!s) el.textContent = 'Reiniciando…';
+      else if (!s) { cayo = true; el.textContent = 'Reiniciando…'; }
       if (Date.now() - t0 < 50 * 60000) setTimeout(mirar, 3000); else { el.disabled = false; el.textContent = '⬇ Instalar la mejora'; } };
     toast('Descargando la mejora v' + meta + '…'); setTimeout(mirar, 2000); }),
   reporte: guard(async () => { const r = await api('/api/reporte', {}); const a = document.createElement('a'); a.href = r.url; a.download = r.name; a.click(); $('#mant-out').textContent = '✓ Reporte descargado (' + r.name + '). Mándamelo: no tiene ninguna clave.'; }),
