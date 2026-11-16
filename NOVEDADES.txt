@@ -1,3 +1,6 @@
+v7.98.7 — 📣 Telegram acepta el canal escrito de cualquier forma
+- 📣 Al conectar un canal de Telegram puedes escribir yupitok_ru, @yupitok_ru o t.me/yupitok_ru: ShortForge lo corrige solo (antes, sin la @, daba «chat not found»). Las cuentas ya conectadas también se arreglan solas.
+
 v7.98.6 — 📣 Difusión: errores explicados
 - 📣 Cada cuenta conectada muestra su canal o usuario (ej. @yupitok_ru) para revisar que esté bien escrito.
 - 💬 Los errores de las redes se explican en español: si Telegram no encuentra el canal, te dice qué revisar (que sea público, que el @ sea exacto y que el bot sea administrador).
