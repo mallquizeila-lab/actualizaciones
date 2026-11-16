@@ -1,3 +1,6 @@
+7.99.2
+- X (Twitter) queda como red MANUAL (gratis): aparece en el kit diario para publicar desde el celular.
+
 7.99.1
 - Difusión en X: publica sin enlace (X cobra ~0,20 US$ por publicación con enlace y ~0,015 US$ sin él). El enlace va en el perfil.
 
