@@ -1,3 +1,7 @@
+v7.98.6 — 📣 Difusión: errores explicados
+- 📣 Cada cuenta conectada muestra su canal o usuario (ej. @yupitok_ru) para revisar que esté bien escrito.
+- 💬 Los errores de las redes se explican en español: si Telegram no encuentra el canal, te dice qué revisar (que sea público, que el @ sea exacto y que el bot sea administrador).
+
 v7.98.5 — 🌍 Idiomas más claros en Difusión
 - 🌍 En Difusión mundial los idiomas se muestran en español con su bandera y su nombre original (ej. «🇷🇺 Ruso (Русский)», «🇮🇩 Indonesio (Bahasa Indonesia)»).
 
