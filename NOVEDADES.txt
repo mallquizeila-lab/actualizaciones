@@ -1,3 +1,6 @@
+7.99.1
+- Difusión en X: publica sin enlace (X cobra ~0,20 US$ por publicación con enlace y ~0,015 US$ sin él). El enlace va en el perfil.
+
 7.99.0
 - Yupitok: el canal de Telegram se elige por el PAÍS de la visita (Cloudflare) y solo se muestra ese. Si el celular está en español, portugués, ruso o indonesio, se respeta ese idioma.
 
