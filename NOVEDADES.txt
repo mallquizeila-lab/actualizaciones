@@ -1,3 +1,8 @@
+v7.98.8 — 🌍 Cada canal, 100 % en su idioma
+- 🌍 Las publicaciones de Difusión ya no salen mezcladas: si la IA no responde (por falta de cupo), el texto se traduce con el mismo traductor de la página; y si tampoco hay traducción, NO se publica en otro idioma: se reintenta en el siguiente horario.
+- ✍️ La frase final («¡Gratis en Yupitok, sin instalar nada!») viene traducida a los 12 idiomas.
+- ✋ El kit semi-automático ya no se cae si un idioma no tiene traducción todavía: te avisa y sigue con los demás.
+
 v7.98.7 — 📣 Telegram acepta el canal escrito de cualquier forma
 - 📣 Al conectar un canal de Telegram puedes escribir yupitok_ru, @yupitok_ru o t.me/yupitok_ru: ShortForge lo corrige solo (antes, sin la @, daba «chat not found»). Las cuentas ya conectadas también se arreglan solas.
 
