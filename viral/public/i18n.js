@@ -36,6 +36,11 @@
   IDIOMA.telegram = 'https://t.me/' + (TG[L] || 'yupitok_en');
   const ponerTG = () => document.querySelectorAll('a[data-tg]').forEach(a => { a.href = IDIOMA.telegram; a.target = '_blank'; a.rel = 'noopener'; });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ponerTG); else ponerTG();
+  // El país desde donde entra la persona manda (si no se sabe, queda el idioma del equipo)
+  // Si el equipo ya está en es/pt/ru/id, ese idioma manda (la persona lo lee); si está en inglés u otro, decide el país
+  const usarPais = tg => { if (tg && !(L !== 'en' && TG[L])) { IDIOMA.telegram = 'https://t.me/' + tg; ponerTG(); } };
+  let tgP = null; try { tgP = sessionStorage.getItem('tgPais'); } catch (e) {}
+  if (tgP) usarPais(tgP); else fetch('/api/pais').then(r => r.json()).then(j => { if (j.tg) { try { sessionStorage.setItem('tgPais', j.tg); } catch (e) {} usarPais(j.tg); } }).catch(() => {});
   if (L === 'es') return;
 
   // ---- Traducción ----

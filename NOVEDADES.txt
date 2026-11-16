@@ -1,3 +1,6 @@
+7.99.0
+- Yupitok: el canal de Telegram se elige por el PAÍS de la visita (Cloudflare) y solo se muestra ese. Si el celular está en español, portugués, ruso o indonesio, se respeta ese idioma.
+
 v7.98.9 — 📢 Canales de Telegram en yupitok.com
 - 📢 Botón «Telegram» en el pie de todas las páginas, en el inicio («Síguenos en Telegram»), en la Academy y al terminar cada lección, cuento o dibujo.
 - 🌍 Cada visitante va al canal de SU idioma: español → @yupitok_es, portugués → @yupitok_pt, ruso → @yupitok_ru, indonesio → @yupitok_id; los demás idiomas → @yupitok_en.
