@@ -1,3 +1,6 @@
+7.99.4
+- Difusión: la tarjeta del enlace (Bluesky y otras) ahora muestra la descripción en el idioma de la cuenta, no en español.
+
 7.99.3
 - Difusión: si las IA gratis no tienen cupo, ahora traduce con un traductor gratis sin IA (MyMemory), así Bluesky y los canales en otros idiomas siguen publicando.
 
