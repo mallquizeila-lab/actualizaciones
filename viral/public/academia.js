@@ -178,6 +178,7 @@
     if (RETO) fin.prepend(h('p', { class: 'ains' }, n > RETO ? '🥇 ¡Ganaste el reto! Superaste a tu amigo.' : n === RETO ? '🤝 ¡Empate! Igualaste a tu amigo.' : '💪 Casi: tu amigo sacó más estrellas. ¡Repite y gánale!'));
     fin.append(h('div', { class: 'card acomp' }, h('b', { style: 'font-size:1.1rem' }, curso ? '📣 ¡Presume tu insignia y reta a tus amigos!' : '📣 Reta a tus amigos a superarte'), D.ninos ? h('p', { class: 'meta', style: 'margin:4px 0' }, '👨‍👩‍👧 Comparte con ayuda de un adulto.') : null,
       compartir(curso ? `🏅 ¡Terminé el curso «${D.cursoT}» en Yupitok Academy! ¿Te animas a lograrlo tú también?` : `🎓 Saqué ${estrellas(n)} en «${D.titulo}» de Yupitok Academy. ¿Puedes superarme? 😎`, curso ? location.origin + D.cursoU : base + '?reto=' + n)));
+    fin.append(h('div', { class: 'card acta' }, h('b', {}, '📢 ¿Quieres más? '), D.ninos ? 'Papá o mamá: ' : '', 'reciban cada día un dibujo, un cuento o un juego nuevo en nuestro canal de Telegram. ', h('a', { href: (window.IDIOMA && window.IDIOMA.telegram) || 'https://t.me/yupitok_es', target: '_blank', rel: 'noopener' }, 'Unirme gratis →')));
     if (TOK && USU) sincronizar(true).then(r => { if (r && r.yc > 0) fin.append(h('p', { class: 'aok' }, `💎 +${r.yc} Yupicoins por terminar una lección nueva`)); });
     else { fin.append(invitacion(D.ninos, true)); sincronizar(false); }
     try { navigator.sendBeacon('/api/academia/ev', JSON.stringify({ c: D.clave, e: n })); } catch (e) {}

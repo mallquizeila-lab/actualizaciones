@@ -31,6 +31,11 @@
     b.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:45;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 10px;background:rgba(15,10,40,.75);color:#fff;font:700 .78rem system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(6px)';
     b.onclick = () => IDIOMA.selector(); document.body.append(b); };
   if (document.body) ponerBoton(); else document.addEventListener('DOMContentLoaded', ponerBoton);
+  // 📢 Canal de Telegram de Yupitok en el idioma de cada visitante
+  const TG = { es: 'yupitok_es', en: 'yupitok_en', pt: 'yupitok_pt', ru: 'yupitok_ru', id: 'yupitok_id' };
+  IDIOMA.telegram = 'https://t.me/' + (TG[L] || 'yupitok_en');
+  const ponerTG = () => document.querySelectorAll('a[data-tg]').forEach(a => { a.href = IDIOMA.telegram; a.target = '_blank'; a.rel = 'noopener'; });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ponerTG); else ponerTG();
   if (L === 'es') return;
 
   // ---- Traducción ----

@@ -1,3 +1,8 @@
+v7.98.9 — 📢 Canales de Telegram en yupitok.com
+- 📢 Botón «Telegram» en el pie de todas las páginas, en el inicio («Síguenos en Telegram»), en la Academy y al terminar cada lección, cuento o dibujo.
+- 🌍 Cada visitante va al canal de SU idioma: español → @yupitok_es, portugués → @yupitok_pt, ruso → @yupitok_ru, indonesio → @yupitok_id; los demás idiomas → @yupitok_en.
+- 👨‍👩‍👧 En las secciones para niños la invitación está dirigida a papá y mamá.
+
 v7.98.8 — 🌍 Cada canal, 100 % en su idioma
 - 🌍 Las publicaciones de Difusión ya no salen mezcladas: si la IA no responde (por falta de cupo), el texto se traduce con el mismo traductor de la página; y si tampoco hay traducción, NO se publica en otro idioma: se reintenta en el siguiente horario.
 - ✍️ La frase final («¡Gratis en Yupitok, sin instalar nada!») viene traducida a los 12 idiomas.

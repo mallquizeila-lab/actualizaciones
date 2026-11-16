@@ -66,6 +66,7 @@
     caja.innerHTML = ''; caja.append(h('div', { class: 'cesc' }, '⭐'.repeat(n) + '☆'.repeat(3 - n)), h('h2', {}, '🎉 ¡Cuento terminado!'), h('p', {}, n === 3 ? '¡Respondiste todo perfecto!' : '¡Muy bien! Lee otra vez para ganar más estrellas.'),
       h('div', { class: 'card' }, h('b', {}, '📣 Recomiéndalo a tus amigos'), C.ninos ? h('p', { class: 'meta' }, '👨‍👩‍👧 Comparte con ayuda de un adulto.') : null,
         h('div', { class: 'cops' }, red('🟢 WhatsApp', 'https://wa.me/?text=' + encodeURIComponent(txt + ' ' + url), '#16a34a'), red('🔵 Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '#1d4ed8'), red('✈️ Telegram', `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`, '#0284c7'))),
+      h('div', { class: 'card acta' }, h('b', {}, '📢 ¿Quieres más? '), C.ninos ? 'Papá o mamá: ' : '', 'reciban cada día un dibujo, un cuento o un juego nuevo en nuestro canal de Telegram. ', h('a', { href: (window.IDIOMA && window.IDIOMA.telegram) || 'https://t.me/yupitok_es', target: '_blank', rel: 'noopener' }, 'Unirme gratis →')),
       h('div', { class: 'cops' }, h('a', { class: 'cop prim', href: '/academia/cuentos' }, '📚 Leer otro cuento'), C.curso ? h('a', { class: 'cop', href: '/academia/' + C.curso }, '🎓 Ir al curso del tema') : null));
   }
 
