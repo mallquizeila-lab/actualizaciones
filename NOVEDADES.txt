@@ -1,3 +1,6 @@
+v7.98.4 — 📌 Pinterest más fácil
+- 📌 Al conectar Pinterest ya no necesitas el número del tablero: escribe su nombre (ej. «Dibujos para colorear gratis») o pega su enlace, y ShortForge lo encuentra solo.
+
 v7.98.3 — 📌 Verificación de Pinterest
 - 📌 yupitok.com ya tiene la etiqueta de verificación de Pinterest: tus pines mostrarán tu marca y Pinterest los recomendará más.
 
