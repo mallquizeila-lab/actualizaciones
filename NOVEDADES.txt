@@ -1,3 +1,6 @@
+v7.98.5 — 🌍 Idiomas más claros en Difusión
+- 🌍 En Difusión mundial los idiomas se muestran en español con su bandera y su nombre original (ej. «🇷🇺 Ruso (Русский)», «🇮🇩 Indonesio (Bahasa Indonesia)»).
+
 v7.98.4 — 📌 Pinterest más fácil
 - 📌 Al conectar Pinterest ya no necesitas el número del tablero: escribe su nombre (ej. «Dibujos para colorear gratis») o pega su enlace, y ShortForge lo encuentra solo.
 
