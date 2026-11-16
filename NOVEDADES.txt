@@ -1,3 +1,6 @@
+v7.98.3 — 📌 Verificación de Pinterest
+- 📌 yupitok.com ya tiene la etiqueta de verificación de Pinterest: tus pines mostrarán tu marca y Pinterest los recomendará más.
+
 v7.98.2 — 🔄 Actualizador más robusto
 - 🔄 La instalación de mejoras ya no congela ShortForge: copia los archivos en segundo plano, con un respaldo liviano (solo el código, sin carpetas pesadas).
 - 📝 Cada paso queda anotado; si una instalación se corta, al volver ShortForge te dice en qué paso fue y puedes reintentarla con el mismo botón (el botón ya no se queda en «Reiniciando…»).
