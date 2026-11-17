@@ -1,3 +1,6 @@
+8.9.0
+- 🌐 Web para AdSense más automática: «Aprobar sola las páginas excelentes» (nota 9+ del revisor, sin datos pendientes ni voseo). Viene activado en las webs mágicas. Las páginas con nota menor esperan tu revisión.
+
 8.8.0
 - 🤝 Yupitok Studio con mucha más credibilidad: portada con 3 celulares que van rotando los diseños, y nueva sección «Así se ven las webs que hacemos» con 6 webs de ejemplo por rubro (pollería, taller, dental, barbería, instituto y bodega) que se pueden abrir completas. Marcadas como diseños de ejemplo (negocios ficticios).
 - 💼 Webs para clientes: portada más profesional (dos columnas, ícono del rubro, datos del negocio y botón «Ver servicios»).

@@ -12,7 +12,7 @@
 
   function formMagia() {
     const D = WB.adsense?.def || {};
-    return `<div class="card" style="border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#eef2ff)"><h3>✨ Crear web mágica</h3><p class="hint">Escribe solo la <b>temática</b> y el <b>dominio</b>. El sistema hace todo: nombre, lema, misión, color, <b>logo</b>, categorías, 24 temas sin repetir, las primeras 6 páginas con <b>imágenes</b>, revisión de calidad, páginas legales y SEO. Luego tú apruebas y se publica a ritmo natural (modo automático activado).</p>
+    return `<div class="card" style="border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#eef2ff)"><h3>✨ Crear web mágica</h3><p class="hint">Escribe solo la <b>temática</b> y el <b>dominio</b>. El sistema hace todo: nombre, lema, misión, color, <b>logo</b>, categorías, 24 temas sin repetir, las primeras 6 páginas con <b>imágenes</b>, revisión de calidad, páginas legales y SEO. Modo automático activado: cada día escribe páginas nuevas, <b>aprueba sola las de nota 9+</b> y las publica a ritmo natural; las demás esperan tu revisión.</p>
     <div class="row">${campo('wm-nicho', 'Temática o nicho *', '', 'Ej: recetas peruanas fáciles · trámites en Perú · cuidado de mascotas')}${campo('wm-dominio', 'Dominio *', '', 'recetasperuanas.com')}</div>
     <div class="row"><label>País<select id="wm-pais">${['Perú', 'México', 'Colombia', 'Argentina', 'Chile', 'Ecuador', 'Bolivia', 'España', 'Estados Unidos', 'Latinoamérica'].map(p => `<option>${p}</option>`).join('')}</select></label>${campo('wm-resp', 'Responsable (tu nombre real, se guarda)', D.responsable || '', 'José Albitres')}${campo('wm-ciudad', 'Ciudad', D.ciudad || '', 'Lima')}</div>
     <p class="hint">📧 El correo será <b>contacto@tudominio</b>: actívalo gratis en Cloudflare → tu dominio → <b>Email Routing</b> (reenvía a tu Gmail). Sin correo que funcione, AdSense rechaza.</p>
@@ -64,6 +64,7 @@
       <div class="row">${v('adsenseId', 'ID de AdSense (ca-pub-…)', 'ca-pub-1234567890123456')}${v('gsc', 'Verificación de Search Console', 'código de la meta google-site-verification')}</div>
       <div class="row"><label>Páginas por semana<input id="wa-ritmo-${w.id}" type="number" min="1" max="7" value="${w.ritmo || 4}"></label><label>Borradores por día (modo automático)<input id="wa-porDia-${w.id}" type="number" min="1" max="5" value="${w.porDia || 2}"></label></div>
       <label><input type="checkbox" id="wa-auto-${w.id}" ${w.auto ? 'checked' : ''} style="width:auto"> 🤖 Modo automático: cada día escribe borradores nuevos (quedan «por revisar» para que tú apruebes)</label>
+      <label><input type="checkbox" id="wa-autoAprobar-${w.id}" ${w.autoAprobar ? 'checked' : ''} style="width:auto"> ✅ Aprobar sola las páginas excelentes (nota 9+ del revisor, sin datos pendientes ni voseo). Las demás esperan tu revisión.</label>
       <label><input type="checkbox" id="wa-autoPublicar-${w.id}" ${w.autoPublicar ? 'checked' : ''} style="width:auto"> 🚀 Republicar solo en Cloudflare cuando llegue la fecha de las páginas aprobadas</label>
       <label><input type="checkbox" id="wa-anuncios-${w.id}" ${w.anuncios ? 'checked' : ''} style="width:auto"> 💰 Mostrar anuncios (activar SOLO cuando AdSense apruebe el sitio)</label>`
       : `<div class="row">${v('rubro', 'Rubro', '', w.cliente?.rubro)}${v('whatsapp', 'WhatsApp', '', w.cliente?.whatsapp)}${v('horario', 'Horario', '', w.cliente?.horario)}</div>
@@ -123,7 +124,7 @@
     wbGuardarEd: guard(async () => { const { w, p } = editor; await api('/api/webs', { accion: 'editar', id: w.id, pid: p.id, tituloSeo: $('#we-tit').value, desc: $('#we-desc').value, cuerpo: $('#we-cuerpo').value, datos: $('#we-datos').value }); toast('💾 Guardado'); document.getElementById('wbEd')?.remove(); editor = null; await cargar(); }),
     wbAjustes: guard(async el => { const id = el.dataset.id, g = k => document.getElementById(`wa-${k}-${id}`), o = { accion: 'ajustes', id };
       for (const k of ['nombre', 'dominio', 'correo', 'responsable', 'ciudad', 'lema', 'mision', 'autor', 'autorBio', 'adsenseId', 'gsc', 'ritmo', 'porDia', 'rubro', 'whatsapp', 'horario', 'direccion', 'servicios', 'diferencial', 'color']) if (g(k)) o[k] = g(k).value;
-      for (const k of ['auto', 'autoPublicar', 'anuncios']) if (g(k)) o[k] = g(k).checked;
+      for (const k of ['auto', 'autoAprobar', 'autoPublicar', 'anuncios']) if (g(k)) o[k] = g(k).checked;
       await api('/api/webs', o); toast('💾 Ajustes guardados'); await cargar(); }),
   });
 })();
