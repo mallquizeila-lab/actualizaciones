@@ -334,7 +334,7 @@ async function api(u, q, U, r) {
   if (u === '/api/mando/academia') return await academiaAg.estado();
   if (u === '/api/crm' && !P) return require('./lib/agencia').listar();
   if (u === '/api/crm' && P) return require('./lib/agencia').accion(await json(q));
-  if (u === '/api/webs/foto' && P) return require('./lib/webs').subirFoto(String(U.searchParams.get('id') || ''), await body(q, 25e6), U.searchParams.get('nombre'));
+  if (u === '/api/webs/foto' && P) return require('./lib/webs').subirFoto(String(U.searchParams.get('id') || ''), await body(q, 25e6), U.searchParams.get('nombre'), U.searchParams.get('cat'));
   if (u === '/api/webs' && !P) return require('./lib/webs').listar(U.searchParams.get('tipo'));
   if (u === '/api/webs' && P) return require('./lib/webs').accion(await json(q));
   if (u === '/api/omniroute' && !P) return require('./lib/omniroute').estado();

@@ -1,3 +1,6 @@
+9.1.0
+- 📷 Webs para clientes: fotos por celebración o categoría (Infantiles, 15 años, Bodas, Baby shower, 50 años…). En la web, la galería «Nuestros trabajos» se filtra por categoría, cada servicio muestra su foto y tiene «📷 Ver fotos». Puedes cambiar la categoría de cada foto y elegir la portada (⭐).
+
 9.0.0
 - 💼 Webs para clientes MUCHO más profesionales:
   · 🔍 Antes de crear, la IA investiga qué tienen las mejores webs del rubro (y hasta 3 webs de referencia que pegues) para hacer una mejor, sin copiar textos.
