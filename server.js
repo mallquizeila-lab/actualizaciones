@@ -584,9 +584,10 @@ http.createServer(async (q, r) => {
     if (u.startsWith('/webs/') || u.startsWith('/webs-zip/')) { // vista previa de las webs creadas
       const WD = require('./lib/webs').DIR, zipp = u.startsWith('/webs-zip/'), partes = u.slice(zipp ? 10 : 6).split('/'), id = (partes.shift() || '').replace(/[^a-z0-9]/g, '');
       if (zipp) { if (serveFile(r, path.join(WD, id, path.basename(partes.join('/'))), path.join(WD, id))) return; }
-      else { const raiz = path.join(WD, id, 'dist'); let f = path.join(raiz, ...partes); if (!path.extname(f)) f = path.join(f, 'index.html'); if (!f.startsWith(raiz + path.sep) || !fs.existsSync(f)) f = path.join(raiz, '404.html');
+      else { const raiz = path.join(WD, id, 'dist'); let f = path.join(raiz, ...partes); if (!path.extname(f)) f = path.join(f, 'index.html'); if (f.startsWith(raiz + path.sep) && !fs.existsSync(f)) { const g = path.join(WD, id, 'assets', ...partes); if (g.startsWith(path.join(WD, id, 'assets') + path.sep) && fs.existsSync(g) && fs.statSync(g).isFile()) f = g; } // logo e imágenes aunque aún no se haya armado el sitio
+        if (!(f.startsWith(raiz + path.sep) || f.startsWith(path.join(WD, id, 'assets') + path.sep)) || !fs.existsSync(f)) f = path.join(raiz, '404.html');
         if (f.endsWith('.html') && fs.existsSync(f)) { r.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' }); return r.end(fs.readFileSync(f, 'utf8').replace(/(href|src)="\/(?!\/)/g, `$1="/webs/${id}/`)); } // enlaces internos dentro de la vista previa
-        if (serveFile(r, f, raiz)) return; }
+        if (serveFile(r, f, f.startsWith(raiz + path.sep) ? raiz : path.join(WD, id, 'assets'))) return; }
     }
     if (u.startsWith('/files/') && /^\/files\/(videos|logos|chars|cache|voces|desarmados|clips)\//.test(u) && serveFile(r, path.join(DATA, u.slice(7)), DATA)) return;
     if (serveFile(r, path.join(PUB, u === '/' ? 'index.html' : u), PUB)) return;
