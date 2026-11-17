@@ -1,3 +1,6 @@
+8.7.6
+- 🤝 Si el campo «WhatsApp de ventas» está vacío, el sistema toma tu número del texto «Lo que el bot debe saber» (wa.me/… o +51 …): los botones verdes de la página y del chat aparecen igual.
+
 8.7.5
 - ⚡ Chatbot: usa un modelo que responde al instante (Llama 3.3 en Groq/Cerebras, sin «pensar»): 1 a 3 segundos.
 - Arreglo: respuestas cortadas a la mitad o vacías («…»). Ahora siempre llegan completas; si una sale vacía, se pide a otro motor.
