@@ -1,3 +1,9 @@
+9.4.0
+- 🤖 Asistente de chat en TODAS las webs de clientes: botón «¿Te ayudo?» que responde al instante con los servicios, paquetes, horarios y preguntas frecuentes del negocio, recomienda el servicio ideal sin pedir datos y, cuando el visitante está interesado, lo pasa al WhatsApp del negocio con el resumen de la conversación.
+- Funciona con el enlace gratis y también cuando la web tenga su dominio propio.
+- El cliente ve las consultas en su panel privado («🤖 Consultas de tu asistente»). En ShortForge ves cuántas consultas hubo y puedes apagarlo o encenderlo.
+- Para las webs ya creadas: pulsa «Armar web» (o que el cliente pulse «Publicar cambios») y aparece el asistente.
+
 9.3.0
 - 🌐 Webs sin comprar dominio: cada web tiene su ENLACE PÚBLICO GRATIS (yupitok.com/studio/sitio/nombre-del-negocio/). Ya puedes enviárselo al cliente o compartirlo en WhatsApp y redes. En ShortForge aparece en cada tarjeta con botón para copiarlo.
 - Cuando más adelante compres el dominio, solo lo escribes en la web y todo pasa a usar el dominio propio.
