@@ -10,8 +10,16 @@
   const chip = e => { const [t, bg, c] = ESTADO[e] || ['?', '#eee', '#333']; return `<span style="background:${bg};color:${c};border-radius:99px;padding:1px 8px;font-size:.75rem;white-space:nowrap">${t}</span>`; };
   const campo = (id, lab, val = '', ph = '', tipo = 'text') => `<label>${lab}<input id="${id}" type="${tipo}" value="${esc(val)}" placeholder="${esc(ph)}"></label>`;
 
+  function formMagia() {
+    const D = WB.adsense?.def || {};
+    return `<div class="card" style="border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#eef2ff)"><h3>✨ Crear web mágica</h3><p class="hint">Escribe solo la <b>temática</b> y el <b>dominio</b>. El sistema hace todo: nombre, lema, misión, color, <b>logo</b>, categorías, 24 temas sin repetir, las primeras 6 páginas con <b>imágenes</b>, revisión de calidad, páginas legales y SEO. Luego tú apruebas y se publica a ritmo natural (modo automático activado).</p>
+    <div class="row">${campo('wm-nicho', 'Temática o nicho *', '', 'Ej: recetas peruanas fáciles · trámites en Perú · cuidado de mascotas')}${campo('wm-dominio', 'Dominio *', '', 'recetasperuanas.com')}</div>
+    <div class="row"><label>País<select id="wm-pais">${['Perú', 'México', 'Colombia', 'Argentina', 'Chile', 'Ecuador', 'Bolivia', 'España', 'Estados Unidos', 'Latinoamérica'].map(p => `<option>${p}</option>`).join('')}</select></label>${campo('wm-resp', 'Responsable (tu nombre real, se guarda)', D.responsable || '', 'José Albitres')}${campo('wm-ciudad', 'Ciudad', D.ciudad || '', 'Lima')}</div>
+    <p class="hint">📧 El correo será <b>contacto@tudominio</b>: actívalo gratis en Cloudflare → tu dominio → <b>Email Routing</b> (reenvía a tu Gmail). Sin correo que funcione, AdSense rechaza.</p>
+    <div class="btns"><button class="b" data-act="wbMagia" style="background:#7c3aed">✨ Crear todo</button></div></div>`;
+  }
   function formNueva(t) {
-    return `<details class="card" ${WB[t]?.webs?.length ? '' : 'open'}><summary style="cursor:pointer"><b>➕ Crear una web nueva</b></summary>
+    return `${t === 'adsense' ? formMagia() : ''}<details class="card" ${WB[t]?.webs?.length || t === 'adsense' ? '' : 'open'}><summary style="cursor:pointer"><b>➕ Crear ${t === 'adsense' ? 'una web paso a paso (avanzado)' : 'una web nueva'}</b></summary>
     ${t === 'adsense' ? `<p class="hint">Un sitio de contenido útil para un nicho. La IA propone temas sin repetir, escribe cada página con datos y fuentes, otra IA la revisa y <b>tú apruebas</b> antes de publicar. Lo que AdSense exige (contacto, responsable, legales, fechas reales, SEO) se arma solo.</p>
     <div class="row">${campo('wn-nombre', 'Nombre del sitio *', '', 'Ej: Se Busca Empleo')}${campo('wn-dominio', 'Dominio (cuando lo compres)', '', 'sebuscaempleo.com')}</div>
     <div class="row">${campo('wn-nicho', 'Nicho / tema *', '', 'Ej: empleo, derechos laborales y CV en Perú')}${campo('wn-publico', 'Para quién', '', 'Ej: personas que buscan trabajo en Perú')}</div>
@@ -38,10 +46,10 @@
       <p>${w.textos ? '✅ Textos listos' : '⏳ Escribiendo los textos…'} ${w.construido ? '· 🏗️ Armada' : ''} ${w.publicado ? `· 🌐 <a href="${esc(w.publicado.url)}" target="_blank" rel="noopener">${esc(w.publicado.url)}</a>` : ''}</p>
       <div class="btns"><button class="b" data-act="wbAcc" data-a="construir" data-id="${w.id}">🏗️ Armar web</button><a class="b ghost" href="${prev}" target="_blank" rel="noopener">👁 Vista previa</a><button class="b ghost" data-act="wbAcc" data-a="textos" data-id="${w.id}">🔄 Reescribir textos</button><button class="b ghost" data-act="wbAcc" data-a="zip" data-id="${w.id}">⬇ ZIP para el cliente</button><button class="b ghost" data-act="wbAcc" data-a="publicar" data-id="${w.id}">🚀 Publicar en Cloudflare</button><button class="b ghost" data-act="wbAcc" data-a="borrar" data-id="${w.id}">🗑</button></div>
       ${ajustes(w)}${w.log.length ? `<details><summary class="hint" style="cursor:pointer">📋 Registro</summary><div class="hint">${w.log.map(esc).join('<br>')}</div></details>` : ''}</div>`;
-    return `<div class="card" style="border-left:5px solid ${esc(w.color)}"><h3>🌐 ${esc(w.nombre)} <span class="hint">${esc(w.dominio || 'sin dominio aún')} · ${esc(w.nicho)}</span></h3>
+    return `<div class="card" style="border-left:5px solid ${esc(w.color)}"><h3>${w.logo ? `<img src="/webs/${w.id}/logo.png?${esc(w.construido || '')}" alt="" width="30" height="30" style="vertical-align:middle;border-radius:6px"> ` : '🌐 '}${esc(w.nombre)} <span class="hint">${esc(w.dominio || 'sin dominio aún')} · ${esc(w.nicho)}</span></h3>
       <p class="hint">💡 ${por('idea').length} ideas · 👀 ${por('revisar').length} por revisar · ✅ ${por('aprobada').length} programadas · 🌐 ${por('publicada').length} publicadas${w.publicado ? ` · <a href="${esc(w.publicado.url)}" target="_blank" rel="noopener">${esc(w.publicado.url)}</a>` : ''}</p>
       <details ${pend.length ? 'open' : ''}><summary style="cursor:pointer"><b>📋 Lista para AdSense: ${w.chequeo.length - pend.length}/${w.chequeo.length}</b></summary><div style="margin:6px 0">${w.chequeo.map(c => `<div>${c.ok ? '✅' : '❌'} ${esc(c.t)}${c.ok ? '' : ` <span class="hint">— ${esc(c.consejo)}</span>`}</div>`).join('')}</div></details>
-      <div class="btns"><button class="b" data-act="wbAcc" data-a="escribir" data-id="${w.id}">✍️ Escribir 3 páginas</button><button class="b ghost" data-act="wbAcc" data-a="planificar" data-id="${w.id}">💡 Más ideas</button><button class="b ghost" data-act="wbAcc" data-a="construir" data-id="${w.id}">🏗️ Armar sitio</button><a class="b ghost" href="${prev}" target="_blank" rel="noopener">👁 Vista previa</a><button class="b ghost" data-act="wbAcc" data-a="zip" data-id="${w.id}">⬇ ZIP</button><button class="b ghost" data-act="wbAcc" data-a="publicar" data-id="${w.id}">🚀 Publicar en Cloudflare</button></div>
+      <div class="btns">${por('revisar').length ? `<button class="b" data-act="wbAcc" data-a="aprobarBuenas" data-id="${w.id}" style="background:#16a34a">✅ Aprobar las de nota 9+</button>` : ''}<button class="b" data-act="wbAcc" data-a="escribir" data-id="${w.id}">✍️ Escribir 3 páginas</button>${w.logo ? '' : `<button class="b ghost" data-act="wbAcc" data-a="logo" data-id="${w.id}">🎨 Crear logo</button>`}<button class="b ghost" data-act="wbAcc" data-a="planificar" data-id="${w.id}">💡 Más ideas</button><button class="b ghost" data-act="wbAcc" data-a="construir" data-id="${w.id}">🏗️ Armar sitio</button><a class="b ghost" href="${prev}" target="_blank" rel="noopener">👁 Vista previa</a><button class="b ghost" data-act="wbAcc" data-a="zip" data-id="${w.id}">⬇ ZIP</button><button class="b ghost" data-act="wbAcc" data-a="publicar" data-id="${w.id}">🚀 Publicar en Cloudflare</button></div>
       ${ajustes(w)}
       ${['revisar', 'error', 'escribiendo', 'idea', 'aprobada', 'publicada'].map(e => por(e).length ? `<details ${['revisar', 'error', 'escribiendo'].includes(e) ? 'open' : ''}><summary style="cursor:pointer;margin-top:8px"><b>${chip(e)} ${por(e).length}</b></summary>${por(e).map(fila).join('')}</details>` : '').join('')}
       ${w.log.length ? `<details><summary class="hint" style="cursor:pointer;margin-top:8px">📋 Registro</summary><div class="hint">${w.log.map(esc).join('<br>')}</div></details>` : ''}</div>`;
@@ -90,6 +98,9 @@
   }
 
   Object.assign(ACT, {
+    wbMagia: guard(async el => { const v = id => document.getElementById(id)?.value.trim() || '';
+      if (!v('wm-nicho')) throw new Error('Escribe la temática'); if (!v('wm-dominio')) throw new Error('Escribe el dominio');
+      el.disabled = true; try { await api('/api/webs', { accion: 'magia', nicho: v('wm-nicho'), dominio: v('wm-dominio'), pais: v('wm-pais'), responsable: v('wm-resp'), ciudad: v('wm-ciudad') }); toast('✨ Creando todo: identidad, logo, temas y primeras páginas (10 a 20 minutos)…'); } finally { el.disabled = false; } await cargar('adsense'); }),
     wbCrear: guard(async el => { const t = el.dataset.t, v = id => document.getElementById(id)?.value || '';
       const o = { accion: 'crear', tipo: t, nombre: v('wn-nombre'), dominio: v('wn-dominio'), pais: v('wn-pais'), ciudad: v('wn-ciudad'), correo: v('wn-correo'), color: v('wn-color') };
       if (t === 'adsense') Object.assign(o, { nicho: v('wn-nicho'), publico: v('wn-publico'), responsable: v('wn-resp'), autor: v('wn-autor'), editor: v('wn-editor') });
@@ -100,7 +111,8 @@
       try { const r = await api('/api/webs', { accion: a, id: el.dataset.id });
         if (a === 'zip' && r.zip) { location.href = r.zip; toast('⬇ Descargando ZIP'); }
         else if (a === 'construir') toast(`🏗️ Sitio armado: ${r.construido?.paginas || 0} páginas. Mira la vista previa.`);
-        else toast({ escribir: '✍️ Escribiendo páginas (unos minutos)…', planificar: '💡 Buscando ideas nuevas…', publicar: '🚀 Publicando en Cloudflare…', textos: '✍️ Reescribiendo textos…', borrar: '🗑 Borrada' }[a] || 'Listo'); }
+        else if (a === 'aprobarBuenas') toast(`✅ Aprobadas ${r.aprobadas} páginas (se publican a ritmo natural)`);
+        else toast({ logo: '🎨 Creando logo…', escribir: '✍️ Escribiendo páginas (unos minutos)…', planificar: '💡 Buscando ideas nuevas…', publicar: '🚀 Publicando en Cloudflare…', textos: '✍️ Reescribiendo textos…', borrar: '🗑 Borrada' }[a] || 'Listo'); }
       finally { el.disabled = false; } await cargar(); }),
     wbPag: guard(async el => { const a = el.dataset.a; if (a === 'descartar' && !confirm('¿Descartar esta página?')) return; el.disabled = true;
       try { await api('/api/webs', { accion: a, id: el.dataset.id, pid: el.dataset.pid }); toast({ aprobar: '✅ Aprobada: se publicará en su fecha (ritmo natural)', escribir: '✍️ Escribiendo…', descartar: '🗑 Descartada' }[a]); }

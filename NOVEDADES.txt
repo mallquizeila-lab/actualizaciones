@@ -1,3 +1,9 @@
+8.6.0
+- ✨ «Crear web mágica»: escribes solo la temática y el dominio, y el sistema hace todo: nombre, lema, misión, color, LOGO, categorías, 24 temas sin repetir, las primeras 6 páginas con IMÁGENES, revisión de calidad, legales y SEO. Modo automático activado.
+- ✅ Botón «Aprobar las de nota 9+» (sin datos pendientes ni voseo).
+- Imágenes por artículo (portada, tarjetas, og:image y datos estructurados) y logo en cabecera y favicon. Si se acaba el cupo de imágenes, se completan solas al día siguiente.
+- Detector de temas repetidos más inteligente (no confunde temas distintos del mismo nicho).
+
 8.5.0
 - 🌐 NUEVO «Web para AdSense»: sitios propios de calidad. La IA propone temas sin repetir, escribe cada página con fuentes y bloque único, otra IA la revisa (nota 8+) y TÚ apruebas. Ritmo natural de publicación, páginas legales completas, SEO técnico (datos estructurados, sitemap con fechas reales, enlazado interno) y lista de requisitos de AdSense.
 - 💼 NUEVO «Web para clientes»: páginas profesionales para negocios con WhatsApp, mapa y SEO local. Descarga en ZIP o publica en Cloudflare Pages.
