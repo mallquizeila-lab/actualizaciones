@@ -1,3 +1,7 @@
+8.4.0
+- 🎮 Clips propios por canal: sube grabaciones de tus juegos (Canales → Editar → 🎮 Clips propios) y elige «Movimiento: Clips propios». El guion sabe qué clips hay y cada escena muestra el clip que encaja con lo que se dice. Ideal para Yupitok.
+- 🎥 Cada canal elige su movimiento: clips de stock, mixto, solo imágenes o clips propios.
+
 8.3.0
 - 🎙️ Voces Gemini (las más humanas) con tu misma clave gratis: 22 voces en Voces → grupo «Gemini». Si se acaba el cupo del día, ese video usa una voz de Edge parecida (nunca mezcla voces).
 - ⭐ Guion pro: el guion lo escribe siempre Gemini, lo revisa un crítico de OTRO motor y lo pule hasta 9/10.

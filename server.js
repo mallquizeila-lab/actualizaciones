@@ -1,7 +1,7 @@
 // ShortForge: fábrica de videos verticales para varios canales (YouTube Shorts, TikTok y Reels).
 // Abre http://localhost:3200 después de iniciar con start.bat.
 const http = require('http'), fs = require('fs'), path = require('path');
-const { E, setKeys, run, ff, uid, DATA, ROOT, parseJSON } = require('./lib/util');
+const { E, setKeys, run, ff, uid, DATA, ROOT, parseJSON, secs } = require('./lib/util');
 const { db, saveAll, channel, job } = require('./lib/store');
 const ai = require('./lib/ai');
 const tts = require('./lib/tts');
@@ -69,7 +69,7 @@ function publicState() {
 function saveChannel(o) {
   let ch = o.id && channel(o.id);
   if (!ch) { ch = { id: uid(), active: true, style: 'fotos', characters: [], times: { ...DEFAULT_TIMES }, created: new Date().toISOString() }; db.channels.push(ch); }
-  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId', 'radarOn', 'radarAuto'])
+  for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId', 'radarOn', 'radarAuto', 'motion'])
     if (o[k] !== undefined) ch[k] = o[k];
   if (o.reparto !== undefined) ch.reparto = (Array.isArray(o.reparto) ? o.reparto : []).slice(0, 40).map(r => ({ id: String(r.id || uid()), nombre: String(r.nombre || 'Personaje').slice(0, 40), descripcion: String(r.descripcion || '').slice(0, 160), preset: String(r.voice || '').startsWith('clon:') ? '' : String(r.preset || 'hombre'), voice: String(r.voice || '') }));
   if (o.autoClone === true && o.autoCloneConsent === true) ch.autoCloneConsentAt = ch.autoCloneConsentAt || new Date().toISOString();
@@ -88,9 +88,18 @@ function saveChannel(o) {
 async function upload(q, U) {
   const kind = U.searchParams.get('kind'), ch = channel(U.searchParams.get('channel'));
   if (!ch) throw new Error('Canal no encontrado');
-  const buf = await body(q, 15e6), tmp = path.join(DATA, 'cache', 'up-' + uid());
+  const buf = await body(q, kind === 'clip' ? 300e6 : 15e6), tmp = path.join(DATA, 'cache', 'up-' + uid());
   fs.writeFileSync(tmp, buf);
   try {
+    if (kind === 'clip') { // 🎮 clip propio del canal (p. ej. una grabación de pantalla jugando en Yupitok)
+      const dir = path.join(DATA, 'clips', ch.id), id = uid().toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) || Date.now().toString(36); fs.mkdirSync(dir, { recursive: true });
+      const nombre = String(U.searchParams.get('nombre') || '').replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[_-]+/g, ' ').trim().slice(0, 80) || 'clip';
+      await ff(['-i', tmp, '-t', '90', '-an', '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', path.join(dir, id + '.mp4')]);
+      await ff(['-ss', '1', '-i', path.join(dir, id + '.mp4'), '-frames:v', '1', '-vf', 'scale=270:480', '-q:v', '4', path.join(dir, id + '.jpg')]).catch(() => {});
+      const dur = await secs(path.join(dir, id + '.mp4')).catch(() => 0);
+      ch.clips = [...(ch.clips || []), { id, nombre, dur: Math.round(dur) }].slice(-200); saveAll.channels();
+      return { ok: 1, clip: id };
+    }
     if (kind === 'logo') {
       await ff(['-i', tmp, '-vf', 'scale=600:600:force_original_aspect_ratio=decrease', '-frames:v', '1', path.join(DATA, 'logos', ch.id + '.png')]);
       ch.logo = Date.now(); saveAll.channels();
@@ -364,6 +373,7 @@ async function api(u, q, U, r) {
   if (u === '/api/engine/test') { const o = await json(q); return ai.test(o.provider); }
   if (u === '/api/engine/models') { const o = await json(q); return { models: await ai.listModels(o.provider), auto: await ai.modelFor(o.provider) }; }
   if (u === '/api/channel') return saveChannel(await json(q));
+  if (u === '/api/channel/clip/delete') { const o = await json(q), ch = channel(o.channel); if (!ch) throw new Error('Canal no encontrado'); ch.clips = (ch.clips || []).filter(c => c.id !== o.id); for (const e of ['.mp4', '.jpg']) fs.rmSync(path.join(DATA, 'clips', ch.id, String(o.id).replace(/[^a-z0-9]/g, '') + e), { force: true }); saveAll.channels(); return { ok: 1 }; }
   if (u === '/api/channel/delete') { const o = await json(q); db.channels = db.channels.filter(c => c.id !== o.id); saveAll.channels(); return { ok: 1 }; }
   if (u === '/api/channel/presets') {
     const have = new Set(db.channels.map(c => c.name));
@@ -566,7 +576,7 @@ http.createServer(async (q, r) => {
     }
     if (u.startsWith('/efectos/') && serveFile(r, path.join(efectos.DIR, ...u.slice(9).split('/').map(decodeURIComponent)), efectos.DIR)) return;
     if (u.startsWith('/musica/') && serveFile(r, path.join(require('./lib/util').USERDATA, 'musica', decodeURIComponent(u.slice(8))), path.join(require('./lib/util').USERDATA, 'musica'))) return;
-    if (u.startsWith('/files/') && /^\/files\/(videos|logos|chars|cache|voces|desarmados)\//.test(u) && serveFile(r, path.join(DATA, u.slice(7)), DATA)) return;
+    if (u.startsWith('/files/') && /^\/files\/(videos|logos|chars|cache|voces|desarmados|clips)\//.test(u) && serveFile(r, path.join(DATA, u.slice(7)), DATA)) return;
     if (serveFile(r, path.join(PUB, u === '/' ? 'index.html' : u), PUB)) return;
     r.writeHead(404); r.end('No encontrado');
   } catch (e) {
