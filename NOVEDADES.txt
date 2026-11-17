@@ -1,3 +1,7 @@
+8.9.1
+- 🔎 Web para AdSense: botón «¿Está libre?» que consulta el registro oficial de dominios (RDAP). Sin extensión revisa .com, .pe, .com.pe, .net y .org a la vez.
+- 💡 «Sugerir nombres con buen SEO»: la IA propone 15 nombres cortos, memorables y con palabras del nicho, y el sistema revisa cuáles están libres (primero los .com libres). Un clic para usarlo.
+
 8.9.0
 - 🌐 Web para AdSense más automática: «Aprobar sola las páginas excelentes» (nota 9+ del revisor, sin datos pendientes ni voseo). Viene activado en las webs mágicas. Las páginas con nota menor esperan tu revisión.
 

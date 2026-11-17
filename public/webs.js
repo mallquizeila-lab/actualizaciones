@@ -15,6 +15,7 @@
     return `<div class="card" style="border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#eef2ff)"><h3>✨ Crear web mágica</h3><p class="hint">Escribe solo la <b>temática</b> y el <b>dominio</b>. El sistema hace todo: nombre, lema, misión, color, <b>logo</b>, categorías, 24 temas sin repetir, las primeras 6 páginas con <b>imágenes</b>, revisión de calidad, páginas legales y SEO. Modo automático activado: cada día escribe páginas nuevas, <b>aprueba sola las de nota 9+</b> y las publica a ritmo natural; las demás esperan tu revisión.</p>
     <div class="row">${campo('wm-nicho', 'Temática o nicho *', '', 'Ej: recetas peruanas fáciles · trámites en Perú · cuidado de mascotas')}${campo('wm-dominio', 'Dominio *', '', 'recetasperuanas.com')}</div>
     <div class="row"><label>País<select id="wm-pais">${['Perú', 'México', 'Colombia', 'Argentina', 'Chile', 'Ecuador', 'Bolivia', 'España', 'Estados Unidos', 'Latinoamérica'].map(p => `<option>${p}</option>`).join('')}</select></label>${campo('wm-resp', 'Responsable (tu nombre real, se guarda)', D.responsable || '', 'José Albitres')}${campo('wm-ciudad', 'Ciudad', D.ciudad || '', 'Lima')}</div>
+    <div class="btns" style="margin-top:-4px"><button class="b ghost sm" data-act="wbDomCheck">🔎 ¿Está libre?</button><button class="b ghost sm" data-act="wbDomSug">💡 Sugerir nombres con buen SEO</button></div><div id="wm-dom-res"></div>
     <p class="hint">📧 El correo será <b>contacto@tudominio</b>: actívalo gratis en Cloudflare → tu dominio → <b>Email Routing</b> (reenvía a tu Gmail). Sin correo que funcione, AdSense rechaza.</p>
     <div class="btns"><button class="b" data-act="wbMagia" style="background:#7c3aed">✨ Crear todo</button></div></div>`;
   }
@@ -98,7 +99,20 @@
     document.body.append(d);
   }
 
+  const EST = { libre: ['✅ Libre', '#166534'], probable: ['🟡 Probablemente libre', '#854d0e'], ocupado: ['❌ Ocupado', '#991b1b'], desconocido: ['❔ No se pudo revisar', '#6b7280'] };
+  const est = e => { const [t, c] = EST[e] || EST.desconocido; return `<span style="color:${c};font-weight:700">${t}</span>`; };
   Object.assign(ACT, {
+    wbDomCheck: guard(async el => { const v = document.getElementById('wm-dominio').value.trim(), box = document.getElementById('wm-dom-res'); if (!v) throw new Error('Escribe un nombre de dominio');
+      el.disabled = true; box.innerHTML = '<p class="hint">🔎 Consultando el registro oficial…</p>';
+      try { const r = await api('/api/webs', { accion: 'dominio', dominio: v, pais: document.getElementById('wm-pais').value });
+        box.innerHTML = `<div class="card" style="margin:6px 0;padding:10px 14px">${r.resultados.map(x => `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:3px 0"><b>${esc(x.dominio)}</b> ${est(x.estado)} <span class="hint">${esc(x.via)}</span>${['libre', 'probable'].includes(x.estado) ? `<button class="b sm" data-act="wbDomUsar" data-d="${esc(x.dominio)}">Usar este</button>` : ''}</div>`).join('')}<p class="hint" style="margin:6px 0 0">Cómpralo en Cloudflare → Domain Registration (precio de costo). Si está ocupado, prueba «💡 Sugerir nombres».</p></div>`; }
+      finally { el.disabled = false; } }),
+    wbDomSug: guard(async el => { const nicho = document.getElementById('wm-nicho').value.trim(), box = document.getElementById('wm-dom-res'); if (!nicho) throw new Error('Escribe primero la temática');
+      el.disabled = true; box.innerHTML = '<p class="hint">💡 Pensando nombres y revisando cuáles están libres (20 a 40 segundos)…</p>';
+      try { const r = await api('/api/webs', { accion: 'sugerirDominios', nicho, pais: document.getElementById('wm-pais').value, base: document.getElementById('wm-dominio').value.trim() });
+        box.innerHTML = `<div class="card" style="margin:6px 0;padding:10px 14px"><b>💡 Nombres sugeridos</b> <span class="hint">(primero los que tienen .com libre)</span>${r.sugerencias.map(x => `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid #eee;padding:6px 0"><b style="min-width:150px">${esc(x.nombre)}</b><span>.com ${est(x.com)}</span>${x.pe ? `<span>.pe ${est(x.pe)}</span>` : ''}<span class="hint" style="flex:1">${esc(x.por_que)}</span>${x.com === 'libre' ? `<button class="b sm" data-act="wbDomUsar" data-d="${esc(x.nombre)}.com">Usar .com</button>` : ''}${x.pe && ['libre', 'probable'].includes(x.pe) ? `<button class="b ghost sm" data-act="wbDomUsar" data-d="${esc(x.nombre)}.pe">Usar .pe</button>` : ''}</div>`).join('') || '<p class="hint">No salieron nombres; intenta otra vez.</p>'}</div>`; }
+      finally { el.disabled = false; } }),
+    wbDomUsar: el => { document.getElementById('wm-dominio').value = el.dataset.d; document.getElementById('wm-dom-res').innerHTML = `<p class="hint">✅ Elegiste <b>${esc(el.dataset.d)}</b>. Cuando todo esté listo, cómpralo en Cloudflare antes de publicar.</p>`; },
     wbMagia: guard(async el => { const v = id => document.getElementById(id)?.value.trim() || '';
       if (!v('wm-nicho')) throw new Error('Escribe la temática'); if (!v('wm-dominio')) throw new Error('Escribe el dominio');
       el.disabled = true; try { await api('/api/webs', { accion: 'magia', nicho: v('wm-nicho'), dominio: v('wm-dominio'), pais: v('wm-pais'), responsable: v('wm-resp'), ciudad: v('wm-ciudad') }); toast('✨ Creando todo: identidad, logo, temas y primeras páginas (10 a 20 minutos)…'); } finally { el.disabled = false; } await cargar('adsense'); }),
