@@ -1,3 +1,6 @@
+8.7.7
+- 🖼️ Yupitok Studio: imagen de vista previa profesional al compartir el enlace en WhatsApp, Facebook, Telegram y X (1200×630). Funciona en yupitok.com/studio/ y en tu dominio. Para usar otra imagen, pon la tuya en data/agencia-og.jpg.
+
 8.7.6
 - 🤝 Si el campo «WhatsApp de ventas» está vacío, el sistema toma tu número del texto «Lo que el bot debe saber» (wa.me/… o +51 …): los botones verdes de la página y del chat aparecen igual.
 
