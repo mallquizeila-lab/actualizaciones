@@ -1,3 +1,10 @@
+9.0.0
+- 💼 Webs para clientes MUCHO más profesionales:
+  · 🔍 Antes de crear, la IA investiga qué tienen las mejores webs del rubro (y hasta 3 webs de referencia que pegues) para hacer una mejor, sin copiar textos.
+  · Página completa: portada con imagen, beneficios, servicios con detalles y botón «Consultar», paquetes (con «Más elegido»), galería «Nuestros trabajos», por qué elegirnos, proceso, sobre nosotros, preguntas frecuentes, llamado final y contacto con mapa de Google.
+  · 📷 Sube fotos reales del negocio (hasta 16): la primera es la portada.
+  · Control de calidad: si la IA deja algo vacío o cortado, lo vuelve a escribir.
+
 8.9.3
 - Webs: cola de trabajos. Si ya está creando una web, las nuevas quedan «en cola» y empiezan solas (ya no sale «estoy ocupado»).
 

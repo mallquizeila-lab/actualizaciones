@@ -33,7 +33,8 @@
     <div class="row">${campo('wn-whatsapp', 'WhatsApp (con código de país)', '', '51987654321')}${campo('wn-correo', 'Correo', '', '', 'email')}</div>
     <div class="row">${campo('wn-direccion', 'Dirección', '', 'Av. Principal 123')}${campo('wn-ciudad', 'Ciudad', '', 'Lima')}${campo('wn-horario', 'Horario', '', 'Lun a Dom 12:00–23:00')}</div>
     <div class="row">${campo('wn-dominio', 'Dominio (si ya tiene)', '', 'polleriaelbuensabor.com')}<label>País<select id="wn-pais">${['Perú', 'México', 'Colombia', 'Argentina', 'Chile', 'Ecuador', 'Bolivia', 'España', 'Estados Unidos'].map(p => `<option>${p}</option>`).join('')}</select></label><label>Color de marca<input id="wn-color" type="color" value="#dc2626"></label></div>
-    <label>¿Qué lo hace diferente? (opcional, solo cosas reales)<input id="wn-dif" placeholder="Ej: leña de algarrobo, 15 años en el barrio"></label>`}
+    <label>¿Qué lo hace diferente? (opcional, solo cosas reales)<input id="wn-dif" placeholder="Ej: leña de algarrobo, 15 años en el barrio"></label>
+    <label>🔍 Webs de referencia que te gusten <small>(opcional, hasta 3 enlaces: la IA toma ideas de su estructura, sin copiar textos)</small><input id="wn-refs" placeholder="https://… https://…"></label>`}
     <div class="btns"><button class="b" data-act="wbCrear" data-t="${t}">✨ Crear web</button></div></details>`;
   }
 
@@ -46,6 +47,10 @@
     if (w.tipo === 'cliente') return `<div class="card" style="border-left:5px solid ${esc(w.color)}"><h3>💼 ${esc(w.nombre)} <span class="hint">${esc(w.dominio || 'sin dominio aún')}</span></h3>
       <p>${w.textos ? '✅ Textos listos' : '⏳ Escribiendo los textos…'} ${w.construido ? '· 🏗️ Armada' : ''} ${w.publicado ? `· 🌐 <a href="${esc(w.publicado.url)}" target="_blank" rel="noopener">${esc(w.publicado.url)}</a>` : ''}</p>
       <div class="btns"><button class="b" data-act="wbAcc" data-a="construir" data-id="${w.id}">🏗️ Armar web</button><a class="b ghost" href="${prev}" target="_blank" rel="noopener">👁 Vista previa</a><button class="b ghost" data-act="wbAcc" data-a="textos" data-id="${w.id}">🔄 Reescribir textos</button><button class="b ghost" data-act="wbAcc" data-a="zip" data-id="${w.id}">⬇ ZIP para el cliente</button><button class="b ghost" data-act="wbAcc" data-a="publicar" data-id="${w.id}">🚀 Publicar en Cloudflare</button><button class="b ghost" data-act="wbAcc" data-a="borrar" data-id="${w.id}">🗑</button></div>
+      <details ${(w.fotos || []).length ? '' : 'open'} style="margin:6px 0"><summary style="cursor:pointer"><b>📷 Fotos reales del negocio</b> <span class="hint">(${(w.fotos || []).length}/16 · la primera es la portada; las demás van a «Nuestros trabajos»)</span></summary>
+        <p class="hint">Fotos de sus trabajos, local o productos (no de internet). Hacen que la web se vea MUCHO más profesional.</p>
+        <div class="btns"><input type="file" id="wf-${w.id}" accept="image/*" multiple style="width:auto"><button class="b sm" data-act="wbFotos" data-id="${w.id}">⬆ Subir fotos</button><span class="hint" id="wfe-${w.id}"></span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">${(w.fotos || []).map(f => `<div style="text-align:center"><img src="/webs/${w.id}/${esc(f)}" alt="" style="width:110px;height:80px;object-fit:cover;border-radius:8px"><br><button class="b ghost sm" data-act="wbQuitarFoto" data-id="${w.id}" data-f="${esc(f)}">🗑</button></div>`).join('')}</div></details>
       ${ajustes(w)}${w.log.length ? `<details><summary class="hint" style="cursor:pointer">📋 Registro</summary><div class="hint">${w.log.map(esc).join('<br>')}</div></details>` : ''}</div>`;
     return `<div class="card" style="border-left:5px solid ${esc(w.color)}"><h3>${w.logo ? `<img src="/webs/${w.id}/logo.png?${esc(w.construido || '')}" alt="" width="30" height="30" style="vertical-align:middle;border-radius:6px"> ` : '🌐 '}${esc(w.nombre)} <span class="hint">${esc(w.dominio || 'sin dominio aún')} · ${esc(w.nicho)}</span></h3>
       <p class="hint">💡 ${por('idea').length} ideas · 👀 ${por('revisar').length} por revisar · ✅ ${por('aprobada').length} programadas · 🌐 ${por('publicada').length} publicadas${w.publicado ? ` · <a href="${esc(w.publicado.url)}" target="_blank" rel="noopener">${esc(w.publicado.url)}</a>` : ''}</p>
@@ -69,7 +74,7 @@
       <label><input type="checkbox" id="wa-autoPublicar-${w.id}" ${w.autoPublicar ? 'checked' : ''} style="width:auto"> 🚀 Republicar solo en Cloudflare cuando llegue la fecha de las páginas aprobadas</label>
       <label><input type="checkbox" id="wa-anuncios-${w.id}" ${w.anuncios ? 'checked' : ''} style="width:auto"> 💰 Mostrar anuncios (activar SOLO cuando AdSense apruebe el sitio)</label>`
       : `<div class="row">${v('rubro', 'Rubro', '', w.cliente?.rubro)}${v('whatsapp', 'WhatsApp', '', w.cliente?.whatsapp)}${v('horario', 'Horario', '', w.cliente?.horario)}</div>
-      <div class="row">${v('direccion', 'Dirección', '', w.cliente?.direccion)}${v('ciudad', 'Ciudad', '', w.cliente?.ciudad)}</div>
+      <div class="row">${v('direccion', 'Dirección', '', w.cliente?.direccion)}${v('ciudad', 'Ciudad', '', w.cliente?.ciudad)}</div>${v('referencias', 'Webs de referencia (hasta 3 enlaces)', 'https://…', w.cliente?.referencias)}
       <label>Servicios<textarea id="wa-servicios-${w.id}" style="min-height:50px">${esc(w.cliente?.servicios || '')}</textarea></label>${v('diferencial', 'Diferencial (real)', '', w.cliente?.diferencial)}`}
       <label>Color<input type="color" id="wa-color-${w.id}" value="${esc(w.color)}"></label>
       <div class="btns"><button class="b sm" data-act="wbAjustes" data-id="${w.id}">💾 Guardar ajustes</button></div></details>`;
@@ -116,10 +121,14 @@
     wbMagia: guard(async el => { const v = id => document.getElementById(id)?.value.trim() || '';
       if (!v('wm-nicho')) throw new Error('Escribe la temática'); if (!v('wm-dominio')) throw new Error('Escribe el dominio');
       el.disabled = true; try { await api('/api/webs', { accion: 'magia', nicho: v('wm-nicho'), dominio: v('wm-dominio'), pais: v('wm-pais'), responsable: v('wm-resp'), ciudad: v('wm-ciudad') }); toast('✨ Creando todo: identidad, logo, temas y primeras páginas (10 a 20 minutos)…'); } finally { el.disabled = false; } await cargar('adsense'); }),
+    wbFotos: guard(async el => { const id = el.dataset.id, fs_ = [...(document.getElementById('wf-' + id)?.files || [])], est = document.getElementById('wfe-' + id); if (!fs_.length) throw new Error('Elige una o más fotos');
+      el.disabled = true; try { for (const [k, f] of fs_.entries()) { est.textContent = `Subiendo ${k + 1} de ${fs_.length}…`; const r = await fetch('/api/webs/foto?' + new URLSearchParams({ id, nombre: f.name }), { method: 'POST', headers: { 'x-sf': '1' }, body: f }); const j = await r.json().catch(() => ({})); if (!r.ok || j.error) throw new Error(j.error || 'No se pudo subir'); } } finally { el.disabled = false; }
+      toast('📷 Fotos listas. Pulsa «Armar web» para verlas'); await cargar(); }),
+    wbQuitarFoto: guard(async el => { if (!confirm('¿Quitar esta foto?')) return; await api('/api/webs', { accion: 'quitarFoto', id: el.dataset.id, foto: el.dataset.f }); await cargar(); }),
     wbCrear: guard(async el => { const t = el.dataset.t, v = id => document.getElementById(id)?.value || '';
       const o = { accion: 'crear', tipo: t, nombre: v('wn-nombre'), dominio: v('wn-dominio'), pais: v('wn-pais'), ciudad: v('wn-ciudad'), correo: v('wn-correo'), color: v('wn-color') };
       if (t === 'adsense') Object.assign(o, { nicho: v('wn-nicho'), publico: v('wn-publico'), responsable: v('wn-resp'), autor: v('wn-autor'), editor: v('wn-editor') });
-      else Object.assign(o, { rubro: v('wn-rubro'), servicios: v('wn-servicios'), whatsapp: v('wn-whatsapp'), direccion: v('wn-direccion'), horario: v('wn-horario'), diferencial: v('wn-dif') });
+      else Object.assign(o, { rubro: v('wn-rubro'), servicios: v('wn-servicios'), whatsapp: v('wn-whatsapp'), direccion: v('wn-direccion'), horario: v('wn-horario'), diferencial: v('wn-dif'), referencias: v('wn-refs') });
       if (t === 'adsense' && !o.nicho) throw new Error('Escribe el nicho'); if (t === 'cliente' && !o.rubro) throw new Error('Escribe el rubro');
       await api('/api/webs', o); toast(t === 'adsense' ? '✨ Web creada: la IA está proponiendo categorías y temas…' : '✨ Web creada: la IA está escribiendo los textos…'); await cargar(t); }),
     wbAcc: guard(async el => { const a = el.dataset.a; if (a === 'borrar' && !confirm('¿Borrar esta web y todo su contenido?')) return; el.disabled = true;
@@ -137,7 +146,7 @@
     wbCerrarEd: () => { document.getElementById('wbEd')?.remove(); editor = null; render(); },
     wbGuardarEd: guard(async () => { const { w, p } = editor; await api('/api/webs', { accion: 'editar', id: w.id, pid: p.id, tituloSeo: $('#we-tit').value, desc: $('#we-desc').value, cuerpo: $('#we-cuerpo').value, datos: $('#we-datos').value }); toast('💾 Guardado'); document.getElementById('wbEd')?.remove(); editor = null; await cargar(); }),
     wbAjustes: guard(async el => { const id = el.dataset.id, g = k => document.getElementById(`wa-${k}-${id}`), o = { accion: 'ajustes', id };
-      for (const k of ['nombre', 'dominio', 'correo', 'responsable', 'ciudad', 'lema', 'mision', 'autor', 'autorBio', 'adsenseId', 'gsc', 'ritmo', 'porDia', 'rubro', 'whatsapp', 'horario', 'direccion', 'servicios', 'diferencial', 'color']) if (g(k)) o[k] = g(k).value;
+      for (const k of ['nombre', 'dominio', 'correo', 'responsable', 'ciudad', 'lema', 'mision', 'autor', 'autorBio', 'adsenseId', 'gsc', 'ritmo', 'porDia', 'rubro', 'whatsapp', 'horario', 'direccion', 'servicios', 'diferencial', 'referencias', 'color']) if (g(k)) o[k] = g(k).value;
       for (const k of ['auto', 'autoAprobar', 'autoPublicar', 'anuncios']) if (g(k)) o[k] = g(k).checked;
       await api('/api/webs', o); toast('💾 Ajustes guardados'); await cargar(); }),
   });
