@@ -1,3 +1,8 @@
+8.7.5
+- ⚡ Chatbot: usa un modelo que responde al instante (Llama 3.3 en Groq/Cerebras, sin «pensar»): 1 a 3 segundos.
+- Arreglo: respuestas cortadas a la mitad o vacías («…»). Ahora siempre llegan completas; si una sale vacía, se pide a otro motor.
+- El asistente tutea siempre y responde corto (máx. ~70 palabras).
+
 8.7.4
 - 🤝 Chatbot: si el cliente pide hablar con ustedes («quiero comunicarme», «hablar con un asesor», «WhatsApp», «cotízame», «me interesa»…) o el bot lo invita a WhatsApp, el botón verde con el RESUMEN aparece siempre.
 - Botón de WhatsApp siempre visible: en el menú de la página, flotante abajo a la izquierda y en la cabecera del chat (con el resumen actualizado).
