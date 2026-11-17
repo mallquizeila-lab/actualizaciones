@@ -1,0 +1,50 @@
+[
+ {
+  "slug": "polleria",
+  "nombre": "La Brasa de Don Lucho",
+  "rubro": "pollería y parrillas",
+  "ciudad": "Lima",
+  "color": "#dc2626",
+  "icono": "🍗"
+ },
+ {
+  "slug": "taller",
+  "nombre": "AutoTec Arequipa",
+  "rubro": "taller mecánico",
+  "ciudad": "Arequipa",
+  "color": "#0369a1",
+  "icono": "🔧"
+ },
+ {
+  "slug": "dental",
+  "nombre": "Sonríe Clínica Dental",
+  "rubro": "clínica dental",
+  "ciudad": "Trujillo",
+  "color": "#0d9488",
+  "icono": "🦷"
+ },
+ {
+  "slug": "barberia",
+  "nombre": "Barbería Los Reyes",
+  "rubro": "barbería",
+  "ciudad": "Lima",
+  "color": "#1f2937",
+  "icono": "💈"
+ },
+ {
+  "slug": "instituto",
+  "nombre": "Instituto TecnoFuturo",
+  "rubro": "instituto de carreras técnicas",
+  "ciudad": "Lima",
+  "color": "#4f46e5",
+  "icono": "🎓"
+ },
+ {
+  "slug": "tienda",
+  "nombre": "Bodega Mi Barrio",
+  "rubro": "bodega y minimarket",
+  "ciudad": "Chiclayo",
+  "color": "#16a34a",
+  "icono": "🛒"
+ }
+]

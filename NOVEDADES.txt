@@ -1,3 +1,7 @@
+8.8.0
+- 🤝 Yupitok Studio con mucha más credibilidad: portada con 3 celulares que van rotando los diseños, y nueva sección «Así se ven las webs que hacemos» con 6 webs de ejemplo por rubro (pollería, taller, dental, barbería, instituto y bodega) que se pueden abrir completas. Marcadas como diseños de ejemplo (negocios ficticios).
+- 💼 Webs para clientes: portada más profesional (dos columnas, ícono del rubro, datos del negocio y botón «Ver servicios»).
+
 8.7.7
 - 🖼️ Yupitok Studio: imagen de vista previa profesional al compartir el enlace en WhatsApp, Facebook, Telegram y X (1200×630). Funciona en yupitok.com/studio/ y en tu dominio. Para usar otra imagen, pon la tuya en data/agencia-og.jpg.
 
