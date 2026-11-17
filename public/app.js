@@ -769,7 +769,7 @@ const KEYINFO = [
   ['FB_CONFIG_ID', 'Facebook: Identificador de configuración', 'Solo si Facebook lo pide (Inicio de sesión para empresas → Configuraciones)', 'https://developers.facebook.com/apps/'],
 ];
 // 🔀 OmniRoute (relevo local de IA gratis): estado que se pide aparte
-let OM = null, OMt = 0, OMcarga = false;
+let OM = null, OMt = 0, OMcarga = false, OMprueba = null;
 async function loadOM() { if (OMcarga) return; OMcarga = true; try { OM = await api('/api/omniroute'); } catch (e) { OM = { error: e.message }; } OMt = Date.now(); OMcarga = false;
   if (tab === 'ajustes' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render();
   if (OM && (OM.instalando || OM.arrancando)) setTimeout(loadOM, 5000); }
@@ -787,7 +787,7 @@ function omniCard() {
   ${OM.instalado ? `<button class="b ghost" data-act="omni" data-a="instalar" ${OM.instalando ? 'disabled' : ''}>🔄 Actualizar OmniRoute</button>` : ''}
   ${OM.corriendo ? `<a class="b ghost" href="${esc(OM.panel)}" target="_blank" rel="noopener">⚙️ Abrir su panel</a><button class="b ghost" data-act="omni" data-a="claves" ${OM.sincronizando ? 'disabled' : ''}>🔗 Conectar mis claves</button><button class="b ghost" data-act="testEng" data-p="omniroute" data-out="test-omni-card">🧪 Probar</button>` : ''}</div>
   ${OM.corriendo ? `<p class="hint">🔗 Claves tuyas conectadas en OmniRoute: <b>${OM.claves.length ? esc(OM.claves.join(', ')) : 'ninguna todavía'}</b>. ShortForge las conecta solo (y vuelve a hacerlo si cambias o agregas una clave en «Claves»).</p>` : ''}
-  <div class="hint" id="test-omni-card"></div>
+  <div class="hint" id="test-omni-card" style="color:${OMprueba?.ok ? 'var(--brand)' : 'var(--bad)'}">${OMprueba ? esc(OMprueba.txt) : ''}</div>
   <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">📖 Cómo sacarle el máximo provecho</summary><ol class="hint" style="margin:6px 0 0 18px">
   <li><b>Tus claves gratis se conectan solas</b> (Gemini, Groq, NVIDIA, OpenRouter, Cerebras, Mistral; GitHub Models no existe en OmniRoute, pero ShortForge lo sigue usando directo): no tienes que copiarlas. Para sumar más relevos, crea claves gratis de Cerebras y Mistral y pégalas en «Claves» de ShortForge.</li>
   <li>La primera vez que abras su panel te pedirá crear una contraseña: anótala solo en tu Excel.</li>
@@ -1379,7 +1379,7 @@ const ACT = {
   }),
   saveKeys: guard(async () => { const o = {}; document.querySelectorAll('[data-key]').forEach(i => { if (i.value.trim()) o[i.dataset.key] = i.value.trim(); }); if (!Object.keys(o).length) return toast('No pegaste ninguna clave nueva'); await api('/api/keys', o); toast('Claves guardadas'); await refresh(true); }),
   mv: guard(async el => { const e = [...S.settings.engines], i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= e.length) return; [e[i], e[j]] = [e[j], e[i]]; await api('/api/settings', { engines: e }); await refresh(true); }),
-  testEng: guard(async el => { const p = el.dataset.p, out = $('#' + (el.dataset.out || 'test-' + p)); out.textContent = 'Probando…'; const r = await api('/api/engine/test', { provider: p }); out.textContent = (r.ok ? '✓ ' : '✗ ') + r.msg; out.style.color = r.ok ? 'var(--brand)' : 'var(--bad)'; }),
+  testEng: guard(async el => { const p = el.dataset.p, out = $('#' + (el.dataset.out || 'test-' + p)); out.textContent = 'Probando… (puede tardar hasta 2 minutos)'; if (p === 'omniroute') OMprueba = { ok: true, txt: '⏳ Probando… (puede tardar hasta 2 minutos)' }; const r = await api('/api/engine/test', { provider: p }); out.textContent = (r.ok ? '✓ ' : '✗ ') + r.msg; out.style.color = r.ok ? 'var(--brand)' : 'var(--bad)'; if (p === 'omniroute') { OMprueba = { ok: r.ok, txt: (r.ok ? '✓ ' : '✗ ') + r.msg }; if (tab === 'ajustes') render(); } }),
   loadModels: guard(async el => { const p = el.dataset.p, sel = document.querySelector(`[data-model="${p}"]`), r = await api('/api/engine/models', { provider: p }); const cur = S.settings.models[p] || ''; sel.innerHTML = `<option value="">Automático (${esc(r.auto)})</option>` + r.models.map(m => `<option ${m === cur ? 'selected' : ''}>${esc(m)}</option>`).join(''); toast(r.models.length + ' modelos disponibles'); }),
   omni: guard(async el => { el.disabled = true; OM = await api('/api/omniroute', { accion: el.dataset.a }); toast(el.dataset.a === 'claves' ? '🔗 Conectando tus claves en OmniRoute…' : el.dataset.a === 'instalar' ? '⬇ Instalando OmniRoute… (2 a 5 minutos)' : el.dataset.a === 'encender' ? '▶ Encendiendo OmniRoute…' : '⏸ Apagado'); render(); setTimeout(loadOM, 4000); }),
   saveModels: guard(async () => { const m = {}; document.querySelectorAll('[data-model]').forEach(s => { if (s.value) m[s.dataset.model] = s.value; }); await api('/api/settings', { models: m }); toast('Guardado'); await refresh(true); }),

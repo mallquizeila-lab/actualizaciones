@@ -1,3 +1,6 @@
+8.1.3
+- OmniRoute: el resultado de «Probar» queda fijo en su tarjeta (no se borra al refrescar) y dice qué modelo respondió de verdad.
+
 8.1.2
 - OmniRoute: el resultado de «Probar» ahora se ve en la misma tarjeta.
 
