@@ -572,7 +572,7 @@ http.createServer(async (q, r) => {
   const U = new URL(q.url, 'http://x'), u = decodeURIComponent(U.pathname);
   try {
     if (u.startsWith('/oauth/')) return oauth(u, U, r);
-    if (u === '/agencia-pub' || u.startsWith('/agencia-pub/')) { const b = q.method === 'POST' ? (await body(q, 30000)).toString() : ''; return require('./lib/agencia').publico(u, q, r, b); } // 🤝 página de Yupitok Studio (vista previa local o reenviada por el servidor público)
+    if (u === '/agencia-pub' || u.startsWith('/agencia-pub/')) { const foto = /\/cliente\/[a-f0-9]{36}\/foto$/.test(u), b = q.method === 'POST' ? (foto ? await body(q, 26e6) : (await body(q, 30000)).toString()) : ''; return require('./lib/agencia').publico(u, q, r, b); } // 🤝 página de Yupitok Studio (vista previa local o reenviada por el servidor público)
     if (u.startsWith('/api/')) {
       const out = await api(u, q, U, r);
       if (out === STREAMED) return;

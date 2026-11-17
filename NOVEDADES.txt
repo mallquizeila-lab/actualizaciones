@@ -1,3 +1,7 @@
+9.2.0
+- 🛠️ Panel del cliente: cada web de cliente trae su enlace privado (yupitok.com/studio/cliente/…). El cliente sube sus fotos por categoría o celebración (hasta 300, como su base de datos), las ordena, elige la portada, cambia su WhatsApp, horario, dirección y correo, pone una PROMOCIÓN que aparece arriba en su web, y publica sus cambios cuando quiera.
+- En ShortForge: botones para copiar el enlace, enviárselo por WhatsApp o cambiarlo.
+
 9.1.0
 - 📷 Webs para clientes: fotos por celebración o categoría (Infantiles, 15 años, Bodas, Baby shower, 50 años…). En la web, la galería «Nuestros trabajos» se filtra por categoría, cada servicio muestra su foto y tiene «📷 Ver fotos». Puedes cambiar la categoría de cada foto y elegir la portada (⭐).
 
