@@ -1,3 +1,6 @@
+8.7.2
+- 🤝 Yupitok Studio ya se puede compartir SIN dominio: yupitok.com/studio/ (página + chatbot). No se indexa en Google, así no se mezcla con Yupitok. Cuando compres yupitokstudio.com, también funcionará ahí.
+
 8.7.1
 - 🤝 Chatbot de Yupitok Studio más humano: ya NO pide datos. Asesora y explica poco a poco lo que la web puede hacer por el negocio, y solo cuando hay interés real ofrece «Continuar por WhatsApp».
 - Al pulsarlo, a tu WhatsApp llega un RESUMEN de la conversación (negocio, ciudad, qué quiere, plan, dudas, urgencia). El resumen y la conversación quedan también en el CRM.
