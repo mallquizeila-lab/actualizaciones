@@ -1,3 +1,6 @@
+8.1.2
+- OmniRoute: el resultado de «Probar» ahora se ve en la misma tarjeta.
+
 8.1.1
 - OmniRoute: ya no intenta conectar GitHub (en OmniRoute «github» es Copilot, otro servicio). GitHub Models se sigue usando directo en ShortForge.
 
