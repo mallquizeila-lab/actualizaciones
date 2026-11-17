@@ -1302,9 +1302,20 @@ async function api(req, res, u) {
   return send(res, 404, { error: 'No existe' });
 }
 
+// 🤝 Otros dominios apuntados a este túnel (ej. yupitokstudio.com) muestran la página de la agencia (la sirve ShortForge)
+const HOST_MAIN = (() => { try { return new URL(PUBLIC_URL).hostname.replace(/^www\./, ''); } catch (e) { return ''; } })();
+async function proxyAgencia(req, res, u) {
+  const trozos = []; let n = 0; if (req.method === 'POST') for await (const c of req) { n += c.length; if (n > 30000) return send(res, 413, { error: 'Muy grande' }); trozos.push(c); }
+  if (!E.SF_URL) return send(res, 503, 'No disponible', 'text/plain');
+  try { const r = await fetch(E.SF_URL + '/agencia-pub' + (u.pathname === '/' ? '/' : u.pathname), { method: req.method === 'POST' ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-ip': String(req.headers['cf-connecting-ip'] || req.socket.remoteAddress || ''), 'x-pais': String(req.headers['cf-ipcountry'] || ''), 'x-host': String(req.headers.host || '') }, body: req.method === 'POST' ? Buffer.concat(trozos) : undefined, signal: AbortSignal.timeout(90000) });
+    res.writeHead(r.status, { 'content-type': r.headers.get('content-type') || 'text/html;charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }); return res.end(Buffer.from(await r.arrayBuffer())); }
+  catch (e) { return send(res, 502, 'La página está en mantenimiento. Intenta en un momento.', 'text/plain;charset=utf-8'); }
+}
 http.createServer(async (req, res) => {
   try {
     const u = new URL(req.url, 'http://x');
+    const hostReq = String(req.headers.host || '').toLowerCase().split(':')[0].replace(/^www\./, '');
+    if (HOST_MAIN && hostReq && hostReq !== HOST_MAIN && !/^(localhost|127\.|\[::1\]|192\.168\.|10\.)/.test(hostReq) && !/trycloudflare\.com$/.test(hostReq)) return await proxyAgencia(req, res, u);
     if (u.pathname.startsWith('/api/')) return await api(req, res, u);
     // Clic en una notificación: se cuenta y se manda a su destino.
     let m = /^\/c\/(\d+)$/.exec(u.pathname);

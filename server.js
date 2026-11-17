@@ -332,6 +332,8 @@ async function api(u, q, U, r) {
   if (u === '/api/mando') return await mando.estado();
   if (u === '/api/mando/juego') return await juego.estado();
   if (u === '/api/mando/academia') return await academiaAg.estado();
+  if (u === '/api/crm' && !P) return require('./lib/agencia').listar();
+  if (u === '/api/crm' && P) return require('./lib/agencia').accion(await json(q));
   if (u === '/api/webs' && !P) return require('./lib/webs').listar(U.searchParams.get('tipo'));
   if (u === '/api/webs' && P) return require('./lib/webs').accion(await json(q));
   if (u === '/api/omniroute' && !P) return require('./lib/omniroute').estado();
@@ -569,6 +571,7 @@ http.createServer(async (q, r) => {
   const U = new URL(q.url, 'http://x'), u = decodeURIComponent(U.pathname);
   try {
     if (u.startsWith('/oauth/')) return oauth(u, U, r);
+    if (u === '/agencia-pub' || u.startsWith('/agencia-pub/')) { const b = q.method === 'POST' ? (await body(q, 30000)).toString() : ''; return require('./lib/agencia').publico(u, q, r, b); } // 🤝 página de Yupitok Studio (vista previa local o reenviada por el servidor público)
     if (u.startsWith('/api/')) {
       const out = await api(u, q, U, r);
       if (out === STREAMED) return;

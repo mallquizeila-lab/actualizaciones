@@ -1,3 +1,8 @@
+8.7.0
+- 🤝 NUEVO «Clientes (CRM)» + página de presentación de Yupitok Studio: página profesional para vender webs a negocios de cualquier rubro, con un ASISTENTE (chatbot) que asesora a cada negocio, da tus precios «desde» (nunca inventa) y registra nombre, negocio y WhatsApp.
+- CRM: cada cliente con su conversación, etapa (nuevo → contactado → propuesta → cliente), notas, botón de WhatsApp y «Crear su web» en un clic. Aviso por Telegram de cada cliente nuevo.
+- Se publica en su propio dominio por el mismo túnel de Cloudflare (Yupitok no se toca).
+
 8.6.0
 - ✨ «Crear web mágica»: escribes solo la temática y el dominio, y el sistema hace todo: nombre, lema, misión, color, LOGO, categorías, 24 temas sin repetir, las primeras 6 páginas con IMÁGENES, revisión de calidad, legales y SEO. Modo automático activado.
 - ✅ Botón «Aprobar las de nota 9+» (sin datos pendientes ni voseo).
