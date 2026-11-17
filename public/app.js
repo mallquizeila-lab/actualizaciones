@@ -760,6 +760,7 @@ const KEYINFO = [
   ['OPENROUTER_API_KEY', 'OpenRouter (reserva)', 'Usa solo modelos gratis (:free). openrouter.ai → Keys', 'https://openrouter.ai/settings/keys'],
   ['TELEGRAM_BOT_TOKEN', 'Telegram: token del bot', 'Avisos al celular gratis. En Telegram habla con @BotFather → /newbot → copia el token', 'https://t.me/BotFather'],
   ['MESHY_API_KEY', 'Meshy (modelos 3D)', 'Agente del Juego: convierte tus imágenes en personajes 3D profesionales. Necesita el plan Pro con API. meshy.ai → Settings → API', 'https://www.meshy.ai/settings/api'],
+  ['OMNIROUTE_API_KEY', 'OmniRoute (opcional)', 'Solo si en su panel activas «Require API key». Está en su panel → Endpoints', 'http://localhost:20128/dashboard'],
   ['FREESOUND_API_KEY', 'Freesound', 'Biblioteca gratis de efectos y música CC0', 'https://freesound.org/apiv2/apply'],
   ['GOOGLE_CLIENT_ID', 'Google OAuth: Client ID', 'Para publicar en YouTube (ver guía abajo)', 'https://console.cloud.google.com/apis/credentials'],
   ['GOOGLE_CLIENT_SECRET', 'Google OAuth: Client Secret', 'Para publicar en YouTube', 'https://console.cloud.google.com/apis/credentials'],
@@ -767,6 +768,32 @@ const KEYINFO = [
   ['FB_APP_SECRET', 'Facebook: App Secret', 'Para publicar en tus páginas', 'https://developers.facebook.com/apps/'],
   ['FB_CONFIG_ID', 'Facebook: Identificador de configuración', 'Solo si Facebook lo pide (Inicio de sesión para empresas → Configuraciones)', 'https://developers.facebook.com/apps/'],
 ];
+// 🔀 OmniRoute (relevo local de IA gratis): estado que se pide aparte
+let OM = null, OMt = 0, OMcarga = false;
+async function loadOM() { if (OMcarga) return; OMcarga = true; try { OM = await api('/api/omniroute'); } catch (e) { OM = { error: e.message }; } OMt = Date.now(); OMcarga = false;
+  if (tab === 'ajustes' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) render();
+  if (OM && (OM.instalando || OM.arrancando)) setTimeout(loadOM, 5000); }
+function omniCard() {
+  if (!OM || Date.now() - OMt > 30000) setTimeout(loadOM, 0);
+  if (!OM) return `<div class="card"><h3>🔀 OmniRoute</h3><p class="hint">Cargando…</p></div>`;
+  if (OM.error) return `<div class="card"><h3>🔀 OmniRoute</h3><p class="hint">${esc(OM.error)}</p></div>`;
+  const est = OM.instalando ? '⏳ Instalando…' : OM.arrancando ? '⏳ Encendiendo…' : OM.corriendo ? '🟢 Encendido' : OM.instalado ? (OM.activo ? '🟠 Instalado, encendiéndose…' : '⚪ Instalado, apagado') : '⚪ No instalado';
+  return `<div class="card" style="border:2px solid #f97316"><h3>🔀 OmniRoute: que nunca se acabe la IA</h3>
+  <p class="hint">Relevo gratis y de código abierto: cuando Gemini, Groq, NVIDIA y los demás agotan su cupo del día, ShortForge sigue trabajando con <b>cientos de modelos gratis</b> detrás de una sola dirección. Además comprime los pedidos para gastar menos. ShortForge lo instala, lo enciende y lo vigila solo (si se cae, lo vuelve a encender). Por seguridad escucha <b>solo en esta PC</b>.</p>
+  <p><b>Estado:</b> ${est}${OM.version ? ` · v${esc(OM.version)}` : ''} · Node ${esc(OM.node)} ${OM.nodeOk ? '✅' : '❌'}</p>
+  ${OM.nodeOk ? '' : `<p style="color:#b91c1c"><b>Falta Node.js 24 LTS.</b> Descárgalo de <a href="https://nodejs.org/en/download" target="_blank" rel="noopener">nodejs.org</a> (instalador .msi para Windows), instálalo y reinicia ShortForge.</p>`}
+  ${OM.msg ? `<p class="hint">📋 ${esc(OM.msg)}</p>` : ''}
+  <div class="btns">${!OM.instalado ? `<button class="b" data-act="omni" data-a="instalar" ${OM.instalando || !OM.nodeOk ? 'disabled' : ''}>⬇ Instalar OmniRoute</button>` : OM.activo ? `<button class="b ghost" data-act="omni" data-a="apagar">⏸ Apagar</button>` : `<button class="b" data-act="omni" data-a="encender">▶ Encender</button>`}
+  ${OM.instalado ? `<button class="b ghost" data-act="omni" data-a="instalar" ${OM.instalando ? 'disabled' : ''}>🔄 Actualizar OmniRoute</button>` : ''}
+  ${OM.corriendo ? `<a class="b ghost" href="${esc(OM.panel)}" target="_blank" rel="noopener">⚙️ Abrir su panel</a><button class="b ghost" data-act="testEng" data-p="omniroute">🧪 Probar</button>` : ''}</div>
+  <div class="hint" id="test-omniroute"></div>
+  <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">📖 Cómo sacarle el máximo provecho</summary><ol class="hint" style="margin:6px 0 0 18px">
+  <li>Ya funciona sin configurar nada (modo <code>auto</code>), pero rinde mucho más si conectas proveedores: en su panel → <b>Providers</b>, pega tus mismas claves gratis (Gemini, Groq, NVIDIA, Cerebras, OpenRouter, Mistral, GitHub) y otras que ofrece. Cuantos más, más relevos.</li>
+  <li>La primera vez que abras su panel te pedirá crear una contraseña: anótala solo en tu Excel.</li>
+  <li>En «Motores de IA» (arriba) aparece como un motor más. Por defecto va <b>antes</b> de Cloudflare y de Claude: entra cuando los demás se agotan. Si quieres que trabaje primero, súbelo con ↑.</li>
+  <li>Compresión: deja el perfil por defecto. Si notas textos peores, baja a <b>Lite</b> en su panel.</li>
+  <li>No conectes cuentas de pago ni uses proveedores que su panel marque como «no recomendados».</li></ol></details></div>`;
+}
 VIEWS.ajustes = () => {
   const s = S.settings, eng = s.engines;
   const usage = S.usage[today()] || {};
@@ -780,6 +807,7 @@ VIEWS.ajustes = () => {
     <div class="hint" id="test-${p}"></div><div class="row" style="margin-top:6px"><select data-model="${p}"><option value="">Automático${s.models[p] ? '' : ' (recomendado)'}</option>${s.models[p] ? `<option selected>${esc(s.models[p])}</option>` : ''}</select></div></div>
     <div class="btns" style="margin:0"><button class="b ghost sm" data-act="mv" data-i="${i}" data-d="-1">↑</button><button class="b ghost sm" data-act="mv" data-i="${i}" data-d="1">↓</button><button class="b ghost sm" data-act="testEng" data-p="${p}">Probar</button><button class="b ghost sm" data-act="loadModels" data-p="${p}">Ver modelos</button></div></div>`; }).join('')}
   <div class="btns"><button class="b" data-act="saveModels">Guardar modelos</button></div></div>
+  ${omniCard()}
 
   <div class="card"><h3>Producción</h3>
   <label><input type="checkbox" id="set-agenda" ${s.agenda !== false ? 'checked' : ''}><b>📅 Producir según los horarios</b>: el sistema siempre deja listos los videos de hoy y mañana para cada hora de publicación de tus canales (YouTube, Facebook y TikTok).</label>
@@ -1352,6 +1380,7 @@ const ACT = {
   mv: guard(async el => { const e = [...S.settings.engines], i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= e.length) return; [e[i], e[j]] = [e[j], e[i]]; await api('/api/settings', { engines: e }); await refresh(true); }),
   testEng: guard(async el => { const p = el.dataset.p, out = $('#test-' + p); out.textContent = 'Probando…'; const r = await api('/api/engine/test', { provider: p }); out.textContent = (r.ok ? '✓ ' : '✗ ') + r.msg; out.style.color = r.ok ? 'var(--brand)' : 'var(--bad)'; }),
   loadModels: guard(async el => { const p = el.dataset.p, sel = document.querySelector(`[data-model="${p}"]`), r = await api('/api/engine/models', { provider: p }); const cur = S.settings.models[p] || ''; sel.innerHTML = `<option value="">Automático (${esc(r.auto)})</option>` + r.models.map(m => `<option ${m === cur ? 'selected' : ''}>${esc(m)}</option>`).join(''); toast(r.models.length + ' modelos disponibles'); }),
+  omni: guard(async el => { el.disabled = true; OM = await api('/api/omniroute', { accion: el.dataset.a }); toast(el.dataset.a === 'instalar' ? '⬇ Instalando OmniRoute… (2 a 5 minutos)' : el.dataset.a === 'encender' ? '▶ Encendiendo OmniRoute…' : '⏸ Apagado'); render(); setTimeout(loadOM, 4000); }),
   saveModels: guard(async () => { const m = {}; document.querySelectorAll('[data-model]').forEach(s => { if (s.value) m[s.dataset.model] = s.value; }); await api('/api/settings', { models: m }); toast('Guardado'); await refresh(true); }),
   saveSettings: guard(async () => { await api('/api/settings', { agenda: $('#set-agenda').checked, autoVolume: $('#set-autovol').checked, videosPerDay: $('#set-vpd').value, nightly: { enabled: $('#set-night').checked, time: $('#set-time').value }, factCheck: $('#set-fc').checked, karaoke: $('#set-kar').checked, whisperModel: $('#set-wm').value, continuous: $('#set-cont').checked, bufferDays: $('#set-buf').value, ytDailyMax: $('#set-ytmax').value, review: $('#set-rev').checked, critic: $('#set-critic').checked, waitAiImages: $('#set-waitimg').checked, seoPro: $('#set-seopro').checked, cloneSlow: $('#set-cloneslow').checked, naturalVoice: $('#set-natural').checked, reserveGemini: $('#set-reserve').checked, autoClean: $('#set-clean')?.checked, checkImages: $('#set-cimg').checked, minNota: $('#set-minnota').value }); toast('Ajustes guardados'); await refresh(true); }),
 };
