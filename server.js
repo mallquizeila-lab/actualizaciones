@@ -25,7 +25,7 @@ const { chatSystem } = require('./lib/prompts');
 
 const PORT = E.PORT || 3200, PUB = path.join(ROOT, 'public');
 const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY', 'MESHY_API_KEY', 'OMNIROUTE_API_KEY'];
-const MIME = { '.webm': 'audio/webm', '.html': 'text/html;charset=utf-8', '.js': 'text/javascript;charset=utf-8', '.css': 'text/css;charset=utf-8', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aiff': 'audio/aiff', '.png': 'image/png', '.jpg': 'image/jpeg', '.txt': 'text/plain;charset=utf-8', '.svg': 'image/svg+xml' };
+const MIME = { '.webm': 'audio/webm', '.html': 'text/html;charset=utf-8', '.js': 'text/javascript;charset=utf-8', '.css': 'text/css;charset=utf-8', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aiff': 'audio/aiff', '.png': 'image/png', '.jpg': 'image/jpeg', '.txt': 'text/plain;charset=utf-8', '.svg': 'image/svg+xml', '.zip': 'application/zip', '.xml': 'application/xml;charset=utf-8' };
 const DEFAULT_TIMES = { youtube: '18:00', tiktok: '20:00', facebook: '13:00' };
 
 async function body(q, limit = 1e6) {
@@ -332,6 +332,8 @@ async function api(u, q, U, r) {
   if (u === '/api/mando') return await mando.estado();
   if (u === '/api/mando/juego') return await juego.estado();
   if (u === '/api/mando/academia') return await academiaAg.estado();
+  if (u === '/api/webs' && !P) return require('./lib/webs').listar(U.searchParams.get('tipo'));
+  if (u === '/api/webs' && P) return require('./lib/webs').accion(await json(q));
   if (u === '/api/omniroute' && !P) return require('./lib/omniroute').estado();
   if (u === '/api/omniroute' && P) return require('./lib/omniroute').ajustar(await json(q));
   if (u === '/api/mando/difusion' && !P) return difusion.estado();
@@ -576,6 +578,13 @@ http.createServer(async (q, r) => {
     }
     if (u.startsWith('/efectos/') && serveFile(r, path.join(efectos.DIR, ...u.slice(9).split('/').map(decodeURIComponent)), efectos.DIR)) return;
     if (u.startsWith('/musica/') && serveFile(r, path.join(require('./lib/util').USERDATA, 'musica', decodeURIComponent(u.slice(8))), path.join(require('./lib/util').USERDATA, 'musica'))) return;
+    if (u.startsWith('/webs/') || u.startsWith('/webs-zip/')) { // vista previa de las webs creadas
+      const WD = require('./lib/webs').DIR, zipp = u.startsWith('/webs-zip/'), partes = u.slice(zipp ? 10 : 6).split('/'), id = (partes.shift() || '').replace(/[^a-z0-9]/g, '');
+      if (zipp) { if (serveFile(r, path.join(WD, id, path.basename(partes.join('/'))), path.join(WD, id))) return; }
+      else { const raiz = path.join(WD, id, 'dist'); let f = path.join(raiz, ...partes); if (!path.extname(f)) f = path.join(f, 'index.html'); if (!f.startsWith(raiz + path.sep) || !fs.existsSync(f)) f = path.join(raiz, '404.html');
+        if (f.endsWith('.html') && fs.existsSync(f)) { r.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' }); return r.end(fs.readFileSync(f, 'utf8').replace(/(href|src)="\/(?!\/)/g, `$1="/webs/${id}/`)); } // enlaces internos dentro de la vista previa
+        if (serveFile(r, f, raiz)) return; }
+    }
     if (u.startsWith('/files/') && /^\/files\/(videos|logos|chars|cache|voces|desarmados|clips)\//.test(u) && serveFile(r, path.join(DATA, u.slice(7)), DATA)) return;
     if (serveFile(r, path.join(PUB, u === '/' ? 'index.html' : u), PUB)) return;
     r.writeHead(404); r.end('No encontrado');
@@ -595,6 +604,7 @@ http.createServer(async (q, r) => {
   avisos.start(); mando.start(); juego.start(); academiaAg.start(); difusion.start();
   salud.start();
   require('./lib/omniroute').iniciar();
+  require('./lib/webs').iniciar();
   actualizar.start();
   require('./lib/crecer').start();
   require('./lib/radar').start();

@@ -1,3 +1,7 @@
+8.5.0
+- 🌐 NUEVO «Web para AdSense»: sitios propios de calidad. La IA propone temas sin repetir, escribe cada página con fuentes y bloque único, otra IA la revisa (nota 8+) y TÚ apruebas. Ritmo natural de publicación, páginas legales completas, SEO técnico (datos estructurados, sitemap con fechas reales, enlazado interno) y lista de requisitos de AdSense.
+- 💼 NUEVO «Web para clientes»: páginas profesionales para negocios con WhatsApp, mapa y SEO local. Descarga en ZIP o publica en Cloudflare Pages.
+
 8.4.1
 - Arreglo: cuando una IA de respaldo devuelve el guion con el formato roto (comas, texto de más, cortado), ShortForge lo repara; y si no se puede, lo pide a otro modelo en vez de fallar el video.
 - Ya no se crean videos con temas vacíos como «...».
