@@ -1,3 +1,7 @@
+8.7.1
+- 🤝 Chatbot de Yupitok Studio más humano: ya NO pide datos. Asesora y explica poco a poco lo que la web puede hacer por el negocio, y solo cuando hay interés real ofrece «Continuar por WhatsApp».
+- Al pulsarlo, a tu WhatsApp llega un RESUMEN de la conversación (negocio, ciudad, qué quiere, plan, dudas, urgencia). El resumen y la conversación quedan también en el CRM.
+
 8.7.0
 - 🤝 NUEVO «Clientes (CRM)» + página de presentación de Yupitok Studio: página profesional para vender webs a negocios de cualquier rubro, con un ASISTENTE (chatbot) que asesora a cada negocio, da tus precios «desde» (nunca inventa) y registra nombre, negocio y WhatsApp.
 - CRM: cada cliente con su conversación, etapa (nuevo → contactado → propuesta → cliente), notas, botón de WhatsApp y «Crear su web» en un clic. Aviso por Telegram de cada cliente nuevo.
