@@ -1,3 +1,8 @@
+8.7.4
+- 🤝 Chatbot: si el cliente pide hablar con ustedes («quiero comunicarme», «hablar con un asesor», «WhatsApp», «cotízame», «me interesa»…) o el bot lo invita a WhatsApp, el botón verde con el RESUMEN aparece siempre.
+- Botón de WhatsApp siempre visible: en el menú de la página, flotante abajo a la izquierda y en la cabecera del chat (con el resumen actualizado).
+- El CRM avisa en rojo si falta tu WhatsApp de ventas.
+
 8.7.3
 - ⚡ Chatbot de Yupitok Studio mucho más rápido: usa los motores más veloces primero (Groq y Cerebras, Gemini de respaldo), un intento por motor con tope de 12 s y sin pausas. Animación de «escribiendo…».
 

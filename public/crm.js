@@ -10,7 +10,7 @@
 
   function config(A) {
     const c = (k, lab, ph = '') => `<label>${lab}<input id="cf-${k}" value="${esc(A[k] || '')}" placeholder="${esc(ph)}"></label>`;
-    return `<details class="card" ${A.whatsapp ? '' : 'open'}><summary style="cursor:pointer"><b>⚙️ Tu página y tu chatbot</b> <span class="hint">· lo que el asistente sabe y dice</span></summary>
+    return `${A.whatsapp ? '' : '<div class="card" style="background:#fee2e2;color:#991b1b"><b>⚠️ Falta tu WhatsApp de ventas.</b> Sin él, la página no muestra el botón de WhatsApp y el chatbot no puede pasarte a los clientes. Escríbelo abajo y pulsa Guardar.</div>'}<details class="card" ${A.whatsapp ? '' : 'open'}><summary style="cursor:pointer"><b>⚙️ Tu página y tu chatbot</b> <span class="hint">· lo que el asistente sabe y dice</span></summary>
     <div class="row">${c('marca', 'Marca')}${c('dominio', 'Dominio de la agencia', 'yupitokstudio.com')}${c('whatsapp', 'Tu WhatsApp de ventas (con código de país)', '51987654321')}</div>
     <div class="row">${c('correo', 'Correo de contacto', 'hola@yupitokstudio.com')}${c('ciudad', 'Ciudad')}${c('pais', 'País')}<label>Color<input type="color" id="cf-color" value="${esc(A.color || '#7c3aed')}"></label></div>
     <h3 style="margin-top:14px">💼 Planes y precios «desde»</h3><p class="hint">Si dejas el precio vacío, el bot dice «a cotizar» y <b>nunca inventa un número</b>.</p>
