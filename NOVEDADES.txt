@@ -1,3 +1,6 @@
+8.1.1
+- OmniRoute: ya no intenta conectar GitHub (en OmniRoute «github» es Copilot, otro servicio). GitHub Models se sigue usando directo en ShortForge.
+
 8.1.0
 - 🔗 OmniRoute: ShortForge conecta SOLO tus claves gratis (Gemini, Groq, NVIDIA, GitHub, OpenRouter, Cerebras, Mistral). Si cambias o agregas una clave, la vuelve a conectar sola. Botón «Conectar mis claves».
 - Arreglo: OmniRoute siempre usa su propio puerto (20128).

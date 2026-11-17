@@ -789,7 +789,7 @@ function omniCard() {
   ${OM.corriendo ? `<p class="hint">🔗 Claves tuyas conectadas en OmniRoute: <b>${OM.claves.length ? esc(OM.claves.join(', ')) : 'ninguna todavía'}</b>. ShortForge las conecta solo (y vuelve a hacerlo si cambias o agregas una clave en «Claves»).</p>` : ''}
   <div class="hint" id="test-omniroute"></div>
   <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">📖 Cómo sacarle el máximo provecho</summary><ol class="hint" style="margin:6px 0 0 18px">
-  <li><b>Tus claves gratis se conectan solas</b> (Gemini, Groq, NVIDIA, GitHub, OpenRouter, Cerebras, Mistral): no tienes que copiarlas. Para sumar más relevos, crea claves gratis de Cerebras y Mistral y pégalas en «Claves» de ShortForge.</li>
+  <li><b>Tus claves gratis se conectan solas</b> (Gemini, Groq, NVIDIA, OpenRouter, Cerebras, Mistral; GitHub Models no existe en OmniRoute, pero ShortForge lo sigue usando directo): no tienes que copiarlas. Para sumar más relevos, crea claves gratis de Cerebras y Mistral y pégalas en «Claves» de ShortForge.</li>
   <li>La primera vez que abras su panel te pedirá crear una contraseña: anótala solo en tu Excel.</li>
   <li>En «Motores de IA» (arriba) aparece como un motor más. Por defecto va <b>antes</b> de Cloudflare y de Claude: entra cuando los demás se agotan. Si quieres que trabaje primero, súbelo con ↑.</li>
   <li>Compresión: deja el perfil por defecto. Si notas textos peores, baja a <b>Lite</b> en su panel.</li>
