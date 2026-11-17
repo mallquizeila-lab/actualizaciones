@@ -82,7 +82,7 @@
       : 'Páginas profesionales para emprendedores: lista en minutos, con WhatsApp, mapa, SEO local y diseño para celular. Entrégala en ZIP o publícala en Cloudflare.';
     if (!D) return `<h1>${titulo}</h1><p class="sub">${sub}</p><div class="card">Cargando…</div>`;
     if (D.error) return `<h1>${titulo}</h1><div class="card" style="color:#b91c1c">${esc(D.error)}</div>`;
-    return `<h1>${titulo}</h1><p class="sub">${sub}</p>${D.trabajando ? `<div class="card" style="background:#fef9c3">⏳ Trabajando: ${esc(D.trabajando)}… (se actualiza solo)</div>` : ''}${formNueva(t)}${D.webs.slice().reverse().map(tarjeta).join('') || ''}`;
+    return `<h1>${titulo}</h1><p class="sub">${sub}</p>${D.trabajando ? `<div class="card" style="background:#fef9c3">⏳ Trabajando: ${esc(D.trabajando)}… (se actualiza solo)${(D.enCola || []).length ? `<br><span class="hint">En cola, después: ${D.enCola.map(esc).join(' · ')}</span>` : ''}<br><span class="hint">Puedes seguir creando webs: se ponen en cola y empiezan solas.</span></div>` : ''}${formNueva(t)}${D.webs.slice().reverse().map(tarjeta).join('') || ''}`;
   }
   VIEWS.webads = () => vista('adsense');
   VIEWS.webcli = () => vista('cliente');

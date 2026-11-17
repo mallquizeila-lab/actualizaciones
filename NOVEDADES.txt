@@ -1,3 +1,6 @@
+8.9.3
+- Webs: cola de trabajos. Si ya está creando una web, las nuevas quedan «en cola» y empiezan solas (ya no sale «estoy ocupado»).
+
 8.9.2
 - Arreglo: el logo y las imágenes de las webs se ven en el panel y en la vista previa aunque todavía no hayas pulsado «Armar sitio».
 
