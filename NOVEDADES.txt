@@ -1,3 +1,8 @@
+8.3.0
+- 🎙️ Voces Gemini (las más humanas) con tu misma clave gratis: 22 voces en Voces → grupo «Gemini». Si se acaba el cupo del día, ese video usa una voz de Edge parecida (nunca mezcla voces).
+- ⭐ Guion pro: el guion lo escribe siempre Gemini, lo revisa un crítico de OTRO motor y lo pule hasta 9/10.
+- 💬 Subtítulos palabra por palabra con la palabra resaltada (estilo CapCut) aunque no tengas Whisper.
+
 8.2.0
 - 🎥 Videos 100% en movimiento: cada escena usa un CLIP DE VIDEO REAL (Pexels y Pixabay, gratis con tus mismas claves) en vez de una foto fija. Con efectos del director, subtítulos y barra de progreso encima.
 - Ajustes → Producción → «Movimiento en los videos»: Máximo (recomendado), Mixto o Solo imágenes.

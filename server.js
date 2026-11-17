@@ -356,7 +356,7 @@ async function api(u, q, U, r) {
     if (o.ytDailyMax !== undefined) db.settings.ytDailyMax = Math.max(1, Math.min(50, +o.ytDailyMax || 6));
     if (o.review !== undefined) db.settings.review = !!o.review;
     if (['max', 'mixto', 'off'].includes(o.motion)) db.settings.motion = o.motion;
-    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages', 'seoPro', 'cloneSlow']) if (o[k] !== undefined) db.settings[k] = !!o[k];
+    for (const k of ['critic', 'checkImages', 'telegram', 'naturalVoice', 'reserveGemini', 'autoClean', 'autoVolume', 'agenda', 'waitAiImages', 'seoPro', 'cloneSlow', 'guionPro', 'subsAnimados']) if (o[k] !== undefined) db.settings[k] = !!o[k];
     if (o.minNota !== undefined) db.settings.minNota = Math.max(1, Math.min(10, +o.minNota || 6));
     saveAll.settings();
     return { ok: 1 };
