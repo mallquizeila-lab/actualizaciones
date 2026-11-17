@@ -1,3 +1,7 @@
+8.1.0
+- 🔗 OmniRoute: ShortForge conecta SOLO tus claves gratis (Gemini, Groq, NVIDIA, GitHub, OpenRouter, Cerebras, Mistral). Si cambias o agregas una clave, la vuelve a conectar sola. Botón «Conectar mis claves».
+- Arreglo: OmniRoute siempre usa su propio puerto (20128).
+
 8.0.0
 - 🔀 OmniRoute integrado: relevo gratis de cientos de IA. Cuando Gemini, Groq, NVIDIA y los demás agotan su cupo, ShortForge sigue con OmniRoute. Se instala, enciende y vigila desde Ajustes; escucha solo en esta PC (seguro).
 - Todo usa este relevo: videos, agente de la Academy, supervisor, traducciones de la página y difusión.
