@@ -1,3 +1,15 @@
+9.6.0
+- 🎉 Panel del cliente MUCHO más completo: «Mis trabajos». La dueña crea cada trabajo (ej. «Boda en jardín con toldo») con:
+  · tipo de celebración, nombre, cómo fue la decoración y lugar,
+  · qué incluyó (toldo, maestro de ceremonias, hora loca, DJ, iluminación, mesa de dulces, torta… y otros que escriba),
+  · precio de la decoración o del paquete completo (o lo oculta),
+  · FOTOS Y VIDEOS (videos de hasta 60 s, se comprimen solos para que carguen rápido en celular).
+  Puede editar, ordenar, elegir portada y borrar.
+- 💰 «Mis precios»: precio «desde» por servicio y precio por paquete, más una nota (ej. «varían según invitados»). Salen en la web y el asistente los puede dar.
+- En la web: sección «Nuestros trabajos» con tarjetas, filtros por celebración y una ventana con todas las fotos, videos, lo que incluyó, el precio y el botón «Quiero algo así» por WhatsApp.
+- ✨ Webs con más vida: animaciones suaves al bajar, cinta en movimiento con los servicios, títulos con acento de color y botones con efecto.
+- El asistente de chat conoce los trabajos y los precios que puso la dueña.
+
 9.5.1
 - 🗣️ Lenguaje correcto: el asistente y los textos de las webs ya no dicen «un quinceañero». Dicen «fiesta de 15 años» o «la quinceañera», y usan el género correcto (la novia, la cumpleañera…). Las webs ya creadas se corrigen solas al pulsar «Armar web».
 
