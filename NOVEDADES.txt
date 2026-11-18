@@ -1,3 +1,8 @@
+9.11.0
+- 🖼️ Imagen para compartir automática en TODAS las webs de clientes: al pegar el enlace en WhatsApp, Facebook o Telegram sale una tarjeta grande con el nombre del negocio, su frase, su logo, la ciudad y fotos de sus trabajos, en el color de su marca. Se rehace sola cuando cambian el logo, las fotos o los textos.
+- 🎨 En el panel del cliente, «Mi logo, portada y color»: subir su logo, poner su propia foto de fondo en la portada (o volver al collage) y cambiar el color de su marca. Muestra cómo se verá la web al compartirla.
+- Letra Outfit incluida (licencia libre OFL) para dibujar las imágenes.
+
 9.10.0
 - 📇 Captar a los visitantes de las webs de clientes (con permiso, como manda la Ley 29733):
   · Formulario «Recibe promociones» en la portada y en cada temática: nombre, WhatsApp, qué quiere celebrar y fecha del evento. El contacto le llega a la dueña («📇 Mis contactos» en su panel, con botón de WhatsApp y descarga en Excel) y a ti por Telegram.
