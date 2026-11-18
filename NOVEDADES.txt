@@ -1,3 +1,9 @@
+9.9.0
+- 🗂️ Cada TEMÁTICA tiene su propia página en la web (ej. /cumpleanos-infantiles/). El visitante toca «Ver decoraciones y paquetes» en el servicio y ve, en orden, primero los 📦 paquetes y luego las 📸 decoraciones que hizo la dueña, con fotos, videos, lo que incluyen y precios, más filtros «Paquetes / Decoraciones».
+- Encabezado con foto de la temática, detalles, precio «desde» y botón «Cotizar». Enlaces para saltar a otras temáticas.
+- En la portada, «Nuestros trabajos» trae botones «Ver por temática».
+- Cada página de temática entra al mapa del sitio, para que Google pueda mostrarla cuando busquen esa decoración.
+
 9.8.0
 - ✏️ La dueña del negocio corrige TODO desde su panel («Textos de mi web»): título y frase de la portada, texto del botón, servicios (nombre, emoji, descripción y detalles), paquetes, sobre nosotros, zonas, «por qué elegirnos», pasos, preguntas frecuentes y llamado final. Puede agregar o quitar servicios, paquetes, preguntas, razones y pasos.
 - Si cambia el nombre de un servicio (temática), sus fotos, precios y trabajos se mueven solos al nombre nuevo.
