@@ -1,3 +1,6 @@
+9.14.0
+- 📬 Cada lunes (desde las 9 a. m.) te llega por Telegram un resumen de las webs de tus clientes: visitas, clics a WhatsApp, chats y contactos de los últimos 7 días. Sirve para mostrarle a cada cliente que su web le trae clientes.
+
 9.13.0 (mejoras automáticas mientras dormías 😴)
 - 💾 Copia de seguridad diaria de los datos (webs de clientes, CRM, contactos, base de datos Yupitok, ajustes) en ShortForge-datos/respaldos/datos-AAAA-MM-DD. Guarda las últimas 14 y no copia archivos dañados.
 - 📊 Estadísticas para cada cliente (anónimas, sin cookies ni IP guardada): visitas, clics a WhatsApp y chats con el asistente, con gráfico de 30 días y las páginas más vistas. La dueña las ve en su panel y tú en la tarjeta de cada web en ShortForge. Los robots no cuentan y la misma persona no cuenta doble.
