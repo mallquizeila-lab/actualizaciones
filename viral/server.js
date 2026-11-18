@@ -1305,7 +1305,7 @@ async function api(req, res, u) {
 // 🤝 Otros dominios apuntados a este túnel (ej. yupitokstudio.com) muestran la página de la agencia (la sirve ShortForge)
 const HOST_MAIN = (() => { try { return new URL(PUBLIC_URL).hostname.replace(/^www\./, ''); } catch (e) { return ''; } })();
 async function proxyAgencia(req, res, u, ruta = u.pathname, previa = false) {
-  const tope = /^\/cliente\/[a-f0-9]{36}\/foto$/.test(ruta) ? 95e6 : 30000; // fotos del portal del cliente
+  const tope = /^\/cliente\/[a-f0-9]{36}\/foto$/.test(ruta) ? 95e6 : /^\/cliente\/[a-f0-9]{36}\/accion$/.test(ruta) ? 300000 : 30000; // fotos del portal del cliente
   const trozos = []; let n = 0; if (req.method === 'POST') for await (const c of req) { n += c.length; if (n > tope) return send(res, 413, { error: 'Muy grande' }); trozos.push(c); }
   if (!E.SF_URL) return send(res, 503, 'No disponible', 'text/plain');
   try { const r = await fetch(E.SF_URL + '/agencia-pub' + (ruta === '/' || !ruta ? '/' : ruta) + (u.search || ''), { method: req.method === 'POST' ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-ip': String(req.headers['cf-connecting-ip'] || req.socket.remoteAddress || ''), 'x-pais': String(req.headers['cf-ipcountry'] || ''), 'x-host': String(req.headers.host || ''), ...(req.headers.range ? { range: String(req.headers.range).slice(0, 60) } : {}), ...(previa ? { 'x-prefijo': '/studio' } : {}) }, body: req.method === 'POST' ? Buffer.concat(trozos) : undefined, redirect: 'manual', signal: AbortSignal.timeout(90000) });

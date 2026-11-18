@@ -1,3 +1,9 @@
+9.8.0
+- ✏️ La dueña del negocio corrige TODO desde su panel («Textos de mi web»): título y frase de la portada, texto del botón, servicios (nombre, emoji, descripción y detalles), paquetes, sobre nosotros, zonas, «por qué elegirnos», pasos, preguntas frecuentes y llamado final. Puede agregar o quitar servicios, paquetes, preguntas, razones y pasos.
+- Si cambia el nombre de un servicio (temática), sus fotos, precios y trabajos se mueven solos al nombre nuevo.
+- «↩ Deshacer último cambio» por si se equivoca.
+- Lo demás ya era editable: trabajos y paquetes (con fotos y videos), precios, fotos de muestra, fotos sueltas, WhatsApp, horario, dirección, correo y promoción.
+
 9.7.0
 - 🗂️ Panel del cliente ordenado por TEMÁTICA: cada celebración (Infantiles, Baby shower, Bodas, 15 años… o las que ella cree) es una carpeta. Adentro sube sus TRABAJOS (decoraciones que ya hizo) y sus PAQUETES (lo que ofrece), cada uno con todas sus fotos y videos, lo que incluye y su precio. Botón «➕ Agregar trabajo o paquete de …» en cada temática y contador de fotos y videos.
 - Sube muchas fotos a la vez, de 2 en 2, con barra de progreso.
