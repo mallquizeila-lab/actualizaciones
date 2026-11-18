@@ -1,3 +1,9 @@
+9.5.0
+- 🎨 Webs de clientes con más vida: la portada ahora tiene un COLLAGE DE FONDO con fotos de cada temática (ej. infantil, 15 años, bodas, baby shower) que se mueven suave, y en computadora 3 fotos tipo «polaroid» con el nombre de cada servicio.
+- Cada tarjeta de servicio lleva su foto. Se buscan solas, fotos reales y gratis de Pexels o Pixabay (o imagen con IA si no hay). Dicen «Algunas fotos son referenciales» hasta que el cliente sube las suyas, que siempre tienen prioridad.
+- Nuevo botón «🎨 Fotos por temática» en cada web de cliente, para las webs ya creadas.
+- Arreglos: «Consultar →» ya no sale pegado al texto, y la ciudad y el horario salen con mayúscula («Perú»).
+
 9.4.0
 - 🤖 Asistente de chat en TODAS las webs de clientes: botón «¿Te ayudo?» que responde al instante con los servicios, paquetes, horarios y preguntas frecuentes del negocio, recomienda el servicio ideal sin pedir datos y, cuando el visitante está interesado, lo pasa al WhatsApp del negocio con el resumen de la conversación.
 - Funciona con el enlace gratis y también cuando la web tenga su dominio propio.
