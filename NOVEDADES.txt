@@ -1,3 +1,11 @@
+9.10.0
+- 📇 Captar a los visitantes de las webs de clientes (con permiso, como manda la Ley 29733):
+  · Formulario «Recibe promociones» en la portada y en cada temática: nombre, WhatsApp, qué quiere celebrar y fecha del evento. El contacto le llega a la dueña («📇 Mis contactos» en su panel, con botón de WhatsApp y descarga en Excel) y a ti por Telegram.
+  · Casilla OPCIONAL y sin marcar «También quiero recibir novedades de Yupitok»: quien la marca entra a la «📇 Base de datos Yupitok» en tu CRM (con descarga en Excel y registro del permiso).
+  · Pie de cada web: «Web creada por Yupitok Studio · ¿Quieres una web así?». Los negocios que llegan por ahí entran a tu CRM indicando de qué web vinieron.
+  · El asistente responde «Yupitok Studio» si preguntan quién hizo la web.
+  · La página de privacidad de cada web explica quién recibe los datos y cómo darse de baja.
+
 9.9.0
 - 🗂️ Cada TEMÁTICA tiene su propia página en la web (ej. /cumpleanos-infantiles/). El visitante toca «Ver decoraciones y paquetes» en el servicio y ve, en orden, primero los 📦 paquetes y luego las 📸 decoraciones que hizo la dueña, con fotos, videos, lo que incluyen y precios, más filtros «Paquetes / Decoraciones».
 - Encabezado con foto de la temática, detalles, precio «desde» y botón «Cotizar». Enlaces para saltar a otras temáticas.

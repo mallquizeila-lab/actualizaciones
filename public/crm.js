@@ -33,6 +33,14 @@
       ${(l.notas || []).length ? `<div class="hint">${l.notas.slice(-5).reverse().map(n => `🗒 ${fecha(n.f)} · ${esc(n.t)}`).join('<br>')}</div>` : ''}
       ${(l.conversacion || []).length ? `<details><summary class="hint" style="cursor:pointer">💬 Conversación con el chatbot (${l.conversacion.length})</summary><div style="max-height:260px;overflow:auto;background:#f8fafc;border-radius:10px;padding:8px;margin-top:6px">${l.conversacion.map(m => `<div style="margin:4px 0;${m.r === 'u' ? 'text-align:right' : ''}"><span style="display:inline-block;padding:6px 10px;border-radius:10px;max-width:85%;${m.r === 'u' ? 'background:#7c3aed;color:#fff' : 'background:#fff;border:1px solid #e5e7eb'}">${esc(m.t)}</span></div>`).join('')}</div></details>` : ''}</div>`;
   }
+  function audiencia(A) {
+    const por = {}; A.forEach(a => por[a.origen] = (por[a.origen] || 0) + 1);
+    return `<details class="card" style="margin-top:18px"><summary style="cursor:pointer;font-weight:800;font-size:1.1rem">📇 Base de datos Yupitok · ${A.length} personas</summary>
+    <p class="hint">Visitantes de las webs de tus clientes que marcaron «Quiero recibir novedades de Yupitok». Úsala solo para eso (novedades y promociones de Yupitok) y borra a quien pida «BAJA».</p>
+    ${Object.keys(por).length ? `<p class="hint">${Object.entries(por).map(([k, v]) => `🌐 ${esc(k)}: <b>${v}</b>`).join(' · ')}</p>` : ''}
+    <div class="btns"><button class="b ghost sm" data-act="crmAudCsv">⬇ Descargar en Excel (CSV)</button></div>
+    ${A.slice(0, 300).map(a => `<div style="border-top:1px solid #e5e7eb;padding:7px 0;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><div><b>${esc(a.nombre)}</b> · ${esc(a.whatsapp)} <span class="hint">· ${fecha(a.fecha)} · ${esc(a.origen)}${a.interes ? ' · 🎉 ' + esc(a.interes) : ''}${a.fechaEvento ? ' · 📅 ' + esc(a.fechaEvento) : ''}</span></div><div class="btns"><a class="b sm" style="background:#16a34a;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${esc(a.whatsapp)}">💬</a><button class="b ghost sm" data-act="crmAudBorrar" data-id="${esc(a.id)}" title="Borrar (pidió BAJA)">🗑</button></div></div>`).join('') || '<p class="hint">Todavía nadie. Aparecerán aquí cuando los visitantes marquen la casilla en las webs de tus clientes.</p>'}</details>`;
+  }
   VIEWS.crm = () => {
     if (!CR || Date.now() - CRt > 15000) setTimeout(cargar, 0);
     if (!CR) return '<h1>🤝 Clientes</h1><div class="card">Cargando…</div>';
@@ -42,9 +50,12 @@
     <div class="card"><div style="display:flex;gap:18px;flex-wrap:wrap">${Object.keys(ET).map(e => `<div><div style="font-size:1.6rem;font-weight:800">${n(e)}</div><div class="hint">${ET[e][0]}</div></div>`).join('')}<div><div style="font-size:1.6rem;font-weight:800">${CR.sesiones}</div><div class="hint">💬 chats</div></div></div></div>
     ${config(CR.cfg)}
     <div class="btns">${[['activos', 'Activos'], ['nuevo', '🆕 Nuevos'], ['propuesta', '📄 Propuesta'], ['ganado', '🏆 Clientes'], ['todos', 'Todos']].map(([k, t]) => `<button class="b ${filtro === k ? '' : 'ghost'} sm" data-act="crmFiltro" data-f="${k}">${t}</button>`).join('')}<button class="b ghost sm" data-act="crmNuevo">➕ Agregar a mano</button></div>
-    ${vis.map(lead).join('') || '<div class="card empty">Aún no hay clientes aquí. Comparte tu página y el chatbot los irá registrando.</div>'}`;
+    ${vis.map(lead).join('') || '<div class="card empty">Aún no hay clientes aquí. Comparte tu página y el chatbot los irá registrando.</div>'}
+    ${audiencia(CR.audiencia || [])}`;
   };
   Object.assign(ACT, {
+    crmAudCsv: () => { const A = CR.audiencia || [], t = 'Fecha;Nombre;WhatsApp;Web de origen;Interés;Fecha del evento;Consentimiento\n' + A.map(a => [String(a.fecha).slice(0, 10), a.nombre, a.whatsapp, a.origen, a.interes, a.fechaEvento, a.consentimiento].map(x => '"' + String(x || '').replace(/"/g, '""') + '"').join(';')).join('\n'); const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob(['\ufeff' + t], { type: 'text/csv' })); el.download = 'base-yupitok.csv'; el.click(); },
+    crmAudBorrar: guard(async el => { if (!confirm('¿Borrar a esta persona de la base de datos?')) return; CR = await api('/api/crm', { accion: 'borrarAud', id: el.dataset.id }); render(); }),
     crmCfg: guard(async () => { const g = k => document.getElementById('cf-' + k)?.value, o = { accion: 'cfg' };
       for (const k of ['marca', 'dominio', 'whatsapp', 'correo', 'ciudad', 'pais', 'color', 'entrega', 'pagos', 'dominioIncluido', 'extra']) o[k] = g(k) ?? '';
       o.planes = CR.cfg.planes.map((_, i) => ({ plan: document.getElementById('cp-plan-' + i).value, desde: document.getElementById('cp-desde-' + i).value, incluye: document.getElementById('cp-incluye-' + i).value }));
