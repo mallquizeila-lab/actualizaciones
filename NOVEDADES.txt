@@ -1,3 +1,6 @@
+9.5.1
+- 🗣️ Lenguaje correcto: el asistente y los textos de las webs ya no dicen «un quinceañero». Dicen «fiesta de 15 años» o «la quinceañera», y usan el género correcto (la novia, la cumpleañera…). Las webs ya creadas se corrigen solas al pulsar «Armar web».
+
 9.5.0
 - 🎨 Webs de clientes con más vida: la portada ahora tiene un COLLAGE DE FONDO con fotos de cada temática (ej. infantil, 15 años, bodas, baby shower) que se mueven suave, y en computadora 3 fotos tipo «polaroid» con el nombre de cada servicio.
 - Cada tarjeta de servicio lleva su foto. Se buscan solas, fotos reales y gratis de Pexels o Pixabay (o imagen con IA si no hay). Dicen «Algunas fotos son referenciales» hasta que el cliente sube las suyas, que siempre tienen prioridad.
