@@ -553,9 +553,11 @@ async function oauth(u, U, r) {
   const page = (ok, msg) => { r.writeHead(ok ? 200 : 400, { 'content-type': 'text/html;charset=utf-8' }); r.end(`<!doctype html><meta charset="utf-8"><body style="font:16px system-ui;padding:40px;background:#f1f2ef"><h2>${ok ? '✓ Listo' : '✗ No se pudo conectar'}</h2><p>${String(msg).replace(/</g, '&lt;')}</p><p><a href="/">Volver a ShortForge</a></p><script>setTimeout(()=>location.href='/',${ok ? 2500 : 15000})</script>`); };
   try {
     if (u === '/oauth/google/start') { r.writeHead(302, { location: publish.googleAuthUrl(U.searchParams.get('channel')) }); return r.end(); }
+    if (u === '/oauth/pinterest/start') { r.writeHead(302, { location: difusion.pinAuthUrl() }); return r.end(); }
     if (u === '/oauth/facebook/start') { r.writeHead(302, { location: publish.fbAuthUrl() }); return r.end(); }
     if (U.searchParams.get('error')) return page(false, U.searchParams.get('error_description') || U.searchParams.get('error'));
     if (u === '/oauth/google') { const yt = await publish.googleCallback(U.searchParams.get('code'), U.searchParams.get('state')); return page(true, 'YouTube conectado' + (yt ? ': ' + yt.title : '') + '.'); }
+    if (u === '/oauth/pinterest') { const n = await difusion.pinCallback(U.searchParams.get('code'), U.searchParams.get('state')); return page(true, `Pinterest conectado (${n}). Ya puede publicar pines; el permiso se renueva solo. Vuelve a ShortForge → Difusión.`); }
     if (u === '/oauth/facebook') { const n = await publish.fbCallback(U.searchParams.get('code')); return page(true, `Facebook conectado: ${n} página(s). Ahora elige la página de cada canal.`); }
   } catch (e) { return page(false, e.message); }
   r.writeHead(404); r.end();

@@ -1,3 +1,7 @@
+9.15.0
+- 📌 Pinterest con «Autorizar con Pinterest» (Difusión): se autoriza la app UNA vez y ShortForge obtiene el permiso para PUBLICAR pines (el botón «Generar token» del sitio de Pinterest solo da permiso de lectura). El permiso se renueva solo.
+- Las conexiones de Pinterest ahora solo piden el tablero y el idioma (una por tablero).
+
 9.14.1
 - Arreglo Pinterest: ya reconoce los enlaces de tableros con tildes (ej. «desenhos-para-colorir-gr%C3%A1tis») y los que traen «?…» al final.
 
