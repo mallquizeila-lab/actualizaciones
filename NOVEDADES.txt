@@ -1,3 +1,10 @@
+9.13.0 (mejoras automáticas mientras dormías 😴)
+- 💾 Copia de seguridad diaria de los datos (webs de clientes, CRM, contactos, base de datos Yupitok, ajustes) en ShortForge-datos/respaldos/datos-AAAA-MM-DD. Guarda las últimas 14 y no copia archivos dañados.
+- 📊 Estadísticas para cada cliente (anónimas, sin cookies ni IP guardada): visitas, clics a WhatsApp y chats con el asistente, con gráfico de 30 días y las páginas más vistas. La dueña las ve en su panel y tú en la tarjeta de cada web en ShortForge. Los robots no cuentan y la misma persona no cuenta doble.
+- 🌐 En el panel del cliente, tarjeta «Mi página web» con su enlace y botones Ver, Copiar, Compartir por WhatsApp y Facebook.
+- ⚡ Las fotos se achican en el mismo celular antes de subir (ej. 8 MB → 0,7 MB): suben unas 10 veces más rápido y gastan menos datos. El logo no se toca.
+- 🔎 Google: cada web le dice qué servicios ofrece, sus precios en soles, su imagen y la zona que atiende.
+
 9.12.1
 - Arreglo: si el dominio de una web está escrito sin extensión (ej. «alferproducciones» sin .com), se ignora y la web usa su enlace gratis de yupitok.com. Antes la imagen para compartir y el enlace oficial apuntaban a una dirección que no existe, y WhatsApp no mostraba la foto.
 

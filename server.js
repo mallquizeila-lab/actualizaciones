@@ -610,6 +610,7 @@ http.createServer(async (q, r) => {
   salud.start();
   require('./lib/omniroute').iniciar();
   require('./lib/webs').iniciar();
+  require('./lib/respaldo').iniciar(); // 💾 copia diaria de webs, CRM y contactos
   actualizar.start();
   require('./lib/crecer').start();
   require('./lib/radar').start();
