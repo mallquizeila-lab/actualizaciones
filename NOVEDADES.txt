@@ -1,3 +1,9 @@
+9.7.0
+- 🗂️ Panel del cliente ordenado por TEMÁTICA: cada celebración (Infantiles, Baby shower, Bodas, 15 años… o las que ella cree) es una carpeta. Adentro sube sus TRABAJOS (decoraciones que ya hizo) y sus PAQUETES (lo que ofrece), cada uno con todas sus fotos y videos, lo que incluye y su precio. Botón «➕ Agregar trabajo o paquete de …» en cada temática y contador de fotos y videos.
+- Sube muchas fotos a la vez, de 2 en 2, con barra de progreso.
+- 🖼️ «Fotos de muestra que puso el sistema»: la dueña las cambia por una foto suya o las quita.
+- En la web, los paquetes llevan la etiqueta «📦 Paquete».
+
 9.6.0
 - 🎉 Panel del cliente MUCHO más completo: «Mis trabajos». La dueña crea cada trabajo (ej. «Boda en jardín con toldo») con:
   · tipo de celebración, nombre, cómo fue la decoración y lugar,
