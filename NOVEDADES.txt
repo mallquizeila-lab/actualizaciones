@@ -1,3 +1,7 @@
+9.12.0
+- 🎨 Cuando el cliente sube su propia foto de portada, su web la muestra con un velo suave (se ve el fondo) y su LOGO GRANDE a la derecha en un círculo blanco que flota. En celular, el logo sale más chico junto a sus datos.
+- El logo se guarda en mejor calidad (512 px, con fondo transparente).
+
 9.11.0
 - 🖼️ Imagen para compartir automática en TODAS las webs de clientes: al pegar el enlace en WhatsApp, Facebook o Telegram sale una tarjeta grande con el nombre del negocio, su frase, su logo, la ciudad y fotos de sus trabajos, en el color de su marca. Se rehace sola cuando cambian el logo, las fotos o los textos.
 - 🎨 En el panel del cliente, «Mi logo, portada y color»: subir su logo, poner su propia foto de fondo en la portada (o volver al collage) y cambiar el color de su marca. Muestra cómo se verá la web al compartirla.
