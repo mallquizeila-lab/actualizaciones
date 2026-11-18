@@ -1,3 +1,6 @@
+9.12.1
+- Arreglo: si el dominio de una web está escrito sin extensión (ej. «alferproducciones» sin .com), se ignora y la web usa su enlace gratis de yupitok.com. Antes la imagen para compartir y el enlace oficial apuntaban a una dirección que no existe, y WhatsApp no mostraba la foto.
+
 9.12.0
 - 🎨 Cuando el cliente sube su propia foto de portada, su web la muestra con un velo suave (se ve el fondo) y su LOGO GRANDE a la derecha en un círculo blanco que flota. En celular, el logo sale más chico junto a sus datos.
 - El logo se guarda en mejor calidad (512 px, con fondo transparente).
