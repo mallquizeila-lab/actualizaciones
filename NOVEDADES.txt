@@ -1,3 +1,6 @@
+9.14.1
+- Arreglo Pinterest: ya reconoce los enlaces de tableros con tildes (ej. «desenhos-para-colorir-gr%C3%A1tis») y los que traen «?…» al final.
+
 9.14.0
 - 📬 Cada lunes (desde las 9 a. m.) te llega por Telegram un resumen de las webs de tus clientes: visitas, clics a WhatsApp, chats y contactos de los últimos 7 días. Sirve para mostrarle a cada cliente que su web le trae clientes.
 
