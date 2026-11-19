@@ -341,6 +341,9 @@ function viralTop() {
     <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(250,204,21,.12)"><b>👑 Voces de GLORY BROWN</b> <span class="hint">Cada uno de los 127 personajes habla con su propia voz de tu biblioteca (${v.vocesListas || 0} de ${v.vozGlory?.total || 983} frases grabadas).</span>
       ${v.vozGlory?.activo ? `<p class="hint">🎙️ Grabando… ${v.vozGlory.hechas}/${v.vozGlory.total} (puede tardar unos 15 minutos; puedes seguir usando ShortForge)</p>` : `<button class="b sm" data-act="vfVoces" style="margin-top:6px">🎙️ ${v.vocesListas ? 'Completar o actualizar las voces' : 'Grabar las voces de los personajes'}</button>`}
       ${v.vozGlory?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.vozGlory.error)}</p>` : ''}</div>
+    <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(59,130,246,.12)"><b>🃏 YUPI CARDS: ilustraciones</b> <span class="hint">Crea con Cloudflare el arte de las cartas de personaje (Lulú, Choki, Yupi y Coquito), las figuritas del álbum y los fondos de la mesa (${v.yupicardsListas || 0} de ${v.yupicardsTotal || 0} listas). Arranca sola y sigue cada día con el cupo gratis.</span>
+      ${v.yupicards?.activo ? `<p class="hint">🃏 Creando… ${v.yupicards.hechas}/${v.yupicards.total}</p>` : `<button class="b sm" data-act="vfYupicards" style="margin-top:6px">🃏 ${v.yupicardsListas ? 'Completar ilustraciones' : 'Crear ilustraciones de YUPI CARDS'}</button>`}
+      ${v.yupicards?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.yupicards.error)}</p>` : ''}</div>
     <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(34,197,94,.12)"><b>🌱 Huerto Defensor: voces e ilustraciones</b> <span class="hint">Graba las 187 frases con voces de tu biblioteca (cada personaje con la suya) y crea las 17 ilustraciones realistas de los personajes con Cloudflare (${v.huertoListo || 0} de 204 listas).</span>
       ${v.huerto?.activo ? `<p class="hint">🌱 ${v.huerto.fase === 'voces' ? 'Grabando voces' : 'Creando ilustraciones'}… ${v.huerto.hechas}/${v.huerto.total}</p>` : `<button class="b sm" data-act="vfHuerto" style="margin-top:6px">🌱 ${v.huertoListo ? 'Completar voces e ilustraciones' : 'Crear voces e ilustraciones del Huerto'}</button>`}
       ${v.huerto?.error ? `<p class="hint" style="color:#b91c1c">${esc(v.huerto.error)}</p>` : ''}</div>
@@ -1310,6 +1313,7 @@ const ACT = {
   redOff: guard(async el => { await api('/api/red', { red: el.dataset.red, channelId: el.dataset.id, borrar: true }); await refresh(); drawChannel(); }),
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
+  vfYupicards: guard(async () => { VS = await api('/api/viral/yupicards-arte', {}); toast('🃏 Creando las ilustraciones de YUPI CARDS…'); render(); }),
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
   apReload: () => { AP = null; render(); },
   apAgregar: b => { if (AP.metodos.length >= 12) return alert('Máximo 12 métodos'); const t = b.dataset.t; AP.metodos.push({ tipo: t, nombre: b.dataset.n === 'Otro' ? '' : b.dataset.n, valor: '', ...(t === 'cripto' ? { red: b.dataset.r || (AP.redes || [])[0] } : {}) }); render(); },

@@ -1,7 +1,8 @@
 // 🃏 YUPI CARDS: juego de cartas por colores y números, con identidad 100% propia de Yupitok.
 // Fase 1: contra la IA (2 a 4 jugadores, 3 dificultades) y modo entrenamiento. Cartas dibujadas en SVG (nítidas en cualquier pantalla).
 // Reglas: 7 cartas, se juega por color o número; especiales: Saltar, Reversa, +2, Comodín y Comodín +4; botón «¡YUPI!» con la última carta.
-// Regla Yupi opcional: acumular +2 y +4. Cartas de personaje (opcionales): Brujita Lulú, Rey Choki, Idol Yupi y Coquito Travieso.
+// Mundo: Aventura (15 niveles en Costa, Sierra y Selva con jefes), modos fiesta, perfil con logros, álbum de figuritas, mochila y liga semanal.
+// Todo se gana jugando: sin compras ni premios por anuncios. Regla Yupi opcional: acumular +2 y +4. Cartas de personaje (opcionales): Brujita Lulú, Rey Choki, Idol Yupi y Coquito Travieso.
 (() => {
   const A = window.ARC_API, { JUEGOS, salir } = A, setParar = A.setParar;
   const COL = { r: { n: 'Rojo', a: '#ff5a6e', m: '#e8173b', b: '#8f0a24', s: '🔥' }, b: { n: 'Azul', a: '#5cc8ff', m: '#1f7bff', b: '#0b2e8a', s: '🌊' }, g: { n: 'Verde', a: '#5cf2a0', m: '#12b76a', b: '#055c3a', s: '🌿' }, y: { n: 'Amarillo', a: '#fff07a', m: '#ffc21a', b: '#c26a00', s: '☀️' } };
@@ -11,7 +12,7 @@
   const LS_ = { get: k => { try { return localStorage.getItem('yc_' + k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem('yc_' + k, v); } catch (e) {} } };
   // 🎨 Reversos y mesas que se desbloquean ganando (solo estética: no dan ventaja)
   const REVERSOS = [{ k: 'galaxia', n: 'Galaxia', g: 'linear-gradient(140deg,#4c1d95,#7c3aed 45%,#db2777)', min: 0 }, { k: 'oceano', n: 'Océano', g: 'linear-gradient(140deg,#0c4a6e,#0284c7 50%,#22d3ee)', min: 5 }, { k: 'oro', n: 'Oro real', g: 'linear-gradient(140deg,#78350f,#d97706 50%,#fde047)', min: 15 }, { k: 'neon', n: 'Neón', g: 'linear-gradient(140deg,#111827,#16a34a 40%,#a3e635)', min: 30 }];
-  const MESAS = [{ k: 'noche', n: 'Noche Yupi', g: 'radial-gradient(ellipse at 50% 40%,#3b1d7a 0%,#1a0b3d 55%,#0b0420 100%)', min: 0 }, { k: 'selva', n: 'Selva', g: 'radial-gradient(ellipse at 50% 40%,#166534 0%,#0f3d2a 55%,#05170f 100%)', min: 10 }, { k: 'atardecer', n: 'Atardecer', g: 'radial-gradient(ellipse at 50% 40%,#c2410c 0%,#7c2d12 50%,#2a0a05 100%)', min: 20 }];
+  const MESAS = [{ k: 'cielo', n: 'Terraza tropical', g: 'linear-gradient(180deg,#1677e8 0%,#3aa0ff 40%,#8fd3ff 75%,#dff4ff 100%)', min: 0 }, { k: 'noche', n: 'Noche Yupi', g: 'radial-gradient(ellipse at 50% 40%,#3b1d7a 0%,#1a0b3d 55%,#0b0420 100%)', min: 0 }, { k: 'selva', n: 'Selva', g: 'radial-gradient(ellipse at 50% 40%,#166534 0%,#0f3d2a 55%,#05170f 100%)', min: 10 }, { k: 'atardecer', n: 'Atardecer', g: 'radial-gradient(ellipse at 50% 40%,#c2410c 0%,#7c2d12 50%,#2a0a05 100%)', min: 20 }];
   // 🎯 Misiones del día (se renuevan cada día; al completarlas te dan puntos extra en tu siguiente partida)
   const MIS = [{ k: 'jugar', n: '🎮 Juega 3 partidas', meta: 3 }, { k: 'ganar', n: '🏆 Gana 1 partida', meta: 1 }, { k: 'esp', n: '⚡ Juega 10 cartas especiales', meta: 10 }, { k: 'yupi', n: '📣 Grita ¡YUPI! 2 veces', meta: 2 }];
   const hoyMis = () => new Date().toISOString().slice(0, 10);
@@ -19,11 +20,14 @@
   const avanzar = (k, n = 1) => { const m = misiones(); m.p[k] = (m.p[k] || 0) + n; LS_.set('mis', JSON.stringify(m)); };
   // 🌟 Cartas de PERSONAJE (con sonido y habilidad): personajes propios de Yupitok
   const HEROES = {
-    bruja: { n: 'Brujita Lulú', e: '🧙‍♀️', h: 'Elige color y el siguiente se queda dormido 😴', g: ['#a855f7', '#4c1d95'], icono: '✨' },
-    rey: { n: 'Rey Choki', e: '🤴', h: 'Comodín +4 real: elige color y el siguiente roba 4', g: ['#fbbf24', '#b45309'], icono: '+4' },
+    bruja: { n: 'Brujita Lulú', e: '🦙', h: 'Elige color y el siguiente se queda dormido 😴', g: ['#a855f7', '#4c1d95'], icono: '✨' },
+    rey: { n: 'Rey Choki', e: '🌽', h: 'Comodín +4 real: elige color y el siguiente roba 4', g: ['#fbbf24', '#b45309'], icono: '+4' },
     idol: { n: 'Idol Yupi', e: '🎤', h: 'Elige color y TODOS los rivales roban 1', g: ['#f472b6', '#9d174d'], icono: '🎵' },
-    coquito: { n: 'Coquito Travieso', e: '🐶', h: 'Elige color y cambia tu mano con el rival que tiene menos cartas', g: ['#34d399', '#065f46'], icono: '🔄' },
+    coquito: { n: 'Coquito Travieso', e: '🥥', h: 'Elige color y cambia tu mano con el rival que tiene menos cartas', g: ['#34d399', '#065f46'], icono: '🔄' },
   };
+  // 🎨 Ilustraciones (las crea ShortForge con IA; mientras no estén, se usan los dibujos de respaldo)
+  const ART = new Set(), artUrl = id => `/arte/yupicards/${id}.webp`, hayArte = id => ART.has(id);
+  fetch('/arte/yupicards/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { for (const id of m.arte || []) ART.add(id); }).catch(() => {});
   const esHeroe = x => !!HEROES[x?.v], cuatro = v => v === 'mas4' || v === 'rey';
   let ACs = null;
   function sonar(k) { // sonidos de cada personaje (sintetizados, sin archivos)
@@ -49,7 +53,7 @@
     const M = [];
     for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); }
     for (let i = 0; i < 4; i++) M.push({ c: 'w', v: 'comodin' }, { c: 'w', v: 'mas4' });
-    if (heroes) for (const v of Object.keys(HEROES)) M.push({ c: 'w', v });
+    for (let r = 0; r < (+heroes || 0); r++) for (const v of Object.keys(HEROES)) M.push({ c: 'w', v });
     return mezclar(M.map(x => ({ ...x, id: ++uidC })));
   }
   const valor = x => /^\d$/.test(x.v) ? +x.v : x.c === 'w' ? 50 : 20;
@@ -63,6 +67,14 @@
   const estrella = (r, f) => { let d = ''; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; d += (i ? 'L' : 'M') + (Math.cos(a) * rr).toFixed(1) + ' ' + (Math.sin(a) * rr).toFixed(1); } return `<path d="${d}Z" fill="${f}"/>`; };
   const ruedaColores = r => COLS.map((c, i) => { const a0 = -Math.PI / 2 + i * Math.PI / 2, a1 = a0 + Math.PI / 2, p = a => `${(Math.cos(a) * r).toFixed(1)} ${(Math.sin(a) * r).toFixed(1)}`; return `<path d="M0 0 L${p(a0)} A${r} ${r} 0 0 1 ${p(a1)} Z" fill="${COL[c].a}"/>`; }).join('');
   function svgCarta(x, w = 90) {
+    if (esHeroe(x) && hayArte('h_' + x.v)) { const H = HEROES[x.v], h = Math.round(w * 1.45), id = 'h' + x.id + 'w' + w, E = x.elegido && COL[x.elegido];
+      return `<svg viewBox="0 0 100 145" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" aria-label="${H.n}: ${H.h}"><defs><linearGradient id="${id}o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7cc"/><stop offset=".45" stop-color="#facc15"/><stop offset="1" stop-color="#a16207"/></linearGradient><clipPath id="${id}c"><rect x="6" y="6" width="88" height="133" rx="10"/></clipPath><linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="${H.g[1]}" stop-opacity="0"/><stop offset="1" stop-color="${H.g[1]}"/></linearGradient></defs>
+<rect x="2" y="2" width="96" height="141" rx="13" fill="url(#${id}o)"/><rect x="6" y="6" width="88" height="133" rx="10" fill="${H.g[1]}"/>
+<g clip-path="url(#${id}c)"><image href="${artUrl('h_' + x.v)}" x="6" y="6" width="88" height="118" preserveAspectRatio="xMidYMid slice"/><rect x="6" y="6" width="88" height="133" fill="url(#${id}s)"/></g>
+<g transform="translate(15 16)">${estrella(8, '#fde047')}</g><circle cx="84" cy="17" r="8.5" fill="#1d4ed8" stroke="#fff" stroke-width="1.6"/><text x="84" y="20.5" text-anchor="middle" font-size="9">🔊</text>
+<rect x="8" y="103" width="84" height="16" rx="8" fill="#0b1b4dd9" stroke="#fde68a" stroke-width="1.2"/><text x="50" y="114.5" text-anchor="middle" font-size="${H.n.length > 13 ? 7.8 : 9}" font-weight="900" fill="#fff" font-family="Baloo 2,Figtree,Arial">${H.n}</text>
+<text x="50" y="128" text-anchor="middle" font-size="5.6" font-weight="800" fill="#fff" font-family="Figtree,Arial">${H.icono === '+4' ? '+4 · elige color' : 'Elige color · ' + H.icono}</text><g transform="translate(86 131)">${E ? `<circle r="6.5" fill="${E.m}" stroke="#fff" stroke-width="1.6"/>` : ruedaColores(6)}</g>
+<rect x="6" y="6" width="88" height="133" rx="10" fill="none" stroke="#fff" stroke-opacity=".6"/></svg>`; }
     if (esHeroe(x)) { const H = HEROES[x.v], h = Math.round(w * 1.45), id = 'h' + x.id + 'w' + w, E = x.elegido && COL[x.elegido];
       return `<svg viewBox="0 0 100 145" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" aria-label="${H.n}: ${H.h}"><defs><radialGradient id="${id}" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".25" stop-color="${H.g[0]}"/><stop offset="1" stop-color="${H.g[1]}"/></radialGradient><linearGradient id="${id}o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7cc"/><stop offset=".45" stop-color="#facc15"/><stop offset="1" stop-color="#a16207"/></linearGradient></defs>
 <rect x="2" y="2" width="96" height="141" rx="13" fill="url(#${id}o)"/><rect x="6" y="6" width="88" height="133" rx="10" fill="url(#${id})"/>
@@ -76,7 +88,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     const txt = /^\d$/.test(x.v) ? x.v : x.v === 'mas2' ? '+2' : x.v === 'mas4' ? '+4' : '';
     const centro = x.v === 'saltar' || x.v === 'reversa' ? `<g transform="translate(50 72) scale(1.15)">${ICO[x.v]}</g>`
       : comodin ? `<g transform="translate(50 72)"><circle r="31" fill="#0b1020"/><g transform="rotate(${x.v === 'mas4' ? 45 : 0})">${ruedaColores(27)}</g>${estrella(13, '#fff')}${x.v === 'mas4' ? '<text x="0" y="52" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="Figtree,Arial">+4</text>' : ''}</g>`
-      : `<text x="50" y="${txt.length > 1 ? 86 : 90}" text-anchor="middle" font-size="${txt.length > 1 ? 40 : 54}" font-weight="900" fill="#fff" font-family="Figtree,Arial" stroke="${C.b}" stroke-width="2" paint-order="stroke">${txt}</text>`;
+      : `<text x="50" y="${txt.length > 1 ? 86 : 90}" text-anchor="middle" font-size="${txt.length > 1 ? 42 : 58}" font-weight="900" font-style="italic" fill="#fff" font-family="Baloo 2,Figtree,Arial" stroke="${C.b}" stroke-width="3" paint-order="stroke">${txt}</text>`;
     const esq = comodin ? (x.v === 'mas4' ? '+4' : '★') : x.v === 'saltar' ? '⦸' : x.v === 'reversa' ? '⇄' : txt;
     return `<svg viewBox="0 0 100 145" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" aria-label="${comodin ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : COL[x.c].n + ' ' + (txt || x.v)}"><defs>
 <linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${comodin ? '<stop offset="0" stop-color="#312e81"/><stop offset=".55" stop-color="#1e1b4b"/><stop offset="1" stop-color="#05060f"/>' : `<stop offset="0" stop-color="${C.a}"/><stop offset=".5" stop-color="${C.m}"/><stop offset="1" stop-color="${C.b}"/>`}</linearGradient>
@@ -117,32 +129,276 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 .yc-vitrina{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.yc-vitrina button{border:0;background:none;padding:0;cursor:pointer;transition:transform .15s;filter:drop-shadow(0 6px 12px #0008)}.yc-vitrina button:hover{transform:translateY(-5px) rotate(-3deg)}.yc-menu{display:grid;gap:10px;margin-top:10px}.yc-modos{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.yc-modos button{border:3px solid #ffffffcc;border-radius:16px;color:#fff;font:900 .82rem Figtree,sans-serif;padding:10px 4px;cursor:pointer;display:grid;gap:4px;justify-items:center;box-shadow:0 6px 0 #0006,0 10px 20px #0005;text-shadow:0 2px 4px #0008;transition:.15s}.yc-modos button:hover:not(:disabled){transform:translateY(-3px)}.yc-modos button span{font-size:1.9rem}.yc-modos button small{font-size:.66rem;background:#0006;border-radius:999px;padding:1px 6px}.yc-modos button:disabled{opacity:.7;cursor:default}@media(max-width:480px){.yc-modos{grid-template-columns:repeat(3,1fr)}}.yc-opc{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.yc-opc button{border:2px solid #ffffff33;background:#ffffff14;color:#fff;border-radius:12px;padding:8px 12px;font:800 .9rem Figtree;cursor:pointer}.yc-opc button.on{border-color:#facc15;background:#facc1533}
 @media(max-width:600px){.yc-desc{width:104px;height:151px}#yc .capa{padding:6px}.yc-op{min-width:72px;padding:4px 6px}.yc-av{font-size:1.5rem}}`;
 
+  // ================= MUNDO YUPI CARDS: progreso, logros, liga, álbum, mochila y aventura =================
+  // Todo se gana jugando: no hay nada a la venta ni premios por ver anuncios.
+  const semana = () => { const d = new Date(Date.now() - 5 * 3600e3), l = new Date(d); l.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return l.toISOString().slice(0, 10); }; // lunes (hora de Perú)
+  const PROG0 = { xp: 0, est: 0, st: { p: 0, g: 0, racha: 0, mejor: 0, esp: 0, yupi: 0, heroes: 0, atrapa: 0, jefes: 0 }, logros: {}, hist: [], mochila: { megafono: 1, sobres: 1 }, album: {}, sets: [], marco: 'basico', marcos: ['basico'], av: {}, liga: { sem: '', pts: 0 } };
+  function prog() {
+    let p = null; try { p = JSON.parse(LS_.get('prog') || 'null'); } catch (e) {}
+    p = Object.assign(JSON.parse(JSON.stringify(PROG0)), p || {}); p.st = Object.assign({}, PROG0.st, p.st); p.mochila = Object.assign({}, PROG0.mochila, p.mochila); p.liga = Object.assign({}, PROG0.liga, p.liga);
+    if (!p.migrado) { try { const s = JSON.parse(LS_.get('stats') || '{}'); p.st.p = Math.max(p.st.p, s.p || 0); p.st.g = Math.max(p.st.g, s.g || 0); } catch (e) {} p.migrado = 1; }
+    const sem = semana(); if (p.liga.sem !== sem) { if (p.liga.sem && p.liga.pts) p.liga.ant = { sem: p.liga.sem, pts: p.liga.pts }; p.liga.sem = sem; p.liga.pts = 0; }
+    return p;
+  }
+  const guardarProg = p => { LS_.set('prog', JSON.stringify(p)); LS_.set('stats', JSON.stringify({ g: p.st.g, p: p.st.p })); };
+  const nivelDe = xp => { let n = 1, need = 100, x = xp; while (x >= need) { x -= need; n++; need = 100 + (n - 1) * 40; } return { n, x, need }; };
+  const LIGAS = [{ n: 'Bronce', e: '🥉', min: 0, c: '#d97706' }, { n: 'Plata', e: '🥈', min: 800, c: '#cbd5e1' }, { n: 'Oro', e: '🥇', min: 2000, c: '#facc15' }, { n: 'Diamante', e: '💎', min: 4000, c: '#67e8f9' }, { n: 'Leyenda', e: '👑', min: 7000, c: '#f472b6' }];
+  const ligaDe = pts => { let i = 0; LIGAS.forEach((l, k) => { if (pts >= l.min) i = k; }); return i; };
+  const MARCOS = { basico: { n: 'Dorado', css: 'linear-gradient(135deg,#fef3c7,#f59e0b,#b45309)', como: 'Lo tienes desde el inicio' }, costa: { n: 'Ola marina', css: 'conic-gradient(#22d3ee,#0ea5e9,#a5f3fc,#0284c7,#22d3ee)', como: 'Vence al jefe de la Costa' }, sierra: { n: 'Andino', css: 'conic-gradient(#f97316,#a855f7,#facc15,#ef4444,#22c55e,#f97316)', como: 'Vence al jefe de la Sierra' }, selva: { n: 'Selva', css: 'conic-gradient(#16a34a,#a3e635,#065f46,#4ade80,#16a34a)', como: 'Vence al jefe de la Selva' }, racha: { n: 'Fuego', css: 'conic-gradient(#ef4444,#f59e0b,#fde047,#f59e0b,#ef4444)', anim: 1, como: 'Logro «Imparable» nivel 3' }, album: { n: 'Coleccionista', css: 'conic-gradient(#f472b6,#a78bfa,#60a5fa,#f472b6)', anim: 1, como: 'Completa el álbum entero' }, leyenda: { n: 'Leyenda', css: 'conic-gradient(#ef4444,#f59e0b,#fde047,#4ade80,#22d3ee,#818cf8,#e879f9,#ef4444)', anim: 1, como: 'Termina una semana en liga Leyenda' } };
+  const LOGROS = [
+    { k: 'p', n: 'Jugador', e: '🎮', d: 'Juega partidas', metas: [5, 25, 100] }, { k: 'g', n: 'Ganador', e: '🏆', d: 'Gana partidas', metas: [3, 15, 50] },
+    { k: 'esp', n: 'Especialista', e: '⚡', d: 'Juega cartas especiales', metas: [20, 100, 400] }, { k: 'yupi', n: '¡YUPI!', e: '📣', d: 'Grita ¡YUPI! a tiempo', metas: [5, 25, 100] },
+    { k: 'heroes', n: 'Amigo de los personajes', e: '🌟', d: 'Juega cartas de personaje', metas: [3, 20, 80] }, { k: 'atrapa', n: 'Ojo de águila', e: '🫵', d: 'Atrapa rivales que no dijeron ¡YUPI!', metas: [1, 10, 40] },
+    { k: 'mejor', n: 'Imparable', e: '🔥', d: 'Gana varias partidas seguidas', metas: [3, 5, 10] }, { k: 'jefes', n: 'Cazajefes', e: '👑', d: 'Vence a los jefes de la Aventura', metas: [1, 2, 3] },
+  ];
+  const PREMIO_LOGRO = [50, 150, 400];
+  // 📒 Álbum de figuritas (se consiguen jugando; las repetidas se convierten en estrellas)
+  const SETS = [
+    { k: 'amigos', n: 'Amigos de Yupitok', g: ['#c084fc', '#581c87'], f: [['👑', 'Yupi', 'f_yupi'], ['🦙', 'Lulú', 'f_lulu'], ['🌽', 'Choki', 'f_choki'], ['🥥', 'Coquito', 'f_coquito'], ['🌶️', 'Rocoto Rojo', 'f_rocoto'], ['🪲', 'Gorgojo Grun', 'f_grun']] },
+    { k: 'costa', n: 'Costa del Pacífico', g: ['#38bdf8', '#0c4a6e'], f: [['🦀', 'Cangrejo Carlos', 'f_cangrejo'], ['🐧', 'Pingüino de Humboldt', 'f_pinguino'], ['🏄', 'Surfista', 'f_surfista'], ['🐬', 'Delfín', 'f_delfin'], ['🦭', 'Lobo marino', 'f_lobo'], ['🌅', 'Atardecer en la playa', 'f_atardecer']] },
+    { k: 'sierra', n: 'Sierra andina', g: ['#fb923c', '#7c2d12'], f: [['🦙', 'Llama Lola', 'f_llama'], ['🦅', 'Cóndor', 'f_condor'], ['🌽', 'Choclo gigante', 'f_choclo'], ['🏔️', 'Nevado', 'f_nevado'], ['🐹', 'Cuy', 'f_cuy'], ['🪅', 'Fiesta del pueblo', 'f_fiesta']] },
+    { k: 'selva', n: 'Selva amazónica', g: ['#4ade80', '#14532d'], f: [['🐆', 'Jaguar Jairo', 'f_jaguar'], ['🦜', 'Guacamayo', 'f_guacamayo'], ['🐒', 'Mono maquisapa', 'f_mono'], ['🦥', 'Perezoso', 'f_perezoso'], ['🐸', 'Rana dardo', 'f_rana'], ['🌺', 'Orquídea', 'f_orquidea']] },
+    { k: 'pop', n: 'Estrellas Pop', g: ['#f472b6', '#6d28d9'], f: [['🎤', 'Estrella Pop', 'f_kpopstar'], ['🎧', 'DJ Pop', 'f_kpopdj'], ['🐱', 'Gatito Gamer', 'f_gatito'], ['💃', 'Bailarina', 'f_bailarina'], ['🤖', 'Robot cantante', 'f_robot'], ['🌟', 'Fan número 1', 'f_fan']] },
+    { k: 'navidad', n: 'Navidad Yupi (evento)', evento: true, g: ['#ef4444', '#14532d'], f: [['🎅', 'Papá Noel', 'f_papanoel'], ['🦌', 'Reno Mágico', 'f_reno'], ['⛄', 'Muñeco de Nieve', 'f_muneco'], ['🧝', 'Duende Juguetero', 'f_duende'], ['🐧', 'Pingüino Navideño', 'f_pinguinonav'], ['⭐', 'Estrella de Navidad', 'f_estrellanav']] },
+  ];
+  const FIGS = SETS.flatMap(s => s.f.map((f, i) => ({ id: s.k + i, set: s.k, e: f[0], n: f[1], art: f[2], rara: i < 1, evento: !!s.evento })));
+  // 🎄 Eventos de temporada: misiones del día que dan sobres con figuritas exclusivas
+  const EVENTOS = [{ k: 'navidad', n: 'Evento de Navidad', e: '🎅', set: 'navidad', desde: [11, 15], hasta: [1, 6], fondo: 'fondo_navidad', g: 'linear-gradient(135deg,#dc2626,#991b1b 45%,#166534)', mis: [{ k: 'jugar', n: '🎮 Juega 5 partidas', meta: 5 }, { k: 'ganar', n: '🏆 Gana 3 partidas', meta: 3 }, { k: 'pts', n: '⭐ Logra 500 puntos', meta: 500 }] }];
+  const eventoActivo = () => { const d = new Date(Date.now() - 5 * 3600e3), md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); return EVENTOS.find(E => { const a = E.desde[0] * 100 + E.desde[1], b = E.hasta[0] * 100 + E.hasta[1]; return a <= b ? md >= a && md <= b : md >= a || md <= b; }) || null; };
+  const evProg = (p, E) => { const hoy = hoyMis(); p.ev = p.ev || {}; let x = p.ev[E.k]; if (!x || x.dia !== hoy) x = p.ev[E.k] = { dia: hoy, p: {}, cob: [], sobres: x?.sobres || 0 }; return x; };
+  const COSTO_SOBRE = 150;
+  // 🗺️ Aventura de cartas: 3 zonas de Perú, 15 niveles con reglas especiales y un jefe al final de cada zona
+  const ZONAS = [
+    { k: 'costa', n: 'Costa del Pacífico', e: '🏖️', fondo: 'linear-gradient(180deg,#0ea5e9 0%,#7dd3fc 38%,#fde68a 70%,#f59e0b 100%)', deco: ['🌊', '🏖️', '🐚', '🦀', '🌴', '⛵', '🐬', '☀️'], dif: ['facil', 'facil', 'medio', 'medio'], jefe: { n: 'Cangrejo Carlos', cara: '🦀' } },
+    { k: 'sierra', n: 'Sierra andina', e: '⛰️', fondo: 'linear-gradient(180deg,#6366f1 0%,#c4b5fd 34%,#86efac 68%,#166534 100%)', deco: ['🏔️', '🦙', '🌄', '🌽', '🦅', '🪨', '🌾', '☁️'], dif: ['medio', 'medio', 'medio', 'dificil'], jefe: { n: 'Llama Lola', cara: '🦙' } },
+    { k: 'selva', n: 'Selva amazónica', e: '🌴', fondo: 'linear-gradient(180deg,#064e3b 0%,#15803d 36%,#4ade80 70%,#14532d 100%)', deco: ['🌴', '🦜', '🐒', '🌺', '🐸', '🍃', '🦋', '🐊'], dif: ['medio', 'dificil', 'dificil', 'dificil'], jefe: { n: 'Jaguar Jairo', cara: '🐆' } },
+  ];
+  const REGLAS = { normal: '🃏 Partida clásica', heroes: '🌟 Doble de cartas de personaje', turbo: '⚡ Turbo: solo 8 segundos por turno', acum: '➕ Se acumulan los +2 y +4', roba: '🎣 Roba hasta que puedas jugar', jefe: '👑 Jefe: empieza con solo 5 cartas y juega en difícil' };
+  const NIVELES = ZONAS.flatMap((z, zi) => [['normal', 2], ['heroes', 3], [zi === 2 ? 'roba' : 'turbo', 2], ['acum', 3], ['jefe', 2]].map(([r, n], i) => ({ id: zi * 5 + i + 1, zona: zi, regla: r, n, dif: r === 'jefe' ? 'dificil' : z.dif[i], jefe: r === 'jefe' ? z.jefe : null })));
+  const opcNivel = L => ({ n: L.n, dif: L.dif, acum: L.regla === 'acum', heroes: true, heroesX: L.regla === 'heroes' || L.regla === 'jefe' ? 2 : 1, turbo: L.regla === 'turbo', robaHasta: L.regla === 'roba', jefe: L.jefe, aventura: L.id, entrena: false });
+  const MODOS = [
+    { k: 'turbo', n: 'Turbo', e: '⚡', d: '8 segundos por turno y rivales veloces.', g: 'linear-gradient(160deg,#fde047,#ea580c)', o: { turbo: true } },
+    { k: 'fiesta', n: 'Fiesta de personajes', e: '🌟', d: 'Triple de cartas de personaje: ¡puro caos mágico!', g: 'linear-gradient(160deg,#f0abfc,#7e22ce)', o: { heroesX: 3, heroes: true } },
+    { k: 'roba', n: 'Roba hasta poder', e: '🎣', d: 'Si no tienes carta, robas hasta encontrar una que sirva.', g: 'linear-gradient(160deg,#5eead4,#0f766e)', o: { robaHasta: true } },
+    { k: 'caos', n: 'Caos Yupi', e: '🌪️', d: 'Se acumulan +2/+4, doble personajes y reloj de 12 s.', g: 'linear-gradient(160deg,#fb7185,#9f1239)', o: { acum: true, heroesX: 2, heroes: true, turbo: 12 } },
+  ];
+
+  // Registra el final de una partida: XP, estrellas, liga, logros, historial, aventura y álbum
+  function registrarFin(o) { // o: { yo, puntos, opc, S, estrellasAv }
+    const p = prog(), r = { xp: 0, est: 0, logros: [], marcos: [], sobres: 0, subio: 0, liga: null };
+    const n0 = nivelDe(p.xp).n, l0 = ligaDe(p.liga.pts);
+    p.st.p++; if (o.yo) { p.st.g++; p.st.racha++; p.st.mejor = Math.max(p.st.mejor, p.st.racha); } else p.st.racha = 0;
+    for (const k of ['esp', 'yupi', 'heroes', 'atrapa']) p.st[k] += o.S[k] || 0;
+    if (!o.opc.entrena) { r.xp = o.yo ? 60 : 25; r.est = o.yo ? 25 : 8; p.liga.pts += o.yo ? o.puntos : Math.round(o.puntos / 2); }
+    // aventura
+    if (o.opc.aventura && o.yo) { const L = NIVELES[o.opc.aventura - 1], antes = p.av[L.id] || 0, est = o.estrellasAv; p.av[L.id] = Math.max(antes, est);
+      if (!antes) { r.est += L.jefe ? 150 : 40; r.primera = true; if (L.jefe) { p.st.jefes++; r.sobres++; const mk = ZONAS[L.zona].k; if (!p.marcos.includes(mk)) { p.marcos.push(mk); r.marcos.push(mk); } } } }
+    // logros
+    for (const L of LOGROS) { const v = p.st[L.k] || 0, ya = p.logros[L.k] || 0; let t = ya; while (t < 3 && v >= L.metas[t]) t++;
+      for (let i = ya; i < t; i++) { r.est += PREMIO_LOGRO[i]; r.logros.push(`${L.e} ${L.n} ${'★'.repeat(i + 1)}`); if (L.k === 'mejor' && i === 2 && !p.marcos.includes('racha')) { p.marcos.push('racha'); r.marcos.push('racha'); } }
+      p.logros[L.k] = t; }
+    p.xp += r.xp; p.est += r.est; const n1 = nivelDe(p.xp).n; if (n1 > n0) { r.subio = n1; r.sobres += n1 - n0; if ((n1 - n0) && n1 % 5 === 0) p.mochila.megafono++; }
+    p.mochila.sobres += r.sobres; const l1 = ligaDe(p.liga.pts); if (l1 > l0) r.liga = LIGAS[l1];
+    { const E = eventoActivo(); if (E && !o.opc.entrena) { const x = evProg(p, E); x.p.jugar = (x.p.jugar || 0) + 1; if (o.yo) x.p.ganar = (x.p.ganar || 0) + 1; x.p.pts = (x.p.pts || 0) + o.puntos; } }
+    p.hist.unshift({ f: Date.now(), m: o.opc.aventura ? `Aventura ${o.opc.aventura}` : o.opc.modo ? (MODOS.find(m => m.k === o.opc.modo)?.n || 'Fiesta') : o.opc.entrena ? 'Entrenamiento' : 'Clásico', yo: o.yo, pts: o.puntos, n: o.opc.n }); p.hist.length = Math.min(p.hist.length, 15);
+    guardarProg(p); return r;
+  }
+  function usarMegafono() { const p = prog(); if (p.mochila.megafono > 0) { p.mochila.megafono--; guardarProg(p); return true; } return false; }
+
+  const avatarYo = (size, p) => { p = p || prog(); const M = MARCOS[p.marco] || MARCOS.basico; return `<span class="yc-marco${M.anim ? ' anim' : ''}" style="--m:${M.css};width:${size + 10}px;height:${size + 10}px">${typeof avImg === 'function' ? avImg(LS.get('chatAv') || 'a01', size) : '😎'}</span>`; };
+  const marcoMuestra = (k, size = 54) => { const M = MARCOS[k]; return `<span class="yc-marco${M.anim ? ' anim' : ''}" style="--m:${M.css};width:${size}px;height:${size}px"><span style="font-size:${size * .45}px">🙂</span></span>`; };
+  const figurita = (F, tiene, w = 92) => { const S = SETS.find(s => s.k === F.set), img = tiene && F.art && hayArte(F.art); return `<div class="yc-fig${tiene ? '' : ' falta'}${F.rara ? ' rara' : ''}${img ? ' ilus' : ''}" style="width:${w}px;--a:${S.g[0]};--b:${S.g[1]}${img ? `;background-image:url(${artUrl(F.art)})` : ''}"><em class="es">★</em><span>${img ? '' : tiene ? F.e : '❔'}</span><b>${tiene ? F.n : '???'}</b>${F.rara && tiene ? '<i>✨ Rara</i>' : ''}</div>`; };
+
+  const CSS2 = `@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
+#yc:not(.full) .fondo{background:linear-gradient(180deg,#1677e8 0%,#3aa0ff 38%,#8fd3ff 72%,#dff4ff 100%)!important}#yc:not(.full) .fondo::after{background-image:radial-gradient(ellipse 120px 40px at 15% 22%,#ffffffd0 60%,transparent 62%),radial-gradient(ellipse 160px 50px at 80% 14%,#ffffffc0 60%,transparent 62%),radial-gradient(ellipse 140px 44px at 60% 78%,#ffffffa0 60%,transparent 62%),radial-gradient(#ffffff30 1px,transparent 1px);background-size:100% 100%,100% 100%,100% 100%,26px 26px;animation:none}#yc:not(.full) .fondo.arte{background-size:cover!important;background-position:center!important}
+.yc-logo{position:relative;text-align:center;padding:30px 0 4px;font-family:'Baloo 2',Figtree,sans-serif;line-height:.82}.yc-logo .cartas{position:absolute;left:50%;top:6px;transform:translateX(-50%);display:flex}.yc-logo .cartas i{width:52px;height:74px;border-radius:9px;border:3px solid #fff;margin:0 -9px;box-shadow:0 6px 14px #0004}.yc-logo .corona{position:absolute;left:50%;top:-6px;transform:translateX(-118%) rotate(-14deg);font-size:2.4rem;z-index:3;filter:drop-shadow(0 3px 4px #0006)}.yc-logo b{position:relative;z-index:2;display:block;font-weight:800;text-shadow:3px 0 #0b2a6b,-3px 0 #0b2a6b,0 3px #0b2a6b,0 -3px #0b2a6b,3px 3px #0b2a6b,-3px -3px #0b2a6b,3px -3px #0b2a6b,-3px 3px #0b2a6b,5px 0 #0b2a6b,-5px 0 #0b2a6b,0 -5px #0b2a6b,0 9px 0 #0b2a6b,0 14px 18px #0007;letter-spacing:1px}.yc-logo .yupi{font-size:clamp(3.6rem,13vw,5.4rem);color:#ffd21f}.yc-logo .cards{font-size:clamp(3rem,11vw,4.6rem);color:#fff;margin-top:-2px}.yc-logo .cinta{position:relative;z-index:3;display:inline-block;margin-top:8px;background:linear-gradient(180deg,#ffe25a,#f5a400);color:#3b1d00;font:800 clamp(.95rem,3.6vw,1.2rem) 'Baloo 2',Figtree,sans-serif;padding:4px 22px;border-radius:10px;border:3px solid #fff;box-shadow:0 5px 0 #b45309,0 10px 18px #0004;transform:rotate(-2deg)}
+.yc-evento{position:relative;display:grid;gap:2px;align-content:center;justify-items:start;text-align:left;min-height:84px;padding:12px 16px;border-radius:20px;border:3px solid #fff;color:#fff;cursor:pointer;box-shadow:0 7px 0 #7f1d1d,0 14px 26px #0005;font-family:Figtree;width:100%;box-sizing:border-box;background-size:cover!important;overflow:hidden}.yc-evento b{font:800 1.35rem 'Baloo 2',Figtree;text-shadow:0 2px 0 #7f1d1d,0 0 10px #0008;color:#fde047}.yc-evento span{font-weight:800;text-shadow:0 1px 4px #000c}.yc-evento::after{content:'❄ ❄ ❄';position:absolute;right:14px;top:8px;opacity:.6;letter-spacing:6px}
+.yc-hud,.yc-nav,.yc-panel{background:linear-gradient(180deg,#ffffff,#eaf3ff)!important;color:#0b2a5b;border:3px solid #fff!important;box-shadow:0 10px 28px #0b2a6b40!important}.yc-hud .nv b,.yc-panel h2,.yc-panel h3{color:#0b2a5b}.yc-panel h2{font:800 1.5rem 'Baloo 2',Figtree}.yc-nav button{color:#0b2a5b}.yc-nav button:hover{background:#dbeafe}.yc-chip{background:#0b2a5b!important;color:#fff!important;border-color:#0b2a5b!important}.yc-xp{background:#cfe0fb}
+.yc-panel .yc-btn,.yc-caja .yc-btn{background:#1d4ed8;color:#fff}.yc-panel .yc-btn:disabled{opacity:.45}.yc-tabs button{background:#dbeafe;color:#0b2a5b;border-color:#bfdbfe}.yc-tabs button.on{background:#facc15;border-color:#f59e0b;color:#3b1d00}.yc-panel .yc-opc button{background:#dbeafe;color:#0b2a5b;border-color:#bfdbfe}.yc-panel .yc-opc button.on{background:#facc15;border-color:#f59e0b}
+.yc-stats div,.yc-logro,.yc-obj,.yc-panel [style*="#ffffff10"]{background:#dbeafe!important;color:#0b2a5b}.yc-elige{background:#dbeafe;color:#0b2a5b}.yc-panel .yc-estr{text-shadow:0 1px 0 #92400e}
+#yc:not(.full) .yc-caja{background:linear-gradient(180deg,#ffffff,#eaf3ff);color:#0b2a5b;border:3px solid #fff}.yc-caja .yc-fig b{color:#fff}
+.yc-fig .es{position:absolute;left:5px;top:3px;font-style:normal;color:#fde047;text-shadow:0 1px 2px #000;font-size:.95rem}.yc-fig.ilus{background-size:cover;background-position:center;justify-content:end;align-content:end;padding:0 4px 6px}.yc-fig.ilus b{background:#0b1b4dd9;border:1px solid #fde68a;border-radius:8px;padding:2px 6px}.yc-fig.ilus span{display:none}
+.yc-yupiwrap{position:relative}.yc-yupiwrap .glob{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);background:#fff;color:#e11d48;font:900 1rem 'Baloo 2',Figtree;border-radius:12px;padding:2px 10px;white-space:nowrap;box-shadow:0 4px 10px #0005;display:none}.yc-yupiwrap .mano{position:absolute;right:-14px;bottom:-10px;font-size:1.8rem;display:none;animation:ycToca .7s ease-in-out infinite alternate;pointer-events:none}.yc-yupiwrap.listo .glob,.yc-yupiwrap.listo .mano{display:block}@keyframes ycToca{to{transform:translate(-6px,-6px) scale(.92)}}
+@media(min-width:900px) and (orientation:landscape){#yc.full .yc-top{display:block;position:relative;height:0}#yc.full .yc-op{position:absolute;z-index:3}#yc.full .yc-op[data-pos="izq"]{left:1%;top:calc(32vh)}#yc.full .yc-op[data-pos="der"]{right:1%;top:calc(32vh)}#yc.full .yc-op[data-pos="arr"]{left:50%;transform:translateX(-50%);top:0}#yc.full .capa>div:first-child{min-height:150px}}
+.yc-lobby{max-width:820px;margin:0 auto;width:100%;display:grid;gap:12px;padding:6px 4px 14px}.yc-hud{display:flex;align-items:center;gap:10px;background:#0f172acc;border:1px solid #ffffff22;border-radius:18px;padding:8px 12px;box-shadow:0 8px 24px #0006}.yc-hud .nv{flex:1;min-width:0}.yc-hud .nv b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.yc-xp{height:9px;border-radius:9px;background:#ffffff22;overflow:hidden;margin-top:4px}.yc-xp u{display:block;height:100%;background:linear-gradient(90deg,#4ade80,#22d3ee)}.yc-chip{background:#ffffff18;border:1px solid #ffffff2a;border-radius:999px;padding:5px 11px;font-weight:900;white-space:nowrap}
+.yc-marco{display:inline-grid;place-items:center;border-radius:50%;padding:4px;background:var(--m);box-shadow:0 6px 16px #0008;flex:none;box-sizing:border-box}.yc-marco>*{width:100%!important;height:100%!important;border-radius:50%;background:#fff;display:grid!important;place-items:center;object-fit:cover;border:0!important}.yc-marco.anim{animation:ycHue 3s linear infinite}@keyframes ycHue{to{filter:hue-rotate(360deg)}}
+.yc-tiles{display:grid;grid-template-columns:1.3fr 1fr 1fr;grid-template-rows:auto auto;gap:10px}.yc-tile{position:relative;border:3px solid #ffffffd9;border-radius:22px;color:#fff;cursor:pointer;padding:14px 10px;display:grid;align-content:center;justify-items:center;gap:4px;font:900 1.05rem Figtree,sans-serif;text-shadow:0 2px 6px #0009;box-shadow:0 7px 0 #0007,0 14px 26px #0006;transition:transform .15s;overflow:hidden;min-height:118px}.yc-tile:hover:not(:disabled){transform:translateY(-4px) rotate(-.5deg)}.yc-tile span{font-size:2.6rem;filter:drop-shadow(0 4px 8px #0007)}.yc-tile small{font-size:.72rem;font-weight:800;background:#0006;border-radius:999px;padding:2px 9px}.yc-tile.grande{grid-row:span 2;font-size:1.35rem}.yc-tile.grande span{font-size:4rem}.yc-tile::before{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff40 45%,transparent 60%);transform:translateX(-120%);animation:ycBrillo 4s ease-in-out infinite}.yc-tile:disabled{opacity:.6;cursor:default}.yc-tile:disabled::before{display:none}@keyframes ycBrillo{60%,100%{transform:translateX(120%)}}
+.yc-nav{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#0f172acc;border:1px solid #ffffff22;border-radius:18px;padding:6px}.yc-nav button{position:relative;border:0;background:none;color:#fff;font:800 .72rem Figtree,sans-serif;display:grid;justify-items:center;gap:2px;padding:6px 2px;border-radius:12px;cursor:pointer}.yc-nav button:hover{background:#ffffff14}.yc-nav button span{font-size:1.6rem}.yc-badge{position:absolute;top:2px;right:18%;background:#ef4444;color:#fff;border-radius:999px;font-size:.66rem;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px;border:2px solid #0f172a}
+@media(max-width:560px){.yc-tiles{grid-template-columns:1fr 1fr}.yc-tile.grande{grid-column:span 2;grid-row:auto;min-height:130px}.yc-nav{grid-template-columns:repeat(3,1fr)}}
+.yc-panel{max-width:820px;margin:0 auto;width:100%;background:linear-gradient(160deg,#2e1065f2,#0f0a2ef2);border:1px solid #ffffff33;border-radius:22px;padding:14px;box-shadow:0 20px 60px #000a;box-sizing:border-box}.yc-panel h2{margin:0;font-size:1.35rem}.yc-cab{display:flex;align-items:center;gap:10px;margin-bottom:10px}.yc-cab h2{flex:1}.yc-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.yc-tabs button{border:2px solid #ffffff2a;background:#ffffff12;color:#fff;border-radius:12px;padding:7px 12px;font:800 .85rem Figtree;cursor:pointer}.yc-tabs button.on{border-color:#facc15;background:#facc1530}
+.yc-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.yc-stats div{background:#ffffff10;border-radius:14px;padding:10px;text-align:center}.yc-stats b{display:block;font-size:1.4rem}.yc-stats small{opacity:.8}
+.yc-logro{display:flex;gap:10px;align-items:center;background:#ffffff10;border-radius:14px;padding:9px 11px;margin:6px 0}.yc-logro>span{font-size:1.9rem}.yc-logro div{flex:1;min-width:0}.yc-logro small{opacity:.8}.yc-estr{color:#facc15;letter-spacing:2px;font-size:1rem}
+.yc-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}.yc-elige{border:3px solid transparent;background:#ffffff10;border-radius:16px;padding:8px;color:#fff;cursor:pointer;display:grid;justify-items:center;gap:4px;font:800 .78rem Figtree;width:104px}.yc-elige.on{border-color:#facc15;background:#facc1522}.yc-elige:disabled{opacity:.45;cursor:default}
+.yc-fig{position:relative;aspect-ratio:3/4;border-radius:14px;background:radial-gradient(circle at 50% 35%,#ffffff55,transparent 55%),linear-gradient(160deg,var(--a),var(--b));border:3px solid #fff;display:grid;align-content:center;justify-items:center;gap:4px;text-align:center;box-shadow:0 6px 14px #0007;padding:6px;box-sizing:border-box}.yc-fig span{font-size:2.3rem;filter:drop-shadow(0 3px 6px #0007)}.yc-fig b{font-size:.68rem;line-height:1.1;text-shadow:0 1px 3px #000}.yc-fig i{position:absolute;top:4px;right:4px;font-size:.55rem;font-style:normal;background:#000a;border-radius:999px;padding:1px 5px}.yc-fig.rara{border-color:#facc15;box-shadow:0 0 0 2px #facc1577,0 0 18px #facc15aa}.yc-fig.falta{filter:grayscale(1) brightness(.55)}
+.yc-sobre{display:flex;gap:12px;justify-content:center;perspective:800px;margin:10px 0}.yc-sobre>div{animation:ycVoltea .7s ease both}.yc-sobre>div:nth-child(2){animation-delay:.25s}.yc-sobre>div:nth-child(3){animation-delay:.5s}@keyframes ycVoltea{from{transform:rotateY(90deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
+.yc-mapa{border-radius:20px;overflow:hidden;border:3px solid #ffffffcc;box-shadow:0 14px 40px #0009}.yc-zona{position:relative;padding:14px 10px 18px;overflow:hidden}.yc-zona h3{position:relative;z-index:2;margin:0 0 6px;text-align:center;font-size:1.15rem;text-shadow:0 2px 6px #000a}.yc-zona .deco{position:absolute;font-size:2rem;opacity:.55;pointer-events:none;animation:ycFlota 5s ease-in-out infinite alternate}@keyframes ycFlota{to{transform:translateY(-10px) rotate(6deg)}}
+.yc-ruta{position:relative;z-index:2;display:grid;gap:4px}.yc-nodo{justify-self:var(--x);display:grid;justify-items:center;gap:2px;border:0;background:none;color:#fff;cursor:pointer;font:900 .8rem Figtree;position:relative}.yc-nodo .bola{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;background:radial-gradient(circle at 35% 30%,#fff 0,#facc15 30%,#b45309 100%);border:4px solid #fff;box-shadow:0 6px 0 #0006,0 10px 20px #0007;color:#3b1d00}.yc-nodo.jefe .bola{width:80px;height:80px;font-size:2.4rem;background:radial-gradient(circle at 35% 30%,#fff 0,#f472b6 30%,#7e22ce 100%)}.yc-nodo.bloq .bola{background:radial-gradient(circle at 35% 30%,#e2e8f0,#64748b);color:#334155}.yc-nodo.bloq{cursor:default}.yc-nodo.actual .bola{animation:ycPulso 1.2s ease-in-out infinite}@keyframes ycPulso{50%{box-shadow:0 6px 0 #0006,0 0 0 10px #facc1566,0 0 30px #facc15}}.yc-nodo .yo{position:absolute;top:-34px;animation:ycSalta .8s ease-in-out infinite alternate}@keyframes ycSalta{to{transform:translateY(-6px)}}.yc-nodo .est{color:#fde047;text-shadow:0 1px 3px #000;font-size:.85rem;letter-spacing:1px}.yc-nodo .tag{background:#000a;border-radius:999px;padding:1px 8px;font-size:.7rem}
+.yc-modoF{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.yc-modoF button{border:3px solid #ffffffd9;border-radius:20px;color:#fff;cursor:pointer;padding:14px;text-align:left;display:grid;gap:4px;box-shadow:0 6px 0 #0007;font-family:Figtree}.yc-modoF button span{font-size:2.4rem}.yc-modoF button b{font-size:1.1rem}.yc-modoF button small{font-size:.82rem;opacity:.95}
+.yc-resumen{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}.yc-resumen span{background:#ffffff14;border-radius:999px;padding:5px 11px;font-weight:800;font-size:.86rem}
+#yc:not(.full) .yc-modal{position:fixed;z-index:70}.yc-ruta{padding-top:30px}.yc-ruta::before{content:'';position:absolute;left:50%;top:40px;bottom:30px;border-left:6px dotted #ffffffaa;transform:translateX(-50%);z-index:-1}.yc-palmas span{position:absolute;bottom:18%;font-size:clamp(3rem,9vw,6rem);opacity:.85;filter:drop-shadow(0 8px 10px #0004);z-index:0}.yc-palmas span:nth-child(1){left:1%}.yc-palmas span:nth-child(2){left:9%;bottom:12%;font-size:2.4rem}.yc-palmas span:nth-child(3){right:1%;transform:scaleX(-1)}.yc-palmas span:nth-child(4){right:9%;bottom:12%;font-size:2.4rem}.yc-mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.yc-obj{background:#ffffff10;border-radius:16px;padding:12px;text-align:center;display:grid;gap:4px}.yc-obj>span{font-size:2.6rem}.yc-obj small{opacity:.8}`;
+
+  // Pantalla con fondo de mesa y una capa central
+  function vista(t, h) { salir(); registrar(t.id); stage(`<style>${CSS}${CSS2}</style><div id="yc"><div class="fondo${hayArte('fondo_lobby') ? ' arte' : ''}" ${hayArte('fondo_lobby') ? `style="background:url(${artUrl('fondo_lobby')}) center/cover!important"` : ''}></div><div class="luz"></div><div class="capa" style="grid-template-rows:auto;align-content:start">${h}</div></div>`); setParar(() => {}); }
+  const cab = (titulo, extra = '') => `<div class="yc-cab"><button class="yc-btn" data-volver>← Volver</button><h2>${titulo}</h2>${extra}</div>`;
+  const alVolver = t => $('#yc').addEventListener('click', e => { if (e.target.closest('[data-volver]')) { FX.son('click'); menu(t); } });
+  const estChip = p => `<span class="yc-chip" title="Estrellas: se ganan jugando">⭐ ${p.est}</span>`;
+
+  const logo = () => `<div class="yc-logo"><div class="cartas">${[['#ff3b55', '#b3001b'], ['#3b9bff', '#0b4fd1'], ['#2fd27a', '#0a8a45'], ['#ffd23b', '#e09a00']].map((g, i) => `<i style="background:linear-gradient(150deg,${g[0]},${g[1]});transform:rotate(${(i - 1.5) * 16}deg) translateY(${Math.abs(i - 1.5) * 6}px)"></i>`).join('')}</div><span class="corona">👑</span><b class="yupi">Yupi</b><b class="cards">Cards</b><span class="cinta">¡Juega, Colecciona y Gana!</span></div>`;
   function menu(t) {
-    salir(); registrar(t.id);
-    const st = JSON.parse(LS_.get('stats') || '{"g":0,"p":0}'), opc = JSON.parse(LS_.get('opc') || '{"n":4,"dif":"medio","acum":false}');
-    const libres = (L, k) => L.map(x => `<button data-${k}="${x.k}" ${st.g >= x.min ? '' : 'disabled'} class="${(LS_.get(k) || L[0].k) === x.k ? 'on' : ''}" title="${st.g >= x.min ? '' : 'Gana ' + x.min + ' partidas'}">${st.g >= x.min ? '' : '🔒 '}${x.n}</button>`).join('');
-    stage(`<style>${CSS}</style><div id="yc"><div class="fondo" style="background:${(MESAS.find(m => m.k === LS_.get('mesa')) || MESAS[0]).g}"></div><div class="luz"></div><div class="capa" style="grid-template-rows:auto;align-content:center"><div class="yc-caja" style="margin:auto">
-<div style="display:flex;justify-content:center;gap:-10px;margin-bottom:6px">${[{ c: 'r', v: '7', id: 'a1' }, { c: 'w', v: 'mas4', id: 'a2' }, { c: 'b', v: 'reversa', id: 'a3' }].map((x, i) => `<div style="transform:rotate(${(i - 1) * 12}deg) translateY(${i === 1 ? -8 : 0}px);margin:0 -10px">${svgCarta(x, 70)}</div>`).join('')}</div>
-<h2 style="margin:6px 0 2px;font-size:1.8rem;letter-spacing:1px">🃏 YUPI CARDS</h2><p style="margin:0;opacity:.85">Juega por color o número, usa las cartas especiales y grita <b>¡YUPI!</b> cuando te quede una sola carta.</p>
-<p style="margin:8px 0 0;font-size:.85rem;opacity:.8">🏆 ${st.g} victorias · 🎮 ${st.p} partidas</p>
+    const p = prog(), N = nivelDe(p.xp), li = LIGAS[ligaDe(p.liga.pts)], m = misiones(), misListas = MIS.filter(x => (m.p[x.k] || 0) >= x.meta && !m.cobradas.includes(x.k)).length;
+    const avAct = Math.min(15, Object.keys(p.av).length + 1), logrosPend = 0;
+    vista(t, `<div class="yc-lobby">
+<div class="yc-hud">${avatarYo(46, p)}<div class="nv"><b>${escH(LS.get('chatNom') || 'Jugador')} · Nivel ${N.n}</b><div class="yc-xp" title="${N.x}/${N.need} XP"><u style="width:${N.x / N.need * 100}%"></u></div></div>${estChip(p)}<span class="yc-chip" style="color:${li.c}">${li.e} ${li.n}</span></div>
+${logo()}
+${(() => { const E = eventoActivo(); if (!E) return ''; const x = evProg(p, E), listas = E.mis.filter(m => (x.p[m.k] || 0) >= m.meta && !x.cob.includes(m.k)).length; return `<button class="yc-evento" data-ir="evento" style="background:${E.g}${hayArte(E.fondo) ? `,url(${artUrl(E.fondo)}) center/cover` : ''}"><b>${E.e} ${E.n}</b><span>Completa misiones y consigue cartas exclusivas</span>${listas || x.sobres ? `<i class="yc-badge" style="top:8px;right:10px">${listas + x.sobres}</i>` : ''}</button>`; })()}
+<div class="yc-tiles">
+<button class="yc-tile grande" data-ir="aventura" style="background:radial-gradient(circle at 50% 20%,#fde68a55,transparent 50%),linear-gradient(160deg,#22c55e,#0ea5e9 55%,#1e3a8a)"><span>🗺️</span>Aventura de cartas<small>Nivel ${avAct} de 15 · ${Object.values(p.av).reduce((a, b) => a + b, 0)}/45 ★</small></button>
+<button class="yc-tile" data-ir="clasico" style="background:linear-gradient(160deg,#ff5a6e,#8f0a24)"><span>🤖</span>Clásico<small>Contra la IA</small></button>
+<button class="yc-tile" data-ir="fiesta" style="background:linear-gradient(160deg,#f0abfc,#7e22ce)"><span>🎉</span>Modos fiesta<small>4 modos</small></button>
+<button class="yc-tile" data-ir="entrena" style="background:linear-gradient(160deg,#a78bfa,#4c1d95)"><span>🎓</span>Entrenamiento<small>Aprende jugando</small></button>
+<button class="yc-tile" disabled style="background:linear-gradient(160deg,#5cc8ff,#0b2e8a)"><span>🌐</span>Online y amigos<small>Pronto</small></button></div>
+<div class="yc-nav">${[['perfil', '👤', 'Perfil', 0], ['album', '📒', 'Álbum', p.mochila.sobres], ['mochila', '🎒', 'Mochila', 0], ['misiones', '🎯', 'Misiones', misListas], ['liga', '🏅', 'Liga', p.liga.ant ? 1 : 0], ['reglas', '📖', 'Reglas', logrosPend]].map(([k, e, n, b]) => `<button data-ir="${k}"><span>${e}</span>${n}${b ? `<i class="yc-badge">${b}</i>` : ''}</button>`).join('')}</div>
+<p style="text-align:center;font-size:.78rem;opacity:.75;margin:0">Todo se gana jugando · Sin compras · 🏆 ${p.st.g} victorias de ${p.st.p} partidas</p></div>`);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (!b || b.disabled) return; FX.son('click'); const k = b.dataset.ir;
+      ({ evento: () => evento(t), aventura: () => mapa(t), clasico: () => clasico(t), fiesta: () => fiesta(t), entrena: () => { const o = JSON.parse(LS_.get('opc') || '{}'); partida(t, { n: 2, dif: 'facil', acum: false, entrena: true, heroes: o.heroes }); }, perfil: () => perfil(t), album: () => album(t), mochila: () => mochila(t), misiones: () => verMisiones(t), liga: () => liga(t), reglas: () => reglas(t) })[k]?.(); });
+  }
+
+  function clasico(t) {
+    const opc = JSON.parse(LS_.get('opc') || '{"n":4,"dif":"medio","acum":false}');
+    vista(t, `<div class="yc-panel" style="max-width:520px;text-align:center">${cab('🤖 Clásico contra la IA')}
 <div class="yc-menu"><div><b>Jugadores</b><div class="yc-opc" id="ycN">${[2, 3, 4].map(n => `<button data-n="${n}" class="${opc.n === n ? 'on' : ''}">${n}</button>`).join('')}</div></div>
 <div><b>Dificultad de la IA</b><div class="yc-opc" id="ycD">${[['facil', '😊 Fácil'], ['medio', '🤔 Medio'], ['dificil', '😈 Difícil']].map(([k, l]) => `<button data-d="${k}" class="${opc.dif === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
 <label style="font-size:.9rem;display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="ycAc" ${opc.acum ? 'checked' : ''}> Regla Yupi: acumular +2 y +4</label>
 <label style="font-size:.9rem;display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="ycHe" ${opc.heroes !== false ? 'checked' : ''}> 🌟 Cartas de personaje (con sonido y poder)</label>
-<div class="yc-vitrina">${Object.keys(HEROES).map((v, i) => `<button type="button" data-heroe="${v}" title="${HEROES[v].n}: ${HEROES[v].h}">${svgCarta({ c: 'w', v, id: 'v' + i }, innerWidth < 600 ? 70 : 92)}</button>`).join('')}</div><p style="margin:-4px 0 0;font-size:.78rem;opacity:.8">Toca un personaje para escuchar su sonido y ver su poder 🔊</p>
-<div class="yc-modos"><button id="ycJugar" style="background:linear-gradient(160deg,#ff5a6e,#8f0a24)"><span>🤖</span>Contra la IA</button><button id="ycEntrena" style="background:linear-gradient(160deg,#a78bfa,#4c1d95)"><span>🎓</span>Entrenamiento</button><button disabled style="background:linear-gradient(160deg,#5cc8ff,#0b2e8a)"><span>🌐</span>Online<small>Pronto</small></button><button disabled style="background:linear-gradient(160deg,#5cf2a0,#055c3a)"><span>👥</span>Con amigos<small>Pronto</small></button><button disabled style="background:linear-gradient(160deg,#fff07a,#c26a00)"><span>🏆</span>Torneos<small>Pronto</small></button></div>
-<details style="text-align:left;font-size:.88rem;opacity:.95"><summary style="cursor:pointer;font-weight:800">🎨 Reversos y mesas</summary><p style="margin:6px 0 2px">Reverso de tus cartas:</p><div class="yc-opc" id="ycRv">${libres(REVERSOS, 'reverso')}</div><p style="margin:6px 0 2px">Mesa:</p><div class="yc-opc" id="ycMs">${libres(MESAS, 'mesa')}</div><p style="opacity:.75;margin:6px 0 0">Se desbloquean ganando partidas. Solo cambian el aspecto: nadie tiene ventaja.</p></details>
-<details style="text-align:left;font-size:.88rem"><summary style="cursor:pointer;font-weight:800">📖 Reglas</summary><ul style="margin:6px 0;padding-left:18px"><li>Todos empiezan con 7 cartas. Juega una carta del <b>mismo color o número</b> que la de la mesa.</li><li>Si no puedes, <b>roba</b> una del mazo (si sirve, puedes jugarla).</li><li><b>⦸ Saltar:</b> el siguiente pierde su turno. <b>⇄ Reversa:</b> cambia el sentido. <b>+2:</b> el siguiente roba 2 y pierde el turno.</li><li><b>★ Comodín:</b> eliges el color. <b>Comodín +4:</b> eliges color y el siguiente roba 4.</li><li>Con <b>2 cartas</b>, pulsa <b>¡YUPI!</b> antes de jugar (o justo después). Si te atrapan sin decirlo: <b>+2 cartas</b>.</li><li>Gana quien se queda sin cartas. Sumas puntos por las cartas que les quedan a los demás.</li></ul></details>
-<div style="text-align:left;background:#ffffff10;border-radius:14px;padding:10px 12px"><b>🎯 Misiones de hoy</b>${(() => { const m = misiones(); return MIS.map(x => { const v = Math.min(x.meta, m.p[x.k] || 0), ok = v >= x.meta, cob = m.cobradas.includes(x.k); return `<div style="margin-top:7px"><div style="display:flex;justify-content:space-between;font-size:.86rem"><span>${x.n}</span><span>${cob ? '✅' : ok ? `<button class="yc-btn" data-cobrar="${x.k}" style="padding:3px 9px;background:#16a34a">🎁 +100</button>` : v + '/' + x.meta}</span></div><div style="height:7px;border-radius:9px;background:#ffffff22;margin-top:3px;overflow:hidden"><div style="height:100%;width:${v / x.meta * 100}%;background:linear-gradient(90deg,#facc15,#f97316)"></div></div></div>`; }).join(''); })()}${+LS_.get('bono') ? `<p style="margin:8px 0 0;font-size:.84rem">🎁 Tienes <b>+${LS_.get('bono')}</b> puntos extra para tu próxima victoria.</p>` : ''}</div>
-<p style="font-size:.8rem;opacity:.7;margin:0">🌐 Partidas online, salas con amigos, torneos y cartas coleccionables: ¡muy pronto!</p></div></div></div></div>`);
-    const sel = (box, attr, fn) => $(box).onclick = e => { const b = e.target.closest(`[data-${attr}]`); if (!b || b.disabled) return; FX.son('click'); fn(b.dataset[attr]); $(box).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
-    sel('#ycN', 'n', v => opc.n = +v); sel('#ycD', 'd', v => opc.dif = v); sel('#ycRv', 'reverso', v => LS_.set('reverso', v)); sel('#ycMs', 'mesa', v => { LS_.set('mesa', v); $('#yc .fondo').style.background = MESAS.find(m => m.k === v).g; });
-    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-cobrar]'); if (!b) return; const m = misiones(); if (m.cobradas.includes(b.dataset.cobrar)) return; m.cobradas.push(b.dataset.cobrar); LS_.set('mis', JSON.stringify(m)); LS_.set('bono', (+LS_.get('bono') || 0) + 100); FX.confeti(); menu(t); });
+<div class="yc-vitrina">${Object.keys(HEROES).map((v, i) => `<button type="button" data-heroe="${v}" title="${HEROES[v].n}: ${HEROES[v].h}">${svgCarta({ c: 'w', v, id: 'v' + i }, innerWidth < 600 ? 70 : 88)}</button>`).join('')}</div><p style="margin:-4px 0 0;font-size:.78rem;opacity:.8">Toca un personaje para escuchar su sonido y ver su poder 🔊</p>
+<button class="yc-yupi" id="ycJugar" style="font-size:1.4rem">▶ ¡A jugar!</button></div></div>`);
+    alVolver(t);
+    const sel = (box, attr, fn) => $(box).onclick = e => { const b = e.target.closest(`[data-${attr}]`); if (!b) return; FX.son('click'); fn(b.dataset[attr]); $(box).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+    sel('#ycN', 'n', v => opc.n = +v); sel('#ycD', 'd', v => opc.dif = v);
     $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-heroe]'); if (!b) return; const H = HEROES[b.dataset.heroe]; sonar(b.dataset.heroe); toast(`${H.e} ${H.n}: ${H.h}`); });
-    const guardarOpc = () => { opc.heroes = $('#ycHe').checked; opc.acum = $('#ycAc').checked; LS_.set('opc', JSON.stringify(opc)); };
-    $('#ycJugar').onclick = () => { guardarOpc(); partida(t, { ...opc, entrena: false }); };
-    $('#ycEntrena').onclick = () => { guardarOpc(); partida(t, { n: 2, dif: 'facil', acum: false, entrena: true, heroes: opc.heroes }); };
-    setParar(() => {});
+    $('#ycJugar').onclick = () => { opc.heroes = $('#ycHe').checked; opc.acum = $('#ycAc').checked; LS_.set('opc', JSON.stringify(opc)); partida(t, { ...opc, entrena: false }); };
+  }
+
+  function fiesta(t) {
+    const opc = JSON.parse(LS_.get('opc') || '{"n":4,"dif":"medio"}');
+    vista(t, `<div class="yc-panel">${cab('🎉 Modos fiesta')}<p style="margin:0 0 10px;opacity:.85">Reglas locas para partidas distintas. Juegas con ${opc.n || 4} jugadores en dificultad ${{ facil: 'fácil', medio: 'media', dificil: 'difícil' }[opc.dif] || 'media'} (cámbialo en Clásico).</p>
+<div class="yc-modoF">${MODOS.map(m => `<button data-modo="${m.k}" style="background:${m.g}"><span>${m.e}</span><b>${m.n}</b><small>${m.d}</small></button>`).join('')}</div></div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-modo]'); if (!b) return; const M = MODOS.find(m => m.k === b.dataset.modo); FX.son('click'); partida(t, { n: opc.n || 4, dif: opc.dif || 'medio', acum: false, heroes: true, ...M.o, modo: M.k, entrena: false }); });
+  }
+
+  function mapa(t) {
+    const p = prog(), hechos = Object.keys(p.av).map(Number), act = Math.min(15, (hechos.length ? Math.max(...hechos) : 0) + 1), X = ['50%', '78%', '50%', '22%', '50%'];
+    vista(t, `<div class="yc-panel" style="padding:10px">${cab('🗺️ Aventura de cartas', estChip(p))}<div class="yc-mapa">${ZONAS.map((z, zi) => `<div class="yc-zona" style="background:${z.fondo}">${z.deco.map((d, i) => `<span class="deco" style="left:${(i * 37 + zi * 11) % 88 + 3}%;top:${(i * 29 + 7) % 84 + 6}%;animation-delay:${i * .4}s">${d}</span>`).join('')}<h3>${z.e} ${z.n}</h3><div class="yc-ruta">${NIVELES.filter(L => L.zona === zi).map((L, i) => { const est = p.av[L.id] || 0, bloq = L.id > act, es = L.id === act; return `<button class="yc-nodo${L.jefe ? ' jefe' : ''}${bloq ? ' bloq' : ''}${es ? ' actual' : ''}" style="--x:${X[i] === '50%' ? 'center' : X[i] === '78%' ? 'end' : 'start'};margin:0 ${X[i] === '50%' ? 0 : '12%'}" data-nivel="${L.id}" ${bloq ? 'disabled' : ''}>${es ? `<span class="yo">${avatarYo(30, p)}</span>` : ''}<span class="bola">${bloq ? '🔒' : L.jefe ? L.jefe.cara : L.id}</span><span class="est">${'★'.repeat(est)}${'☆'.repeat(3 - est)}</span><span class="tag">${L.jefe ? 'JEFE' : REGLAS[L.regla].split(' ')[0]}</span></button>`; }).join('')}</div></div>`).join('')}</div>
+<p style="text-align:center;font-size:.8rem;opacity:.8;margin:8px 0 0">★ Ganas · ★★ Ganas sin que te atrapen · ★★★ Ganas dejando a los rivales con muchas cartas</p></div>`);
+    alVolver(t);
+    const bAct = $(`#yc [data-nivel="${act}"]`); setTimeout(() => bAct?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 150);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-nivel]'); if (!b || b.disabled) return; FX.son('click'); fichaNivel(t, NIVELES[+b.dataset.nivel - 1]); });
+  }
+  function fichaNivel(t, L) {
+    const z = ZONAS[L.zona], p = prog(), est = p.av[L.id] || 0;
+    const d = document.createElement('div'); d.className = 'yc-modal'; d.innerHTML = `<div class="yc-caja" style="background:${z.fondo};text-shadow:0 1px 4px #000a"><div style="font-size:3.4rem">${L.jefe ? L.jefe.cara : z.e}</div><h2 style="margin:2px 0">${L.jefe ? '👑 ' + L.jefe.n : 'Nivel ' + L.id}</h2><p style="margin:0">${z.n} · Nivel ${L.id} de 15</p>
+<div style="background:#000a;border-radius:14px;padding:10px;margin:10px 0;text-align:left;font-weight:700;line-height:1.6">👥 Rivales: ${L.n - 1}<br>🧠 Dificultad: ${{ facil: '😊 Fácil', medio: '🤔 Media', dificil: '😈 Difícil' }[L.dif]}<br>📜 ${REGLAS[L.regla]}<br>🎁 Premio: ${est ? 'ya lo cobraste (puedes mejorar tus ★)' : L.jefe ? '⭐ 150 + sobre de figuritas + marco ' + MARCOS[z.k].n : '⭐ 40'}</div>
+<div class="yc-estr" style="font-size:1.6rem">${'★'.repeat(est)}${'☆'.repeat(3 - est)}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="yc-yupi" data-go>▶ Jugar</button><button class="yc-btn" data-x style="background:#000a">Cerrar</button></div></div>`;
+    $('#yc').append(d); d.onclick = e => { if (e.target.closest('[data-x]') || e.target === d) d.remove(); if (e.target.closest('[data-go]')) partida(t, opcNivel(L)); };
+  }
+
+  function perfil(t, tab = 'info') {
+    const p = prog(), N = nivelDe(p.xp), li = LIGAS[ligaDe(p.liga.pts)], st = JSON.parse(LS_.get('stats') || '{"g":0}');
+    const tabs = [['info', '📋 Información'], ['logros', '🏅 Logros'], ['estilo', '🎨 Personalizar'], ['hist', '🕘 Historial']];
+    let cuerpo = '';
+    if (tab === 'info') cuerpo = `<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px">${avatarYo(84, p)}<div style="flex:1;min-width:180px"><h2>${escH(LS.get('chatNom') || 'Jugador')}</h2><p style="margin:2px 0;opacity:.85">Nivel ${N.n} · ${li.e} Liga ${li.n} · Marco ${MARCOS[p.marco]?.n}</p><div class="yc-xp"><u style="width:${N.x / N.need * 100}%"></u></div><small style="opacity:.75">${N.x}/${N.need} XP para el nivel ${N.n + 1}</small><p style="margin:6px 0 0;font-size:.82rem;opacity:.8">Tu foto o avatar se cambia en tu perfil de Yupitok.</p></div></div>
+<div class="yc-stats">${[['🎮', p.st.p, 'Partidas'], ['🏆', p.st.g, 'Victorias'], ['📊', p.st.p ? Math.round(p.st.g / p.st.p * 100) + '%' : '–', 'Ganadas'], ['🔥', p.st.mejor, 'Mejor racha'], ['⚡', p.st.esp, 'Especiales'], ['📣', p.st.yupi, '¡YUPI! gritados'], ['🌟', p.st.heroes, 'Personajes'], ['🫵', p.st.atrapa, 'Atrapados'], ['👑', p.st.jefes, 'Jefes vencidos'], ['📒', Object.keys(p.album).length + '/' + FIGS.length, 'Figuritas']].map(([e, v, n]) => `<div>${e}<b>${v}</b><small>${n}</small></div>`).join('')}</div>`;
+    if (tab === 'logros') cuerpo = LOGROS.map(L => { const t_ = p.logros[L.k] || 0, v = p.st[L.k] || 0, meta = L.metas[Math.min(t_, 2)]; return `<div class="yc-logro"><span>${L.e}</span><div><b>${L.n}</b> <span class="yc-estr">${'★'.repeat(t_)}${'☆'.repeat(3 - t_)}</span><br><small>${L.d}: ${Math.min(v, meta)}/${meta}${t_ < 3 ? ` · Premio ⭐ ${PREMIO_LOGRO[t_]}` : ' · ¡Completado!'}</small><div class="yc-xp"><u style="width:${t_ >= 3 ? 100 : Math.min(100, v / meta * 100)}%"></u></div></div></div>`; }).join('');
+    if (tab === 'estilo') { const lib = (L, k) => L.map(x => `<button class="yc-elige${(LS_.get(k) || L[0].k) === x.k ? ' on' : ''}" data-${k}="${x.k}" ${st.g >= x.min ? '' : 'disabled'}><span style="width:60px;height:${k === 'reverso' ? 84 : 44}px;border-radius:10px;background:${x.g};border:2px solid #fff;display:block"></span>${st.g >= x.min ? x.n : '🔒 ' + x.min + ' victorias'}</button>`).join('');
+      cuerpo = `<h3 style="margin:4px 0 8px">🖼️ Marco del avatar</h3><div class="yc-grid">${Object.entries(MARCOS).map(([k, M]) => { const tiene = p.marcos.includes(k); return `<button class="yc-elige${p.marco === k ? ' on' : ''}" data-marco="${k}" ${tiene ? '' : 'disabled'} title="${M.como}">${marcoMuestra(k)}${tiene ? M.n : '🔒 ' + M.como}</button>`; }).join('')}</div>
+<h3 style="margin:14px 0 8px">🂠 Reverso de cartas</h3><div class="yc-grid">${lib(REVERSOS, 'reverso')}</div><h3 style="margin:14px 0 8px">🟢 Mesa</h3><div class="yc-grid">${lib(MESAS, 'mesa')}</div><p style="opacity:.75;font-size:.82rem;text-align:center">Solo cambian el aspecto: nadie tiene ventaja.</p>`; }
+    if (tab === 'hist') cuerpo = p.hist.length ? p.hist.map(h => `<div class="yc-logro"><span>${h.yo ? '🏆' : '🎴'}</span><div><b>${h.yo ? 'Victoria' : 'Derrota'} · ${escH(h.m)}</b><br><small>${new Date(h.f).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' })} · ${h.n} jugadores</small></div><b>+${h.pts}</b></div>`).join('') : '<p style="text-align:center;opacity:.8">Aún no hay partidas. ¡Juega la primera!</p>';
+    vista(t, `<div class="yc-panel">${cab('👤 Mi perfil', estChip(p))}<div class="yc-tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}</div>${cuerpo}</div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-tab],[data-marco],[data-reverso],[data-mesa]'); if (!b || b.disabled) return; FX.son('click');
+      if (b.dataset.tab) return perfil(t, b.dataset.tab);
+      if (b.dataset.marco) { const q = prog(); q.marco = b.dataset.marco; guardarProg(q); }
+      if (b.dataset.reverso) LS_.set('reverso', b.dataset.reverso);
+      if (b.dataset.mesa) LS_.set('mesa', b.dataset.mesa);
+      perfil(t, 'estilo'); });
+  }
+
+  function abrirSobre(evento) { // 3 figuritas; las raras salen menos. Las repetidas dan 20 estrellas
+    const p = prog(); let sale;
+    if (evento) { const E = EVENTOS.find(x => x.k === evento), x = evProg(p, E); if (!x.sobres) return null; x.sobres--; const del = FIGS.filter(f => f.set === E.set), faltan = del.filter(f => !p.album[f.id]);
+      sale = [...Array(3)].map((_, i) => i === 0 && faltan.length ? azar(faltan) : azar(del)); }
+    else { if (p.mochila.sobres <= 0) return null; p.mochila.sobres--; const pool = FIGS.filter(f => !f.evento).flatMap(f => Array(f.rara ? 1 : 4).fill(f)); sale = [...Array(3)].map(() => azar(pool)); }
+    const res = sale.map(f => { const rep = !!p.album[f.id]; p.album[f.id] = (p.album[f.id] || 0) + 1; if (rep) p.est += 20; return { f, rep }; });
+    const premios = []; for (const S of SETS) if (!p.sets.includes(S.k) && S.f.every((_, i) => p.album[S.k + i])) { p.sets.push(S.k); p.est += 300; premios.push(`📒 ¡Completaste «${S.n}»! ⭐ +300`); }
+    if (SETS.filter(S => !S.evento).every(S => p.sets.includes(S.k)) && !p.marcos.includes('album')) { p.marcos.push('album'); premios.push('🖼️ ¡Álbum completo! Ganaste el marco Coleccionista'); }
+    guardarProg(p); return { res, premios };
+  }
+  function album(t) {
+    const p = prog(), tot = Object.keys(p.album).length;
+    vista(t, `<div class="yc-panel">${cab(`📒 Álbum de figuritas · ${tot}/${FIGS.length}`, estChip(p))}
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;background:#ffffff10;border-radius:16px;padding:10px;margin-bottom:10px"><span style="font-size:2.4rem">🎴</span><div style="flex:1;min-width:160px"><b>Sobres sin abrir: ${p.mochila.sobres}</b><br><small style="opacity:.8">Ganas sobres al subir de nivel y al vencer jefes. Las repetidas se convierten en ⭐ 20.</small></div><button class="yc-yupi" data-abrir ${p.mochila.sobres ? '' : 'disabled'}>Abrir sobre</button><button class="yc-btn" data-comprar ${p.est >= COSTO_SOBRE ? '' : 'disabled'} title="Se paga con estrellas ganadas jugando">⭐ ${COSTO_SOBRE} → 1 sobre</button></div>
+${(() => { const E = eventoActivo(); if (!E) return ''; const x = evProg(p, E); return x.sobres ? `<div class="yc-evento" style="background:${E.g}${hayArte(E.fondo) ? `,url(${artUrl(E.fondo)}) center/cover` : ''};margin-bottom:10px"><b>${E.e} Sobres navideños: ${x.sobres}</b><button class="yc-yupi" data-abrir="${E.k}">Abrir sobre navideño</button></div>` : ''; })()}
+${SETS.map(S => { const n = S.f.filter((_, i) => p.album[S.k + i]).length; return `<h3 style="margin:12px 0 6px">${S.n} · ${n}/${S.f.length} ${p.sets.includes(S.k) ? '✅' : `<small style="opacity:.7">(premio ⭐ 300)</small>`}${S.evento ? ' <small style="opacity:.75">· solo en el evento</small>' : ''}</h3><div class="yc-grid">${S.f.map((_, i) => figurita(FIGS.find(f => f.id === S.k + i), !!p.album[S.k + i], innerWidth < 600 ? 84 : 100)).join('')}</div>`; }).join('')}</div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => {
+      if (e.target.closest('[data-comprar]:not([disabled])')) { const q = prog(); if (q.est < COSTO_SOBRE) return; q.est -= COSTO_SOBRE; q.mochila.sobres++; guardarProg(q); FX.son('moneda'); return album(t); }
+      const ab = e.target.closest('[data-abrir]:not([disabled])'); if (!ab) return; const r = abrirSobre(ab.dataset.abrir || null); if (!r) return; FX.son('combo'); FX.confeti();
+      const d = document.createElement('div'); d.className = 'yc-modal'; d.innerHTML = `<div class="yc-caja"><h2 style="margin:0">🎴 ¡Sobre abierto!</h2><div class="yc-sobre">${r.res.map(x => `<div>${figurita(x.f, true, innerWidth < 600 ? 92 : 112)}<small style="display:block;margin-top:4px">${x.rep ? '🔁 Repetida: ⭐ +20' : '🆕 ¡Nueva!'}</small></div>`).join('')}</div>${r.premios.map(x => `<p style="margin:4px 0;font-weight:800">${x}</p>`).join('')}<button class="yc-yupi" data-x>¡Genial!</button></div>`;
+      $('#yc').append(d); d.onclick = ev => { if (ev.target.closest('[data-x]')) album(t); };
+    });
+  }
+
+  function mochila(t) {
+    const p = prog();
+    vista(t, `<div class="yc-panel">${cab('🎒 Mochila', estChip(p))}<div class="yc-mochila">
+<div class="yc-obj"><span>📣</span><b>Megáfono Yupi × ${p.mochila.megafono}</b><small>Si te olvidas de gritar ¡YUPI!, lo grita por ti (se usa solo, una vez). Ganas uno cada 5 niveles.</small></div>
+<div class="yc-obj"><span>🎴</span><b>Sobres × ${p.mochila.sobres}</b><small>Ábrelos en el Álbum para conseguir figuritas.</small><button class="yc-btn" data-ir2="album">Ir al álbum</button></div>
+<div class="yc-obj"><span>⭐</span><b>${p.est} estrellas</b><small>Se ganan jugando, con logros y en la Aventura. Sirven para conseguir sobres.</small></div>
+<div class="yc-obj"><span>🖼️</span><b>Marcos × ${p.marcos.length}/${Object.keys(MARCOS).length}</b><small>Cámbialos en Perfil → Personalizar.</small><button class="yc-btn" data-ir2="estilo">Personalizar</button></div></div></div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-ir2]'); if (!b) return; FX.son('click'); b.dataset.ir2 === 'album' ? album(t) : perfil(t, 'estilo'); });
+  }
+
+  function evento(t) {
+    const E = eventoActivo(); if (!E) return menu(t); const p = prog(), x = evProg(p, E), S = SETS.find(s => s.k === E.set);
+    vista(t, `<div class="yc-panel">${cab(E.e + ' ' + E.n, estChip(p))}
+<div class="yc-evento" style="background:${E.g}${hayArte(E.fondo) ? `,url(${artUrl(E.fondo)}) center/cover` : ''}"><b style="font-size:1.4rem">${E.e} ¡${E.n}!</b><span>Completa las misiones del evento y consigue cartas exclusivas</span></div>
+<h3 style="margin:12px 0 6px">🎁 Misiones del evento (se renuevan cada día)</h3>
+${E.mis.map(m => { const v = Math.min(m.meta, x.p[m.k] || 0), ok = v >= m.meta, cob = x.cob.includes(m.k); return `<div class="yc-logro"><span>${m.n.split(' ')[0]}</span><div><b>${m.n.split(' ').slice(1).join(' ')}</b><div class="yc-xp"><u style="width:${v / m.meta * 100}%"></u></div></div>${cob ? '✅' : ok ? `<button class="yc-btn" data-evcob="${m.k}" style="background:#16a34a">🎁 Sobre</button>` : `<b>${v}/${m.meta}</b> 🎁`}</div>`; }).join('')}
+${x.sobres ? `<p style="text-align:center"><button class="yc-yupi" data-irA>🎴 Abrir ${x.sobres} sobre${x.sobres > 1 ? 's' : ''} navideño${x.sobres > 1 ? 's' : ''}</button></p>` : ''}
+<h3 style="margin:12px 0 6px">${S.n} · ${S.f.filter((_, i) => p.album[S.k + i]).length}/${S.f.length}</h3><div class="yc-grid">${S.f.map((_, i) => figurita(FIGS.find(f => f.id === S.k + i), !!p.album[S.k + i], innerWidth < 600 ? 84 : 100)).join('')}</div>
+<p style="text-align:center;font-size:.85rem;opacity:.8">¡Colecciona las 6 cartas navideñas antes del 6 de enero! Completar el set da ⭐ 300.</p></div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { if (e.target.closest('[data-irA]')) return album(t); const b = e.target.closest('[data-evcob]'); if (!b) return; const q = prog(), y = evProg(q, E); if (y.cob.includes(b.dataset.evcob)) return; y.cob.push(b.dataset.evcob); y.sobres++; guardarProg(q); FX.son('moneda'); FX.confeti(); evento(t); });
+  }
+  function verMisiones(t) {
+    const m = misiones(), p = prog();
+    vista(t, `<div class="yc-panel" style="max-width:560px">${cab('🎯 Misiones de hoy', estChip(p))}<p style="margin:0 0 6px;opacity:.85">Se renuevan cada día. Cada misión cumplida te da ⭐ 30 y +100 puntos para tu próxima victoria.</p>
+${MIS.map(x => { const v = Math.min(x.meta, m.p[x.k] || 0), ok = v >= x.meta, cob = m.cobradas.includes(x.k); return `<div class="yc-logro"><span>${x.n.split(' ')[0]}</span><div><b>${x.n.split(' ').slice(1).join(' ')}</b><div class="yc-xp"><u style="width:${v / x.meta * 100}%"></u></div></div>${cob ? '✅' : ok ? `<button class="yc-btn" data-cobrar="${x.k}" style="background:#16a34a">🎁 Cobrar</button>` : `<b>${v}/${x.meta}</b>`}</div>`; }).join('')}
+${+LS_.get('bono') ? `<p style="margin:8px 0 0;font-size:.9rem">🎁 Tienes <b>+${LS_.get('bono')}</b> puntos extra para tu próxima victoria.</p>` : ''}</div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-cobrar]'); if (!b) return; const m2 = misiones(); if (m2.cobradas.includes(b.dataset.cobrar)) return; m2.cobradas.push(b.dataset.cobrar); LS_.set('mis', JSON.stringify(m2)); LS_.set('bono', (+LS_.get('bono') || 0) + 100); const q = prog(); q.est += 30; guardarProg(q); FX.son('moneda'); FX.confeti(); verMisiones(t); });
+  }
+
+  function liga(t) {
+    const p = prog(), i = ligaDe(p.liga.pts), sig_ = LIGAS[i + 1], fin = new Date(p.liga.sem + 'T00:00:00-05:00'); fin.setDate(fin.getDate() + 7); const dias = Math.max(0, Math.ceil((fin - Date.now()) / 864e5));
+    const ant = p.liga.ant, antI = ant ? ligaDe(ant.pts) : 0;
+    vista(t, `<div class="yc-panel" style="max-width:600px">${cab('🏅 Liga semanal', estChip(p))}
+${ant ? `<div style="background:linear-gradient(135deg,#facc1533,#f472b633);border:2px solid #facc15;border-radius:16px;padding:12px;text-align:center;margin-bottom:10px"><b>La semana pasada terminaste en ${LIGAS[antI].e} ${LIGAS[antI].n}</b><br><small>${ant.pts} puntos</small><br><button class="yc-yupi" data-premio style="margin-top:8px">🎁 Cobrar ⭐ ${(antI + 1) * 100}${antI === 4 ? ' + marco Leyenda' : ''}</button></div>` : ''}
+<p style="margin:0 0 8px;opacity:.85">Suma puntos ganando partidas (las derrotas suman la mitad). La liga se reinicia cada lunes · quedan <b>${dias} día${dias === 1 ? '' : 's'}</b>.</p>
+<div style="display:grid;gap:8px">${LIGAS.map((L, k) => `<div class="yc-logro" style="${k === i ? `border:2px solid ${L.c};background:#ffffff1c` : k > i ? 'opacity:.6' : ''}"><span>${L.e}</span><div><b style="color:${L.c}">${L.n}</b><br><small>Desde ${L.min} puntos · premio semanal ⭐ ${(k + 1) * 100}${k === 4 ? ' + marco Leyenda' : ''}</small></div>${k === i ? `<b>Tú: ${p.liga.pts}</b>` : k < i ? '✅' : ''}</div>`).reverse().join('')}</div>
+${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min - p.liga.pts}</b> puntos para ${sig_.e} ${sig_.n}</p>` : '<p style="text-align:center;margin:10px 0 0">👑 ¡Estás en la liga más alta!</p>'}</div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { if (!e.target.closest('[data-premio]')) return; const q = prog(); if (!q.liga.ant) return; const k = ligaDe(q.liga.ant.pts); q.est += (k + 1) * 100; if (k === 4 && !q.marcos.includes('leyenda')) q.marcos.push('leyenda'); delete q.liga.ant; guardarProg(q); FX.son('moneda'); FX.confeti(); liga(t); });
+  }
+
+  function reglas(t) {
+    vista(t, `<div class="yc-panel" style="max-width:640px">${cab('📖 Cómo se juega')}<ul style="margin:0;padding-left:20px;line-height:1.6"><li>Todos empiezan con 7 cartas. Juega una carta del <b>mismo color o número</b> que la de la mesa.</li><li>Si no puedes, <b>roba</b> una del mazo (si sirve, puedes jugarla).</li><li><b>⦸ Saltar:</b> el siguiente pierde su turno. <b>⇄ Reversa:</b> cambia el sentido. <b>+2:</b> el siguiente roba 2 y pierde el turno.</li><li><b>★ Comodín:</b> eliges el color. <b>Comodín +4:</b> eliges color y el siguiente roba 4.</li><li>Con <b>2 cartas</b>, pulsa <b>¡YUPI!</b> antes de jugar (o justo después). Si te atrapan sin decirlo: <b>+2 cartas</b>. Tú también puedes atrapar a los rivales.</li><li>Gana quien se queda sin cartas. Sumas puntos por las cartas que les quedan a los demás.</li></ul>
+<h3 style="margin:14px 0 6px">🌟 Cartas de personaje</h3><div class="yc-vitrina">${Object.keys(HEROES).map((v, i) => `<button type="button" data-heroe="${v}" title="${HEROES[v].n}: ${HEROES[v].h}">${svgCarta({ c: 'w', v, id: 'r' + i }, innerWidth < 600 ? 70 : 88)}</button>`).join('')}</div><ul style="padding-left:20px;line-height:1.6">${Object.values(HEROES).map(H => `<li>${H.e} <b>${H.n}:</b> ${H.h}.</li>`).join('')}</ul>
+<h3 style="margin:14px 0 6px">⭐ Progreso</h3><p style="margin:0;line-height:1.5">Jugando ganas <b>XP</b> (subes de nivel y recibes sobres), <b>estrellas</b>, <b>logros</b>, <b>figuritas</b> y <b>marcos</b>. Los reversos y las mesas se desbloquean ganando. <b>Nada se compra con dinero</b>: todo se gana jugando.</p></div>`);
+    alVolver(t);
+    $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-heroe]'); if (!b) return; const H = HEROES[b.dataset.heroe]; sonar(b.dataset.heroe); toast(`${H.e} ${H.n}: ${H.h}`); });
   }
 
   // ---------- Partida ----------
@@ -152,8 +408,11 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     const salirCompleta = () => { document.body.style.overflow = ''; try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {} };
     const nombres = mezclar([...NOMBRES]), caras = mezclar([...CARAS]);
     const J = [{ yo: true, n: LS.get('chatNom') || 'Tú', cara: '😎', mano: [] }, ...[...Array(opc.n - 1)].map((_, i) => ({ yo: false, n: nombres[i], cara: caras[i], mano: [], vistos: {} }))];
-    let ocupado = false, turnoId = 0, pila = mazo(opc.heroes !== false), desc = [], turno = 0, dir = 1, color = null, acum = 0, yupi = new Set(), vulnerable = null, robado = false, fin_ = false, pistaN = 0;
+    if (opc.jefe) Object.assign(J[1], { n: opc.jefe.n, cara: opc.jefe.cara, jefe: true });
+    const SS = { esp: 0, yupi: 0, heroes: 0, atrapa: 0, atrapado: false, mega: false };
+    let ocupado = false, turnoId = 0, pila = mazo(opc.heroes === false ? 0 : (opc.heroesX || 1)), desc = [], turno = 0, dir = 1, color = null, acum = 0, yupi = new Set(), vulnerable = null, robado = false, fin_ = false, pistaN = 0;
     for (let k = 0; k < 7; k++) for (const j of J) j.mano.push(pila.pop());
+    if (opc.jefe) pila.unshift(...J[1].mano.splice(5)); // el jefe empieza con 5 cartas
     let ini; do { ini = pila.pop(); if (ini.c === 'w' || ini.v === 'mas4') { pila.unshift(ini); ini = null; } } while (!ini);
     desc.push(ini); color = ini.c;
     G = { J };
@@ -168,7 +427,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     // ---- Pintar mesa ----
     function pintar(msg) {
       if (!vivo) return; const T = tope(), yo = J[0], miTurno = turno === 0 && !fin_;
-      const ops = J.slice(1).map((j, i) => { const k = i + 1; return `<div class="yc-op${turno === k && !fin_ ? ' turno' : ''}" data-op="${k}"><span class="yc-av">${j.cara}<i class="yc-n">${j.mano.length}</i></span><b class="yc-tag">${escH(j.n)}</b><div class="yc-mini">${[...Array(Math.min(j.mano.length, 7))].map(() => reverso(innerWidth < 600 ? 26 : 34)).join('')}</div><small>${j.mano.length} carta${j.mano.length === 1 ? '' : 's'}</small>${yupi.has(k) && j.mano.length === 1 ? '<span class="yc-burbuja">¡YUPI!</span>' : ''}${vulnerable === k ? '<button class="yc-atrapar" data-atrapar="' + k + '">🫵 ¡No dijo YUPI!</button>' : ''}</div>`; }).join('');
+      const ops = J.slice(1).map((j, i) => { const k = i + 1; return `<div class="yc-op${turno === k && !fin_ ? ' turno' : ''}" data-op="${k}" data-pos="${J.length === 2 ? 'arr' : J.length === 3 ? ['izq', 'der'][i] : ['izq', 'arr', 'der'][i]}"><span class="yc-av"${j.jefe ? ' style="border-color:#f472b6;box-shadow:0 0 0 4px #f472b655,0 0 24px #f472b6"' : ''}>${j.cara}${j.jefe ? '<em style="position:absolute;top:-16px;font-size:1.1rem;font-style:normal">👑</em>' : ''}<i class="yc-n">${j.mano.length}</i></span><b class="yc-tag">${escH(j.n)}</b><div class="yc-mini">${[...Array(Math.min(j.mano.length, 7))].map(() => reverso(innerWidth < 600 ? 26 : 34)).join('')}</div><small>${j.mano.length} carta${j.mano.length === 1 ? '' : 's'}</small>${yupi.has(k) && j.mano.length === 1 ? '<span class="yc-burbuja">¡YUPI!</span>' : ''}${vulnerable === k ? '<button class="yc-atrapar" data-atrapar="' + k + '">🫵 ¡No dijo YUPI!</button>' : ''}</div>`; }).join('');
       $('#ycTop').innerHTML = ops;
       $('#ycDesc').innerHTML = desc.slice(-3).map((x, i, L) => `<div class="c" style="transform:rotate(${((x.id * 37) % 24) - 12}deg)">${svgCarta(x, Math.round(Math.min(($('#yc')?.clientWidth || 380) < 600 ? 104 : 150, innerHeight * .2)))}</div>`).join('') + `<div class="yc-colorAct" style="border-color:${COL[color]?.a || '#fff'}"></div>`;
       $('#ycDir').setAttribute('class', 'yc-dir' + (dir < 0 ? ' inv' : '')); $('#ycPilaN').textContent = pila.length;
@@ -176,7 +435,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
       const anchoY = $('#yc')?.clientWidth || 380, altoY = innerHeight, wC = Math.round(Math.min(anchoY < 600 ? 104 : 140, altoY * .16, Math.max(anchoY < 600 ? 78 : 96, anchoY / (Math.max(5, yo.mano.length) * .62 + 1)))), solape = Math.round(wC * (yo.mano.length > 9 ? .55 : .38));
       $('#ycMano').innerHTML = yo.mano.map((x, i) => `<div class="c ${miTurno ? (jug.has(x.id) ? 'ok' : 'no') : ''}${opc.entrena && miTurno && jug.has(x.id) && pistaN < 6 ? ' pista' : ''}" data-id="${x.id}" style="margin-left:${i ? -solape : 0}px">${svgCarta(x, wC)}</div>`).join('');
       const bY = $('#ycYupi'), puedeY = (yo.mano.length === 2 && miTurno && jug.size) || (yo.mano.length === 1 && !yupi.has(0));
-      bY.disabled = !puedeY || yupi.has(0); bY.classList.toggle('listo', !!puedeY && !yupi.has(0));
+      bY.disabled = !puedeY || yupi.has(0); bY.classList.toggle('listo', !!puedeY && !yupi.has(0)); $('#ycYupiW')?.classList.toggle('listo', !!puedeY && !yupi.has(0));
       $('#ycPasar').hidden = !(miTurno && robado);
       $('#ycInfo').innerHTML = msg || (fin_ ? '' : miTurno ? (acum ? `⚠️ Acumulado: +${acum}. ${opc.acum ? 'Responde con +2/+4 o roba.' : ''}` : robado ? 'Juega la carta que robaste o pasa' : jug.size ? '👉 Tu turno: elige una carta' : '👉 No tienes carta: toca el mazo para robar') : `Turno de ${escH(J[turno].n)}…`);
     }
@@ -191,7 +450,8 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     function jugar(k, x, colorElegido) {
       ocupado = false; const j = J[k]; LOG.push(['jugar', k, x.c + x.v, x.id, total()]); if (!j.mano.some(c => c.id === x.id)) { LOG.push(['DUP', k, x.id]); return; } /* ya se jugó (doble toque) */ j.mano = j.mano.filter(c => c.id !== x.id); if (LOG.length > 200) LOG.splice(0, 100); if (x.c === 'w') x.elegido = colorElegido;
       desc.push(x); color = x.c === 'w' ? colorElegido : x.c; robado = false;
-      FX.son(esp(x) ? 'combo' : 'swish'); FX.vibrar(15); if (k === 0 && esp(x)) avanzar('esp');
+      FX.son(esp(x) ? 'combo' : 'swish'); FX.vibrar(15); if (k === 0 && esp(x)) { avanzar('esp'); SS.esp++; if (esHeroe(x)) SS.heroes++; }
+      if (k === 0 && j.mano.length === 1 && !yupi.has(0) && !opc.entrena && !SS.mega && usarMegafono()) { SS.mega = true; yupi.add(0); FX.son('moneda'); tip('📣 ¡El <b>Megáfono Yupi</b> gritó ¡YUPI! por ti!', 1800); }
       if (opc.entrena && esp(x)) tip(EXPLICA[x.v] + (k ? ` <i>(${escH(j.n)} la jugó)</i>` : ''), 2600);
       // ¡YUPI!: si queda con 1 carta y no lo dijo, se puede atrapar hasta que juegue el siguiente
       if (j.mano.length === 1 && !yupi.has(k)) { vulnerable = k; if (k) setTimeout(() => botAtrapa(k), 0); else botsAtrapanAlHumano(); } else if (vulnerable === k) vulnerable = null;
@@ -211,7 +471,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 
     function botsAtrapanAlHumano() { // los bots pueden atraparte si no dijiste ¡YUPI!
       const prob = { facil: .35, medio: .7, dificil: .95 }[opc.dif]; if (Math.random() > prob) return;
-      setTimeout(() => { if (!vivo || vulnerable !== 0 || yupi.has(0) || J[0].mano.length !== 1) return; const quien = J[1 + Math.floor(Math.random() * (J.length - 1))]; robar(J[0], 2); vulnerable = null; FX.son('error'); FX.vibrar(80); tip(`🫵 ${escH(quien.n)} te atrapó sin decir <b>¡YUPI!</b>: +2 cartas`, 2200); pintar(); }, 1200 + Math.random() * 1600);
+      setTimeout(() => { if (!vivo || vulnerable !== 0 || yupi.has(0) || J[0].mano.length !== 1) return; const quien = J[1 + Math.floor(Math.random() * (J.length - 1))]; SS.atrapado = true; robar(J[0], 2); vulnerable = null; FX.son('error'); FX.vibrar(80); tip(`🫵 ${escH(quien.n)} te atrapó sin decir <b>¡YUPI!</b>: +2 cartas`, 2200); pintar(); }, 1200 + Math.random() * 1600);
     }
     function botAtrapa(k) { // un bot se olvida de decir ¡YUPI! según la dificultad
       const olvida = { facil: .45, medio: .2, dificil: .03 }[opc.dif];
@@ -224,8 +484,8 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     function siguienteTurno() {
       clearTimeout(timer); clearInterval(relojT); turnoId++; pintar(); if (!vivo || fin_) return;
       if (acum && !J[turno].mano.some(puede)) { robar(J[turno], acum); FX.son('error'); acum = 0; turno = sig(); return setTimeout(siguienteTurno, 500); }
-      if (turno === 0) { reloj(opc.entrena ? 60 : 20); return; }
-      const tid = turnoId; timer = setTimeout(() => { if (tid === turnoId) turnoBot(turno); }, 900 + Math.random() * 700);
+      if (turno === 0) { reloj(opc.entrena ? 60 : opc.turbo ? (+opc.turbo > 1 ? +opc.turbo : 8) : 20); return; }
+      const tid = turnoId; timer = setTimeout(() => { if (tid === turnoId) turnoBot(turno); }, opc.turbo ? 380 + Math.random() * 300 : 900 + Math.random() * 700);
     }
     function reloj(seg) {
       let s = seg; const el = $('#ycReloj'); const dib = () => { if (!el) return; const p = s / seg; el.innerHTML = `<svg viewBox="0 0 36 36" class="yc-reloj"><circle cx="18" cy="18" r="15" fill="#0006" stroke="#ffffff33" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="${p > .4 ? '#4ade80' : p > .2 ? '#facc15' : '#ef4444'}" stroke-width="3" stroke-dasharray="${(94 * p).toFixed(1)} 94" transform="rotate(-90 18 18)" stroke-linecap="round"/><text x="18" y="22" text-anchor="middle" font-size="11" font-weight="900" fill="#fff">${s}</text></svg>`; };
@@ -234,7 +494,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     function accionRobar() {
       if (turno !== 0 || robado || fin_ || ocupado) return; const yo = J[0];
       if (acum) { robar(yo, acum); acum = 0; FX.son('error'); turno = sig(); return siguienteTurno(); }
-      robar(yo, 1); robado = true; FX.son('pop'); pistaN++;
+      robar(yo, 1); if (opc.robaHasta) { let n = 0; while (!puede(yo.mano[yo.mano.length - 1]) && n++ < 12 && (pila.length || desc.length > 1)) robar(yo, 1); if (n) tip(`🎣 Robaste ${n + 1} cartas hasta encontrar una que sirve`, 1500); } robado = true; FX.son('pop'); pistaN++;
       const nueva = yo.mano[yo.mano.length - 1]; volar($('#ycPila'), $('#ycMano'), reverso(70));
       if (!puede(nueva)) { pintar('Robaste: no sirve. Pasa el turno…'); setTimeout(() => { if (turno === 0 && robado) pasar(); }, 900); } else pintar();
     }
@@ -247,7 +507,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     function turnoBot(k) {
       if (!vivo || fin_ || turno !== k || ocupado) return; const j = J[k]; let ops = j.mano.filter(puede);
       if (!ops.length) { if (acum) { robar(j, acum); acum = 0; turno = sig(); return siguienteTurno(); }
-        robar(j, 1); FX.son('pop'); volar($('#ycPila'), document.querySelector(`[data-op="${k}"]`) || $('#ycPila'), reverso(50)); const nv = j.mano[j.mano.length - 1]; pintar();
+        robar(j, 1); if (opc.robaHasta) { let n = 0; while (!puede(j.mano[j.mano.length - 1]) && n++ < 12 && (pila.length || desc.length > 1)) robar(j, 1); } FX.son('pop'); volar($('#ycPila'), document.querySelector(`[data-op="${k}"]`) || $('#ycPila'), reverso(50)); const nv = j.mano[j.mano.length - 1]; pintar();
         // recuerda qué color le faltaba al bot (para la IA difícil)
         for (const o of J) if (o.vistos && o !== j) o.vistos = o.vistos; if (j.vistos) j.vistos[color] = (j.vistos[color] || 0) + 1;
         if (puede(nv)) ops = [nv]; else { turno = sig(); return setTimeout(siguienteTurno, 500); } }
@@ -265,16 +525,18 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     function ganar(k) {
       fin_ = true; clearTimeout(timer); clearInterval(relojT); pintar(); const yo = k === 0;
       const pts = J.filter((j, i) => i !== k).reduce((a, j) => a + j.mano.reduce((s, c) => s + valor(c), 0), 0);
-      const st = JSON.parse(LS_.get('stats') || '{"g":0,"p":0}'); st.p++; if (yo) st.g++; LS_.set('stats', JSON.stringify(st)); avanzar('jugar'); if (yo) avanzar('ganar');
-      const nuevos = yo ? [...REVERSOS, ...MESAS].filter(x => x.min === st.g) : [];
+      avanzar('jugar'); if (yo) avanzar('ganar');
+      const restan = J.reduce((a, j, i) => a + (i ? j.mano.length : 0), 0), estrellasAv = yo ? 1 + (SS.atrapado ? 0 : 1) + (restan >= 5 * (J.length - 1) ? 1 : 0) : 0;
       if (J.length > 1) { const q = yo ? 1 + Math.floor(Math.random() * (J.length - 1)) : k; setTimeout(() => burbuja(q, yo ? '¡Bien jugado! 👏' : '🥳'), 300); }
       if (yo) { FX.confeti(); FX.voz?.('¡Ganaste! ¡Eres un crack de las cartas!', { forzar: true }); } else { FX.son('perder'); }
       const bono = yo ? Math.min(400, +LS_.get('bono') || 0) : 0; if (bono) LS_.set('bono', 0);
-      const puntos = (yo ? Math.min(4000, pts * ({ facil: 1, medio: 1.5, dificil: 2 }[opc.dif]) | 0) + (opc.entrena ? 0 : 50) : Math.min(60, (7 - J[0].mano.length) * 8)) + bono;
-      modal(`<div style="font-size:3rem">${yo ? '🏆' : J[k].cara}</div><h2 style="margin:4px 0">${yo ? '¡Ganaste!' : escH(J[k].n) + ' ganó'}</h2><p style="opacity:.9">${yo ? `Sumaste <b>${puntos}</b> puntos por las cartas que les quedaron a los demás${bono ? ` (incluye 🎁 +${bono} de misiones)` : ''}.` : `Te quedaron ${J[0].mano.length} cartas. ¡La próxima es tuya!`}</p>${nuevos.length ? `<p>🎁 ¡Desbloqueaste: <b>${nuevos.map(x => x.n).join(', ')}</b>!</p>` : ''}
+      const puntos0 = (yo ? Math.min(4000, pts * ({ facil: 1, medio: 1.5, dificil: 2 }[opc.dif]) | 0) + (opc.entrena ? 0 : 50) : Math.min(60, Math.max(0, 7 - J[0].mano.length) * 8)) + bono, puntos = puntos0;
+      const R = registrarFin({ yo, puntos, opc, S: SS, estrellasAv }), st = prog().st, nuevos = yo ? [...REVERSOS, ...MESAS].filter(x => x.min === st.g) : [], Lav = opc.aventura ? NIVELES[opc.aventura - 1] : null, sigNivel = Lav && yo && opc.aventura < 15 ? NIVELES[opc.aventura] : null;
+      modal(`<div style="font-size:3rem">${yo ? '🏆' : J[k].cara}</div><h2 style="margin:4px 0">${yo ? '¡Ganaste!' : escH(J[k].n) + ' ganó'}</h2><p style="opacity:.9">${yo ? `Sumaste <b>${puntos}</b> puntos por las cartas que les quedaron a los demás${bono ? ` (incluye 🎁 +${bono} de misiones)` : ''}.` : `Te quedaron ${J[0].mano.length} cartas. ¡La próxima es tuya!`}</p>${Lav && yo ? `<div class="yc-estr" style="font-size:2.2rem">${'★'.repeat(estrellasAv)}${'☆'.repeat(3 - estrellasAv)}</div>` : ''}
+<div class="yc-resumen">${R.xp ? `<span>🆙 +${R.xp} XP</span>` : ''}${R.est ? `<span>⭐ +${R.est}</span>` : ''}${R.sobres ? `<span>🎴 +${R.sobres} sobre${R.sobres > 1 ? 's' : ''}</span>` : ''}${R.subio ? `<span>🎉 ¡Nivel ${R.subio}!</span>` : ''}${R.liga ? `<span>${R.liga.e} ¡Subiste a liga ${R.liga.n}!</span>` : ''}</div>${R.logros.length ? `<p style="margin:4px 0">🏅 Logros nuevos: <b>${R.logros.join(' · ')}</b></p>` : ''}${R.marcos.length ? `<p style="margin:4px 0">🖼️ ¡Marco nuevo: <b>${R.marcos.map(k => MARCOS[k].n).join(', ')}</b>! Póntelo en Perfil.</p>` : ''}${nuevos.length ? `<p>🎁 ¡Desbloqueaste: <b>${nuevos.map(x => x.n).join(', ')}</b>!</p>` : ''}
 ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones de hoy</b>${MIS.map(x => { const v = Math.min(x.meta, m.p[x.k] || 0); return `<div><span style="min-width:150px">${x.n}</span><i><u style="width:${v / x.meta * 100}%"></u></i><b>${v >= x.meta ? '✅' : v + '/' + x.meta}</b></div>`; }).join('')}</div>`; })()}
-<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px"><button class="yc-yupi" id="ycOtra">🔁 Otra partida</button><button class="yc-btn" id="ycMenu">🃏 Menú</button><button class="yc-btn" id="ycFin">💾 Guardar puntos</button></div>`);
-      $('#ycOtra').onclick = () => partida(t, opc); $('#ycMenu').onclick = () => { salirCompleta(); menu(t); }; $('#ycFin').onclick = () => { vivo = false; salirCompleta(); A.fin(t, puntos, yo ? `¡Ganaste a la IA (${opc.dif})!` : 'Buena partida'); };
+<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">${sigNivel ? '<button class="yc-yupi" id="ycSig">➡️ Nivel ' + sigNivel.id + '</button>' : ''}<button class="${sigNivel ? 'yc-btn' : 'yc-yupi'}" id="ycOtra">🔁 ${Lav ? (yo ? 'Repetir nivel' : 'Reintentar') : 'Otra partida'}</button><button class="yc-btn" id="ycMenu">${Lav ? '🗺️ Mapa' : '🃏 Menú'}</button><button class="yc-btn" id="ycFin">💾 Guardar puntos</button></div>`);
+      $('#ycOtra').onclick = () => partida(t, opc); $('#ycMenu').onclick = () => { salirCompleta(); Lav ? mapa(t) : menu(t); }; if (sigNivel) $('#ycSig').onclick = () => partida(t, opcNivel(sigNivel)); $('#ycFin').onclick = () => { vivo = false; salirCompleta(); A.fin(t, puntos, yo ? (Lav ? `¡Superaste el nivel ${Lav.id} de la Aventura!` : `¡Ganaste a la IA (${opc.dif})!`) : 'Buena partida'); };
     }
     function burbuja(k, txt) { if (!vivo) return; const el = k === 0 ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${k}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (k === 0 ? 0 : r.height * .75)) + 'px'; $('#yc').append(d); setTimeout(() => d.remove(), 2600); }
     let ultReac = 0;
@@ -289,19 +551,19 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
 
     // ---- Montaje ----
     const M = MESAS.find(m => m.k === LS_.get('mesa')) || MESAS[0];
-    stage(`<style>${CSS}</style><div id="yc" class="full"><div class="fondo" style="background:${M.g}"></div><div class="luz"></div><div class="capa">
-<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">← Menú</button><b>🃏 YUPI CARDS${opc.entrena ? ' · 🎓 Entrenamiento' : ''}</b><button class="yc-btn" id="ycMus" style="padding:6px 10px" title="Música">${LS.get('arcMusica') === '0' ? '🔇' : '🎵'}</button><span id="ycReloj" style="width:46px;height:46px"></span></div><div class="yc-top" id="ycTop"></div></div>
+    stage(`<style>${CSS}${CSS2}</style><div id="yc" class="full"><div class="fondo" style="background:${M.k === 'cielo' && hayArte('fondo_mesa') ? `url(${artUrl('fondo_mesa')}) center/cover,` : ''}${M.g}"></div>${M.k === 'cielo' && !hayArte('fondo_mesa') ? '<div class="yc-palmas"><span>🌴</span><span>🌺</span><span>🌴</span><span>🌺</span></div>' : ''}<div class="luz"></div><div class="capa">
+<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">← Menú</button><b style="text-align:center">🃏 YUPI CARDS${opc.entrena ? ' · 🎓 Entrenamiento' : ''}${opc.aventura ? ' · 🗺️ Nivel ' + opc.aventura : opc.modo ? ' · ' + (MODOS.find(m => m.k === opc.modo)?.e || '🎉') + ' ' + (MODOS.find(m => m.k === opc.modo)?.n || '') : ''}</b><button class="yc-btn" id="ycMus" style="padding:6px 10px" title="Música">${LS.get('arcMusica') === '0' ? '🔇' : '🎵'}</button><span id="ycReloj" style="width:46px;height:46px"></span></div><div class="yc-top" id="ycTop"></div></div>
 <div class="yc-centro"><div class="yc-mesa"></div><div class="yc-pila" id="ycPila" title="Robar carta" style="width:${innerWidth < 600 ? 84 : 112}px;height:${innerWidth < 600 ? 122 : 162}px">${[0, 1, 2].map(i => `<div style="position:absolute;top:${-i * 3}px;left:${i * 2}px">${reverso(innerWidth < 600 ? 84 : 112)}</div>`).join('')}<span id="ycPilaN" style="position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:.8rem;opacity:.8"></span></div>
 <div class="yc-desc" id="ycDesc"></div><svg class="yc-dir" id="ycDir" viewBox="0 0 200 200" aria-hidden="true"><defs><marker id="ycFl" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fde68a"/></marker></defs><path d="M100 12A88 88 0 0 1 188 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/><path d="M100 188A88 88 0 0 1 12 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/></svg><div class="yc-info" id="ycInfo"></div></div>
-<div class="yc-yo"><div class="yc-mano" id="ycMano"></div><div class="yc-barra"><div class="yc-yoav" title="Cambia tu foto en tu perfil de Yupitok">${typeof avImg === 'function' ? avImg(LS.get('chatAv') || 'a01', 58) : '😎'}<b class="yc-tag">${escH(LS.get('chatNom') || 'Tú')}</b></div><button class="yc-btn yc-reacBtn" id="ycReac" title="Reacciones">💬</button><button class="yc-yupi" id="ycYupi">¡YUPI!</button><button class="yc-btn" id="ycPasar" hidden>⏭ Pasar</button></div></div></div></div>`);
-    $('#ycSalir').onclick = () => { vivo = false; clearTimeout(timer); clearInterval(relojT); salirCompleta(); menu(t); };
+<div class="yc-yo"><div class="yc-mano" id="ycMano"></div><div class="yc-barra"><div class="yc-yoav" title="Cambia tu foto en tu perfil de Yupitok">${avatarYo(52)}<b class="yc-tag">${escH(LS.get('chatNom') || 'Tú')}</b></div><button class="yc-btn yc-reacBtn" id="ycReac" title="Reacciones">💬</button><span class="yc-yupiwrap" id="ycYupiW"><span class="glob">¡YUPI!</span><button class="yc-yupi" id="ycYupi">YUPI</button><span class="mano">👆</span></span><button class="yc-btn" id="ycPasar" hidden>⏭ Pasar</button></div></div></div></div>`);
+    $('#ycSalir').onclick = () => { vivo = false; clearTimeout(timer); clearInterval(relojT); salirCompleta(); opc.aventura ? mapa(t) : menu(t); };
     $('#ycMus').onclick = e => { FX.alternar?.('arcMusica', e.currentTarget); e.currentTarget.textContent = LS.get('arcMusica') === '0' ? '🔇' : '🎵'; if (LS.get('arcMusica') !== '0') FX.musica?.('cartas'); };
     pantallaCompleta(); FX.musica?.('cartas');
     $('#ycPila').onclick = () => accionRobar();
     $('#ycPasar').onclick = () => pasar();
-    $('#ycYupi').onclick = () => { if (J[0].mano.length <= 2) { yupi.add(0); avanzar('yupi'); if (vulnerable === 0) vulnerable = null; FX.son('moneda'); FX.voz?.('¡Yupi!', { forzar: true }); tip('🎉 ¡Dijiste <b>¡YUPI!</b>!', 1100); pintar(); } };
+    $('#ycYupi').onclick = () => { if (J[0].mano.length <= 2) { if (!yupi.has(0)) SS.yupi++; yupi.add(0); avanzar('yupi'); if (vulnerable === 0) vulnerable = null; FX.son('moneda'); FX.voz?.('¡Yupi!', { forzar: true }); tip('🎉 ¡Dijiste <b>¡YUPI!</b>!', 1100); pintar(); } };
     $('#ycReac').onclick = () => { const p = $('#yc .yc-reacs'); if (p) return p.remove(); FX.son('click'); const d = document.createElement('div'); d.className = 'yc-reacs'; d.innerHTML = `<div class="em">${EMOJIS.map(e => `<button data-r="${e}">${e}</button>`).join('')}</div><div class="fr">${FRASES.map(f => `<button data-r="${f}">${f}</button>`).join('')}</div>`; d.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; d.remove(); if (Date.now() - (window.__ycR || 0) < 1500) return; window.__ycR = Date.now(); burbuja(0, b.dataset.r); if (J.length > 1 && Math.random() < .5) setTimeout(() => burbuja(1 + Math.floor(Math.random() * (J.length - 1)), ['😂', '😎', '🤔', '¡Suerte! 🍀', '❤️'][Math.floor(Math.random() * 5)]), 1300); }; $('#yc').append(d); };
-    $('#ycTop').onclick = e => { const b = e.target.closest('[data-atrapar]'); if (!b) return; const k = +b.dataset.atrapar; if (vulnerable !== k) return; robar(J[k], 2); vulnerable = null; FX.son('punto'); tip(`🫵 ¡Atrapaste a ${escH(J[k].n)}! Roba 2 cartas`, 1600); pintar(); };
+    $('#ycTop').onclick = e => { const b = e.target.closest('[data-atrapar]'); if (!b) return; const k = +b.dataset.atrapar; if (vulnerable !== k) return; SS.atrapa++; robar(J[k], 2); vulnerable = null; FX.son('punto'); tip(`🫵 ¡Atrapaste a ${escH(J[k].n)}! Roba 2 cartas`, 1600); pintar(); };
     $('#ycMano').onclick = e => {
       const el = e.target.closest('[data-id]'); if (!el || turno !== 0 || fin_ || ocupado || document.querySelector('#yc .yc-colores')) return; const x = J[0].mano.find(c => c.id === +el.dataset.id);
       if (!x || !puede(x)) { FX.son('error'); if (opc.entrena) tip(acum ? 'Hay un + acumulado: responde con +2/+4 o toca el mazo para robar.' : `Esa carta no sirve: necesitas <b>${COL[color]?.n || ''}</b> o el número/símbolo de la carta de la mesa.`, 2200); return; }

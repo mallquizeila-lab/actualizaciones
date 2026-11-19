@@ -1360,6 +1360,8 @@ http.createServer(async (req, res) => {
     if (m) { const f = path.join(DATA, `voces_${m[1]}_${m[2]}`, m[3]); return archivo(req, res, f, m[3].endsWith('.json') ? 'application/json' : 'audio/mpeg', { 'cache-control': m[3].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/(arte|voces)\/huerto\/([a-z0-9_]{2,80}\.(?:webp|mp3)|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, m[1] + '_huerto', m[2]); return archivo(req, res, f, m[2].endsWith('.json') ? 'application/json' : m[2].endsWith('.mp3') ? 'audio/mpeg' : 'image/webp', { 'cache-control': m[2].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
+    m = /^\/arte\/yupicards\/([a-z0-9_]{2,40}\.webp|manifest\.json)$/.exec(u.pathname);
+    if (m) { const f = path.join(DATA, 'arte_yupicards', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'image/webp', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/arte\/glory\/([a-z0-9_]{2,80}\.webp|manifest\.json)$/.exec(u.pathname);
     if (m) { const f = path.join(DATA, 'arte_glory', m[1]); return archivo(req, res, f, m[1].endsWith('.json') ? 'application/json' : 'image/webp', { 'cache-control': m[1].endsWith('.json') ? 'no-cache' : 'public, max-age=86400' }); }
     m = /^\/arte\/escenas\/([a-z0-9_]{2,40}\.webp|manifest\.json)$/.exec(u.pathname);

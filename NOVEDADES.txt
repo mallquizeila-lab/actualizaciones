@@ -1,3 +1,15 @@
+9.26.0
+- 🃏 YUPI CARDS se convierte en un mundo completo, con el estilo brillante del diseño (cielo azul, logo «Yupi Cards» con corona y cinta «¡Juega, Colecciona y Gana!»):
+  · 🗺️ Aventura de cartas: 15 niveles en 3 zonas de Perú (🏖️ Costa, ⛰️ Sierra y 🌴 Selva), cada uno con su regla especial (doble de personajes, turbo, acumular, roba hasta poder) y un JEFE al final de cada zona (Cangrejo Carlos, Llama Lola y Jaguar Jairo). Hasta 3 ★ por nivel.
+  · 🎄 Evento de Navidad (del 15 de noviembre al 6 de enero): misiones del día que dan sobres navideños con 6 figuritas exclusivas (Papá Noel, Reno Mágico, Muñeco de Nieve…).
+  · 👤 Perfil con estadísticas, 🏅 logros (8 logros de 3 niveles), 🎨 personalizar (marcos del avatar, reversos y mesas) e 🕘 historial.
+  · 📒 Álbum de 36 figuritas en 6 colecciones (Amigos de Yupitok, Costa, Sierra, Selva, Estrellas Pop y Navidad), con sobres que se ganan jugando; las repetidas dan estrellas.
+  · 🎒 Mochila (Megáfono Yupi que grita ¡YUPI! por ti), 🏅 Liga semanal (Bronce → Leyenda) y 🎉 4 modos fiesta (Turbo, Fiesta de personajes, Roba hasta poder y Caos Yupi).
+  · Niveles de jugador con XP y estrellas. TODO se gana jugando: no hay compras ni premios por ver anuncios.
+- 🌟 Las cartas de personaje ahora son los personajes de Yupitok: Brujita Lulú (la llama), Rey Choki (el choclo), Idol Yupi y Coquito Travieso (el coco).
+- 🎨 Ilustraciones con IA: ShortForge crea solo (con tu cuenta de Cloudflare) el arte de las cartas de personaje, las 36 figuritas y los fondos de la mesa y del lobby. Arranca solo a los 3 minutos y sigue cada día con el cupo gratis; también hay un botón «🃏 Crear ilustraciones de YUPI CARDS» en la sección de la página viral. Mientras no estén, el juego usa sus dibujos de respaldo.
+- 🪑 En PC, los rivales se sientan alrededor de la mesa (izquierda, arriba y derecha), y el botón YUPI muestra la burbuja «¡YUPI!» con una manito cuando toca gritar.
+
 9.25.0
 - 🃏 YUPI CARDS: ¡llegan las CARTAS DE PERSONAJE! Cada una con su dibujo dorado, su sonido y su poder (se pueden apagar en el menú):
   · 🧙‍♀️ Brujita Lulú: eliges color y el siguiente se queda dormido (pierde el turno).
