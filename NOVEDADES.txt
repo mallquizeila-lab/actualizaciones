@@ -1,3 +1,8 @@
+9.19.1
+- Arreglo: si la IA devuelve un texto demasiado corto, ya no se rinde; lo pide de nuevo a OTRO motor con instrucciones claras (hasta 3 intentos).
+- Arreglo: las guías que quedaban trabadas en «Escribiendo…» (porque ShortForge se reinició a mitad de una) vuelven solas a «idea» y se escriben de nuevo.
+- Las guías con error se reintentan solas al día siguiente (máximo 2 veces).
+
 9.19.0
 - 🤖 PILOTO AUTOMÁTICO para webs AdSense (encendido por defecto, 5 guías al día): cada día escribe guías nuevas repartidas entre TODAS tus webs de distintos nichos (primero la que tiene menos), con estudio del nicho, fotos reales, foto e introducción de cada tema y revisión de calidad (solo aprueba las de nota 9+).
 - Cada web publica como máximo 1 guía al día a ritmo natural; lo demás queda en reserva (así Google ve sitios que crecen de forma constante, no una granja de contenido).
