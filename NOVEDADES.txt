@@ -1,3 +1,10 @@
+9.28.0
+- 🗣️ YUPI CARDS habla: grita «¡Yupi!» al presionar el botón, dice el color nuevo («¡Cambio a rojo!»), «¡Cambio de sentido!» y «¡Turno saltado!». Cada reacción suena: las frases se dicen en voz alta y cada emoji tiene su sonido (risa, fiesta, corazón, fuego…). También suenan las reacciones de los rivales y de tus amigos en línea.
+  · ShortForge graba solo estas 21 frases nuevas con las voces naturales (arranca a los 4 minutos). Mientras tanto se usa la voz del celular, para que nunca quede en silencio.
+- 🧭 Flecha de turno: una flecha dorada en la mesa gira hacia el jugador al que le toca (también en el juego con amigos), y suena un aviso cuando es tu turno en línea.
+- 📱 Pantalla completa en el celular: todo YUPI CARDS (menú, álbum, perfil, salas y mesa) ocupa la pantalla entera, con un botón ← para volver a Yupitok. Al jugar se pone en horizontal solo (en los celulares que lo permiten); si no se puede, aparece un aviso para girarlo.
+- 🃏 Con muchas cartas la pantalla ya no se achica: las cartas se juntan para entrar siempre a lo ancho. En el celular horizontal, el botón YUPI y tu avatar van en la esquina para dejar espacio a la mano.
+
 9.27.2
 - 🎨 YUPI CARDS: cada ilustración lleva su número de versión, así Cloudflare nunca muestra una copia vieja o vacía (pasaba con el Pingüino de Humboldt). El contador del panel ya no pasa de 43/43.
 - 🎄 Nuevo fondo de Navidad: un pueblito nevado con árbol y regalos (el anterior lo filtró NVIDIA).
