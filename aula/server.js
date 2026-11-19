@@ -134,7 +134,7 @@ const borrarArchivo = id => { if (id && /^[a-f0-9]{24}\.(jpg|png|webp)$/.test(id
 const API = {};
 // --- cuentas ---
 API['POST /api/registro'] = async ({ b, ip }) => { // docente nuevo: crea su colegio con prueba gratis
-  if (limite(ip, 'reg', 5, 3600e3)) throw 429;
+  if (!/^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(ip) && limite(ip, 'reg', 15, 3600e3)) throw 'Demasiados registros desde tu conexión. Espera un rato e intenta de nuevo.'; // en tu propia PC no hay límite
   const email = String(b.email || '').toLowerCase().trim(); if (!emailOk(email)) throw 'Escribe un correo válido'; if (String(b.clave || '').length < 8) throw 'La contraseña debe tener al menos 8 caracteres';
   if (q1('select 1 from usuarios where email=?', email)) throw 'Ese correo ya tiene cuenta. Inicia sesión.';
   const nombre = limpio(b.nombre, 80), colegio = limpio(b.colegio, 100) || ('Aula de ' + nombre); if (nombre.length < 3) throw 'Escribe tu nombre';
@@ -144,7 +144,7 @@ API['POST /api/registro'] = async ({ b, ip }) => { // docente nuevo: crea su col
   audit(uid, 'registro', colegio); return { token: nuevaSesion(uid) };
 };
 API['POST /api/entrar'] = async ({ b, ip }) => {
-  if (limite(ip, 'login', 10, 15 * 60000)) throw 'Demasiados intentos. Espera 15 minutos.';
+  if (!/^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(ip) && limite(ip, 'login', 10, 15 * 60000)) throw 'Demasiados intentos. Espera 15 minutos.';
   const u = q1('select * from usuarios where email=? and activo=1', String(b.email || '').toLowerCase().trim());
   if (!u || !verPass(b.clave, u.hash)) throw 'Correo o contraseña incorrectos'; audit(u.id, 'entrar'); return { token: nuevaSesion(u.id) };
 };

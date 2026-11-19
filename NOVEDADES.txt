@@ -1,3 +1,6 @@
+9.31.3
+- 🎓 ProfeTok: desde tu propia PC o VPS ya no hay límite de registros ni de intentos de ingreso (antes, después de 5 pruebas en una hora no dejaba crear más cuentas). Los errores ahora se ven en rojo dentro del formulario, no solo en un aviso abajo.
+
 9.31.2
 - 🎓 ProfeTok tiene su propio botón en el menú de ShortForge (debajo de Clientes CRM), con la tarjeta para encenderlo y una guía para probarlo y venderlo. Ya no está dentro de «Página viral».
 
