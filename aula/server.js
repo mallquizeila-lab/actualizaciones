@@ -113,7 +113,7 @@ function fichaAlumno(aid, u) {
 }
 
 // ---------- HTTP ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.mp4': 'video/mp4' };
 const SEG = { 'x-content-type-options': 'nosniff', 'referrer-policy': 'same-origin', 'x-frame-options': 'DENY', 'permissions-policy': 'camera=(self), microphone=()' };
 function send(res, code, body, req) { let b = Buffer.from(JSON.stringify(body)); const h = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...SEG }; if (req && /gzip/.test(req.headers['accept-encoding'] || '') && b.length > 1500) { b = zlib.gzipSync(b); h['content-encoding'] = 'gzip'; } res.writeHead(code, h); res.end(b); }
 const json = (req, max = 4e6) => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > max) { no(new Error('Archivo muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { ok({}); } }); });
@@ -318,6 +318,11 @@ const server = http.createServer(async (req, res) => {
     let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app)(\/|$)/.test(f)) f = "/index.html";
     const fp = path.join(PUB, path.normalize(f).replace(/^(\.\.[/\\])+/, ''));
     if (!fp.startsWith(PUB) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+    if (fp.endsWith('.mp4')) { // video por partes (Range) para que el celular lo reproduzca y adelante sin descargarlo entero
+      const tam = fs.statSync(fp).size, m = /bytes=(\d*)-(\d*)/.exec(req.headers.range || ''); const hv = { 'content-type': 'video/mp4', 'accept-ranges': 'bytes', 'cache-control': 'public, max-age=86400', ...SEG };
+      if (!m) { res.writeHead(200, { ...hv, 'content-length': tam }); return fs.createReadStream(fp).pipe(res); }
+      let a = m[1] ? +m[1] : Math.max(0, tam - +m[2]), z = m[1] && m[2] ? Math.min(+m[2], tam - 1) : tam - 1; if (a >= tam || a > z) { res.writeHead(416, { 'content-range': 'bytes */' + tam }); return res.end(); }
+      res.writeHead(206, { ...hv, 'content-range': `bytes ${a}-${z}/${tam}`, 'content-length': z - a + 1 }); return fs.createReadStream(fp, { start: a, end: z }).pipe(res); }
     let body = fs.readFileSync(fp);
     if (fp.endsWith('index.html')) { // vista previa al compartir (WhatsApp, Facebook, Telegram): imagen, título y descripción
       const host = /^[a-z0-9.:-]{3,100}$/i.test(req.headers.host || '') ? req.headers.host : 'localhost', base = (req.headers['cf-connecting-ip'] || req.headers['x-forwarded-proto'] === 'https' ? 'https://' : 'http://') + host;
