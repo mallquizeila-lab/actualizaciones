@@ -302,7 +302,16 @@ function archivo(req, res, f, type, extra = {}) {
   h['content-length'] = body.length; res.writeHead(200, h); res.end(req.method === 'HEAD' ? undefined : body);
 }
 // HTML que cambia por pedido (la portada con sus etiquetas para redes): se comprime al vuelo.
+// 🧹 Modo revisión de AdSense: mientras Google revisa, se esconde lo que un revisor puede ver como riesgo
+// (chat y mesas con desconocidos, juegos de otros estudios en la portada, mensajes de «gana») sin borrar nada.
+const REV_CSS = '<style>.adsrev #vivoCard,.adsrev #hubTop,.adsrev #proTop,.adsrev [data-g="pro"],.adsrev [data-g^="sala-"],.adsrev [data-g^="mesa-"],.adsrev [data-amigos],.adsrev .am-modal{display:none!important}</style>';
+function modoRevision(html) {
+  if (!adsRevision()) return html;
+  return html.replace(/<!--REV-->[\s\S]*?<!--\/REV-->/g, '').replace(/¡Juega, ríe, aprende y gana!/g, '¡Juega, ríe y aprende!').replace(/Juega, ríe, aprende y gana/g, 'Juega, ríe y aprende')
+    .replace('</head>', `<script>window.ADS_REV=1;document.documentElement.classList.add('adsrev')</script>${REV_CSS}</head>`);
+}
 function enviarHtml(req, res, html, extra = {}) {
+  html = modoRevision(html);
   const ae = String(req.headers['accept-encoding'] || ''), h = { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', vary: 'Accept-Encoding', ...extra };
   let body = Buffer.from(html); if (/gzip/.test(ae)) { body = zlib.gzipSync(body, { level: 6 }); h['content-encoding'] = 'gzip'; }
   res.writeHead(200, h); res.end(body);

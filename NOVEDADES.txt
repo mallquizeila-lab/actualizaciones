@@ -1,3 +1,8 @@
+9.16.0 (para la nueva revisión de AdSense)
+- 🧹 El «modo revisión de AdSense» de Yupitok ahora también ESCONDE en pantalla (sin borrar nada) lo que un revisor puede ver como riesgo: chat y salas en vivo, mesas con desconocidos, Amigos (chat privado y de grupo), el recuadro «En vivo ahora», los juegos de otros estudios de la portada («Los más jugados», «Juegos profesionales», categorías de juegos) y el filtro «En vivo».
+- El lema se muestra como «¡Juega, ríe y aprende!» (sin «gana») mientras dure la revisión, y «¿Quieres ganar más?» pasó a «¿Quieres mejorar?».
+- Cuando AdSense te apruebe, apaga el modo revisión en el panel de Yupitok y todo vuelve a mostrarse.
+
 9.15.0
 - 📌 Pinterest con «Autorizar con Pinterest» (Difusión): se autoriza la app UNA vez y ShortForge obtiene el permiso para PUBLICAR pines (el botón «Generar token» del sitio de Pinterest solo da permiso de lectura). El permiso se renueva solo.
 - Las conexiones de Pinterest ahora solo piden el tablero y el idioma (una por tablero).
