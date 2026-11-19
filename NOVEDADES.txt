@@ -1,3 +1,9 @@
+9.18.0
+- 🗂️ Webs AdSense: cada TEMA tiene su página completa con foto real grande, introducción propia escrita por la IA (2 párrafos útiles), todas sus guías ordenadas por fecha y «Otros temas» con foto. Ya no son listas vacías.
+- «Explora por tema» en la portada ahora con la foto de cada tema.
+- 📅 La publicación diaria reparte las guías entre los temas: primero escribe para el tema que tiene menos, así todos crecen parejo.
+- 🎨 Logo más profesional: emblema tipo marca (insignia circular, 2 colores, estilo vectorial limpio).
+
 9.17.0
 - 🏞️ Webs para AdSense con diseño profesional, al estilo de las mejores webs del nicho:
   · Portada con FOTO REAL grande a lo ancho y el título centrado, temas como botones y señales de confianza (guías publicadas, última actualización, fuentes oficiales).
