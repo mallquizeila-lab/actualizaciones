@@ -1,4 +1,4 @@
-// 📧 Correos de Libretín: tareas, reuniones, comunicados y campañas (email marketing) a las familias y docentes.
+// 📧 Correos de ProfeTok: tareas, reuniones, comunicados y campañas (email marketing) a las familias y docentes.
 // Envía con Brevo (API, gratis hasta 300 al día) o por SMTP: Amazon SES (≈ US$ 0.10 cada 1 000 correos, ideal para miles
 // de docentes: email-smtp.us-east-1.amazonaws.com, puerto 465), Gmail con contraseña de aplicación o el correo de tu dominio. Sin librerías: el SMTP se habla directo con TLS.
 // Cada correo lleva un enlace para darse de baja (ley de protección de datos y buenas prácticas de envío).
@@ -19,7 +19,7 @@ function crear({ db, q, q1, run, getS, setS, limpio }) {
   // ---------- envío ----------
   async function brevo(c, m) {
     const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': c.apiKey, 'content-type': 'application/json', accept: 'application/json' }, signal: AbortSignal.timeout(30000),
-      body: JSON.stringify({ sender: { email: c.remitente, name: m.deNombre || c.nombre || 'Libretín' }, to: [{ email: m.para, name: m.paraNombre || undefined }], replyTo: m.responderA ? { email: m.responderA } : undefined, subject: m.asunto, htmlContent: m.html, textContent: m.texto, headers: m.baja ? { 'List-Unsubscribe': `<${m.baja}>` } : undefined }) });
+      body: JSON.stringify({ sender: { email: c.remitente, name: m.deNombre || c.nombre || 'ProfeTok' }, to: [{ email: m.para, name: m.paraNombre || undefined }], replyTo: m.responderA ? { email: m.responderA } : undefined, subject: m.asunto, htmlContent: m.html, textContent: m.texto, headers: m.baja ? { 'List-Unsubscribe': `<${m.baja}>` } : undefined }) });
     if (!r.ok) throw new Error('Brevo ' + r.status + ': ' + (await r.text()).slice(0, 160));
   }
   function smtp(c, m) { // SMTP con TLS directo (puerto 465)
@@ -27,7 +27,7 @@ function crear({ db, q, q1, run, getS, setS, limpio }) {
       const s = tls.connect({ host: c.host, port: +c.port || 465, servername: c.host }); s.setTimeout(30000, () => { s.destroy(); no(new Error('El servidor de correo no responde')); });
       let buf = '', paso = 0; const b64 = x => Buffer.from(x).toString('base64'), enc = t => '=?UTF-8?B?' + b64(t) + '?=';
       const limite = 'b' + crypto.randomBytes(8).toString('hex');
-      const cuerpo = [`From: ${enc(m.deNombre || c.nombre || 'Libretín')} <${c.remitente}>`, `To: ${m.para}`, ...(m.responderA ? [`Reply-To: ${m.responderA}`] : []), `Subject: ${enc(m.asunto)}`, `Date: ${new Date().toUTCString()}`, `Message-ID: <${crypto.randomBytes(10).toString('hex')}@${c.remitente.split('@')[1]}>`, 'MIME-Version: 1.0', ...(m.baja ? [`List-Unsubscribe: <${m.baja}>`] : []), `Content-Type: multipart/alternative; boundary="${limite}"`, '',
+      const cuerpo = [`From: ${enc(m.deNombre || c.nombre || 'ProfeTok')} <${c.remitente}>`, `To: ${m.para}`, ...(m.responderA ? [`Reply-To: ${m.responderA}`] : []), `Subject: ${enc(m.asunto)}`, `Date: ${new Date().toUTCString()}`, `Message-ID: <${crypto.randomBytes(10).toString('hex')}@${c.remitente.split('@')[1]}>`, 'MIME-Version: 1.0', ...(m.baja ? [`List-Unsubscribe: <${m.baja}>`] : []), `Content-Type: multipart/alternative; boundary="${limite}"`, '',
         `--${limite}`, 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(m.texto).replace(/.{76}/g, '$&\r\n'), `--${limite}`, 'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(m.html).replace(/.{76}/g, '$&\r\n'), `--${limite}--`, ''].join('\r\n');
       const pasos = [['EHLO libretin', 250], ['AUTH LOGIN', 334], [b64(c.user), 334], [b64(c.pass), 235], [`MAIL FROM:<${c.remitente}>`, 250], [`RCPT TO:<${m.para}>`, 250], ['DATA', 354], [cuerpo.replace(/\r\n\./g, '\r\n..') + '\r\n.', 250], ['QUIT', 221]];
       s.on('data', d => { buf += d; const lineas = buf.split('\r\n'); const ult = lineas.filter(Boolean).pop() || ''; if (!/^\d{3} /.test(ult)) return; const cod = +ult.slice(0, 3); buf = '';
@@ -51,7 +51,7 @@ function crear({ db, q, q1, run, getS, setS, limpio }) {
 ${detalle ? `<table role="presentation" cellpadding="0" cellspacing="0" style="background:#e0f2fe;border-radius:12px;width:100%;margin:6px 0 16px"><tr><td style="padding:12px 14px;font-size:15px;color:#075985">${escH(detalle).replace(/\n/g, '<br>')}</td></tr></table>` : ''}
 ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="background:${color};color:#ffffff;text-decoration:none;font-weight:bold;padding:13px 22px;border-radius:12px;display:inline-block;font-size:16px">${escH(boton || 'Abrir')}</a></p>` : ''}
 <p style="margin:16px 0 0;font-size:14px;color:#475569">${escH(pie || '')}</p></td></tr>
-<tr><td style="background:#f8fafc;padding:14px 22px;font-size:12px;color:#64748b">Enviado con Libretín 📒 · Recibes este correo por tu registro como familia o docente.${baja ? ` <a href="${escH(baja)}" style="color:#64748b">Dejar de recibir correos</a>` : ''}</td></tr></table></td></tr></table></body></html>`;
+<tr><td style="background:#f8fafc;padding:14px 22px;font-size:12px;color:#64748b">Enviado con ProfeTok 📒 · Recibes este correo por tu registro como familia o docente.${baja ? ` <a href="${escH(baja)}" style="color:#64748b">Dejar de recibir correos</a>` : ''}</td></tr></table></td></tr></table></body></html>`;
     const texto = [colegio, titulo, '', saludo, cuerpo, detalle, enlace ? `${boton || 'Abrir'}: ${enlace}` : '', pie, '', baja ? 'Dejar de recibir correos: ' + baja : ''].filter(x => x !== undefined && x !== null).join('\n');
     return { html, texto };
   }
@@ -62,13 +62,13 @@ ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="backgr
     if (trabajando || !listo()) return; trabajando = true;
     try { for (;;) {
       const e = q1("select e.*, c.asunto, c.cuerpo, c.enlace, c.tipo, c.colegio_id, c.autor_id, c.id cid from envios e join campanas c on c.id=e.campana_id where e.estado='pendiente' order by e.id limit 1"); if (!e) break;
-      const col = q1('select * from colegios where id=?', e.colegio_id) || { nombre: 'Libretín', color: '#0284c7' }, autor = q1('select nombre, email from usuarios where id=?', e.autor_id), extra = (() => { try { return JSON.parse(e.enlace || '{}'); } catch (x) { return {}; } })();
+      const col = q1('select * from colegios where id=?', e.colegio_id) || { nombre: 'ProfeTok', color: '#0284c7' }, autor = q1('select nombre, email from usuarios where id=?', e.autor_id), extra = (() => { try { return JSON.parse(e.enlace || '{}'); } catch (x) { return {}; } })();
       const persona = s => String(s || '').replace(/\{nombre\}/g, (e.nombre || '').split(' ')[0] || '').replace(/\{alumno\}/g, e.alumno || 'tu hijo(a)');
       const baja = (getS('urlPublica', '') || '') + `/baja?u=${e.usuario_id}&f=${firma(e.usuario_id)}`;
       const { html, texto } = plantilla({ colegio: col.nombre, color: col.color, tipo: e.tipo, titulo: persona(e.asunto), saludo: e.nombre ? `Hola ${e.nombre.split(' ')[0]} 👋` : 'Hola 👋', cuerpo: persona(e.cuerpo), detalle: persona(extra.detalle || ''), enlace: extra.url || '', boton: extra.boton, pie: autor ? `${autor.nombre}${e.tipo === 'campana' ? '' : ' · ' + col.nombre}` : col.nombre, baja: getS('urlPublica', '') ? baja : '' });
-      try { await enviar({ para: e.email, paraNombre: e.nombre, asunto: persona(e.asunto), html, texto, deNombre: e.tipo === 'campana' ? (conf().nombre || 'Libretín') : `${col.nombre} (Libretín)`, responderA: e.tipo === 'campana' ? undefined : autor?.email, baja: getS('urlPublica', '') ? baja : '' });
+      try { await enviar({ para: e.email, paraNombre: e.nombre, asunto: persona(e.asunto), html, texto, deNombre: e.tipo === 'campana' ? (conf().nombre || 'ProfeTok') : `${col.nombre} (ProfeTok)`, responderA: e.tipo === 'campana' ? undefined : autor?.email, baja: getS('urlPublica', '') ? baja : '' });
         run("update envios set estado='enviado', enviado=datetime('now') where id=?", e.id); run('update campanas set enviados=enviados+1 where id=?', e.cid); }
-      catch (er) { run("update envios set estado='fallido', error=? where id=?", String(er.message).slice(0, 200), e.id); run('update campanas set fallidos=fallidos+1 where id=?', e.cid); if (/40[13]|auth|credential|535/i.test(er.message)) { console.log('[Libretín] Correo: ' + er.message); break; } }
+      catch (er) { run("update envios set estado='fallido', error=? where id=?", String(er.message).slice(0, 200), e.id); run('update campanas set fallidos=fallidos+1 where id=?', e.cid); if (/40[13]|auth|credential|535/i.test(er.message)) { console.log('[ProfeTok] Correo: ' + er.message); break; } }
       run("update campanas set estado=case when enviados+fallidos>=total then 'enviada' else 'enviando' end where id=?", e.cid);
       await new Promise(r => setTimeout(r, +conf().pausa || 250)); // ~10 000 por hora; con Amazon SES o un plan pagado de Brevo se puede bajar la pausa
     } } finally { trabajando = false; }
@@ -92,7 +92,7 @@ ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="backgr
   const API = {};
   // docente: enviar a las familias del aula (un clic)
   API['POST /api/correo'] = async ({ u, b, aulaDe, membresia }) => {
-    const a = aulaDe(u, b.aula_id); if (!a) throw 403; if (!listo()) throw 'El envío de correos aún no está configurado. Avísale al administrador de Libretín.';
+    const a = aulaDe(u, b.aula_id); if (!a) throw 403; if (!listo()) throw 'El envío de correos aún no está configurado. Avísale al administrador de ProfeTok.';
     const col = q1('select * from colegios where id=?', a.colegio_id), dest = familiasDe(a.id, b.alumnos);
     if (!dest.length) throw 'Ninguna familia de esta aula tiene cuenta todavía. Invítalas con el botón 👨‍👩‍👧.';
     const max = LIMITE_MES[membresia(col).prueba ? 'prueba' : col.plan] || 100; if (usadosMes(col.id) + dest.length > max) throw `Llegaste al límite de ${max} correos de este mes en tu plan.`;
@@ -102,15 +102,15 @@ ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="backgr
     return { id, total: dest.length };
   };
   API['GET /api/correos'] = async ({ u, url, aulaDe }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; const col = q1('select * from colegios where id=?', a.colegio_id); return { listo: listo(), campanas: q('select id, tipo, asunto, total, enviados, fallidos, estado, creado from campanas where aula_id=? order by id desc limit 40', a.id), familias: familiasDe(a.id).length, usados: usadosMes(col.id) }; };
-  // dueño: configuración y campañas a docentes (email marketing de Libretín)
+  // dueño: configuración y campañas a docentes (email marketing de ProfeTok)
   API['POST /api/correo-config'] = async ({ u, b }) => {
     if (u.rol !== 'dueno') throw 403; const c = conf();
-    const n = { proveedor: b.proveedor === 'smtp' ? 'smtp' : 'brevo', remitente: limpio(b.remitente, 120).toLowerCase(), nombre: limpio(b.nombre, 60) || 'Libretín', host: limpio(b.host, 120), port: +b.port || 465, user: limpio(b.user, 120), apiKey: b.apiKey ? String(b.apiKey).trim().slice(0, 200) : c.apiKey, pass: b.pass ? String(b.pass).slice(0, 200) : c.pass };
+    const n = { proveedor: b.proveedor === 'smtp' ? 'smtp' : 'brevo', remitente: limpio(b.remitente, 120).toLowerCase(), nombre: limpio(b.nombre, 60) || 'ProfeTok', host: limpio(b.host, 120), port: +b.port || 465, user: limpio(b.user, 120), apiKey: b.apiKey ? String(b.apiKey).trim().slice(0, 200) : c.apiKey, pass: b.pass ? String(b.pass).slice(0, 200) : c.pass };
     setS('correo', n); if (b.urlPublica !== undefined) setS('urlPublica', urlOk(b.urlPublica).replace(/\/$/, ''));
-    if (b.prueba) { const { html, texto } = plantilla({ colegio: 'Libretín', titulo: '¡Tus correos funcionan!', saludo: 'Hola 👋', cuerpo: 'Este es un correo de prueba de Libretín. Si lo recibes, ya puedes enviar tareas, reuniones y comunicados a las familias con un clic.', tipo: 'campana' }); await enviar({ para: u.email, asunto: '✅ Prueba de correo de Libretín', html, texto }); }
+    if (b.prueba) { const { html, texto } = plantilla({ colegio: 'ProfeTok', titulo: '¡Tus correos funcionan!', saludo: 'Hola 👋', cuerpo: 'Este es un correo de prueba de ProfeTok. Si lo recibes, ya puedes enviar tareas, reuniones y comunicados a las familias con un clic.', tipo: 'campana' }); await enviar({ para: u.email, asunto: '✅ Prueba de correo de ProfeTok', html, texto }); }
     return { ok: 1 };
   };
-  API['GET /api/correo-config'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; const c = conf(); return { proveedor: c.proveedor || 'brevo', remitente: c.remitente || '', nombre: c.nombre || 'Libretín', host: c.host || '', port: c.port || 465, user: c.user || '', tieneClave: !!(c.apiKey || c.pass), listo: listo(), urlPublica: getS('urlPublica', ''), campanas: q("select id, asunto, total, enviados, fallidos, estado, creado from campanas where tipo='campana' order by id desc limit 20") }; };
+  API['GET /api/correo-config'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; const c = conf(); return { proveedor: c.proveedor || 'brevo', remitente: c.remitente || '', nombre: c.nombre || 'ProfeTok', host: c.host || '', port: c.port || 465, user: c.user || '', tieneClave: !!(c.apiKey || c.pass), listo: listo(), urlPublica: getS('urlPublica', ''), campanas: q("select id, asunto, total, enviados, fallidos, estado, creado from campanas where tipo='campana' order by id desc limit 20") }; };
   API['POST /api/campana'] = async ({ u, b }) => {
     if (u.rol !== 'dueno') throw 403; if (!listo()) throw 'Primero configura el envío de correos';
     const seg = { todos: "1=1", prueba: "c.plan='prueba'", pagando: "c.plan<>'prueba' and c.vence>datetime('now')", vencidos: "c.vence<=datetime('now')" }[b.segmento] || '1=1';

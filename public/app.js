@@ -630,13 +630,13 @@ let LB = null, LBt = 0;
 const cargarLB = () => api('/api/libretin').then(r => { LB = r; LBt = Date.now(); if (tab === 'viral') render(); }).catch(() => {});
 function libretinCard() {
   if (!LB || Date.now() - LBt > 5000) cargarLB(); const l = LB || {};
-  return `<div class="card" style="border:2px solid #7dd3fc"><h2>🎓 Libretín · sistema para docentes y familias</h2><p class="hint">Asistencia, notas, tareas, bitácora, alertas tempranas y panel para padres. Los docentes pagan su membresía por Yape/Plin y tú la apruebas en tu panel de dueño. Funciona aparte de Yupitok (sin anuncios).</p>
+  return `<div class="card" style="border:2px solid #7dd3fc"><h2>🎓 ProfeTok · sistema para docentes y familias</h2><p class="hint">Asistencia, notas, tareas, bitácora, alertas tempranas y panel para padres. Los docentes pagan su membresía por Yape/Plin y tú la apruebas en tu panel de dueño. Funciona aparte de Yupitok (sin anuncios).</p>
   <p>Estado: <b>${l.on ? (l.estado === 'encendido' ? '🟢 Encendido' : '🟡 ' + esc(l.estado || '')) : '⚪ Apagado'}</b>${l.on ? ` · <a href="${esc(l.local)}" target="_blank">Abrir en este equipo</a>` : ''}</p>
-  <label>Tu correo de dueño (con él entras a tu panel de Libretín)</label><input id="lbEmail" value="${esc(l.email || '')}" placeholder="tucorreo@gmail.com">
+  <label>Tu correo de dueño (con él entras a tu panel de ProfeTok)</label><input id="lbEmail" value="${esc(l.email || '')}" placeholder="tucorreo@gmail.com">
   <label>Tu número de Yape / WhatsApp de soporte (con 51)</label><input id="lbSop" value="${esc(l.soporte || '')}" placeholder="51987654321">
   ${l.on && l.clave ? `<p class="hint">🔑 Tu contraseña inicial de dueño: <b>${esc(l.clave)}</b> (cámbiala en «Mi cuenta» al entrar).</p>` : ''}
-  <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender Libretín</button>'}</div>
-  <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. libretin.pe) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
+  <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender ProfeTok</button>'}</div>
+  <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. profetok.com) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
 }
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
@@ -1328,7 +1328,7 @@ const ACT = {
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfYupicards: guard(async () => { VS = await api('/api/viral/yupicards-arte', {}); toast('🃏 Creando las ilustraciones de YUPI CARDS…'); render(); }),
-  lbOn: guard(async () => { const email = $('#lbEmail')?.value.trim(); if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email || '')) return toast('Escribe tu correo de dueño'); LB = await api('/api/libretin/encender', { email, soporte: $('#lbSop')?.value || '' }); toast('🎓 Libretín encendido'); render(); }),
+  lbOn: guard(async () => { const email = $('#lbEmail')?.value.trim(); if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email || '')) return toast('Escribe tu correo de dueño'); LB = await api('/api/libretin/encender', { email, soporte: $('#lbSop')?.value || '' }); toast('🎓 ProfeTok encendido'); render(); }),
   lbOff: guard(async () => { LB = await api('/api/libretin/apagar', {}); render(); }),
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
   apReload: () => { AP = null; render(); },

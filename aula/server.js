@@ -1,4 +1,4 @@
-// 🎓 Libretín: sistema para docentes, padres y alumnos (con membresías).
+// 🎓 ProfeTok: sistema para docentes, padres y alumnos (con membresías).
 // - Cada colegio (o docente independiente) tiene sus aulas, alumnos, notas, asistencia, tareas e incidencias.
 // - Cada padre entra con su correo y SOLO ve a sus hijos: el servidor lo revisa en cada consulta.
 // - Las fotos de los alumnos y los logos son privados: se sirven solo a quien tiene permiso.
@@ -55,7 +55,7 @@ const limpio = (t, n = 200) => String(t ?? '').replace(/[<>]/g, '').replace(/\s+
 if (E.AULA_OWNER_EMAIL && !q1("select 1 from usuarios where rol='dueno'")) {
   const pass = E.AULA_OWNER_PASS || crypto.randomBytes(6).toString('base64url');
   run("insert into usuarios(email, nombre, hash, rol) values(?,?,?,'dueno')", E.AULA_OWNER_EMAIL.toLowerCase().trim(), 'Administrador', hashPass(pass));
-  if (!E.AULA_OWNER_PASS) { fs.writeFileSync(path.join(DATA, 'CLAVE_DUENO.txt'), `Correo: ${E.AULA_OWNER_EMAIL}\nContraseña: ${pass}\nCámbiala apenas entres.\n`); console.log('[Libretín] Cuenta de dueño creada. La contraseña está en data/CLAVE_DUENO.txt'); }
+  if (!E.AULA_OWNER_PASS) { fs.writeFileSync(path.join(DATA, 'CLAVE_DUENO.txt'), `Correo: ${E.AULA_OWNER_EMAIL}\nContraseña: ${pass}\nCámbiala apenas entres.\n`); console.log('[ProfeTok] Cuenta de dueño creada. La contraseña está en data/CLAVE_DUENO.txt'); }
 }
 
 // ---------- membresía ----------
@@ -250,7 +250,7 @@ API['POST /api/notas'] = async ({ u, b }) => {
 
 // --- tareas ---
 API['POST /api/tarea'] = async ({ u, b }) => { const a = aulaDe(u, b.aula_id); if (!a) throw 403; if (b.borrar) { run('delete from entregas where tarea_id=?', +b.id); run('delete from tareas where id=? and aula_id=?', +b.id, a.id); return { ok: 1 }; } const tid = run('insert into tareas(aula_id, curso_id, titulo, descripcion, entrega) values(?,?,?,?,?)', a.id, +b.curso_id || null, limpio(b.titulo, 100), limpio(b.descripcion, 1500), /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? b.entrega : hoy()).lastInsertRowid;
-  let correos = 0; if (b.correo) { const cu = q1('select nombre from cursos where id=?', +b.curso_id)?.nombre, ent = /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? new Date(b.entrega + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }) : ''; correos = conCorreo(u, a, 'tarea', 'Nueva tarea: ' + limpio(b.titulo, 100), (limpio(b.descripcion, 1500) || 'Hay una nueva tarea para {alumno}.') , { detalle: `${cu ? '📚 Curso: ' + cu + '\n' : ''}📅 Entrega: ${ent}`, url: getS('urlPublica', '') ? getS('urlPublica', '') + '/' : '', boton: 'Ver en Libretín' }); }
+  let correos = 0; if (b.correo) { const cu = q1('select nombre from cursos where id=?', +b.curso_id)?.nombre, ent = /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? new Date(b.entrega + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }) : ''; correos = conCorreo(u, a, 'tarea', 'Nueva tarea: ' + limpio(b.titulo, 100), (limpio(b.descripcion, 1500) || 'Hay una nueva tarea para {alumno}.') , { detalle: `${cu ? '📚 Curso: ' + cu + '\n' : ''}📅 Entrega: ${ent}`, url: getS('urlPublica', '') ? getS('urlPublica', '') + '/' : '', boton: 'Ver en ProfeTok' }); }
   return { id: tid, correos }; };
 API['GET /api/tareas'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; return { tareas: q('select t.*, c.nombre curso, (select count(*) from entregas e where e.tarea_id=t.id and e.estado=\'entregada\') entregadas from tareas t left join cursos c on c.id=t.curso_id where t.aula_id=? order by t.entrega desc', a.id), entregas: q('select e.* from entregas e join tareas t on t.id=e.tarea_id where t.aula_id=?', a.id) }; };
 API['POST /api/entrega'] = async ({ u, b }) => { const t = q1('select * from tareas where id=?', +b.tarea_id); if (!t || !aulaDe(u, t.aula_id) || !q1('select 1 from alumnos where id=? and aula_id=?', +b.alumno_id, t.aula_id)) throw 403; run('insert into entregas values(?,?,?) on conflict(tarea_id, alumno_id) do update set estado=excluded.estado', t.id, +b.alumno_id, ['entregada', 'pendiente', 'tarde'].includes(b.estado) ? b.estado : 'entregada'); return { ok: 1 }; };
@@ -313,7 +313,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, await API[clave]({ u, b, url, ip, req }), req);
     }
     if (url.pathname.startsWith('/api/')) return send(res, 404, { error: 'No existe' });
-    if (url.pathname === '/baja') { const ok = correo.baja(url); res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', ...SEG }); return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Libretín</title><body style="font-family:Arial;background:#f0f9ff;display:grid;place-items:center;min-height:90vh"><div style="background:#fff;padding:28px;border-radius:16px;max-width:420px;text-align:center"><img src="/libretin.svg" width="110" alt=""><h2>${ok ? '✅ Listo, ya no recibirás correos' : 'Enlace no válido'}</h2><p>${ok ? 'Puedes seguir viendo todo en tu panel de Libretín. Si cambias de opinión, avísale al colegio.' : ''}</p><a href="/">Ir a Libretín</a></div></body>`); }
+    if (url.pathname === '/baja') { const ok = correo.baja(url); res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', ...SEG }); return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>ProfeTok</title><body style="font-family:Arial;background:#f0f9ff;display:grid;place-items:center;min-height:90vh"><div style="background:#fff;padding:28px;border-radius:16px;max-width:420px;text-align:center"><img src="/libretin.svg" width="110" alt=""><h2>${ok ? '✅ Listo, ya no recibirás correos' : 'Enlace no válido'}</h2><p>${ok ? 'Puedes seguir viendo todo en tu panel de ProfeTok. Si cambias de opinión, avísale al colegio.' : ''}</p><a href="/">Ir a ProfeTok</a></div></body>`); }
     // archivos públicos de la aplicación
     let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app)(\/|$)/.test(f)) f = "/index.html";
     const fp = path.join(PUB, path.normalize(f).replace(/^(\.\.[/\\])+/, ''));
@@ -324,11 +324,11 @@ const server = http.createServer(async (req, res) => {
   } catch (e) {
     if (e === 403) return send(res, 403, { error: 'No tienes permiso para ver esto' }); if (e === 404) return send(res, 404, { error: 'No encontrado' }); if (e === 429) return send(res, 429, { error: 'Demasiados intentos. Intenta más tarde.' });
     if (typeof e === 'string') return send(res, 400, { error: e }); if (e?.message && /Imagen|pesad|grande/.test(e.message)) return send(res, 400, { error: e.message });
-    console.error('[Libretín]', e); return send(res, 500, { error: 'Algo salió mal. Intenta de nuevo.' });
+    console.error('[ProfeTok]', e); return send(res, 500, { error: 'Algo salió mal. Intenta de nuevo.' });
   }
 });
 // 💾 copia de seguridad diaria de la base de datos (se guardan las últimas 14)
-function respaldo() { try { const dir = path.join(DATA, 'respaldos'), f = path.join(dir, 'aula-' + hoy() + '.db'); fs.mkdirSync(dir, { recursive: true }); if (fs.existsSync(f)) return; db.exec(`VACUUM INTO '${f.replace(/'/g, "''")}'`); const L = fs.readdirSync(dir).filter(x => /^aula-\d{4}-\d{2}-\d{2}\.db$/.test(x)).sort(); for (const x of L.slice(0, Math.max(0, L.length - 14))) fs.rmSync(path.join(dir, x), { force: true }); console.log('[Libretín] Respaldo listo: ' + f); } catch (e) { console.log('[Libretín] Respaldo: ' + e.message); } }
+function respaldo() { try { const dir = path.join(DATA, 'respaldos'), f = path.join(dir, 'aula-' + hoy() + '.db'); fs.mkdirSync(dir, { recursive: true }); if (fs.existsSync(f)) return; db.exec(`VACUUM INTO '${f.replace(/'/g, "''")}'`); const L = fs.readdirSync(dir).filter(x => /^aula-\d{4}-\d{2}-\d{2}\.db$/.test(x)).sort(); for (const x of L.slice(0, Math.max(0, L.length - 14))) fs.rmSync(path.join(dir, x), { force: true }); console.log('[ProfeTok] Respaldo listo: ' + f); } catch (e) { console.log('[ProfeTok] Respaldo: ' + e.message); } }
 setTimeout(respaldo, 60000).unref(); setInterval(respaldo, 3 * 3600e3).unref();
-if (require.main === module) server.listen(PORT, () => console.log(`🎓 Libretín en http://localhost:${PORT}`));
+if (require.main === module) server.listen(PORT, () => console.log(`🎓 ProfeTok en http://localhost:${PORT}`));
 module.exports = { server, db, riesgo, alumnosVisibles };

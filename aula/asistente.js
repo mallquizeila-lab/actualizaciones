@@ -1,4 +1,4 @@
-// 🤖 «Mi asistente»: el ayudante con IA de cada docente en Libretín.
+// 🤖 «Mi asistente»: el ayudante con IA de cada docente en ProfeTok.
 // Conoce sus aulas (grado, nivel, cursos, escala, cantidad de alumnos y quiénes necesitan apoyo, solo con su primer nombre)
 // y está preparado para el Currículo Nacional (CNEB) del Perú. Usa la IA de ShortForge (sin costo extra).
 // Privacidad: nunca se envían apellidos, DNI, fotos, salud ni datos de las familias a la IA.
@@ -20,7 +20,7 @@ function crear({ db, q, q1, run, getS, riesgo, aulaDe, membresia, E }) {
     });
     return `Docente: ${u.nombre} · ${col?.nombre || ''}\nSus aulas:\n${partes.join('\n') || '(todavía no tiene aulas)'}\nFecha de hoy: ${new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10)} (Perú).`;
   }
-  const SISTEMA = u => `Eres «Libretín», el asistente pedagógico personal de un(a) docente del Perú dentro de la plataforma Libretín. Respondes SIEMPRE en español de Perú, claro, cálido y práctico, como un colega experto.
+  const SISTEMA = u => `Eres «Libretín», el asistente pedagógico personal de un(a) docente del Perú dentro de la plataforma ProfeTok (tu nombre es Libretín, la libreta amiga). Respondes SIEMPRE en español de Perú, claro, cálido y práctico, como un colega experto.
 Conoces el Currículo Nacional de la Educación Básica (CNEB) del MINEDU: enfoque por competencias, áreas, competencias, capacidades, desempeños, estándares, enfoques transversales, evaluación formativa, escala AD/A/B/C, conclusiones descriptivas, y el formato de sesión de aprendizaje (título, propósito, competencia/capacidades, criterios de evaluación, evidencia, inicio–desarrollo–cierre con tiempos, materiales, reflexión).
 Formato: usa títulos con «## », listas con «- », negritas con **texto** y tablas simples con | cuando ayuden. Deja todo listo para imprimir o copiar. Si haces un examen, incluye la clave de respuestas al final, separada.
 Si piden un mensaje para padres, que sea respetuoso, breve y positivo. Nunca inventes datos de alumnos: usa solo lo que está abajo. No pidas ni guardes datos personales sensibles.

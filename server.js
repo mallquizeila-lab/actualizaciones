@@ -276,7 +276,7 @@ async function api(u, q, U, r) {
     const r = await ai.ask([{ role: 'system', content: 'You moderate profile pictures for a family-friendly gaming website with a public chat. Reply ONLY with JSON {"ok": true|false, "motivo": "short reason in Spanish"}. Reject (ok=false) if the image contains: nudity or sexual content, underwear or swimwear focus, violence, blood, weapons pointed at camera, drugs, hate symbols, offensive gestures, text with insults, QR codes, phone numbers, emails, links or social media handles, or any visible personal document. Accept normal selfies, faces, pets, cartoons, landscapes, memes without offensive text, logos and game characters.' }, { role: 'user', content: [{ type: 'text', text: 'Moderate this profile picture.' }, { type: 'image_url', image_url: { url: o.img } }] }], { json: true, vision: true, max: 300 });
     const j = parseJSON(r.text) || {}; return { ok: j.ok === true ? true : j.ok === false ? false : null, motivo: String(j.motivo || '').slice(0, 120) };
   }
-  // 🎓 IA para «Mi asistente» de Libretín (la pide Libretín desde esta misma PC, con su clave privada)
+  // 🎓 IA para «Mi asistente» de ProfeTok (la pide ProfeTok desde esta misma PC, con su clave privada)
   if (u === '/api/libretin-ia' && P) {
     const ipq = String(q.socket.remoteAddress || ''); if (!/^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(ipq) || !E.LIBRETIN_IA_TOKEN || q.headers['x-sf-token'] !== E.LIBRETIN_IA_TOKEN) throw new Error('No autorizado');
     const o = JSON.parse((await body(q, 2e6)).toString() || '{}'), msgs = (Array.isArray(o.messages) ? o.messages : []).slice(-30).map(m => ({ role: ['system', 'user', 'assistant'].includes(m.role) ? m.role : 'user', content: String(m.content || '').slice(0, 12000) }));
@@ -295,7 +295,7 @@ async function api(u, q, U, r) {
     if (t.length !== textos.length) throw new Error('La IA no devolvió todas las traducciones');
     return { t: t.map((x, i) => String(x ?? textos[i]).slice(0, 800)) };
   }
-  if (u.startsWith('/api/libretin')) { // 🎓 Libretín (sistema para docentes y familias)
+  if (u.startsWith('/api/libretin')) { // 🎓 ProfeTok (sistema para docentes y familias; su personaje es Libretín)
     const L = require('./lib/libretin'), o = P ? await json(q) : {};
     if (u === '/api/libretin/encender' && P) { L.encender(o); return L.estado(); }
     if (u === '/api/libretin/apagar' && P) { L.apagar(); return L.estado(); }

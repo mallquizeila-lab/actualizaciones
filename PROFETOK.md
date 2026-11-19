@@ -1,6 +1,7 @@
-# 🎓 Libretín · sistema para docentes y familias
+# 🎓 ProfeTok · sistema para docentes y familias
 
-**Libretín** es una libreta de notas simpática: tapa celeste con espiral, lentes redondos, mejillas rosadas,
+**ProfeTok** es la plataforma (de la familia de Yupitok). Su personaje y asistente es **Libretín**,
+una libreta de notas simpática: tapa celeste con espiral, lentes redondos, mejillas rosadas,
 un lápiz amarillo en la "oreja" y una estrella dorada «AD» en la mano. Es alegre, ordenado y cariñoso.
 Frase: **«¡Libretín te cuenta cómo va tu hijo!»** · Para docentes: **«Tu aula ordenada en un minuto.»**
 
@@ -19,7 +20,7 @@ Prompt para imágenes y videos (Flow / Cloudflare):
 - Respaldo diario de la base de datos (14 días).
 
 ## Encenderlo
-ShortForge → 📣 Página viral → tarjeta **🎓 Libretín** → escribe tu correo y tu Yape → **Encender**.
+ShortForge → 📣 Página viral → tarjeta **🎓 ProfeTok** → escribe tu correo y tu Yape → **Encender**.
 Para internet: Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → Public Hostname → tu dominio → `http://localhost:3400`.
 
 ## 📧 Correos a las familias (y email marketing)
