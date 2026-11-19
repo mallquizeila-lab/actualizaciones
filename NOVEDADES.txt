@@ -1,3 +1,7 @@
+9.23.0
+- 🌱 Huerto Defensor: ¡de 30 a 60 niveles! 3 zonas nuevas: 🌴 Selva amazónica (31-40), 🏜️ Costa y desierto (41-50) y ⛈️ Tormenta en la puna (51-60). Las plagas son cada vez más resistentes, hay más ratas jefas y más agua para plantar. Quien ya pasó el nivel 30 sigue directo en el 31.
+- Yupitok: si la lista de juegos no carga a la primera (por ejemplo, justo cuando el servidor se reinicia), reintenta sola y, si aun así falla, muestra un botón «Reintentar» en vez del aviso feo.
+
 9.22.0
 - 🧠 MODO AUTÓNOMO (encendido): ShortForge decide todo. Crea 1 web nueva cada 3 días con el mejor nicho del radar (puntaje 8+/10 y dominio .com libre), mantiene como máximo 6 webs creciendo a la vez (con menos de 20 guías) y ajusta solo las guías diarias (2 por web en crecimiento, entre 5 y 10 al día). Te avisa por Telegram cada vez que crea una web para que la revises.
 - Se puede apagar en el recuadro del piloto («🧠 Modo autónomo»).

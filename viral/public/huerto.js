@@ -2,7 +2,7 @@
 // Vertical para celular: las plagas bajan por 5 carriles y tú plantas defensores con el agua 💧 que recoges.
 (() => {
   const A = window.ARC_API, { JUEGOS, salir } = A, setParar = A.setParar;
-  const TOTAL = 30, L = 5, R = 7;
+  const TOTAL = 60, L = 5, R = 7;
   const rng = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const DEF = {
     hongo: { n: 'Hongo Rocío', costo: 50, carga: 6, hp: 300, desde: 1, d: 'Produce gotas de agua 💧 para plantar más.' },
@@ -30,6 +30,9 @@
     { k: 'dia', n: 'Chacra soleada', e: '🌽', desde: 1, hasta: 10, fondo: 'linear-gradient(180deg,#7dd3fc,#bbf7d0 45%,#4ade80)', deco: ['🌻', '🌽', '🐓', '🏡', '🦋', '🌾', '🐄', '🌼'] },
     { k: 'noche', n: 'Jardín de noche', e: '🌙', desde: 11, hasta: 20, fondo: 'linear-gradient(180deg,#020617,#1e1b4b 40%,#14532d)', deco: ['🌙', '✨', '🍄', '🦉', '🏮', '⭐', '🌌', '🦇'] },
     { k: 'andes', n: 'Andenes de los Andes', e: '🏔️', desde: 21, hasta: 30, fondo: 'linear-gradient(180deg,#fb923c,#fcd34d 35%,#a3e635 75%,#4d7c0f)', deco: ['🏔️', '🦙', '🌄', '🪨', '🦅', '🌵', '🌽', '☀️'] },
+    { k: 'selva', n: 'Selva amazónica', e: '🌴', desde: 31, hasta: 40, fondo: 'linear-gradient(180deg,#065f46,#10b981 40%,#166534)', deco: ['🌴', '🦜', '🐒', '🌺', '🐸', '🍌', '🦋', '🌿'] },
+    { k: 'costa', n: 'Costa y desierto', e: '🏜️', desde: 41, hasta: 50, fondo: 'linear-gradient(180deg,#38bdf8,#fde68a 40%,#f59e0b 80%,#b45309)', deco: ['🏜️', '🌊', '🦭', '🐧', '🌵', '🏖️', '🦀', '☀️'] },
+    { k: 'puna', n: 'Tormenta en la puna', e: '⛈️', desde: 51, hasta: 60, fondo: 'linear-gradient(180deg,#1e293b,#475569 40%,#64748b 70%,#3f6212)', deco: ['⛈️', '❄️', '🦙', '🏔️', '🌨️', '⚡', '🪨', '🦅'] },
   ];
   const zonaDe = n => ZONAS.find(z => n >= z.desde && n <= z.hasta) || ZONAS[0];
   const FRASES = {
@@ -64,15 +67,17 @@
     const tipos = Object.keys(ENE).filter(k => k !== 'rata' && ENE[k].desde <= n), peso = { gusano: 5, caracol: 3, langosta: 2, escarabajo: 1.5, polilla: 2, topo: 1.5 };
     const elegir = () => { let x = r() * tipos.reduce((a, k) => a + peso[k], 0); for (const k of tipos) { x -= peso[k]; if (x <= 0) return k; } return 'gusano'; };
     const carril = () => carriles[Math.floor(r() * carriles.length)];
-    const total = Math.round(5 + Math.min(n, 20) * 1.3 + Math.max(0, n - 20) * .8), normal = Math.round(total * .6), ev = [];
+    const total = Math.round(5 + Math.min(n, 20) * 1.3 + Math.max(0, Math.min(n, 30) - 20) * .8 + Math.max(0, n - 30) * .45), normal = Math.round(total * .6), ev = [];
     let t = n < 10 ? 18 : 24;
     for (let i = 0; i < normal; i++) { ev.push({ t, tipo: i < 2 ? 'gusano' : elegir(), c: carril() }); t += Math.max(n >= 24 ? 4.3 : 3.6, 10.5 - n * .2 - i * .1) * (.75 + r() * .55); }
     t += 7; const ola = t;
     for (let i = normal; i < total; i++) ev.push({ t: t + r() * (10 + n * .4), tipo: elegir(), c: carril() });
     if (n % 5 === 0 || n > 20) ev.push({ t: t + 4, tipo: 'rata', c: carriles[Math.floor(carriles.length / 2)] });
     if (n > 25) ev.push({ t: t + 9, tipo: 'rata', c: carril() });
+    if (n > 40) ev.push({ t: t + 15, tipo: 'rata', c: carril() });
+    if (n > 50) ev.push({ t: t + 20, tipo: 'rata', c: carril() });
     ev.sort((a, b) => a.t - b.t);
-    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 10 ? 200 : n < 20 ? 275 : n < 26 ? 325 : 400 };
+    return { n, carriles, ev, ola, ultimo: ev[ev.length - 1].t, agua: n < 3 ? 150 : n < 10 ? 200 : n < 20 ? 275 : n < 26 ? 325 : n <= 40 ? 400 : 450, fuerza: n > 30 ? 1 + (n - 30) * .025 : 1 };
   }
 
   // ---------- Dibujo de personajes (todo vectorial, propio) ----------
@@ -464,7 +469,7 @@
     function update(dt) {
       tj += dt; if (furiaT > 0) { furiaT -= dt; if (furiaT <= 0) FX.intensidad?.(avisoOla ? 2 : 1); }
       for (const k in cool) cool[k] = Math.max(0, cool[k] - dt);
-      while (evI < C.ev.length && C.ev[evI].t <= tj) { const e = C.ev[evI++], d = ENE[e.tipo]; enes.push({ tipo: e.tipo, c: e.c, x: cx(e.c), y: TOP - S * .45, hp: d.hp, max: d.hp, lento: 0, f: Math.random() * 9, t: 0, flash: 0, salto: 0, saltado: false, come: false }); const nueva = enes[enes.length - 1]; if (e.tipo === 'topo') { nueva.y = TOP + S * (2.2 + Math.random() * 1.6); chispas(nueva.x, nueva.y + S * .25, '#7a5a2a', 18, 1.2); FX.son('choque'); shake = Math.max(shake, .15); hablar(nueva, FRASES.llega.topo, .8); } if (e.tipo === 'rata') { banner('🐀 ¡Llegó la rata jefa!', S * .34); FX.son('jefe'); FX.musica?.('jefe'); setTimeout(() => hablar(nueva, FRASES.llega.rata, 1, true), 900); } else hablar(nueva, FRASES.llega[e.tipo], evI <= 2 ? 1 : .35); }
+      while (evI < C.ev.length && C.ev[evI].t <= tj) { const e = C.ev[evI++], d = ENE[e.tipo]; enes.push({ tipo: e.tipo, c: e.c, x: cx(e.c), y: TOP - S * .45, hp: Math.round(d.hp * (C.fuerza || 1)), max: Math.round(d.hp * (C.fuerza || 1)), lento: 0, f: Math.random() * 9, t: 0, flash: 0, salto: 0, saltado: false, come: false }); const nueva = enes[enes.length - 1]; if (e.tipo === 'topo') { nueva.y = TOP + S * (2.2 + Math.random() * 1.6); chispas(nueva.x, nueva.y + S * .25, '#7a5a2a', 18, 1.2); FX.son('choque'); shake = Math.max(shake, .15); hablar(nueva, FRASES.llega.topo, .8); } if (e.tipo === 'rata') { banner('🐀 ¡Llegó la rata jefa!', S * .34); FX.son('jefe'); FX.musica?.('jefe'); setTimeout(() => hablar(nueva, FRASES.llega.rata, 1, true), 900); } else hablar(nueva, FRASES.llega[e.tipo], evI <= 2 ? 1 : .35); }
       if (!avisoOla && tj >= C.ola - 2) { avisoOla = true; banner('🚨 ¡Gran oleada!', S * .5, 2.6); FX.son('sirena'); FX.vibrar([60, 60, 60]); FX.intensidad?.(2); voz('¡Cuidado! ¡Se viene una gran oleada!', 'narrador', { forzar: true, cortar: true, tono: 1.1 }); }
       lluvia -= dt; if (lluvia <= 0) { lluvia = (n >= 20 ? 5.8 : 7) + Math.random() * 3.2; const c = C.carriles[Math.floor(Math.random() * C.carriles.length)]; const oro = Math.random() < .12; gotas.push({ x: cx(c) + (Math.random() - .5) * S * .4, y: -S * .3, ty: TOP + S * (.8 + Math.random() * (R - 1.8)), v: 11, val: oro ? 75 : 25, oro, vuela: 0, cae: .9 }); if (tutorial === 1) tutorial = 2; }
       for (const d of defs.values()) {
@@ -650,7 +655,7 @@
       const prox = ORDEN.find(k => DEF[k].desde === n + 1) || Object.keys(ENE).find(k => ENE[k].desde === n + 1);
       setTimeout(() => modal(`<div style="font-size:3rem;letter-spacing:6px">${'⭐'.repeat(e)}<span style="opacity:.25">${'⭐'.repeat(3 - e)}</span></div><h2>¡Huerto a salvo!</h2>${window.apoyoHTML?.() || ''}<p class="sub">Nivel ${n} superado · ${pts.toLocaleString('es-PE')} puntos · +${e * 5} 🪙${e < 3 ? '<br>Para 3 ⭐: que ninguna plaga llegue a las gallinas y no dejes que se coman tus defensores.' : ''}</p>
         ${prox ? `<div style="display:flex;align-items:center;gap:10px;justify-content:center;background:rgba(255,255,255,.06);border-radius:14px;padding:8px;margin:8px 0"><canvas data-px="${prox}" style="width:52px;height:52px"></canvas><small style="text-align:left">${DEF[prox] ? `En el siguiente nivel desbloqueas<br><b>${DEF[prox].n}</b>` : `En el siguiente nivel aparece<br><b>${ENE[prox].n}</b>`}</small></div>` : ''}
-        ${n < TOTAL ? `<button class="btn" id="sig">▶ Nivel ${n + 1}</button>` : '<p>🏆 ¡Completaste los 30 niveles!</p>'}${e < 3 ? '<button class="btn alt" id="rei">🔁 Repetir por 3 ⭐</button>' : ''}<button class="btn alt" id="map">🗺️ Ver el mapa</button><button class="btn alt" id="comp">📣 Retar a un amigo</button>`, botones), 900);
+        ${n < TOTAL ? `<button class="btn" id="sig">▶ Nivel ${n + 1}</button>` : `<p>🏆 ¡Completaste los ${TOTAL} niveles!</p>`}${e < 3 ? '<button class="btn alt" id="rei">🔁 Repetir por 3 ⭐</button>' : ''}<button class="btn alt" id="map">🗺️ Ver el mapa</button><button class="btn alt" id="comp">📣 Retar a un amigo</button>`, botones), 900);
     }
     function perder(quien) {
       fin = true; FX.pararMusica?.(); if (!quien) voz(azar(FRASES.pierde), 'narrador', { forzar: true, cortar: true }); if (!perdio) { perdio = true; try { PERFIL.partida('huerto', puntos); } catch (er) {} }
