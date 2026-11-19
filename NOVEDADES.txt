@@ -1,3 +1,6 @@
+9.31.2
+- 🎓 ProfeTok tiene su propio botón en el menú de ShortForge (debajo de Clientes CRM), con la tarjeta para encenderlo y una guía para probarlo y venderlo. Ya no está dentro de «Página viral».
+
 9.31.1
 - 🎓 El sistema para docentes ahora se llama ProfeTok (de la familia de Yupitok). Libretín sigue como su personaje y asistente con IA. Guía en PROFETOK.md.
 

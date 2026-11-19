@@ -627,7 +627,7 @@ function yupiVideosCard() {
 }
 // ---- 🎓 Libretín (sistema para docentes y familias, se cobra por membresía) ----
 let LB = null, LBt = 0;
-const cargarLB = () => api('/api/libretin').then(r => { LB = r; LBt = Date.now(); if (tab === 'viral') render(); }).catch(() => {});
+const cargarLB = () => api('/api/libretin').then(r => { LB = r; LBt = Date.now(); if (tab === 'profetok') render(); }).catch(() => {});
 function libretinCard() {
   if (!LB || Date.now() - LBt > 5000) cargarLB(); const l = LB || {};
   return `<div class="card" style="border:2px solid #7dd3fc"><h2>🎓 ProfeTok · sistema para docentes y familias</h2><p class="hint">Asistencia, notas, tareas, bitácora, alertas tempranas y panel para padres. Los docentes pagan su membresía por Yape/Plin y tú la apruebas en tu panel de dueño. Funciona aparte de Yupitok (sin anuncios).</p>
@@ -638,13 +638,21 @@ function libretinCard() {
   <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender ProfeTok</button>'}</div>
   <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. profetok.com) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
 }
+VIEWS.profetok = () => `<h1>🎓 ProfeTok</h1><p class="sub">Tu sistema para docentes y familias (con membresías). Su personaje y asistente con IA es Libretín.</p>
+  ${libretinCard()}
+  <div class="card"><h2>📋 Cómo probarlo y venderlo</h2><ol style="line-height:1.7;margin:0;padding-left:20px">
+  <li><b>Enciéndelo</b> arriba con tu correo y tu Yape. Entra con «Abrir en este equipo».</li>
+  <li><b>Como docente:</b> «Probar gratis» → crea un aula → pega la lista de alumnos → asistencia, notas y 🤖 Mi asistente.</li>
+  <li><b>Como papá:</b> en Alumnos toca 👨‍👩‍👧 → copia el enlace → ábrelo en una ventana de incógnito.</li>
+  <li><b>Como dueño:</b> entra con tu correo y la contraseña de arriba → apruebas pagos, cambias precios y envías campañas.</li>
+  <li><b>Para internet:</b> compra el dominio (profetok.com y profetok.pe) y conéctalo al túnel de Cloudflare → <code>http://localhost:3400</code>.</li>
+  <li><b>Correos:</b> crea tu cuenta gratis en Brevo con hola@profetok.com y pega la API key en tu panel de dueño de ProfeTok.</li></ol></div>`;
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
   const v = VS || {};
   return `<h1>📣 Página viral</h1><p class="sub">Juegos para compartir (horóscopo, test de amor, ruleta…) que llevan gente a tus videos y juntan suscriptores para tus notificaciones.</p>
   ${yupiVideosCard()}
   <div class="card" id="vf-top">${viralTop()}</div>
-  ${libretinCard()}
   ${apoyoCard()}
   <details class="card" ${v.fijo ? '' : 'open'}><summary><b>🔗 Dirección fija (tu dominio) — recomendado</b></summary>
     <ol class="steps" style="margin-top:8px">
