@@ -8,6 +8,7 @@
   · Niveles de jugador con XP y estrellas. TODO se gana jugando: no hay compras ni premios por ver anuncios.
 - 🌟 Las cartas de personaje ahora son los personajes de Yupitok: Brujita Lulú (la llama), Rey Choki (el choclo), Idol Yupi y Coquito Travieso (el coco).
 - 🎨 Ilustraciones con IA: ShortForge crea solo (con tu cuenta de Cloudflare) el arte de las cartas de personaje, las 36 figuritas y los fondos de la mesa y del lobby. Arranca solo a los 3 minutos y sigue cada día con el cupo gratis; también hay un botón «🃏 Crear ilustraciones de YUPI CARDS» en la sección de la página viral. Mientras no estén, el juego usa sus dibujos de respaldo.
+- 👦 Los rivales usan los avatares ilustrados de Yupitok (como en el diseño) y el reloj es una pastilla «⏱ 00:20». Los jefes salen con su ilustración cuando ShortForge la crea.
 - 🪑 En PC, los rivales se sientan alrededor de la mesa (izquierda, arriba y derecha), y el botón YUPI muestra la burbuja «¡YUPI!» con una manito cuando toca gritar.
 
 9.25.0
