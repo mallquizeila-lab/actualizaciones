@@ -1,3 +1,6 @@
+9.16.1
+- Modo revisión de AdSense: el lema sin «gana» también en el encabezado y en todos los idiomas (inglés, portugués, francés, alemán, italiano e indonesio).
+
 9.16.0 (para la nueva revisión de AdSense)
 - 🧹 El «modo revisión de AdSense» de Yupitok ahora también ESCONDE en pantalla (sin borrar nada) lo que un revisor puede ver como riesgo: chat y salas en vivo, mesas con desconocidos, Amigos (chat privado y de grupo), el recuadro «En vivo ahora», los juegos de otros estudios de la portada («Los más jugados», «Juegos profesionales», categorías de juegos) y el filtro «En vivo».
 - El lema se muestra como «¡Juega, ríe y aprende!» (sin «gana») mientras dure la revisión, y «¿Quieres ganar más?» pasó a «¿Quieres mejorar?».
