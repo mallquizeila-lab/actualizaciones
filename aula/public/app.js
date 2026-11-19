@@ -1,0 +1,284 @@
+// Libretín · aplicación (docentes, directores, padres, alumnos y dueño). Sin librerías.
+(() => {
+  const $ = s => document.querySelector(s), app = $('#app');
+  let TOK = null; try { TOK = localStorage.getItem('libretin'); } catch (e) {}
+  let YO = null;
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('ver'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('ver'), 3200); };
+  async function api(r, body) {
+    const res = await fetch('/api/' + r, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', ...(TOK ? { authorization: 'Bearer ' + TOK } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    const j = await res.json().catch(() => ({ error: 'No se pudo conectar' }));
+    if (res.status === 401 && TOK) { guardarTok(null); location.hash = ''; render(); }
+    if (j.error) throw new Error(j.error); return j;
+  }
+  const guardarTok = t => { TOK = t; try { t ? localStorage.setItem('libretin', t) : localStorage.removeItem('libretin'); } catch (e) {} };
+  const hoy = () => new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10);
+  const fmtF = f => f ? new Date(f + (f.length === 10 ? 'T12:00:00' : '')).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' }) : '';
+  const fotoUrl = id => `/api/foto/alumno/${id}?t=${encodeURIComponent(TOK)}`;
+  const foto = (a, xl) => a.foto ? `<img class="foto${xl ? ' xl' : ''}" src="${fotoUrl(a.id)}" alt="">` : `<span class="foto${xl ? ' xl' : ''}">${esc((a.nombres || '?')[0])}</span>`;
+  const RIESGO = { alto: '🔴 Riesgo alto', medio: '🟡 Atención', bajo: '🟢 Bien' };
+  const colorNota = n => n == null ? '#cbd5e1' : n >= 3.5 ? '#16a34a' : n >= 2.5 ? '#0ea5e9' : n >= 1.75 ? '#f59e0b' : '#dc2626';
+  const ASIS = { P: ['Presente', '#16a34a'], T: ['Tardanza', '#f59e0b'], F: ['Falta', '#dc2626'], J: ['Justificada', '#0ea5e9'] };
+  const achicar = (file, max = 512) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); ok(c.toDataURL('image/jpeg', .85)); }; im.onerror = () => no(new Error('No es una imagen')); im.src = r.result; }; r.readAsDataURL(file); });
+  const modal = (h, alCerrar) => { const d = document.createElement('div'); d.className = 'modal'; d.innerHTML = `<div class="card">${h}</div>`; d.onclick = e => { if (e.target === d || e.target.closest('[data-cerrar]')) { d.remove(); alCerrar?.(); } }; document.body.append(d); return d; };
+  const form = el => Object.fromEntries([...el.querySelectorAll('[name]')].map(i => [i.name, i.type === 'checkbox' ? i.checked : i.value]));
+  const conBoton = async (btn, fn) => { btn.disabled = true; try { await fn(); } catch (e) { toast('⚠️ ' + e.message); } finally { btn.disabled = false; } };
+
+  // ================= Landing (sin sesión) =================
+  function landing() {
+    document.title = 'Libretín · Tu aula ordenada, tus familias informadas';
+    app.innerHTML = `<header class="hero"><div class="nav"><div class="marca"><img src="/icono.svg" alt="">Libretín</div><div class="fila"><button class="btn sec sm" data-entrar>Entrar</button><button class="btn amar sm" data-reg>Probar gratis</button></div></div>
+<div class="in"><div><h1>Tu aula ordenada.<br>Tus familias informadas.</h1><p>Asistencia, notas, tareas, bitácora y <b>alertas tempranas</b> en un solo lugar. Cada papá y mamá ve <b>solo a su hijo</b>, desde su celular.</p>
+<div class="fila" style="margin-top:16px"><button class="btn amar" data-reg>🎁 Probar 15 días gratis</button><button class="btn sec" data-entrar>Ya tengo cuenta</button></div><p class="small" style="opacity:.85">Sin tarjeta. Hecho para docentes del Perú (CNEB: AD, A, B, C o vigesimal).</p></div>
+<div><div class="mascota"><img src="/libretin.svg" alt="Libretín"><div class="globo">¡Hola! Soy <b>Libretín</b> 👋<br>Te cuento cómo va cada alumno.</div></div><div class="mock"><div class="fila"><span class="foto">M</span><div><b>María Quispe</b><br><small class="muted">3.° B · Primaria</small></div><span class="chip bajo" style="margin-left:auto">🟢 Bien</span></div><div class="barras" style="margin-top:12px">${[['Comunicación', 3.6], ['Matemática', 2.8], ['Ciencia', 3.1], ['Personal Social', 3.4]].map(([c, n]) => `<div class="barra"><span>${c}</span><i><u style="width:${n / 4 * 100}%;background:${colorNota(n)}"></u></i><b>${n >= 3.5 ? 'AD' : n >= 2.5 ? 'A' : 'B'}</b></div>`).join('')}</div><div class="fila" style="margin-top:12px"><span class="chip">✅ Asistencia 96%</span><span class="chip">📝 2 tareas</span></div></div></div></div></header>
+<section class="sec-l"><div class="grid g3">${[['✅', 'Asistencia en 1 minuto', 'Marca presente, tarde o falta con un toque. Las familias lo ven al instante.'], ['📊', 'Notas por curso', 'AD/A/B/C o vigesimal, por bimestre. Promedios y gráficos automáticos.'], ['🚦', 'Alerta temprana', 'Te avisa qué alumnos están en riesgo: notas bajas, faltas, tareas o incidencias.'], ['📒', 'Bitácora', 'Registra incidencias y logros con fecha. Tú decides qué ven los padres.'], ['👨‍👩‍👧', 'Panel para padres', 'Cada familia entra con su correo y ve solo a su hijo. Privacidad total.'], ['🖨️', 'Libreta imprimible', 'Con el logo y nombre de tu colegio, lista para entregar.']].map(([i, t, d]) => `<div class="card feat"><span class="ic">${i}</span><div><h3>${t}</h3><p class="muted small" style="margin:0">${d}</p></div></div>`).join('')}</div>
+<h2 class="cent" style="margin:34px 0 14px">Planes</h2><div class="grid g3">
+<div class="card plan"><h3>Prueba gratis</h3><div class="precio">S/ 0</div><p class="muted">15 días con todo incluido. Hasta 3 aulas.</p><button class="btn sec" data-reg>Empezar</button></div>
+<div class="card plan dest"><h3>Docente</h3><div class="precio">S/ <span data-p="docente">19</span><small class="muted" style="font-size:1rem">/mes</small></div><p class="muted">Hasta 6 aulas, alumnos ilimitados, panel para padres y alertas.</p><button class="btn" data-reg>Probar gratis</button></div>
+<div class="card plan"><h3>Colegio</h3><div class="precio">S/ <span data-p="colegio">149</span><small class="muted" style="font-size:1rem">/mes</small></div><p class="muted">Todos tus docentes, panel del director y reportes del colegio.</p><button class="btn sec" data-reg="colegio">Probar gratis</button></div></div>
+<p class="cent muted small" style="margin-top:28px">🔒 Los datos de los alumnos son privados y solo los ven su docente y su familia. Cumplimos la Ley 29733 de Protección de Datos Personales.</p></section>`;
+    app.onclick = e => { if (e.target.closest('[data-entrar]')) entrar(); const r = e.target.closest('[data-reg]'); if (r) registro(r.dataset.reg); };
+  }
+  function entrar() {
+    const d = modal(`<h2>Entrar a Libretín</h2><form><label>Correo</label><input name="email" type="email" autocomplete="email" required><label>Contraseña</label><input name="clave" type="password" autocomplete="current-password" required><div class="fila" style="margin-top:14px"><button class="btn">Entrar</button><button class="btn sec" type="button" data-cerrar>Cancelar</button></div></form><p class="small muted">¿Olvidaste tu contraseña? Pídele a tu docente o al colegio que te ayude.</p>`);
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const r = await api('entrar', form(e.target)); guardarTok(r.token); d.remove(); location.hash = '#/inicio'; render(); }); };
+  }
+  function registro(tipo) {
+    const d = modal(`<h2>🎁 Prueba gratis 15 días</h2><form><label>¿Quién eres?</label><select name="tipo"><option value="docente">Soy docente</option><option value="colegio" ${tipo === 'colegio' ? 'selected' : ''}>Soy director(a) de un colegio</option></select><label>Tu nombre</label><input name="nombre" required><label>Nombre del colegio o de tu aula</label><input name="colegio" placeholder="Ej: I.E. San Martín"><label>Correo</label><input name="email" type="email" required><label>Celular (opcional)</label><input name="telefono" inputmode="tel"><label>Crea una contraseña (mín. 8)</label><input name="clave" type="password" minlength="8" required>
+<div class="fila" style="margin-top:14px"><button class="btn">Crear mi cuenta</button><button class="btn sec" type="button" data-cerrar>Cancelar</button></div></form><p class="small muted">Al crear tu cuenta aceptas cuidar los datos de tus alumnos según la Ley 29733.</p>`);
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const r = await api('registro', form(e.target)); guardarTok(r.token); d.remove(); location.hash = '#/inicio'; render(); toast('🎉 ¡Bienvenido(a)! Crea tu primera aula'); }); };
+  }
+  async function invitacion(t) {
+    let inv; try { inv = await api('invitacion?t=' + encodeURIComponent(t)); } catch (e) { app.innerHTML = `<main><div class="card vacio"><h2>😕 ${esc(e.message)}</h2><a class="btn" href="/">Ir al inicio</a></div></main>`; return; }
+    const padre = inv.rol === 'padre';
+    app.innerHTML = `<main style="max-width:520px"><div class="card"><div class="marca" style="color:var(--c)"><img src="/icono.svg" alt="" style="width:36px">Libretín</div><h2 style="margin-top:12px">${padre ? `👨‍👩‍👧 Sigue el avance de <b>${esc(inv.alumno)}</b>` : `👋 ¡Hola, ${esc(inv.alumno)}!`}</h2><p class="muted">${esc(inv.colegio)} te invitó a Libretín. ${padre ? 'Crea tu cuenta con tu correo: solo tú verás la información de tu hijo(a).' : 'Crea tu cuenta para ver tus tareas, notas y clases.'}</p>
+<form><label>Tu nombre</label><input name="nombre" required>${padre ? '<label>Parentesco</label><select name="parentesco"><option>Mamá</option><option>Papá</option><option>Apoderado(a)</option></select><label>Celular (opcional)</label><input name="telefono" inputmode="tel">' : ''}<label>Correo</label><input name="email" type="email" required><label>Contraseña (mín. 8). Si ya tienes cuenta, escribe tu contraseña</label><input name="clave" type="password" minlength="8" required>
+${padre ? `<label style="display:flex;gap:8px;align-items:flex-start;font-weight:500"><input type="checkbox" name="acepto" style="width:auto;margin-top:3px" required> Autorizo al colegio a registrar los datos y la foto de mi hijo(a) para fines educativos, según la Ley 29733. Puedo pedir que se borren cuando quiera.</label>` : '<input type="hidden" name="acepto" value="1">'}
+<button class="btn" style="margin-top:14px;width:100%">Crear mi cuenta</button></form></div></main>`;
+    app.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const f = form(e.target); f.acepto = padre ? f.acepto : true; const r = await api('aceptar', { ...f, t }); guardarTok(r.token); history.replaceState(null, '', '/#/inicio'); render(); toast('🎉 ¡Listo! Ya puedes ver todo'); }); };
+  }
+
+  // ================= Marco de la app (encabezado institucional) =================
+  function marco(menu, actual) {
+    const c = YO.colegio || { nombre: 'Libretín', color: '#0284c7' }, m = YO.membresia;
+    document.title = (c.nombre || 'Libretín') + ' · Libretín';
+    return `<div class="top" style="--col:${esc(c.color || '#0284c7')}"><div class="in"><div class="logo">${c.logo ? `<img src="/api/foto/logo/${c.id}?t=${encodeURIComponent(TOK)}" alt="">` : '🎓'}</div><div class="t"><b>${esc(c.nombre)}</b><small>${esc(c.lema || YO.usuario.nombre)}</small></div>${['docente', 'director'].includes(YO.usuario.rol) && m && (m.prueba || m.dias <= 5) ? `<a class="chip" href="#/plan" style="background:#fff">${m.activa ? (m.prueba ? `🎁 Prueba: ${m.dias} día${m.dias === 1 ? '' : 's'}` : `⏳ Vence en ${m.dias} días`) : '⚠️ Membresía vencida'}</a>` : ''}<a class="btn sec sm" href="#/cuenta" title="Mi cuenta">👤</a></div></div>
+<nav class="menu"><div class="in">${menu.map(([h, t]) => `<a href="${h}" class="${actual === h ? 'on' : ''}">${t}</a>`).join('')}</div></nav><main id="main"><div class="vacio">Cargando…</div></main>`;
+  }
+  const menuStaff = () => [['#/inicio', '🏠 Inicio'], ...(YO.aulas || []).map(a => [`#/aula/${a.id}/alumnos`, '🏫 ' + a.nombre]), ['#/colegio', '🏛️ Colegio'], ['#/plan', '💳 Plan'], ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
+
+  // ================= Router =================
+  async function render() {
+    const inv = new URLSearchParams(location.search).get('t'); if (location.pathname.startsWith('/invitacion') && inv) return invitacion(inv);
+    if (!TOK) return landing();
+    try { YO = await api('yo'); } catch (e) { return; }
+    const h = location.hash || '#/inicio', p = h.slice(2).split('/'), rol = YO.usuario.rol;
+    if (rol === 'dueno') return dueno();
+    if (p[0] === 'cuenta') return cuenta();
+    if (p[0] === 'ayuda') return ayuda();
+    if (rol === 'padre' || rol === 'alumno') { if (p[0] === 'alumno' && p[1]) return ficha(+p[1]); if (p[0] === 'libreta' && p[1]) return libreta(+p[1]); return casa(); }
+    if (p[0] === 'aula' && p[1]) return aula(+p[1], p[2] || 'alumnos');
+    if (p[0] === 'alumno' && p[1]) return ficha(+p[1]);
+    if (p[0] === 'libreta' && p[1]) return libreta(+p[1]);
+    if (p[0] === 'colegio') return colegio();
+    if (p[0] === 'plan') return plan();
+    return inicio();
+  }
+  window.addEventListener('hashchange', render);
+
+  // ================= Docente / director =================
+  async function inicio() {
+    app.innerHTML = marco(menuStaff(), '#/inicio'); const M = $('#main'), rol = YO.usuario.rol;
+    const al = await api('alertas').catch(() => ({ alertas: [] })); if (!M.isConnected) return; const tot = (YO.aulas || []).reduce((a, x) => a + x.alumnos, 0);
+    M.innerHTML = `<div class="fila entre"><h2>¡Hola, ${esc(YO.usuario.nombre.split(' ')[0])}! 👋</h2><button class="btn" data-nueva>➕ Nueva aula</button></div>
+<div class="grid g4" style="margin:10px 0 16px"><div class="card kpi"><b>${(YO.aulas || []).length}</b><span>Aulas</span></div><div class="card kpi"><b>${tot}</b><span>Alumnos</span></div><div class="card kpi"><b style="color:var(--bad)">${al.alertas.filter(a => a.nivel === 'alto').length}</b><span>En riesgo alto</span></div><div class="card kpi"><b style="color:#b45309">${al.alertas.filter(a => a.nivel === 'medio').length}</b><span>Requieren atención</span></div></div>
+<div class="grid g2"><div><h3>🏫 Mis aulas</h3>${(YO.aulas || []).length ? `<div class="grid">${YO.aulas.map(a => `<a class="card" href="#/aula/${a.id}/alumnos" style="text-decoration:none;color:inherit"><div class="fila entre"><div><b>${esc(a.nombre)}</b><br><small class="muted">${esc([a.nivel, a.grado, a.seccion].filter(Boolean).join(' · '))}${rol === 'director' ? ' · ' + esc(a.docente || '') : ''}</small></div><span class="chip">${a.alumnos} alumnos</span></div></a>`).join('')}</div>` : `<div class="card vacio"><img src="/libretin.svg" alt="" style="width:110px"><br>¡Hola! Soy Libretín. Creemos tu primera aula.<br><button class="btn" data-nueva style="margin-top:10px">➕ Crear mi primera aula</button></div>`}</div>
+<div><h3>🚦 Alerta temprana</h3>${al.alertas.length ? `<div class="grid">${al.alertas.slice(0, 12).map(a => `<a class="card alerta ${a.nivel}" href="#/alumno/${a.id}" style="text-decoration:none;color:inherit"><div class="fila">${foto(a)}<div style="flex:1;min-width:0"><b>${esc(a.nombres + ' ' + (a.apellidos || ''))}</b><br><small class="muted">${esc(a.aula)} · ${esc(a.motivos.join(' · '))}</small></div><span class="chip ${a.nivel}">${RIESGO[a.nivel]}</span></div></a>`).join('')}</div>` : '<div class="card vacio">🟢 Ningún alumno en riesgo por ahora.</div>'}</div></div>
+${rol === 'director' ? `<h3 style="margin-top:18px">👩‍🏫 Docentes</h3><div class="card"><div class="lista">${(YO.docentes || []).map(d => `<div><span class="foto">${esc(d.nombre[0])}</span><div><b>${esc(d.nombre)}</b><br><small class="muted">${esc(d.email)}</small></div></div>`).join('') || '<div class="muted">Agrega a tus docentes.</div>'}</div><button class="btn sec" data-doc style="margin-top:8px">➕ Agregar docente</button></div>` : ''}`;
+    M.onclick = e => { if (e.target.closest('[data-nueva]')) editarAula(); if (e.target.closest('[data-doc]')) nuevoDocente(); };
+  }
+  function nuevoDocente() {
+    const d = modal(`<h2>➕ Agregar docente</h2><form><label>Nombre</label><input name="nombre" required><label>Correo</label><input name="email" type="email" required><button class="btn" style="margin-top:12px">Agregar</button></form>`);
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const f = form(e.target), r = await api('docente', f); d.querySelector('.card').innerHTML = `<h2>✅ Docente agregado</h2><p>Envíale estos datos para que entre (y cambie su contraseña):</p><div class="card" style="background:var(--cs)"><b>${location.origin}</b><br>Correo: <b>${esc(f.email)}</b><br>Contraseña: <b>${esc(r.clave)}</b></div><button class="btn" data-cerrar style="margin-top:12px">Listo</button>`; }); };
+  }
+  function editarAula(a = {}) {
+    const d = modal(`<h2>${a.id ? '✏️ Editar aula' : '🏫 Nueva aula'}</h2><form><label>Nombre del aula</label><input name="nombre" value="${esc(a.nombre || '')}" placeholder="Ej: 3.° B Primaria" required>
+<div class="grid g3"><div><label>Nivel</label><select name="nivel">${['inicial', 'primaria', 'secundaria'].map(n => `<option ${a.nivel === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div><div><label>Grado</label><input name="grado" value="${esc(a.grado || '')}" placeholder="3.°"></div><div><label>Sección</label><input name="seccion" value="${esc(a.seccion || '')}" placeholder="B"></div></div>
+<label>Escala de notas</label><select name="escala"><option value="letras">AD, A, B, C (CNEB)</option><option value="vigesimal" ${a.escala === 'vigesimal' ? 'selected' : ''}>0 a 20 (vigesimal)</option></select>
+${YO.usuario.rol === 'director' && !a.id ? `<label>Docente a cargo</label><select name="docente_id"><option value="">Yo</option>${(YO.docentes || []).map(x => `<option value="${x.id}">${esc(x.nombre)}</option>`).join('')}</select>` : ''}
+<label>Enlace de Google Meet para clases virtuales (opcional)</label><input name="meet" value="${esc(a.meet || '')}" placeholder="https://meet.google.com/abc-defg-hij"><p class="small muted" style="margin:4px 0 0">Crea la reunión en meet.google.com con tu cuenta y pega aquí el enlace. Familias y alumnos verán el botón «Entrar a clase».</p>
+<label>Horario (opcional)</label><input name="horario" value="${esc(a.horario || '')}" placeholder="Lun a Vie 8:00 a 13:00">
+<div class="fila" style="margin-top:14px"><button class="btn">Guardar</button><button class="btn sec" type="button" data-cerrar>Cancelar</button></div></form>`);
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const r = await api('aula', { ...form(e.target), id: a.id }); d.remove(); location.hash = `#/aula/${r.id}/alumnos`; render(); toast('✅ Aula guardada'); }); };
+  }
+
+  async function aula(id, tab) {
+    const TABS = [['alumnos', '👧 Alumnos'], ['asistencia', '✅ Asistencia'], ['notas', '📊 Notas'], ['tareas', '📝 Tareas'], ['bitacora', '📒 Bitácora'], ['comunicados', '📣 Comunicados'], ['ajustes', '⚙️ Aula']];
+    app.innerHTML = marco(menuStaff(), `#/aula/${id}/alumnos`); const M = $('#main');
+    let D; try { D = await api('aula?id=' + id); } catch (e) { M.innerHTML = `<div class="card vacio">${esc(e.message)}</div>`; return; } if (!M.isConnected) return;
+    M.innerHTML = `<div class="fila entre"><div><h2 style="margin:0">${esc(D.aula.nombre)}</h2><small class="muted">${esc([D.aula.nivel, D.aula.grado, D.aula.seccion].filter(Boolean).join(' · '))} · ${D.alumnos.length} alumnos</small></div>${D.aula.meet ? `<a class="btn verde sm" href="${esc(D.aula.meet)}" target="_blank" rel="noopener">🎥 Abrir clase en Meet</a>` : ''}</div>
+<div class="fila" style="margin:12px 0;overflow-x:auto;flex-wrap:nowrap">${TABS.map(([k, t]) => `<a class="btn ${k === tab ? '' : 'sec'} sm" href="#/aula/${id}/${k}">${t}</a>`).join('')}</div><div id="tab"></div>`;
+    const T = $('#tab'); ({ alumnos: tAlumnos, asistencia: tAsistencia, notas: tNotas, tareas: tTareas, bitacora: tBitacora, comunicados: tComunicados, ajustes: tAjustes }[tab] || tAlumnos)(T, D);
+  }
+  function tAlumnos(T, D) {
+    T.innerHTML = `<div class="fila" style="margin-bottom:10px"><button class="btn" data-add>➕ Agregar alumno</button><button class="btn sec" data-lote>📋 Pegar lista</button></div>
+${D.alumnos.length ? `<div class="card"><div class="lista">${D.alumnos.map(a => `<div>${foto(a)}<div style="flex:1;min-width:0"><a href="#/alumno/${a.id}" style="font-weight:700;text-decoration:none;color:inherit">${esc(a.apellidos + ', ' + a.nombres)}</a><br><small class="muted">${a.padres ? `👨‍👩‍👧 ${a.padres} familiar(es) vinculado(s)` : '⚠️ Sin familia vinculada'}</small></div><span class="chip ${a.riesgo?.nivel}">${RIESGO[a.riesgo?.nivel || 'bajo']}</span><button class="btn sec sm" data-inv="${a.id}" title="Invitar a la familia">👨‍👩‍👧</button><button class="btn sec sm" data-ed="${a.id}" title="Editar">✏️</button></div>`).join('')}</div></div>` : '<div class="card vacio">Agrega a tus alumnos (puedes pegar la lista completa de una vez).</div>'}`;
+    T.onclick = e => { if (e.target.closest('[data-add]')) editarAlumno(D); if (e.target.closest('[data-lote]')) loteAlumnos(D); const ed = e.target.closest('[data-ed]'); if (ed) editarAlumno(D, D.alumnos.find(a => a.id === +ed.dataset.ed)); const iv = e.target.closest('[data-inv]'); if (iv) invitar(D.alumnos.find(a => a.id === +iv.dataset.inv)); };
+  }
+  function editarAlumno(D, a = {}) {
+    let nuevaFoto = null;
+    const d = modal(`<h2>${a.id ? '✏️ Editar alumno' : '➕ Nuevo alumno'}</h2><form><div class="fila"><span id="fprev">${a.id ? foto(a, true) : '<span class="foto xl">📷</span>'}</span><label class="btn sec sm" style="margin:0">📷 Foto<input type="file" accept="image/*" capture="environment" hidden id="ffile"></label>${a.foto ? '<label class="small" style="margin:0"><input type="checkbox" name="quitarFoto" style="width:auto"> Quitar foto</label>' : ''}</div>
+<label>Nombres</label><input name="nombres" value="${esc(a.nombres || '')}" required><label>Apellidos</label><input name="apellidos" value="${esc(a.apellidos || '')}"><div class="grid g2"><div><label>Fecha de nacimiento</label><input type="date" name="nacimiento" value="${esc(a.nacimiento || '')}"></div><div><label>DNI (opcional)</label><input name="dni" inputmode="numeric" value="${esc(a.dni || '')}"></div></div>
+<label>Salud / alergias (solo lo ve el colegio)</label><textarea name="notas_salud" rows="2"></textarea>
+<div class="fila" style="margin-top:14px"><button class="btn">Guardar</button><button class="btn sec" type="button" data-cerrar>Cancelar</button>${a.id ? '<button class="btn rojo sm" type="button" data-borrar style="margin-left:auto">🗑 Borrar</button>' : ''}</div></form>`);
+    d.querySelector('#ffile').onchange = async e => { try { nuevaFoto = await achicar(e.target.files[0]); d.querySelector('#fprev').innerHTML = `<img class="foto xl" src="${nuevaFoto}">`; } catch (er) { toast(er.message); } };
+    d.querySelector('[data-borrar]')?.addEventListener('click', async () => { if (!confirm(`¿Borrar a ${a.nombres} y TODOS sus datos (notas, asistencia, bitácora)? No se puede deshacer.`)) return; await api('alumno-borrar', { id: a.id }); d.remove(); render(); toast('Alumno borrado'); });
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { await api('alumno', { ...form(e.target), id: a.id, aula_id: D.aula.id, foto: nuevaFoto }); d.remove(); render(); toast('✅ Alumno guardado'); }); };
+  }
+  function loteAlumnos(D) {
+    const d = modal(`<h2>📋 Pegar lista de alumnos</h2><p class="muted small">Uno por línea, así: <b>Apellidos, Nombres</b> (puedes copiarla de Excel o del SIAGIE).</p><form><textarea name="lista" rows="10" placeholder="Quispe Mamani, María José&#10;Torres Ríos, Luis Alberto"></textarea><button class="btn" style="margin-top:12px">Agregar todos</button></form>`);
+    d.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const r = await api('alumnos-lote', { ...form(e.target), aula_id: D.aula.id }); d.remove(); render(); toast(`✅ ${r.n} alumnos agregados`); }); };
+  }
+  async function invitar(a) {
+    const d = modal(`<h2>👨‍👩‍👧 Invitar a la familia de ${esc(a.nombres)}</h2><p class="muted">Se crea un enlace personal (vale 30 días y sirve una sola vez). Mándalo por WhatsApp al papá o la mamá: con su correo verá <b>solo</b> a ${esc(a.nombres)}.</p><div class="fila"><button class="btn" data-rol="padre">Enlace para la familia</button><button class="btn sec" data-rol="alumno">Enlace para el alumno</button></div><div id="invres"></div>`);
+    d.onclick = async e => { const b = e.target.closest('[data-rol]'); if (!b) return; await conBoton(b, async () => { const r = await api('invitar', { alumno_id: a.id, rol: b.dataset.rol }), link = `${location.origin}/invitacion?t=${r.token}`, txt = b.dataset.rol === 'padre' ? `Hola 👋 Soy ${YO.usuario.nombre}, docente de ${a.nombres}. Desde ahora puede ver sus notas, asistencia y tareas en Libretín. Cree su cuenta aquí: ${link}` : `Hola ${a.nombres} 👋 Entra a Libretín para ver tus tareas y clases: ${link}`;
+      d.querySelector('#invres').innerHTML = `<div class="card" style="background:var(--cs);margin-top:12px;word-break:break-all"><small>${esc(link)}</small></div><div class="fila" style="margin-top:8px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">🟢 Enviar por WhatsApp</a><button class="btn sec" data-copiar>📋 Copiar</button></div>`;
+      d.querySelector('[data-copiar]').onclick = () => { navigator.clipboard?.writeText(link); toast('📋 Enlace copiado'); }; }); };
+  }
+  async function tAsistencia(T, D) {
+    let fecha = hoy(), marcas = {};
+    const pintar = async () => { const r = await api(`asistencia?aula=${D.aula.id}&fecha=${fecha}`); marcas = r.marcas;
+      if (!T.isConnected) return; T.innerHTML = `<div class="fila" style="margin-bottom:10px"><input type="date" value="${fecha}" id="fch" style="width:auto"><button class="btn sec sm" data-todos>✅ Todos presentes</button><button class="btn" data-guardar>💾 Guardar</button></div><div class="card"><div class="lista">${D.alumnos.map(a => `<div>${foto(a)}<b style="flex:1">${esc(a.apellidos + ', ' + a.nombres)}</b><div class="asis" data-al="${a.id}">${Object.keys(ASIS).map(k => `<button class="${k}${marcas[a.id] === k ? ' on' : ''}" data-m="${k}" title="${ASIS[k][0]}">${k}</button>`).join('')}</div></div>`).join('') || '<div class="muted">Primero agrega alumnos.</div>'}</div></div><p class="small muted">P: presente · T: tardanza · F: falta · J: falta justificada</p>`;
+      $('#fch').onchange = e => { fecha = e.target.value; pintar(); }; };
+    T.onclick = async e => { const m = e.target.closest('[data-m]'); if (m) { const al = m.closest('[data-al]').dataset.al; marcas[al] = m.dataset.m; m.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === m)); }
+      if (e.target.closest('[data-todos]')) { D.alumnos.forEach(a => { if (!marcas[a.id]) marcas[a.id] = 'P'; }); T.querySelectorAll('[data-al]').forEach(g => { const k = marcas[g.dataset.al]; g.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.m === k)); }); }
+      const g = e.target.closest('[data-guardar]'); if (g) conBoton(g, async () => { await api('asistencia', { aula_id: D.aula.id, fecha, marcas }); toast('✅ Asistencia guardada'); }); };
+    pintar();
+  }
+  async function tNotas(T, D) {
+    let curso = D.cursos[0]?.id; if (!curso) { T.innerHTML = '<div class="card vacio">Agrega cursos en ⚙️ Aula.</div>'; return; }
+    const vig = D.aula.escala === 'vigesimal', V = { AD: 4, A: 3, B: 2, C: 1 }, num = v => v == null || v === '' ? null : vig ? parseFloat(v) / 5 : V[String(v).toUpperCase()] ?? null, letra = p => p == null ? '–' : vig ? (p * 5).toFixed(1) : p >= 3.5 ? 'AD' : p >= 2.5 ? 'A' : p >= 1.75 ? 'B' : 'C';
+    const pintar = async () => { const r = await api(`registro-notas?aula=${D.aula.id}&curso=${curso}`), N = {}; for (const n of r.notas) N[n.evaluacion_id + '|' + n.alumno_id] = n.valor;
+      if (!T.isConnected) return; T.innerHTML = `<div class="fila" style="margin-bottom:10px"><select id="cur" style="width:auto">${D.cursos.map(c => `<option value="${c.id}" ${c.id === curso ? 'selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select><button class="btn sec sm" data-ev>➕ Evaluación</button><button class="btn" data-guardar>💾 Guardar notas</button></div>
+${r.evaluaciones.length ? `<div class="scroll"><table class="tabla"><tr><th>Alumno</th>${r.evaluaciones.map(ev => `<th title="${esc(ev.titulo)}">${esc(ev.titulo)}<br><small class="muted">B${ev.bimestre} · ${fmtF(ev.fecha)}</small> <button class="btn sec sm" data-delev="${ev.id}" title="Borrar" style="padding:2px 6px">✕</button></th>`).join('')}<th>Promedio</th></tr>
+${D.alumnos.map(a => { const vals = r.evaluaciones.map(ev => num(N[ev.id + '|' + a.id])).filter(x => x != null), p = vals.length ? vals.reduce((x, y) => x + y, 0) / vals.length : null; return `<tr><td><b>${esc(a.apellidos + ', ' + a.nombres)}</b></td>${r.evaluaciones.map(ev => `<td><input class="nota" data-n="${ev.id}|${a.id}" value="${esc(N[ev.id + '|' + a.id] || '')}" ${vig ? 'inputmode="decimal"' : 'list="letras"'} maxlength="4"></td>`).join('')}<td><b style="color:${colorNota(p)}">${letra(p)}</b></td></tr>`; }).join('')}</table></div><datalist id="letras"><option>AD</option><option>A</option><option>B</option><option>C</option></datalist><p class="small muted">${vig ? 'Notas de 0 a 20.' : 'Escribe AD, A, B o C.'} Se guardan al pulsar «Guardar notas».</p>` : '<div class="card vacio">Crea la primera evaluación de este curso.</div>'}`;
+      $('#cur').onchange = e => { curso = +e.target.value; pintar(); }; };
+    T.onclick = async e => {
+      if (e.target.closest('[data-ev]')) { const d = modal(`<h2>➕ Nueva evaluación</h2><form><label>Título</label><input name="titulo" placeholder="Ej: Comprensión lectora" required><div class="grid g2"><div><label>Fecha</label><input type="date" name="fecha" value="${hoy()}"></div><div><label>Bimestre</label><select name="bimestre"><option>1</option><option>2</option><option>3</option><option>4</option></select></div></div><button class="btn" style="margin-top:12px">Crear</button></form>`); d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await api('evaluacion', { ...form(ev.target), aula_id: D.aula.id, curso_id: curso }); d.remove(); pintar(); }; }
+      const del = e.target.closest('[data-delev]'); if (del && confirm('¿Borrar esta evaluación y sus notas?')) { await api('evaluacion', { aula_id: D.aula.id, curso_id: curso, id: +del.dataset.delev, borrar: 1 }); pintar(); }
+      const g = e.target.closest('[data-guardar]'); if (g) conBoton(g, async () => { const notas = [...T.querySelectorAll('[data-n]')].map(i => { const [ev, al] = i.dataset.n.split('|'); return { evaluacion_id: +ev, alumno_id: +al, valor: i.value }; }); await api('notas', { aula_id: D.aula.id, notas }); toast('✅ Notas guardadas'); pintar(); });
+    };
+    pintar();
+  }
+  async function tTareas(T, D) {
+    const pintar = async () => { const r = await api('tareas?aula=' + D.aula.id), E = {}; for (const e of r.entregas) E[e.tarea_id + '|' + e.alumno_id] = e.estado;
+      if (!T.isConnected) return; T.innerHTML = `<button class="btn" data-nueva style="margin-bottom:10px">➕ Nueva tarea</button>${r.tareas.length ? `<div class="grid">${r.tareas.map(t => `<details class="card"><summary class="fila entre" style="cursor:pointer"><div><b>${esc(t.titulo)}</b><br><small class="muted">${esc(t.curso || 'General')} · entrega ${fmtF(t.entrega)}</small></div><span class="chip">${t.entregadas}/${D.alumnos.length} entregaron</span></summary>${t.descripcion ? `<p>${esc(t.descripcion)}</p>` : ''}<div class="lista">${D.alumnos.map(a => `<label class="fila" style="margin:0;font-weight:500"><input type="checkbox" style="width:auto" data-ent="${t.id}|${a.id}" ${E[t.id + '|' + a.id] === 'entregada' ? 'checked' : ''}> ${esc(a.apellidos + ', ' + a.nombres)}</label>`).join('')}</div><button class="btn rojo sm" data-del="${t.id}" style="margin-top:8px">🗑 Borrar tarea</button></details>`).join('')}</div>` : '<div class="card vacio">Sin tareas. Las familias verán aquí lo que dejes.</div>'}`; };
+    T.onclick = async e => {
+      if (e.target.closest('[data-nueva]')) { const d = modal(`<h2>📝 Nueva tarea</h2><form><label>Título</label><input name="titulo" required><label>Curso</label><select name="curso_id"><option value="">General</option>${D.cursos.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('')}</select><label>Indicaciones</label><textarea name="descripcion" rows="4"></textarea><label>Fecha de entrega</label><input type="date" name="entrega" value="${hoy()}"><button class="btn" style="margin-top:12px">Publicar</button></form>`); d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await api('tarea', { ...form(ev.target), aula_id: D.aula.id }); d.remove(); pintar(); toast('✅ Tarea publicada'); }; }
+      const del = e.target.closest('[data-del]'); if (del && confirm('¿Borrar esta tarea?')) { await api('tarea', { aula_id: D.aula.id, id: +del.dataset.del, borrar: 1 }); pintar(); }
+    };
+    T.onchange = async e => { const c = e.target.closest('[data-ent]'); if (!c) return; const [t, a] = c.dataset.ent.split('|'); await api('entrega', { tarea_id: +t, alumno_id: +a, estado: c.checked ? 'entregada' : 'pendiente' }).catch(er => toast(er.message)); };
+    pintar();
+  }
+  async function tBitacora(T, D) {
+    const ICON = { conducta: '⚠️', 'académica': '📚', salud: '🩺', logro: '🌟', otro: '📌' };
+    const pintar = async () => { const r = await api('incidencias?aula=' + D.aula.id);
+      if (!T.isConnected) return; T.innerHTML = `<button class="btn" data-nueva style="margin-bottom:10px">➕ Registrar</button>${r.incidencias.length ? `<div class="card"><div class="lista">${r.incidencias.map(i => `<div><span style="font-size:1.4rem">${ICON[i.tipo] || '📌'}</span><div style="flex:1;min-width:0"><b>${esc(i.apellidos + ', ' + i.nombres)}</b> <span class="chip">${esc(i.tipo)}</span>${i.visible_padre ? '' : ' <span class="chip">🔒 solo colegio</span>'}<br><small class="muted">${fmtF(i.fecha)}</small><div>${esc(i.descripcion)}</div></div><button class="btn sec sm" data-del="${i.id}|${i.alumno_id}">🗑</button></div>`).join('')}</div></div>` : '<div class="card vacio">La bitácora está vacía. Registra incidencias y también los logros 🌟.</div>'}`; };
+    T.onclick = async e => {
+      if (e.target.closest('[data-nueva]')) { const d = modal(`<h2>📒 Registrar en la bitácora</h2><form><label>Alumno</label><select name="alumno_id">${D.alumnos.map(a => `<option value="${a.id}">${esc(a.apellidos + ', ' + a.nombres)}</option>`).join('')}</select><div class="grid g2"><div><label>Tipo</label><select name="tipo">${Object.keys(ICON).map(k => `<option>${k}</option>`).join('')}</select></div><div><label>Fecha</label><input type="date" name="fecha" value="${hoy()}"></div></div><label>Descripción</label><textarea name="descripcion" rows="4" required></textarea><label class="fila" style="font-weight:500"><input type="checkbox" name="visible_padre" checked style="width:auto"> La familia puede verlo</label><button class="btn" style="margin-top:12px">Guardar</button></form>`); d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await api('incidencia', form(ev.target)); d.remove(); pintar(); toast('✅ Registrado'); }; }
+      const del = e.target.closest('[data-del]'); if (del && confirm('¿Borrar este registro?')) { const [id, al] = del.dataset.del.split('|'); await api('incidencia', { id: +id, alumno_id: +al, borrar: 1 }); pintar(); }
+    };
+    pintar();
+  }
+  function tComunicados(T, D) {
+    T.innerHTML = `<div class="card"><h3>📣 Enviar comunicado a las familias de esta aula</h3><form><label>Título</label><input name="titulo" required><label>Mensaje</label><textarea name="texto" rows="4" required></textarea><button class="btn" style="margin-top:10px">Publicar</button></form><p class="small muted">Lo verán en su panel. Para avisar al instante, también puedes mandarlo a tu grupo de WhatsApp.</p></div>`;
+    T.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { const f = form(e.target); await api('comunicado', { ...f, aula_id: D.aula.id }); e.target.reset(); toast('✅ Comunicado publicado'); window.open('https://wa.me/?text=' + encodeURIComponent(`📣 ${f.titulo}\n\n${f.texto}\n\nVer más en ${location.origin}`), '_blank'); }); };
+  }
+  function tAjustes(T, D) {
+    T.innerHTML = `<div class="grid g2"><div class="card"><h3>🏫 Datos del aula</h3><p class="muted small">${esc(D.aula.nombre)} · escala ${D.aula.escala === 'vigesimal' ? '0–20' : 'AD/A/B/C'}${D.aula.meet ? ' · Meet ✅' : ''}</p><button class="btn" data-ed>✏️ Editar aula y enlace de Meet</button></div>
+<div class="card"><h3>📚 Cursos</h3><div class="lista">${D.cursos.map(c => `<div><span class="chip" style="background:${c.color}22;color:${c.color}">●</span><b style="flex:1">${esc(c.nombre)}</b><button class="btn sec sm" data-delc="${c.id}">🗑</button></div>`).join('')}</div><form class="fila" style="margin-top:8px"><input name="nombre" placeholder="Nuevo curso" required style="flex:1"><button class="btn sm">➕</button></form></div></div>`;
+    T.onclick = async e => { if (e.target.closest('[data-ed]')) editarAula(D.aula); const dc = e.target.closest('[data-delc]'); if (dc && confirm('¿Quitar este curso?')) { await api('curso', { aula_id: D.aula.id, id: +dc.dataset.delc, borrar: 1 }); render(); } };
+    T.querySelector('form').onsubmit = async e => { e.preventDefault(); await api('curso', { ...form(e.target), aula_id: D.aula.id }); render(); };
+  }
+
+  // ================= Ficha del alumno (docente y familia) =================
+  async function ficha(id) {
+    const staff = !['padre', 'alumno'].includes(YO.usuario.rol);
+    app.innerHTML = marco(staff ? menuStaff() : menuFamilia(), staff ? '' : `#/alumno/${id}`); const M = $('#main');
+    let F; try { F = await api('alumno?id=' + id); } catch (e) { M.innerHTML = `<div class="card vacio">${esc(e.message)}</div>`; return; } if (!M.isConnected) return;
+    const r = F.riesgo, nums = F.cursos.map(c => c.num).filter(x => x != null), prom = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null, vig = F.aula.escala === 'vigesimal';
+    const pend = F.tareas.filter(t => t.estado !== 'entregada' && t.entrega >= hoy()).length, wa = (F.colegio.whatsapp || '').replace(/\D/g, '');
+    M.innerHTML = `${staff ? `<a class="btn sec sm noprint" href="#/aula/${F.aula.id}/alumnos">← ${esc(F.aula.nombre)}</a>` : ''}
+<div class="card" style="margin:10px 0"><div class="fila">${foto({ ...F.alumno }, true)}<div style="flex:1;min-width:0"><h2 style="margin:0">${esc(F.alumno.nombres + ' ' + (F.alumno.apellidos || ''))}</h2><div class="muted">${esc(F.aula.nombre)} · Docente: ${esc(F.docente || '')}</div><span class="chip ${r.nivel}" style="margin-top:6px">${RIESGO[r.nivel]}</span></div></div>
+<div class="fila noprint" style="margin-top:12px">${F.aula.meet ? `<a class="btn verde" href="${esc(F.aula.meet)}" target="_blank" rel="noopener">🎥 Entrar a clase (Meet)</a>` : ''}${wa ? `<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent('Hola, escribo por ' + F.alumno.nombres + ' (' + F.aula.nombre + ')')}">💬 Escribir al colegio</a>` : ''}<a class="btn sec" href="#/libreta/${id}">🖨️ Libreta</a></div>${F.aula.horario ? `<p class="small muted" style="margin:8px 0 0">🕘 ${esc(F.aula.horario)}</p>` : ''}</div>
+<div class="grid g4"><div class="card kpi"><b style="color:${colorNota(prom)}">${prom == null ? '–' : vig ? (prom * 5).toFixed(1) : prom >= 3.5 ? 'AD' : prom >= 2.5 ? 'A' : prom >= 1.75 ? 'B' : 'C'}</b><span>Promedio general</span></div><div class="card kpi"><b>${r.asistencia == null ? '–' : r.asistencia + '%'}</b><span>Asistencia (30 días)</span></div><div class="card kpi"><b>${pend}</b><span>Tareas por entregar</span></div><div class="card kpi"><b>${F.incidencias.filter(i => i.tipo === 'logro').length} 🌟</b><span>Logros</span></div></div>
+${r.motivos.length ? `<div class="card alerta ${r.nivel}" style="margin-top:12px"><b>🚦 ${r.nivel === 'alto' ? 'Necesita apoyo' : 'Para tener en cuenta'}:</b> ${esc(r.motivos.join(' · '))}</div>` : ''}
+<div class="grid g2" style="margin-top:12px"><div class="card"><h3>📊 Rendimiento por curso</h3><div class="barras">${F.cursos.map(c => `<div class="barra"><span>${esc(c.nombre)}</span><i><u style="width:${c.num == null ? 0 : c.num / 4 * 100}%;background:${colorNota(c.num)}"></u></i><b>${esc(c.promedio)}</b></div>`).join('') || '<p class="muted">Aún no hay notas.</p>'}</div></div>
+<div class="card"><h3>✅ Asistencia reciente</h3>${F.asistencia.length ? `<div class="cal">${F.asistencia.slice(0, 30).reverse().map(a => `<span style="background:${ASIS[a.estado]?.[1] || '#cbd5e1'}" title="${fmtF(a.fecha)}: ${ASIS[a.estado]?.[0]}">${a.estado}</span>`).join('')}</div><p class="small muted">Últimos ${Math.min(30, F.asistencia.length)} días: ${r.faltas} falta(s), ${r.tardanzas} tardanza(s).</p>` : '<p class="muted">Aún no hay registros.</p>'}</div>
+<div class="card"><h3>📝 Tareas</h3><div class="lista">${F.tareas.slice(0, 12).map(t => `<div><span>${t.estado === 'entregada' ? '✅' : t.entrega < hoy() ? '⏰' : '📌'}</span><div style="flex:1"><b>${esc(t.titulo)}</b><br><small class="muted">${esc(t.curso || 'General')} · ${fmtF(t.entrega)}</small>${t.descripcion ? `<div class="small">${esc(t.descripcion)}</div>` : ''}</div></div>`).join('') || '<p class="muted">Sin tareas.</p>'}</div></div>
+<div class="card"><h3>📒 Bitácora</h3><div class="lista">${F.incidencias.slice(0, 15).map(i => `<div><span>${{ conducta: '⚠️', 'académica': '📚', salud: '🩺', logro: '🌟' }[i.tipo] || '📌'}</span><div><small class="muted">${fmtF(i.fecha)} · ${esc(i.tipo)}</small><div>${esc(i.descripcion)}</div></div></div>`).join('') || '<p class="muted">Sin registros.</p>'}</div></div>
+<div class="card"><h3>📣 Comunicados</h3><div class="lista">${F.comunicados.slice(0, 8).map(c => `<div><div><b>${esc(c.titulo)}</b><br><small class="muted">${fmtF(c.creado.slice(0, 10))}</small><div class="small">${esc(c.texto)}</div></div></div>`).join('') || '<p class="muted">Sin comunicados.</p>'}</div></div>
+${staff ? `<div class="card"><h3>👨‍👩‍👧 Familia vinculada</h3><div class="lista">${(F.familia || []).map(f => `<div><div><b>${esc(f.nombre)}</b> <span class="chip">${esc(f.parentesco)}</span><br><small class="muted">${esc(f.email)} ${esc(f.telefono || '')}</small></div></div>`).join('') || '<p class="muted">Nadie aún. Usa el botón 👨‍👩‍👧 en la lista de alumnos para invitar.</p>'}</div>${F.alumno.notas_salud ? `<p class="small">🩺 ${esc(F.alumno.notas_salud)}</p>` : ''}<p class="small muted">${F.alumno.consentimiento ? '✅ La familia autorizó el uso de datos (Ley 29733).' : '⚠️ Falta la autorización de la familia (se da al crear su cuenta).'}</p></div>` : ''}</div>`;
+  }
+  async function libreta(id) {
+    let F; try { F = await api('alumno?id=' + id); } catch (e) { toast(e.message); return; }
+    const c = YO.colegio || F.colegio;
+    app.innerHTML = `<div class="noprint fila" style="padding:12px;justify-content:center;gap:8px"><a class="btn sec" href="#/alumno/${id}">← Volver</a><button class="btn" onclick="print()">🖨️ Imprimir / Guardar PDF</button></div>
+<div class="hoja" style="--col:${esc(F.colegio.color || '#0284c7')}"><div class="enc"><div class="logo" style="width:64px;height:64px;border:1px solid var(--bd)">${F.colegio.logo && YO.colegio?.id ? `<img src="/api/foto/logo/${YO.colegio.id}?t=${encodeURIComponent(TOK)}">` : '🎓'}</div><div><h2 style="margin:0">${esc(F.colegio.nombre)}</h2><div class="muted">${esc(F.colegio.lema || '')}</div><b>Informe de progreso del estudiante</b></div></div>
+<div class="fila">${foto(F.alumno, true)}<div><b style="font-size:1.2rem">${esc(F.alumno.apellidos + ', ' + F.alumno.nombres)}</b><br>${esc(F.aula.nombre)} · ${esc(F.aula.nivel || '')} · Docente: ${esc(F.docente || '')}<br><small class="muted">Emitido el ${new Date().toLocaleDateString('es-PE', { dateStyle: 'long' })}</small></div></div>
+<table class="tabla" style="margin-top:16px"><tr><th>Área / curso</th>${[1, 2, 3, 4].map(b => `<th>B${b}</th>`).join('')}<th>Promedio</th></tr>${F.cursos.map(cu => { const vig = F.aula.escala === 'vigesimal', V = { AD: 4, A: 3, B: 2, C: 1 }, porB = b => { const vs = cu.evaluaciones.filter(e => e.bimestre === b && e.valor).map(e => vig ? parseFloat(e.valor) / 5 : V[e.valor]).filter(x => x != null); if (!vs.length) return ''; const p = vs.reduce((x, y) => x + y, 0) / vs.length; return vig ? (p * 5).toFixed(1) : p >= 3.5 ? 'AD' : p >= 2.5 ? 'A' : p >= 1.75 ? 'B' : 'C'; }; return `<tr><td><b>${esc(cu.nombre)}</b></td>${[1, 2, 3, 4].map(b => `<td>${esc(porB(b))}</td>`).join('')}<td><b>${esc(cu.promedio)}</b></td></tr>`; }).join('')}</table>
+<p><b>Asistencia (30 días):</b> ${F.riesgo.asistencia ?? '–'}% · Faltas: ${F.riesgo.faltas} · Tardanzas: ${F.riesgo.tardanzas}</p>
+<p><b>Logros:</b> ${esc(F.incidencias.filter(i => i.tipo === 'logro').map(i => i.descripcion).slice(0, 4).join(' · ') || '—')}</p>
+<div class="fila" style="justify-content:space-around;margin-top:60px"><div class="cent">______________________<br>Docente</div><div class="cent">______________________<br>Padre / madre / apoderado</div></div></div>`;
+  }
+
+  // ================= Familia =================
+  const menuFamilia = () => [['#/inicio', '🏠 Inicio'], ...(YO.hijos || []).map(h => [`#/alumno/${h.id}`, '👧 ' + h.nombres]), ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
+  function casa() {
+    const H = YO.hijos || []; if (H.length === 1) { location.hash = `#/alumno/${H[0].id}`; return; }
+    app.innerHTML = marco(menuFamilia(), '#/inicio'); $('#main').innerHTML = `<h2>¡Hola, ${esc(YO.usuario.nombre.split(' ')[0])}! 👋</h2>${H.length ? `<div class="grid g3">${H.map(h => `<a class="card fila" href="#/alumno/${h.id}" style="text-decoration:none;color:inherit">${foto(h, true)}<div><b>${esc(h.nombres + ' ' + (h.apellidos || ''))}</b><br><small class="muted">${esc(h.aula)}</small></div></a>`).join('')}</div>` : '<div class="card vacio">Aún no tienes alumnos vinculados. Pide al docente tu enlace de invitación.</div>'}`;
+  }
+
+  // ================= Colegio, plan, cuenta, ayuda =================
+  function colegio() {
+    app.innerHTML = marco(menuStaff(), '#/colegio'); const c = YO.colegio; let logo = null;
+    $('#main').innerHTML = `<div class="card" style="max-width:620px"><h2>🏛️ Datos del colegio</h2><p class="muted small">Aparecen arriba en todas las pantallas, en la libreta y en el panel de las familias.</p><form><div class="fila"><div class="logo" id="lprev" style="width:72px;height:72px;border:1px solid var(--bd)">${c.logo ? `<img src="/api/foto/logo/${c.id}?t=${encodeURIComponent(TOK)}">` : '🎓'}</div><label class="btn sec sm" style="margin:0">🖼️ Subir logo<input type="file" accept="image/*" hidden id="lfile"></label></div>
+<label>Nombre</label><input name="nombre" value="${esc(c.nombre)}" required><label>Lema o frase</label><input name="lema" value="${esc(c.lema || '')}" placeholder="Ej: Educando con amor"><div class="grid g2"><div><label>Color</label><input type="color" name="color" value="${esc(c.color || '#0284c7')}" style="height:46px"></div><div><label>WhatsApp del colegio (con código, ej. 51987654321)</label><input name="whatsapp" value="${esc(c.whatsapp || '')}" inputmode="tel"></div></div><button class="btn" style="margin-top:14px">💾 Guardar</button></form></div>`;
+    $('#lfile').onchange = async e => { try { logo = await achicar(e.target.files[0], 400); $('#lprev').innerHTML = `<img src="${logo}">`; } catch (er) { toast(er.message); } };
+    $('#main form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { await api('colegio', { ...form(e.target), logo }); toast('✅ Guardado'); render(); }); };
+  }
+  function plan() {
+    app.innerHTML = marco(menuStaff(), '#/plan'); const m = YO.membresia, P = YO.planes;
+    $('#main').innerHTML = `<div class="card" style="margin-bottom:12px"><h2>💳 Tu membresía</h2><p>${m.activa ? (m.prueba ? `🎁 Estás en tu <b>prueba gratis</b>: te quedan <b>${m.dias} días</b>.` : `✅ Plan <b>${esc(P[m.plan]?.nombre || m.plan)}</b> activo hasta el <b>${new Date(m.vence).toLocaleDateString('es-PE')}</b>.`) : '⚠️ Tu membresía venció. Tus datos están a salvo: renueva para seguir registrando.'}</p></div>
+<div class="grid g2">${Object.entries(P).map(([k, p]) => `<div class="card plan ${k === 'docente' ? 'dest' : ''}"><h3>${esc(p.nombre)}</h3><div class="precio">S/ ${p.precio}<small class="muted" style="font-size:1rem">/mes</small></div><p class="muted">${k === 'docente' ? `Hasta ${p.aulas} aulas` : 'Todos los docentes del colegio'} · alumnos ilimitados · panel de familias · alertas</p><button class="btn" data-pagar="${k}">Pagar con Yape / Plin</button></div>`).join('')}</div>`;
+    $('#main').onclick = e => { const b = e.target.closest('[data-pagar]'); if (!b) return; const p = P[b.dataset.pagar];
+      const d = modal(`<h2>📲 Pagar ${esc(p.nombre)}</h2><ol><li>Yapea o plinea al número <b>${esc(YO.soporte || 'que te indique soporte')}</b> (titular: Libretín).</li><li>Escribe abajo el <b>número de operación</b>.</li><li>Activamos tu plan en pocas horas ✅</li></ol><form><label>Meses</label><select name="meses"><option value="1">1 mes · S/ ${p.precio}</option><option value="3">3 meses · S/ ${p.precio * 3}</option><option value="6">6 meses · S/ ${p.precio * 6}</option><option value="12">12 meses · S/ ${p.precio * 12}</option></select><label>Método</label><select name="metodo"><option>yape</option><option>plin</option><option>transferencia</option></select><label>N.° de operación</label><input name="operacion" required><button class="btn" style="margin-top:12px">Enviar</button></form>`);
+      d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await conBoton(ev.target.querySelector('button'), async () => { await api('pago', { ...form(ev.target), plan: b.dataset.pagar }); d.remove(); toast('✅ ¡Gracias! Revisaremos tu pago y activaremos tu plan'); }); }; };
+  }
+  function cuenta() {
+    const staff = !['padre', 'alumno'].includes(YO.usuario.rol);
+    app.innerHTML = marco(YO.usuario.rol === 'dueno' ? [] : staff ? menuStaff() : menuFamilia(), '#/cuenta');
+    $('#main').innerHTML = `<div class="card" style="max-width:520px"><h2>👤 Mi cuenta</h2><p><b>${esc(YO.usuario.nombre)}</b><br><span class="muted">${esc(YO.usuario.email)}</span></p><form><h3>Cambiar contraseña</h3><label>Contraseña actual</label><input type="password" name="actual" required><label>Nueva (mín. 8)</label><input type="password" name="nueva" minlength="8" required><button class="btn" style="margin-top:12px">Cambiar</button></form><hr style="border:0;border-top:1px solid var(--bd);margin:18px 0"><button class="btn rojo" data-salir>🚪 Cerrar sesión</button></div>`;
+    $('#main form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { await api('clave', form(e.target)); e.target.reset(); toast('✅ Contraseña cambiada'); }); };
+    $('#main [data-salir]').onclick = async () => { await api('salir', {}).catch(() => {}); guardarTok(null); location.hash = ''; render(); };
+  }
+  function ayuda() {
+    const staff = !['padre', 'alumno'].includes(YO.usuario.rol); app.innerHTML = marco(staff ? menuStaff() : menuFamilia(), '#/ayuda');
+    $('#main').innerHTML = `<div class="card" style="max-width:520px"><h2>💬 ¿Necesitas ayuda?</h2><p class="muted">Escríbenos por WhatsApp y te respondemos.</p><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${esc(YO.soporte.replace(/\D/g, ''))}?text=${encodeURIComponent('Hola, necesito ayuda con Libretín (' + YO.usuario.email + ')')}">🟢 Abrir WhatsApp de soporte</a></div>`;
+  }
+
+  // ================= Dueño de la plataforma =================
+  async function dueno() {
+    app.innerHTML = marco([['#/inicio', '📊 Panel'], ['#/cuenta', '👤 Cuenta']], '#/inicio'); if ((location.hash || '').startsWith('#/cuenta')) return cuenta();
+    const M0 = $('#main'), D = await api('dueno'); if (!M0?.isConnected) return; const M = M0, pend = D.pagos.filter(p => p.estado === 'pendiente');
+    M.innerHTML = `<h2>📊 Panel de Libretín</h2><div class="grid g4" style="margin-bottom:12px"><div class="card kpi"><b>${D.colegios.length}</b><span>Cuentas (docentes y colegios)</span></div><div class="card kpi"><b>${D.colegios.filter(c => c.plan !== 'prueba' && new Date(c.vence) > new Date()).length}</b><span>Pagando</span></div><div class="card kpi"><b>${D.colegios.reduce((a, c) => a + c.alumnos, 0)}</b><span>Alumnos</span></div><div class="card kpi"><b style="color:var(--warn)">${pend.length}</b><span>Pagos por revisar</span></div></div>
+<div class="card" style="margin-bottom:12px"><h3>💸 Pagos</h3>${D.pagos.length ? `<div class="scroll"><table class="tabla"><tr><th>Fecha</th><th>Cuenta</th><th>Plan</th><th>Monto</th><th>Operación</th><th></th></tr>${D.pagos.map(p => `<tr><td>${esc(p.creado.slice(0, 16))}</td><td>${esc(p.colegio)}</td><td>${esc(p.plan)}</td><td>S/ ${p.monto}</td><td>${esc(p.metodo)} ${esc(p.operacion)}</td><td>${p.estado === 'pendiente' ? `<button class="btn verde sm" data-ap="${p.id}">✅ Aprobar</button> <button class="btn rojo sm" data-re="${p.id}">✕</button>` : esc(p.estado)}</td></tr>`).join('')}</table></div>` : '<p class="muted">Aún no hay pagos.</p>'}</div>
+<div class="card" style="margin-bottom:12px"><h3>🏫 Cuentas</h3><div class="scroll"><table class="tabla"><tr><th>Nombre</th><th>Correo</th><th>Plan</th><th>Vence</th><th>Docentes</th><th>Alumnos</th><th></th></tr>${D.colegios.map(c => `<tr><td>${esc(c.nombre)}</td><td>${esc(c.email || '')}</td><td>${esc(c.plan)}</td><td>${c.vence ? new Date(c.vence).toLocaleDateString('es-PE') : '–'}</td><td>${c.docentes}</td><td>${c.alumnos}</td><td><button class="btn sec sm" data-ext="${c.id}">+30 días</button></td></tr>`).join('')}</table></div></div>
+<div class="grid g2"><form class="card" data-f="planes"><h3>💲 Precios (S/ al mes)</h3><label>Docente</label><input name="docente" type="number" value="${D.planes.docente.precio}"><label>Colegio</label><input name="colegio" type="number" value="${D.planes.colegio.precio}"><button class="btn" style="margin-top:10px">Guardar</button></form>
+<form class="card" data-f="soporte"><h3>📲 Yape / WhatsApp de soporte</h3><label>Número (con código, ej. 51987654321)</label><input name="whatsapp" value="${esc(D.soporte)}"><p class="small muted">Se muestra para pagar con Yape/Plin y en el botón de ayuda.</p><button class="btn" style="margin-top:10px">Guardar</button></form></div>`;
+    M.onclick = async e => { const a = e.target.closest('[data-ap]'), r = e.target.closest('[data-re]'), x = e.target.closest('[data-ext]'); if (a) { await api('dueno', { accion: 'aprobar', id: +a.dataset.ap }); toast('✅ Plan activado'); dueno(); } if (r) { await api('dueno', { accion: 'rechazar', id: +r.dataset.re }); dueno(); } if (x) { await api('dueno', { accion: 'extender', id: +x.dataset.ext, dias: 30 }); toast('✅ +30 días'); dueno(); } };
+    M.querySelectorAll('form[data-f]').forEach(f => f.onsubmit = async e => { e.preventDefault(); await api('dueno', { accion: f.dataset.f, ...form(f) }); toast('✅ Guardado'); dueno(); });
+  }
+
+  render();
+})();

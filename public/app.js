@@ -625,12 +625,26 @@ function yupiVideosCard() {
     ${listos.length ? listos.map(j => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #e5e7eb;padding:6px 0;font-size:.9rem"><span style="flex:1">${esc(j.title || j.topic || 'Video')} <small class="hint">· ${esc(j.status)}${j.pub?.youtube?.ok ? ' · ✅ YouTube' : ''}${j.pub?.facebook?.ok ? ' · ✅ Facebook' : ''}${j.pub?.tiktok?.ok ? ' · ✅ TikTok' : ''}</small></span>${j.pub?.tiktok?.ok ? '' : `<button class="b ghost sm" data-act="pub" data-id="${j.id}" data-p="tiktok">🎵 Subir a TikTok</button>`}</div>`).join('') : '<p class="hint">Cuando el agente termine los primeros videos de Yupitok, aparecerán aquí.</p>'}
     <div class="btns" style="margin-top:6px"><button class="b ghost sm" data-act="yvAhora">🎬 Hacer un video de Yupitok ahora</button>${ch.active === false ? `<button class="b sm" data-act="yvActivar">▶️ Activar</button>` : ''}</div></div>`;
 }
+// ---- 🎓 Libretín (sistema para docentes y familias, se cobra por membresía) ----
+let LB = null, LBt = 0;
+const cargarLB = () => api('/api/libretin').then(r => { LB = r; LBt = Date.now(); if (tab === 'viral') render(); }).catch(() => {});
+function libretinCard() {
+  if (!LB || Date.now() - LBt > 5000) cargarLB(); const l = LB || {};
+  return `<div class="card" style="border:2px solid #7dd3fc"><h2>🎓 Libretín · sistema para docentes y familias</h2><p class="hint">Asistencia, notas, tareas, bitácora, alertas tempranas y panel para padres. Los docentes pagan su membresía por Yape/Plin y tú la apruebas en tu panel de dueño. Funciona aparte de Yupitok (sin anuncios).</p>
+  <p>Estado: <b>${l.on ? (l.estado === 'encendido' ? '🟢 Encendido' : '🟡 ' + esc(l.estado || '')) : '⚪ Apagado'}</b>${l.on ? ` · <a href="${esc(l.local)}" target="_blank">Abrir en este equipo</a>` : ''}</p>
+  <label>Tu correo de dueño (con él entras a tu panel de Libretín)</label><input id="lbEmail" value="${esc(l.email || '')}" placeholder="tucorreo@gmail.com">
+  <label>Tu número de Yape / WhatsApp de soporte (con 51)</label><input id="lbSop" value="${esc(l.soporte || '')}" placeholder="51987654321">
+  ${l.on && l.clave ? `<p class="hint">🔑 Tu contraseña inicial de dueño: <b>${esc(l.clave)}</b> (cámbiala en «Mi cuenta» al entrar).</p>` : ''}
+  <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender Libretín</button>'}</div>
+  <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. libretin.pe) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
+}
 VIEWS.viral = () => {
   if (!VS || Date.now() - VSt > 4000) loadViral().catch(() => {});
   const v = VS || {};
   return `<h1>📣 Página viral</h1><p class="sub">Juegos para compartir (horóscopo, test de amor, ruleta…) que llevan gente a tus videos y juntan suscriptores para tus notificaciones.</p>
   ${yupiVideosCard()}
   <div class="card" id="vf-top">${viralTop()}</div>
+  ${libretinCard()}
   ${apoyoCard()}
   <details class="card" ${v.fijo ? '' : 'open'}><summary><b>🔗 Dirección fija (tu dominio) — recomendado</b></summary>
     <ol class="steps" style="margin-top:8px">
@@ -1314,6 +1328,8 @@ const ACT = {
   bskyOff: guard(async el => { await api('/api/bluesky', { channelId: el.dataset.id, handle: '' }); await refresh(); drawChannel(); }),
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfYupicards: guard(async () => { VS = await api('/api/viral/yupicards-arte', {}); toast('🃏 Creando las ilustraciones de YUPI CARDS…'); render(); }),
+  lbOn: guard(async () => { const email = $('#lbEmail')?.value.trim(); if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email || '')) return toast('Escribe tu correo de dueño'); LB = await api('/api/libretin/encender', { email, soporte: $('#lbSop')?.value || '' }); toast('🎓 Libretín encendido'); render(); }),
+  lbOff: guard(async () => { LB = await api('/api/libretin/apagar', {}); render(); }),
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
   apReload: () => { AP = null; render(); },
   apAgregar: b => { if (AP.metodos.length >= 12) return alert('Máximo 12 métodos'); const t = b.dataset.t; AP.metodos.push({ tipo: t, nombre: b.dataset.n === 'Otro' ? '' : b.dataset.n, valor: '', ...(t === 'cripto' ? { red: b.dataset.r || (AP.redes || [])[0] } : {}) }); render(); },

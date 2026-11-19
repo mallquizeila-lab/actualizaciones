@@ -1,3 +1,10 @@
+9.29.0
+- 🎓 NUEVO: Libretín, sistema para docentes y familias (producto aparte, con membresías). Su personaje es una libreta simpática para las campañas.
+  · Docentes y directores: aulas, alumnos con foto, asistencia en un toque, notas por curso y bimestre (AD/A/B/C o 0–20), tareas con entregas, bitácora de incidencias y logros, comunicados, alerta temprana de alumnos en riesgo, libreta imprimible con el logo del colegio y botón de clase en Google Meet.
+  · Familias: entran con su correo mediante un enlace de invitación (por WhatsApp) y ven SOLO a su hijo: gráficos de rendimiento, asistencia, tareas, bitácora y comunicados. La privacidad se revisa en el servidor en cada consulta.
+  · Membresías: prueba gratis 15 días, plan Docente y plan Colegio. Pagos por Yape/Plin que apruebas en tu panel de dueño.
+  · Se enciende desde ShortForge (Página viral → tarjeta Libretín). Respaldo diario. Guía en LIBRETIN.md.
+
 9.28.1
 - 📣 YUPI CARDS: cuando un rival se queda con una carta, GRITA «¡YUPI!» fuerte con voz natural, una fanfarria y un globo rojo grande (también en el juego con amigos).
 - 🇵🇪 Idioma: en Perú, Latinoamérica y España la página sale siempre en español, aunque el navegador esté en inglés (antes salía mezclado: «Inti's turn», «15 cards»). Quien quiera otro idioma lo elige en el selector 🌐.

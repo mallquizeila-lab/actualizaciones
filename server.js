@@ -288,6 +288,12 @@ async function api(u, q, U, r) {
     if (t.length !== textos.length) throw new Error('La IA no devolvió todas las traducciones');
     return { t: t.map((x, i) => String(x ?? textos[i]).slice(0, 800)) };
   }
+  if (u.startsWith('/api/libretin')) { // 🎓 Libretín (sistema para docentes y familias)
+    const L = require('./lib/libretin'), o = P ? await json(q) : {};
+    if (u === '/api/libretin/encender' && P) { L.encender(o); return L.estado(); }
+    if (u === '/api/libretin/apagar' && P) { L.apagar(); return L.estado(); }
+    return L.estado();
+  }
   if (u.startsWith('/api/viral')) {
     const V = require('./lib/viral'), o = P ? (u === '/api/viral/apoyo' ? JSON.parse((await body(q, 8e6)).toString() || '{}') : await json(q)) : {};
     if (u === '/api/viral') return V.estado();
@@ -618,5 +624,6 @@ http.createServer(async (q, r) => {
   require('./lib/crecer').start();
   require('./lib/radar').start();
   require('./lib/viral').start();
+  try { require('./lib/libretin').start(); } catch (e) { console.log('[Libretín] ' + e.message); }
   ai.startRevision();
 });
