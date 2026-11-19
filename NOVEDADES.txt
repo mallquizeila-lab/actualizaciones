@@ -1,3 +1,9 @@
+9.30.0
+- 📧 Libretín envía correos a las familias con un clic: plantillas de tarea, reunión (fecha, hora y enlace de Meet o Zoom), comunicado, recordatorio y felicitación, personalizadas con el nombre del papá o mamá y de su hijo(a). Las tareas y comunicados nuevos se pueden mandar por correo al publicarlos. Historial con enviados y fallidos.
+- 📣 Email marketing para ti: campañas a todos los docentes, a los que están en prueba, vencidos o activos, para vender más membresías.
+- Envío con Brevo (gratis para empezar) o SMTP, incluido Amazon SES para miles de docentes (≈ US$ 0.10 por 1 000 correos). Cola de envío ordenada, límite mensual por plan y enlace para darse de baja en cada correo.
+- Libretín preparado para crecer: índices nuevos en la base de datos para cientos de miles de alumnos.
+
 9.29.0
 - 🎓 NUEVO: Libretín, sistema para docentes y familias (producto aparte, con membresías). Su personaje es una libreta simpática para las campañas.
   · Docentes y directores: aulas, alumnos con foto, asistencia en un toque, notas por curso y bimestre (AD/A/B/C o 0–20), tareas con entregas, bitácora de incidencias y logros, comunicados, alerta temprana de alumnos en riesgo, libreta imprimible con el logo del colegio y botón de clase en Google Meet.

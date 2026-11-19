@@ -38,7 +38,7 @@ create table if not exists leidos (comunicado_id integer, usuario_id integer, pr
 create table if not exists pagos (id integer primary key, colegio_id integer, plan text, monto real, metodo text, operacion text, estado text default 'pendiente', creado text default (datetime('now')), revisado text);
 create table if not exists auditoria (id integer primary key, usuario_id integer, accion text, detalle text, fecha text default (datetime('now')));
 create table if not exists ajustes (k text primary key, v text);
-create index if not exists al_aula on alumnos(aula_id); create index if not exists ev_aula on evaluaciones(aula_id); create index if not exists as_aula on asistencia(aula_id, fecha); create index if not exists inc_al on incidencias(alumno_id);
+create index if not exists al_aula on alumnos(aula_id); create index if not exists al_col on alumnos(colegio_id); create index if not exists no_al on notas(alumno_id); create index if not exists en_al on entregas(alumno_id); create index if not exists fa_al on familia(alumno_id); create index if not exists inc_aula on incidencias(aula_id, fecha); create index if not exists au_doc on aulas(docente_id); create index if not exists au_col on aulas(colegio_id); create index if not exists us_col on usuarios(colegio_id); create index if not exists ta_aula on tareas(aula_id); create index if not exists ev_curso on evaluaciones(curso_id); create index if not exists co_aula on comunicados(aula_id); create index if not exists ev_aula on evaluaciones(aula_id); create index if not exists as_aula on asistencia(aula_id, fecha); create index if not exists inc_al on incidencias(alumno_id);
 `);
 const getS = (k, d) => { const r = q1('select v from ajustes where k=?', k); try { return r ? JSON.parse(r.v) : d; } catch (e) { return d; } };
 const setS = (k, v) => run('insert into ajustes(k,v) values(?,?) on conflict(k) do update set v=excluded.v', k, JSON.stringify(v));
@@ -249,7 +249,9 @@ API['POST /api/notas'] = async ({ u, b }) => {
 };
 
 // --- tareas ---
-API['POST /api/tarea'] = async ({ u, b }) => { const a = aulaDe(u, b.aula_id); if (!a) throw 403; if (b.borrar) { run('delete from entregas where tarea_id=?', +b.id); run('delete from tareas where id=? and aula_id=?', +b.id, a.id); return { ok: 1 }; } return { id: run('insert into tareas(aula_id, curso_id, titulo, descripcion, entrega) values(?,?,?,?,?)', a.id, +b.curso_id || null, limpio(b.titulo, 100), limpio(b.descripcion, 1500), /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? b.entrega : hoy()).lastInsertRowid }; };
+API['POST /api/tarea'] = async ({ u, b }) => { const a = aulaDe(u, b.aula_id); if (!a) throw 403; if (b.borrar) { run('delete from entregas where tarea_id=?', +b.id); run('delete from tareas where id=? and aula_id=?', +b.id, a.id); return { ok: 1 }; } const tid = run('insert into tareas(aula_id, curso_id, titulo, descripcion, entrega) values(?,?,?,?,?)', a.id, +b.curso_id || null, limpio(b.titulo, 100), limpio(b.descripcion, 1500), /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? b.entrega : hoy()).lastInsertRowid;
+  let correos = 0; if (b.correo) { const cu = q1('select nombre from cursos where id=?', +b.curso_id)?.nombre, ent = /^\d{4}-\d{2}-\d{2}$/.test(b.entrega || '') ? new Date(b.entrega + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }) : ''; correos = conCorreo(u, a, 'tarea', 'Nueva tarea: ' + limpio(b.titulo, 100), (limpio(b.descripcion, 1500) || 'Hay una nueva tarea para {alumno}.') , { detalle: `${cu ? '📚 Curso: ' + cu + '\n' : ''}📅 Entrega: ${ent}`, url: getS('urlPublica', '') ? getS('urlPublica', '') + '/' : '', boton: 'Ver en Libretín' }); }
+  return { id: tid, correos }; };
 API['GET /api/tareas'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; return { tareas: q('select t.*, c.nombre curso, (select count(*) from entregas e where e.tarea_id=t.id and e.estado=\'entregada\') entregadas from tareas t left join cursos c on c.id=t.curso_id where t.aula_id=? order by t.entrega desc', a.id), entregas: q('select e.* from entregas e join tareas t on t.id=e.tarea_id where t.aula_id=?', a.id) }; };
 API['POST /api/entrega'] = async ({ u, b }) => { const t = q1('select * from tareas where id=?', +b.tarea_id); if (!t || !aulaDe(u, t.aula_id) || !q1('select 1 from alumnos where id=? and aula_id=?', +b.alumno_id, t.aula_id)) throw 403; run('insert into entregas values(?,?,?) on conflict(tarea_id, alumno_id) do update set estado=excluded.estado', t.id, +b.alumno_id, ['entregada', 'pendiente', 'tarde'].includes(b.estado) ? b.estado : 'entregada'); return { ok: 1 }; };
 
@@ -262,7 +264,7 @@ API['POST /api/incidencia'] = async ({ u, b }) => {
 API['GET /api/incidencias'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; return { incidencias: q('select i.*, a.nombres, a.apellidos from incidencias i join alumnos a on a.id=i.alumno_id where i.aula_id=? order by i.fecha desc, i.id desc limit 300', a.id) }; };
 
 // --- comunicados ---
-API['POST /api/comunicado'] = async ({ u, b }) => { if (!esStaff(u)) throw 403; const a = b.aula_id ? aulaDe(u, b.aula_id) : null; if (b.aula_id && !a) throw 403; if (!a && u.rol !== 'director') throw 'Elige un aula'; return { id: run('insert into comunicados(aula_id, colegio_id, autor_id, titulo, texto) values(?,?,?,?,?)', a?.id || null, u.colegio_id, u.id, limpio(b.titulo, 100), limpio(b.texto, 3000)).lastInsertRowid }; };
+API['POST /api/comunicado'] = async ({ u, b }) => { if (!esStaff(u)) throw 403; const a = b.aula_id ? aulaDe(u, b.aula_id) : null; if (b.aula_id && !a) throw 403; if (!a && u.rol !== 'director') throw 'Elige un aula'; const id = run('insert into comunicados(aula_id, colegio_id, autor_id, titulo, texto) values(?,?,?,?,?)', a?.id || null, u.colegio_id, u.id, limpio(b.titulo, 100), String(b.texto || '').replace(/[<>]/g, '').slice(0, 3000)).lastInsertRowid; const correos = b.correo && a ? conCorreo(u, a, 'comunicado', limpio(b.titulo, 100), String(b.texto || '').replace(/[<>]/g, '').slice(0, 3000)) : 0; return { id, correos }; };
 
 // --- resumen del docente (alertas) ---
 API['GET /api/alertas'] = async ({ u }) => { if (!esStaff(u)) throw 403; const ids = alumnosVisibles(u); const lista = ids === null ? q('select id from alumnos limit 500').map(r => r.id) : [...ids]; return { alertas: lista.map(id => { const r = riesgo(id), al = q1('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula from alumnos a join aulas x on x.id=a.aula_id where a.id=?', id); return { ...al, ...r }; }).filter(x => x.nivel !== 'bajo').sort((a, b) => b.puntos - a.puntos) }; };
@@ -280,11 +282,17 @@ API['POST /api/dueno'] = async ({ u, b }) => {
   throw 404;
 };
 
+// 📧 correos a las familias y campañas (ver correo.js)
+const correo = require('./correo').crear({ db, q, q1, run, getS, setS, limpio });
+for (const [k, f] of Object.entries(correo.API)) API[k] = ctx => f({ ...ctx, aulaDe, membresia });
+const conCorreo = (u, a, tipo, asunto, cuerpo, extra = {}) => { if (!correo.listo()) return 0; const dest = correo.familiasDe(a.id); if (!dest.length) return 0; correo.encolar({ colegioId: a.colegio_id, aulaId: a.id, autorId: u.id, tipo, asunto, cuerpo, destinatarios: dest, ...extra }); return dest.length; };
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
 const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio']);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
+  if (req.headers['cf-connecting-ip'] && !getS('urlPublica', '') && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(req.headers.host || '')) setS('urlPublica', 'https://' + req.headers.host); // la dirección pública se aprende sola (para los enlaces de los correos)
   try {
     // archivos privados (fotos y logos): solo con permiso
     let m = /^\/api\/foto\/(alumno|logo)\/(\d+)$/.exec(url.pathname);
@@ -301,6 +309,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, await API[clave]({ u, b, url, ip, req }), req);
     }
     if (url.pathname.startsWith('/api/')) return send(res, 404, { error: 'No existe' });
+    if (url.pathname === '/baja') { const ok = correo.baja(url); res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', ...SEG }); return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Libretín</title><body style="font-family:Arial;background:#f0f9ff;display:grid;place-items:center;min-height:90vh"><div style="background:#fff;padding:28px;border-radius:16px;max-width:420px;text-align:center"><img src="/libretin.svg" width="110" alt=""><h2>${ok ? '✅ Listo, ya no recibirás correos' : 'Enlace no válido'}</h2><p>${ok ? 'Puedes seguir viendo todo en tu panel de Libretín. Si cambias de opinión, avísale al colegio.' : ''}</p><a href="/">Ir a Libretín</a></div></body>`); }
     // archivos públicos de la aplicación
     let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app)(\/|$)/.test(f)) f = "/index.html";
     const fp = path.join(PUB, path.normalize(f).replace(/^(\.\.[/\\])+/, ''));

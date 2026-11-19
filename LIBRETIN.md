@@ -21,3 +21,17 @@ Prompt para imágenes y videos (Flow / Cloudflare):
 ## Encenderlo
 ShortForge → 📣 Página viral → tarjeta **🎓 Libretín** → escribe tu correo y tu Yape → **Encender**.
 Para internet: Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → Public Hostname → tu dominio → `http://localhost:3400`.
+
+## 📧 Correos a las familias (y email marketing)
+- Pestaña **📧 Correos** en cada aula: plantillas (Tarea, Reunión con fecha/hora y enlace de Meet o Zoom, Comunicado,
+  Recordatorio, Felicitación). `{nombre}` y `{alumno}` se cambian solos. Un clic envía a todas las familias o a las elegidas.
+- Al crear una **tarea** o un **comunicado**, la casilla «📧 Enviar también por correo» ya viene marcada.
+- Tu panel de dueño: configuración del envío, correo de prueba y **campañas a docentes** (todos, en prueba, vencidos o activos).
+- Cada correo trae «Dejar de recibir correos» (cumple la ley y protege tu reputación de envío).
+- Límite mensual por cuenta: prueba 100 · Docente 1 500 · Colegio 15 000 correos.
+
+**Proveedor de envío**
+- Para empezar: **Brevo** (gratis 300 correos al día). brevo.com → verifica tu remitente (ideal: hola@tudominio) → crea una API key → pégala en tu panel de dueño.
+- Para miles de docentes: **Amazon SES** (≈ US$ 0.10 por cada 1 000 correos). En tu panel elige «SMTP» con
+  servidor `email-smtp.us-east-1.amazonaws.com`, puerto 465 y el usuario/clave SMTP que te da SES.
+- Para que los correos no caigan en spam: usa un remitente de **tu dominio** y agrega en Cloudflare los registros SPF/DKIM que te indique Brevo o SES.
