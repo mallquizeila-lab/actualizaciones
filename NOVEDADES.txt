@@ -1,3 +1,8 @@
+9.19.0
+- 🤖 PILOTO AUTOMÁTICO para webs AdSense (encendido por defecto, 5 guías al día): cada día escribe guías nuevas repartidas entre TODAS tus webs de distintos nichos (primero la que tiene menos), con estudio del nicho, fotos reales, foto e introducción de cada tema y revisión de calidad (solo aprueba las de nota 9+).
+- Cada web publica como máximo 1 guía al día a ritmo natural; lo demás queda en reserva (así Google ve sitios que crecen de forma constante, no una granja de contenido).
+- En «Web para AdSense»: recuadro del piloto (encender/apagar, guías por día de 1 a 10, cuántas le tocan hoy a cada web) y botón «Pausar en el piloto» en cada web.
+
 9.18.0
 - 🗂️ Webs AdSense: cada TEMA tiene su página completa con foto real grande, introducción propia escrita por la IA (2 párrafos útiles), todas sus guías ordenadas por fecha y «Otros temas» con foto. Ya no son listas vacías.
 - «Explora por tema» en la portada ahora con la foto de cada tema.
