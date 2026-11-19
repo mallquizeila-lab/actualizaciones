@@ -1,3 +1,14 @@
+9.27.0
+- 🌐 YUPI CARDS CON AMIGOS (en línea): crea una sala privada y juega 1 vs 1, de 3, de 4 o 2 vs 2 por equipos.
+  · Cada sala tiene su código (ej. K7P2Q): compártelo con «Copiar» o por WhatsApp, o invita a tus amigos con un toque.
+  · 👥 Busca a tus amigos por su usuario, envíales solicitud de amistad y acepta las que te lleguen, todo desde el juego (usa las cuentas y amigos de Yupitok).
+  · Si un amigo toca tu invitación, entra directo a tu sala. Los asientos vacíos los ocupa la IA; si alguien se va en plena partida, la IA juega por él.
+  · El servidor reparte y revisa cada jugada (nadie puede hacer trampa ni ver tus cartas). 25 segundos por turno.
+  · En 2 vs 2 tu compañero se sienta frente a ti; gana el equipo del primero que se queda sin cartas. No puedes atrapar a tu compañero 😉
+  · Sin chat libre: solo reacciones y frases amables, seguro para niños. Revancha con un toque.
+- ➕ Cartas nuevas +3, +4, +5 y +6 de colores (una de cada por color). Con la Regla Yupi se puede responder con un + igual o más grande. Se pueden apagar en Clásico.
+- 🎨 Ilustraciones: si alguna salió vacía, ShortForge la vuelve a crear sola. Se rehicieron el fondo de Navidad (la IA le había escrito letras con faltas) y el de la mesa (ahora una terraza tropical sin otra mesa encima).
+
 9.26.0
 - 🃏 YUPI CARDS se convierte en un mundo completo, con el estilo brillante del diseño (cielo azul, logo «Yupi Cards» con corona y cinta «¡Juega, Colecciona y Gana!»):
   · 🗺️ Aventura de cartas: 15 niveles en 3 zonas de Perú (🏖️ Costa, ⛰️ Sierra y 🌴 Selva), cada uno con su regla especial (doble de personajes, turbo, acumular, roba hasta poder) y un JEFE al final de cada zona (Cangrejo Carlos, Llama Lola y Jaguar Jairo). Hasta 3 ★ por nivel.

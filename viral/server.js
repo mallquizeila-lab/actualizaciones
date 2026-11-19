@@ -780,6 +780,7 @@ const amigos = require('./amigos').crear({ db, q, q1, run, revisar: require('./c
 const online = require('./juego_online').crear({ social: () => getS('login', {}), guardarFoto: (buf, uid) => fotos.guardarBuffer(buf, uid), borrarFotos: uid => fotos.borrarDe(uid), datos: DATA, db, q, q1, run, revisar: require('./chat').revisar, apodo: require('./chat').apodo });
 const trivia = require('./trivia').crear({ academia: () => academia(), cuentos: () => cuentos(), extra: () => getS('triviaExtra', {}) });
 const mesas = require('./mesas').crear({ revisar: require('./chat').revisar, apodo: require('./chat').apodo });
+const ycOnline = require('./yupicards_online').crear({ apodo: require('./chat').apodo });
 const JUEGO = Object.fromEntries(CATALOGO.map(t => [t.id, [t.t, t.d]]));
 
 async function api(req, res, u) {
@@ -872,6 +873,7 @@ async function api(req, res, u) {
   if (/^\/api\/(cuenta|clan|duelo|glory)/.test(u.pathname)) { const r = await online.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/trivia/')) { const r = await trivia.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   if (u.pathname.startsWith('/api/mesas/')) { const r = await mesas.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
+  if (u.pathname.startsWith('/api/yc/')) { const r = await ycOnline.http(req, res, u, { ip, json, send, limite }); if (r !== false) return; }
   // ---- público ----
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');

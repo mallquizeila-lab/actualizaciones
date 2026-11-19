@@ -28,6 +28,8 @@
   // 🎨 Ilustraciones (las crea ShortForge con IA; mientras no estén, se usan los dibujos de respaldo)
   const ART = new Set(), artUrl = id => `/arte/yupicards/${id}.webp`, hayArte = id => ART.has(id);
   fetch('/arte/yupicards/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { for (const id of m.arte || []) ART.add(id); }).catch(() => {});
+  // ➕ Cartas de robar: +2 (clásica) y las nuevas +3, +4, +5 y +6 de colores
+  const SUMA = { mas2: 2, mas3: 3, mas4c: 4, mas5: 5, mas6: 6, mas4: 4, rey: 4 }, suma = x => SUMA[x?.v] || 0;
   const esHeroe = x => !!HEROES[x?.v], cuatro = v => v === 'mas4' || v === 'rey';
   let ACs = null;
   function sonar(k) { // sonidos de cada personaje (sintetizados, sin archivos)
@@ -50,9 +52,9 @@
 
   // ---------- Mazo (108 cartas) ----------
   let uidC = 0;
-  function mazo(heroes) {
+  function mazo(heroes, masN) {
     const M = [];
-    for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); }
+    for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); if (masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
     for (let i = 0; i < 4; i++) M.push({ c: 'w', v: 'comodin' }, { c: 'w', v: 'mas4' });
     for (let r = 0; r < (+heroes || 0); r++) for (const v of Object.keys(HEROES)) M.push({ c: 'w', v });
     return mezclar(M.map(x => ({ ...x, id: ++uidC })));
@@ -86,7 +88,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 <g transform="translate(50 129)">${E ? `<circle r="8" fill="${E.m}" stroke="#fff" stroke-width="2"/>` : ruedaColores(7)}</g><text x="50" y="26" text-anchor="middle" font-size="12" font-weight="900" fill="#fff" font-family="Figtree,Arial" stroke="#0008" stroke-width="1.5" paint-order="stroke">${H.icono}</text>
 <rect x="6" y="6" width="88" height="133" rx="10" fill="none" stroke="#fff" stroke-opacity=".5"/></svg>`; }
     const h = Math.round(w * 1.45), id = 'g' + x.id + 'w' + w, comodin = x.c === 'w', C = COL[x.c] || { a: '#334155', b: '#0f172a' };
-    const txt = /^\d$/.test(x.v) ? x.v : x.v === 'mas2' ? '+2' : x.v === 'mas4' ? '+4' : '';
+    const txt = /^\d$/.test(x.v) ? x.v : suma(x) ? '+' + suma(x) : '';
     const centro = x.v === 'saltar' || x.v === 'reversa' ? `<g transform="translate(50 72) scale(1.15)">${ICO[x.v]}</g>`
       : comodin ? `<g transform="translate(50 72)"><circle r="31" fill="#0b1020"/><g transform="rotate(${x.v === 'mas4' ? 45 : 0})">${ruedaColores(27)}</g>${estrella(13, '#fff')}${x.v === 'mas4' ? '<text x="0" y="52" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="Figtree,Arial">+4</text>' : ''}</g>`
       : `<text x="50" y="${txt.length > 1 ? 86 : 90}" text-anchor="middle" font-size="${txt.length > 1 ? 42 : 58}" font-weight="900" font-style="italic" fill="#fff" font-family="Baloo 2,Figtree,Arial" stroke="${C.b}" stroke-width="3" paint-order="stroke">${txt}</text>`;
@@ -164,7 +166,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
   ];
   const FIGS = SETS.flatMap(s => s.f.map((f, i) => ({ id: s.k + i, set: s.k, e: f[0], n: f[1], art: f[2], rara: i < 1, evento: !!s.evento })));
   // 🎄 Eventos de temporada: misiones del día que dan sobres con figuritas exclusivas
-  const EVENTOS = [{ k: 'navidad', n: 'Evento de Navidad', e: '🎅', set: 'navidad', desde: [11, 15], hasta: [1, 6], fondo: 'fondo_navidad', g: 'linear-gradient(135deg,#dc2626,#991b1b 45%,#166534)', mis: [{ k: 'jugar', n: '🎮 Juega 5 partidas', meta: 5 }, { k: 'ganar', n: '🏆 Gana 3 partidas', meta: 3 }, { k: 'pts', n: '⭐ Logra 500 puntos', meta: 500 }] }];
+  const EVENTOS = [{ k: 'navidad', n: 'Evento de Navidad', e: '🎅', set: 'navidad', desde: [11, 15], hasta: [1, 6], fondo: 'fondo_navidad2', g: 'linear-gradient(135deg,#dc2626,#991b1b 45%,#166534)', mis: [{ k: 'jugar', n: '🎮 Juega 5 partidas', meta: 5 }, { k: 'ganar', n: '🏆 Gana 3 partidas', meta: 3 }, { k: 'pts', n: '⭐ Logra 500 puntos', meta: 500 }] }];
   const eventoActivo = () => { const d = new Date(Date.now() - 5 * 3600e3), md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); return EVENTOS.find(E => { const a = E.desde[0] * 100 + E.desde[1], b = E.hasta[0] * 100 + E.hasta[1]; return a <= b ? md >= a && md <= b : md >= a || md <= b; }) || null; };
   const evProg = (p, E) => { const hoy = hoyMis(); p.ev = p.ev || {}; let x = p.ev[E.k]; if (!x || x.dia !== hoy) x = p.ev[E.k] = { dia: hoy, p: {}, cob: [], sobres: x?.sobres || 0 }; return x; };
   const COSTO_SOBRE = 150;
@@ -201,7 +203,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
     p.xp += r.xp; p.est += r.est; const n1 = nivelDe(p.xp).n; if (n1 > n0) { r.subio = n1; r.sobres += n1 - n0; if ((n1 - n0) && n1 % 5 === 0) p.mochila.megafono++; }
     p.mochila.sobres += r.sobres; const l1 = ligaDe(p.liga.pts); if (l1 > l0) r.liga = LIGAS[l1];
     { const E = eventoActivo(); if (E && !o.opc.entrena) { const x = evProg(p, E); x.p.jugar = (x.p.jugar || 0) + 1; if (o.yo) x.p.ganar = (x.p.ganar || 0) + 1; x.p.pts = (x.p.pts || 0) + o.puntos; } }
-    p.hist.unshift({ f: Date.now(), m: o.opc.aventura ? `Aventura ${o.opc.aventura}` : o.opc.modo ? (MODOS.find(m => m.k === o.opc.modo)?.n || 'Fiesta') : o.opc.entrena ? 'Entrenamiento' : 'Clásico', yo: o.yo, pts: o.puntos, n: o.opc.n }); p.hist.length = Math.min(p.hist.length, 15);
+    p.hist.unshift({ f: Date.now(), m: o.opc.online ? 'En línea · ' + o.opc.online : o.opc.aventura ? `Aventura ${o.opc.aventura}` : o.opc.modo ? (MODOS.find(m => m.k === o.opc.modo)?.n || 'Fiesta') : o.opc.entrena ? 'Entrenamiento' : 'Clásico', yo: o.yo, pts: o.puntos, n: o.opc.n }); p.hist.length = Math.min(p.hist.length, 15);
     guardarProg(p); return r;
   }
   function usarMegafono() { const p = prog(); if (p.mochila.megafono > 0) { p.mochila.megafono--; guardarProg(p); return true; } return false; }
@@ -239,13 +241,153 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 #yc:not(.full) .yc-modal{position:fixed;z-index:70}.yc-ruta{padding-top:30px}.yc-ruta::before{content:'';position:absolute;left:50%;top:40px;bottom:30px;border-left:6px dotted #ffffffaa;transform:translateX(-50%);z-index:-1}.yc-palmas span{position:absolute;bottom:18%;font-size:clamp(3rem,9vw,6rem);opacity:.85;filter:drop-shadow(0 8px 10px #0004);z-index:0}.yc-palmas span:nth-child(1){left:1%}.yc-palmas span:nth-child(2){left:9%;bottom:12%;font-size:2.4rem}.yc-palmas span:nth-child(3){right:1%;transform:scaleX(-1)}.yc-palmas span:nth-child(4){right:9%;bottom:12%;font-size:2.4rem}.yc-pill{display:inline-block;background:#0b2a5b;color:#fff;border:3px solid var(--c);border-radius:999px;padding:4px 12px;font:800 1.05rem 'Baloo 2',Figtree;box-shadow:0 4px 10px #0005}.yc-av.img{padding:0;background:#fff!important}.yc-av.img img{width:100%!important;height:100%!important;border-radius:50%}.yc-mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.yc-obj{background:#ffffff10;border-radius:16px;padding:12px;text-align:center;display:grid;gap:4px}.yc-obj>span{font-size:2.6rem}.yc-obj small{opacity:.8}`;
 
   // Pantalla con fondo de mesa y una capa central
-  function vista(t, h) { salir(); registrar(t.id); stage(`<style>${CSS}${CSS2}</style><div id="yc"><div class="fondo${hayArte('fondo_lobby') ? ' arte' : ''}" ${hayArte('fondo_lobby') ? `style="background:url(${artUrl('fondo_lobby')}) center/cover!important"` : ''}></div><div class="luz"></div><div class="capa" style="grid-template-rows:auto;align-content:start">${h}</div></div>`); setParar(() => {}); }
+  const htmlVista = h => `<style>${CSS}${CSS2}</style><div id="yc"><div class="fondo${hayArte('fondo_lobby') ? ' arte' : ''}" ${hayArte('fondo_lobby') ? `style="background:url(${artUrl('fondo_lobby')}) center/cover!important"` : ''}></div><div class="luz"></div><div class="capa" style="grid-template-rows:auto;align-content:start">${h}</div></div>`;
+  function vista(t, h) { salir(); registrar(t.id); stage(htmlVista(h)); setParar(() => {}); }
   const cab = (titulo, extra = '') => `<div class="yc-cab"><button class="yc-btn" data-volver>← Volver</button><h2>${titulo}</h2>${extra}</div>`;
   const alVolver = t => $('#yc').addEventListener('click', e => { if (e.target.closest('[data-volver]')) { FX.son('click'); menu(t); } });
   const estChip = p => `<span class="yc-chip" title="Estrellas: se ganan jugando">⭐ ${p.est}</span>`;
 
+  // ================= 🌐 EN LÍNEA CON AMIGOS =================
+  // Salas privadas con código (1 vs 1, 3, 4 o 2 vs 2). El servidor reparte y valida. Sin chat libre: solo reacciones.
+  const MODOS_ON = [{ k: '1v1', n: '1 vs 1', e: '⚔️', d: 'Tú contra un amigo', g: 'linear-gradient(160deg,#5cc8ff,#0b4fd1)' }, { k: '3', n: '3 jugadores', e: '👨‍👩‍👦', d: 'Todos contra todos', g: 'linear-gradient(160deg,#fb7185,#be123c)' }, { k: '4', n: '4 jugadores', e: '🎲', d: 'Todos contra todos', g: 'linear-gradient(160deg,#fbbf24,#c2410c)' }, { k: '2v2', n: '2 vs 2', e: '🤝', d: 'Por equipos: tú y tu compañero', g: 'linear-gradient(160deg,#4ade80,#047857)' }];
+  const REAC_ON = [...FRASES, ...EMOJIS];
+  const yoOn = () => ({ uid: typeof VID !== 'undefined' ? VID : '', nombre: LS.get('chatNom') || 'Jugador', avatar: LS.get('chatAv') || 'a01' });
+  const apiYC = (r, o = {}) => post('/api/yc/' + r, { ...yoOn(), ...o }).catch(() => ({ error: 'Sin conexión. Intenta de nuevo.' }));
+  const apiAm = (r, o = {}) => post('/api/amigos/' + r, { tok: window.PERFIL?.tok, vid: typeof VID !== 'undefined' ? VID : undefined, ...o }).catch(() => ({ error: 'Sin conexión' }));
+  const linkSala = c => `${location.origin}/?g=arcade-yupicards&sala=${c}`;
+
+  async function amigosHTML(codigo) { // lista de amigos + buscador por usuario (necesita cuenta)
+    if (!window.PERFIL?.tok) return `<div class="yc-logro"><span>👥</span><div><b>Busca a tus amigos por su usuario</b><br><small>Para agregar amigos e invitarlos necesitas tu cuenta gratis de Yupitok.</small></div><button class="yc-btn" data-cuenta>Crear cuenta</button></div>`;
+    const L = await apiAm('lista'); if (L.error) return `<p>${escH(L.error)}</p>`;
+    return `<div style="display:flex;gap:6px;margin:6px 0"><input id="ycBus" placeholder="🔎 Buscar por usuario…" maxlength="18" style="flex:1;border:2px solid #bfdbfe;border-radius:12px;padding:9px 12px;font:700 1rem Figtree;color:#0b2a5b"><button class="yc-btn" data-buscar>Buscar</button></div><div id="ycBusR"></div>
+${L.recibidas?.length ? `<h3 style="margin:10px 0 4px">📩 Solicitudes para ti</h3>${L.recibidas.map(a => `<div class="yc-logro"><span style="width:44px">${avImg(a.avatar, 40)}</span><div><b>${escH(a.usuario)}</b></div><button class="yc-btn" data-aceptar="${escH(a.usuario)}" style="background:#16a34a">✅ Aceptar</button></div>`).join('')}` : ''}
+<h3 style="margin:10px 0 4px">👥 Mis amigos (${L.amigos.length})</h3>${L.amigos.length ? L.amigos.map(a => `<div class="yc-logro"><span style="width:44px;position:relative">${avImg(a.avatar, 40)}<i style="position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;border:2px solid #fff;background:${a.enLinea ? '#22c55e' : '#94a3b8'}"></i></span><div><b>${escH(a.usuario)}</b><br><small>${a.enLinea ? '🟢 En línea' : 'Desconectado'}</small></div>${codigo ? `<button class="yc-btn" data-invitar="${escH(a.usuario)}" style="background:#f59e0b;color:#3b1d00">🎮 Invitar</button>` : ''}</div>`).join('') : '<p style="opacity:.8;margin:4px 0">Aún no tienes amigos agregados. ¡Búscalos por su usuario!</p>'}`;
+  }
+  function enlazarAmigos(t, recargar, codigo) {
+    $('#yc').addEventListener('click', async e => {
+      const b = e.target.closest('[data-cuenta],[data-buscar],[data-pedir],[data-aceptar],[data-invitar]'); if (!b) return; FX.son('click');
+      if (b.dataset.cuenta !== undefined) return window.cuentaModal ? window.cuentaModal('crear', recargar) : toast('Crea tu cuenta desde tu perfil de Yupitok');
+      if (b.dataset.buscar !== undefined) { const q = $('#ycBus').value.trim(); if (q.length < 2) return toast('Escribe al menos 2 letras'); const r = await apiAm('buscar', { q }); $('#ycBusR').innerHTML = (r.usuarios || []).length ? r.usuarios.map(a => `<div class="yc-logro"><span style="width:44px">${avImg(a.avatar, 40)}</span><div><b>${escH(a.usuario)}</b><br><small>${a.enLinea ? '🟢 En línea' : ''}</small></div>${a.estado === 'amigo' ? (codigo ? `<button class="yc-btn" data-invitar="${escH(a.usuario)}" style="background:#f59e0b;color:#3b1d00">🎮 Invitar</button>` : '✅ Amigo') : a.estado === 'enviada' ? '<small>⏳ Enviada</small>' : a.estado === 'recibida' ? `<button class="yc-btn" data-aceptar="${escH(a.usuario)}" style="background:#16a34a">✅ Aceptar</button>` : `<button class="yc-btn" data-pedir="${escH(a.usuario)}">➕ Agregar</button>`}</div>`).join('') : '<p style="opacity:.8">No encontramos a nadie con ese usuario.</p>'; return; }
+      if (b.dataset.pedir) { const r = await apiAm('pedir', { usuario: b.dataset.pedir }); toast(r.error || '📨 Solicitud de amistad enviada'); b.outerHTML = '<small>⏳ Enviada</small>'; return; }
+      if (b.dataset.aceptar) { const r = await apiAm('aceptar', { usuario: b.dataset.aceptar }); toast(r.error || '🎉 ¡Ahora son amigos!'); return recargar(); }
+      if (b.dataset.invitar && codigo) { const r = await (window.AMIGOS?.invitar ? window.AMIGOS.invitar(b.dataset.invitar, 'arcade-yupicards', codigo) : apiAm('../dm/enviar', { usuario: b.dataset.invitar, tipo: 'invita', juego: 'arcade-yupicards', codigo })); toast(r?.error || `🎮 Invitación enviada a ${b.dataset.invitar}`); b.textContent = '✅ Invitado'; b.disabled = true; }
+    });
+  }
+
+  async function online(t) {
+    const p = prog();
+    vista(t, `<div class="yc-panel">${cab('🌐 Jugar con amigos', estChip(p))}
+<p style="margin:0 0 8px;opacity:.85">Crea una sala privada, invita a tus amigos con el código y jueguen juntos. Los asientos vacíos los llena la IA. Solo reacciones (sin chat): seguro para todos.</p>
+<h3 style="margin:6px 0">➕ Crear sala</h3><div class="yc-modoF">${MODOS_ON.map(m => `<button data-crear="${m.k}" style="background:${m.g}"><span>${m.e}</span><b>${m.n}</b><small>${m.d}</small></button>`).join('')}</div>
+<h3 style="margin:14px 0 6px">🔑 Unirme con código</h3><div style="display:flex;gap:6px"><input id="ycCod" placeholder="Ej: K7P2Q" maxlength="6" style="flex:1;border:2px solid #bfdbfe;border-radius:12px;padding:10px 12px;font:800 1.2rem 'Baloo 2',Figtree;letter-spacing:3px;text-transform:uppercase;color:#0b2a5b"><button class="yc-yupi" data-unir>Entrar</button></div>
+<div id="ycAm" style="margin-top:10px"><p style="opacity:.7">Cargando amigos…</p></div></div>`);
+    alVolver(t); enlazarAmigos(t, () => online(t));
+    amigosHTML(null).then(h => { const el = $('#ycAm'); if (el) el.innerHTML = h; });
+    $('#yc').addEventListener('click', async e => {
+      const c = e.target.closest('[data-crear]'); if (c) { FX.son('click'); const o = JSON.parse(LS_.get('opc') || '{}'); const r = await apiYC('crear', { modo: c.dataset.crear, opc: { acum: !!o.acum, heroes: o.heroes !== false, masN: o.masN !== false } }); if (r.error) return toast(r.error); return salaOnline(t, r.id); }
+      if (e.target.closest('[data-unir]')) { const cod = $('#ycCod').value.trim().toUpperCase(); if (cod.length < 4) return toast('Escribe el código de la sala'); const r = await apiYC('unir', { id: cod }); if (r.error) return toast(r.error); salaOnline(t, r.id); }
+    });
+  }
+
+  function salaOnline(t, id) {
+    let st = null, ES = null, modoMesa = false, relojI = null, ultEv = -1, vivoOn = true, finMostrado = false;
+    const cerrar = () => { vivoOn = false; try { ES?.close(); } catch (e) {} clearInterval(relojI); document.body.style.overflow = ''; try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {} };
+    const salir = () => { apiYC('salir', { id }); cerrar(); menu(t); };
+    const pos = i => { const n = st.jugadores.length, rel = (i - st.yo + n) % n; return n === 2 ? 'arr' : n === 3 ? ['', 'izq', 'der'][rel] : ['', 'izq', 'arr', 'der'][rel]; };
+    const tope = () => st.tope, puedeC = x => { const T = tope(); if (!T) return false; if (st.acum) return st.opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === st.color || x.v === T.v; };
+    const miTurno = () => st.estado === 'jugando' && st.turno === st.yo;
+    const eqTag = e => st.equipos ? `<em style="font-style:normal;font-size:.7rem;border-radius:999px;padding:1px 7px;background:${e ? '#ef4444' : '#2563eb'};color:#fff">Equipo ${e ? 'Rojo' : 'Azul'}</em>` : '';
+    function burbujaOn(i, txt) { const el = i === st.yo ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${i}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (i === st.yo ? 0 : r.height * .75)) + 'px'; $('#yc')?.append(d); setTimeout(() => d.remove(), 2600); }
+    function destelloOn(H) { const d = document.createElement('div'); d.className = 'yc-heroe'; d.innerHTML = `<span>${H.e}</span><b>${H.n}</b><small>${H.h}</small>`; d.style.background = `radial-gradient(circle,${H.g[0]}ee,${H.g[1]}dd 55%,transparent 72%)`; $('#yc')?.append(d); setTimeout(() => d.remove(), 1700); }
+
+    function lobby() {
+      modoMesa = false; const M = MODOS_ON.find(m => m.k === st.modo), libres = st.n - st.jugadores.length;
+      stage(htmlVista(`<div class="yc-panel" style="max-width:640px">${cab(`${M.e} Sala ${M.n}`)}
+<div style="text-align:center;background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border-radius:18px;padding:12px;border:3px solid #fff;box-shadow:0 8px 20px #0b2a6b55"><small style="font-weight:800">CÓDIGO DE LA SALA</small><div style="font:800 2.6rem 'Baloo 2',Figtree;letter-spacing:8px;line-height:1.1">${st.codigo}</div>
+<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><button class="yc-btn" data-copiar style="background:#ffffff33">📋 Copiar</button><a class="yc-btn" style="background:#22c55e;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('🃏 ¡Juguemos YUPI CARDS! Entra con el código ' + st.codigo + ': ' + linkSala(st.codigo))}">🟢 WhatsApp</a></div></div>
+<h3 style="margin:12px 0 6px">🪑 Jugadores (${st.jugadores.length}/${st.n})</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">${[...Array(st.n)].map((_, i) => { const j = st.jugadores[i]; return `<div class="yc-obj" style="${st.equipos ? `border:3px solid ${i % 2 ? '#ef4444' : '#2563eb'}` : ''}">${j ? `<span style="display:flex;justify-content:center">${avImg(j.avatar, 54)}</span><b>${escH(j.nombre)}${i === st.yo ? ' (tú)' : ''}</b><small>${i === 0 ? '👑 Anfitrión' : j.conectado ? '🟢 Listo' : '…'}</small>` : `<span>⏳</span><b>Esperando…</b><small>o la IA 🤖</small>`}${st.equipos ? eqTag(i % 2) : ''}</div>`; }).join('')}</div>
+${st.host ? `<p style="text-align:center;margin:12px 0 4px"><button class="yc-yupi" data-empezar style="font-size:1.3rem">▶ Empezar partida</button></p><p style="text-align:center;font-size:.82rem;opacity:.8;margin:0">${libres ? `Si empiezas ahora, la IA ocupa ${libres} asiento${libres > 1 ? 's' : ''}.` : '¡Sala completa!'}</p>` : '<p style="text-align:center;font-weight:800">⏳ Esperando que el anfitrión empiece…</p>'}
+<h3 style="margin:14px 0 4px">🎮 Invitar amigos</h3><div id="ycAm"><p style="opacity:.7">Cargando amigos…</p></div>
+<p style="text-align:center;margin-top:10px"><button class="yc-btn" data-salirS style="background:#ef4444">🚪 Salir de la sala</button></p></div>`));
+      amigosHTML(st.codigo).then(h => { const el = $('#ycAm'); if (el) el.innerHTML = h; });
+      enlazarAmigos(t, () => lobby(), st.codigo);
+      $('#yc').addEventListener('click', async e => {
+        if (e.target.closest('[data-volver],[data-salirS]')) { e.stopImmediatePropagation(); return salir(); }
+        if (e.target.closest('[data-copiar]')) { navigator.clipboard?.writeText(st.codigo).catch(() => {}); toast('📋 Código copiado: ' + st.codigo); }
+        if (e.target.closest('[data-empezar]')) { const r = await apiYC('empezar', { id }); if (r.error) toast(r.error); }
+      }, true);
+    }
+
+    function montarMesa() {
+      modoMesa = true; finMostrado = false; const M = MESAS.find(m => m.k === LS_.get('mesa')) || MESAS[0], MO = MODOS_ON.find(m => m.k === st.modo);
+      stage(`<style>${CSS}${CSS2}</style><div id="yc" class="full"><div class="fondo" style="background:${M.k === 'cielo' && hayArte('fondo_terraza') ? `url(${artUrl('fondo_terraza')}) center/cover,` : ''}${M.g}"></div>${M.k === 'cielo' && !hayArte('fondo_terraza') ? '<div class="yc-palmas"><span>🌴</span><span>🌺</span><span>🌴</span><span>🌺</span></div>' : ''}<div class="luz"></div><div class="capa">
+<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">🚪 Salir</button><b style="text-align:center">🌐 ${MO.e} ${MO.n} · Sala ${st.codigo}</b><span id="ycReloj" style="min-width:96px;text-align:right"></span></div><div class="yc-top" id="ycTop"></div></div>
+<div class="yc-centro"><div class="yc-mesa"></div><div class="yc-pila" id="ycPila" title="Robar carta" style="width:${innerWidth < 600 ? 84 : 112}px;height:${innerWidth < 600 ? 122 : 162}px">${[0, 1, 2].map(i => `<div style="position:absolute;top:${-i * 3}px;left:${i * 2}px">${reverso(innerWidth < 600 ? 84 : 112)}</div>`).join('')}<span id="ycPilaN" style="position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:.8rem;opacity:.8"></span></div>
+<div class="yc-desc" id="ycDesc"></div><div class="yc-info" id="ycInfo"></div></div>
+<div class="yc-yo"><div class="yc-mano" id="ycMano"></div><div class="yc-barra"><div class="yc-yoav">${avatarYo(52)}<b class="yc-tag">${escH(LS.get('chatNom') || 'Tú')}</b></div><button class="yc-btn" id="ycReac" title="Reacciones">💬</button><span class="yc-yupiwrap" id="ycYupiW"><span class="glob">¡YUPI!</span><button class="yc-yupi" id="ycYupi">YUPI</button><span class="mano">👆</span></span><button class="yc-btn" id="ycPasar" hidden>⏭ Pasar</button></div></div></div></div>`);
+      try { if (!document.fullscreenElement && matchMedia('(pointer:coarse)').matches) document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {}); } catch (e) {} document.body.style.overflow = 'hidden'; FX.musica?.('cartas');
+      $('#ycSalir').onclick = () => { if (st.estado !== 'jugando' || confirm('¿Salir de la partida? La IA jugará por ti.')) salir(); };
+      $('#ycPila').onclick = async () => { if (!miTurno() || st.robado) return; FX.son('pop'); const r = await apiYC('robar', { id }); if (r.error) toast(r.error); };
+      $('#ycPasar').onclick = () => apiYC('pasar', { id });
+      $('#ycYupi').onclick = async () => { const r = await apiYC('yupi', { id }); if (!r.error) { FX.son('moneda'); FX.voz?.('¡Yupi!', { forzar: true }); avanzar('yupi'); } };
+      $('#ycTop').onclick = async e => { const b = e.target.closest('[data-atrapar]'); if (!b) return; const r = await apiYC('atrapar', { id, k: +b.dataset.atrapar }); toast(r.error || '🫵 ¡Lo atrapaste! Roba 2'); };
+      $('#ycReac').onclick = () => { const p = $('#yc .yc-reacs'); if (p) return p.remove(); const d = document.createElement('div'); d.className = 'yc-reacs'; d.innerHTML = `<div class="em">${EMOJIS.map(e => `<button data-r="${REAC_ON.indexOf(e)}">${e}</button>`).join('')}</div><div class="fr">${FRASES.map(f => `<button data-r="${REAC_ON.indexOf(f)}">${f}</button>`).join('')}</div>`; d.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; d.remove(); apiYC('reaccion', { id, r: +b.dataset.r }); }; $('#yc').append(d); };
+      $('#ycMano').onclick = e => {
+        const el = e.target.closest('[data-id]'); if (!el || !miTurno() || document.querySelector('#yc .yc-colores')) return; const x = st.mano.find(c => c.id === +el.dataset.id);
+        if (!x || !puedeC(x) || (st.robado && x.id !== st.mano[st.mano.length - 1].id)) { FX.son('error'); return; }
+        const ir = async col => { el.style.opacity = '.3'; const r = await apiYC('jugar', { id, carta: x.id, color: col }); if (r.error) { toast(r.error); el.style.opacity = ''; } };
+        if (x.c === 'w') { const d = document.createElement('div'); d.className = 'yc-modal'; d.innerHTML = `<div class="yc-caja"><h3 style="margin:0">Elige el nuevo color</h3><div class="yc-colores">${COLS.map(c => `<button data-col="${c}" style="background:linear-gradient(135deg,${COL[c].a},${COL[c].b})">${COL[c].s} ${COL[c].n}</button>`).join('')}</div></div>`; $('#yc').append(d); d.onclick = ev => { const b = ev.target.closest('[data-col]'); if (!b) return; d.remove(); ir(b.dataset.col); }; }
+        else ir(null);
+      };
+      clearInterval(relojI); relojI = setInterval(() => { if (!st || st.estado !== 'jugando') return; st.quedan = Math.max(0, st.quedan - 1000); dibReloj(); }, 1000);
+    }
+    function dibReloj() { if (!st) return; const s = Math.ceil(st.quedan / 1000), el = $('#ycReloj'); if (el) el.innerHTML = `<span class="yc-pill" style="--c:${s > 10 ? '#16a34a' : s > 5 ? '#f59e0b' : '#ef4444'}">⏱ 00:${String(s).padStart(2, '0')}</span>`; if (miTurno() && s <= 5 && s > 0) FX.son('click'); }
+
+    function pintar() {
+      if (!$('#ycTop')) return; const T = tope(), mia = miTurno(); if (st.estado === 'jugando') dibReloj();
+      $('#ycTop').innerHTML = st.jugadores.map((j, i) => i === st.yo ? '' : `<div class="yc-op${st.turno === i && st.estado === 'jugando' ? ' turno' : ''}" data-op="${i}" data-pos="${pos(i)}"><span class="yc-av img">${avImg(j.avatar, 60)}<i class="yc-n">${j.cartas}</i></span><b class="yc-tag">${escH(j.nombre)}${!j.conectado ? ' 📴' : ''}</b>${st.equipos ? (j.equipo === st.jugadores[st.yo].equipo ? '<em style="font-style:normal;font-size:.7rem;background:#16a34a;border-radius:999px;padding:1px 7px">🤝 Compañero</em>' : eqTag(j.equipo)) : ''}<div class="yc-mini">${[...Array(Math.min(j.cartas, 7))].map(() => reverso(innerWidth < 600 ? 26 : 34)).join('')}</div>${j.yupi && j.cartas === 1 ? '<span class="yc-burbuja">¡YUPI!</span>' : ''}${st.vulnerable === i && (!st.equipos || j.equipo !== st.jugadores[st.yo].equipo) ? `<button class="yc-atrapar" data-atrapar="${i}">🫵 ¡No dijo YUPI!</button>` : ''}</div>`).join('');
+      if (T) $('#ycDesc').innerHTML = `<div class="c">${svgCarta(T, Math.round(Math.min(($('#yc')?.clientWidth || 380) < 600 ? 104 : 150, innerHeight * .2)))}</div><div class="yc-colorAct" style="border-color:${COL[st.color]?.a || '#fff'}"></div>`;
+      $('#ycPilaN').textContent = st.pila;
+      const yo = st.mano, ok = new Set(mia ? yo.filter(puedeC).filter(x => !st.robado || x.id === yo[yo.length - 1].id).map(x => x.id) : []);
+      const anchoY = $('#yc')?.clientWidth || 380, wC = Math.round(Math.min(anchoY < 600 ? 104 : 140, innerHeight * .16, Math.max(anchoY < 600 ? 78 : 96, anchoY / (Math.max(5, yo.length) * .62 + 1)))), sol = Math.round(wC * (yo.length > 9 ? .55 : .38));
+      $('#ycMano').innerHTML = yo.map((x, i) => `<div class="c ${mia ? (ok.has(x.id) ? 'ok' : 'no') : ''}" data-id="${x.id}" style="margin-left:${i ? -sol : 0}px">${svgCarta(x, wC)}</div>`).join('');
+      const meYupi = st.jugadores[st.yo]?.yupi, puedeY = yo.length <= 2 && yo.length > 0 && !meYupi && (yo.length === 1 || (mia && ok.size)), bY = $('#ycYupi');
+      bY.disabled = !puedeY; bY.classList.toggle('listo', !!puedeY); $('#ycYupiW').classList.toggle('listo', !!puedeY);
+      $('#ycPasar').hidden = !(mia && st.robado);
+      const u = st.ultimo, quien = i => i === st.yo ? 'Tú' : escH(st.jugadores[i]?.nombre || '');
+      const ev = !u ? '' : u.tipo === 'juega' ? `${quien(u.i)} jugó ${esHeroe(u.carta) ? HEROES[u.carta.v].n : u.carta.c === 'w' ? (u.carta.v === 'mas4' ? 'Comodín +4' : 'Comodín') : COL[u.carta.c].n + ' ' + (/^\d$/.test(u.carta.v) ? u.carta.v : { saltar: 'Saltar', reversa: 'Reversa' }[u.carta.v] || '+' + suma(u.carta))}${u.roba ? ` · ${escH(u.roba.nombre)} roba ${u.roba.n}` : ''}${u.cambio ? ` · ¡cambió cartas con ${escH(u.cambio)}!` : ''}` : u.tipo === 'roba' ? `${quien(u.i)} robó ${u.n}` : u.tipo === 'atrapado' ? `🫵 ${escH(u.por)} atrapó a ${quien(u.i)} sin ¡YUPI!: +2` : u.tipo === 'tiempo' ? `⏱ Se acabó el tiempo de ${quien(u.i)}` : '';
+      $('#ycInfo').innerHTML = st.estado !== 'jugando' ? '' : mia ? (st.acum ? `⚠️ +${st.acum} acumulado: responde o roba` : st.robado ? 'Juega la carta que robaste o pasa' : ok.size ? '👉 Tu turno: elige una carta' : '👉 Toca el mazo para robar') : (ev || `Turno de ${quien(st.turno)}…`);
+    }
+
+    function finPartida() {
+      if (finMostrado) return; finMostrado = true; const g = st.ganador, gane = st.equipos ? g.equipo === st.jugadores[st.yo].equipo : g.i === st.yo;
+      if (gane) { FX.confeti(); FX.voz?.('¡Ganaste!', { forzar: true }); } else FX.son('perder');
+      const R = registrarFin({ yo: gane, puntos: gane ? 120 : 20, opc: { online: MODOS_ON.find(m => m.k === st.modo).n, n: st.n }, S: {} });
+      const d = document.createElement('div'); d.className = 'yc-modal'; d.innerHTML = `<div class="yc-caja"><div style="font-size:3rem">${gane ? '🏆' : '🎴'}</div><h2 style="margin:4px 0">${st.equipos ? (gane ? '¡Ganó tu equipo!' : 'Ganó el otro equipo') : gane ? '¡Ganaste!' : escH(g.nombre) + ' ganó'}</h2>${st.equipos ? `<p>${g.equipoNombres.map(escH).join(' y ')}</p>` : ''}<div class="yc-resumen">${R.xp ? `<span>🆙 +${R.xp} XP</span>` : ''}${R.est ? `<span>⭐ +${R.est}</span>` : ''}${R.subio ? `<span>🎉 ¡Nivel ${R.subio}!</span>` : ''}</div>${R.logros.length ? `<p>🏅 ${R.logros.join(' · ')}</p>` : ''}<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px"><button class="yc-yupi" data-rev>🔁 Revancha</button><button class="yc-btn" data-sal>🚪 Salir</button></div></div>`;
+      $('#yc').append(d); d.onclick = async e => { if (e.target.closest('[data-rev]')) { d.remove(); const r = await apiYC('revancha', { id }); if (r.error) toast(r.error); } if (e.target.closest('[data-sal]')) salir(); };
+    }
+
+    function conectar() {
+      ES = new EventSource(`/api/yc/stream?id=${encodeURIComponent(id)}&uid=${encodeURIComponent(yoOn().uid)}`);
+      ES.addEventListener('sala', ev => { if (!vivoOn) return; const prev = st; st = JSON.parse(ev.data); if (st.yo < 0) { cerrar(); toast('Ya no estás en esta sala'); return online(t); }
+        if (st.estado === 'esperando') { if (modoMesa || !prev || JSON.stringify(prev.jugadores) !== JSON.stringify(st.jugadores) || prev.host !== st.host) lobby(); return; }
+        if (!modoMesa) montarMesa();
+        if (prev && prev.estado === 'fin' && st.estado === 'jugando') { finMostrado = false; $('#yc .yc-modal')?.remove(); }
+        const u = st.ultimo; if (u && st.n_ev !== ultEv && u.tipo === 'juega' && (!prev || JSON.stringify(prev.ultimo) !== JSON.stringify(u))) { FX.son(esp(u.carta) ? 'combo' : 'swish'); if (esHeroe(u.carta)) { sonar(u.carta.v); destelloOn(HEROES[u.carta.v]); } if (u.i === st.yo && esp(u.carta)) avanzar('esp'); }
+        ultEv = st.n_ev; pintar(); if (st.estado === 'fin') finPartida(); });
+      window.__ycOn = () => st;
+      ES.addEventListener('reac', ev => { const r = JSON.parse(ev.data); if (st) burbujaOn(r.i, r.t); });
+      ES.addEventListener('aviso', ev => toast(JSON.parse(ev.data).texto));
+      ES.onerror = () => { if (!vivoOn) return; };
+    }
+    vista(t, `<div class="yc-panel" style="text-align:center"><h2>🌐 Entrando a la sala ${escH(id)}…</h2></div>`); setParar(() => cerrar());
+    conectar();
+  }
+
   const logo = () => `<div class="yc-logo"><div class="cartas">${[['#ff3b55', '#b3001b'], ['#3b9bff', '#0b4fd1'], ['#2fd27a', '#0a8a45'], ['#ffd23b', '#e09a00']].map((g, i) => `<i style="background:linear-gradient(150deg,${g[0]},${g[1]});transform:rotate(${(i - 1.5) * 16}deg) translateY(${Math.abs(i - 1.5) * 6}px)"></i>`).join('')}</div><span class="corona">👑</span><b class="yupi">Yupi</b><b class="cards">Cards</b><span class="cinta">¡Juega, Colecciona y Gana!</span></div>`;
   function menu(t) {
+    const cod = (window.YC_CODIGO || new URLSearchParams(location.search).get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); window.YC_CODIGO = null;
+    if (cod.length >= 4) { try { const u = new URL(location.href); u.searchParams.delete('sala'); history.replaceState(history.state, '', u); } catch (e) {} vista(t, '<div class="yc-panel" style="text-align:center"><h2>🌐 Entrando a la sala…</h2></div>'); apiYC('unir', { id: cod }).then(r => { if (r.error) { toast(r.error); online(t); } else salaOnline(t, r.id); }); return; }
     const p = prog(), N = nivelDe(p.xp), li = LIGAS[ligaDe(p.liga.pts)], m = misiones(), misListas = MIS.filter(x => (m.p[x.k] || 0) >= x.meta && !m.cobradas.includes(x.k)).length;
     const avAct = Math.min(15, Object.keys(p.av).length + 1), logrosPend = 0;
     vista(t, `<div class="yc-lobby">
@@ -257,11 +399,11 @@ ${(() => { const E = eventoActivo(); if (!E) return ''; const x = evProg(p, E), 
 <button class="yc-tile" data-ir="clasico" style="background:linear-gradient(160deg,#ff5a6e,#8f0a24)"><span>🤖</span>Clásico<small>Contra la IA</small></button>
 <button class="yc-tile" data-ir="fiesta" style="background:linear-gradient(160deg,#f0abfc,#7e22ce)"><span>🎉</span>Modos fiesta<small>4 modos</small></button>
 <button class="yc-tile" data-ir="entrena" style="background:linear-gradient(160deg,#a78bfa,#4c1d95)"><span>🎓</span>Entrenamiento<small>Aprende jugando</small></button>
-<button class="yc-tile" disabled style="background:linear-gradient(160deg,#5cc8ff,#0b2e8a)"><span>🌐</span>Online y amigos<small>Pronto</small></button></div>
+<button class="yc-tile" data-ir="online" style="background:linear-gradient(160deg,#5cc8ff,#0b2e8a)"><span>🌐</span>Con amigos<small>1 vs 1 · 2 vs 2 · 4</small></button></div>
 <div class="yc-nav">${[['perfil', '👤', 'Perfil', 0], ['album', '📒', 'Álbum', p.mochila.sobres], ['mochila', '🎒', 'Mochila', 0], ['misiones', '🎯', 'Misiones', misListas], ['liga', '🏅', 'Liga', p.liga.ant ? 1 : 0], ['reglas', '📖', 'Reglas', logrosPend]].map(([k, e, n, b]) => `<button data-ir="${k}"><span>${e}</span>${n}${b ? `<i class="yc-badge">${b}</i>` : ''}</button>`).join('')}</div>
 <p style="text-align:center;font-size:.78rem;opacity:.75;margin:0">Todo se gana jugando · Sin compras · 🏆 ${p.st.g} victorias de ${p.st.p} partidas</p></div>`);
     $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (!b || b.disabled) return; FX.son('click'); const k = b.dataset.ir;
-      ({ evento: () => evento(t), aventura: () => mapa(t), clasico: () => clasico(t), fiesta: () => fiesta(t), entrena: () => { const o = JSON.parse(LS_.get('opc') || '{}'); partida(t, { n: 2, dif: 'facil', acum: false, entrena: true, heroes: o.heroes }); }, perfil: () => perfil(t), album: () => album(t), mochila: () => mochila(t), misiones: () => verMisiones(t), liga: () => liga(t), reglas: () => reglas(t) })[k]?.(); });
+      ({ online: () => online(t), evento: () => evento(t), aventura: () => mapa(t), clasico: () => clasico(t), fiesta: () => fiesta(t), entrena: () => { const o = JSON.parse(LS_.get('opc') || '{}'); partida(t, { n: 2, dif: 'facil', acum: false, entrena: true, heroes: o.heroes }); }, perfil: () => perfil(t), album: () => album(t), mochila: () => mochila(t), misiones: () => verMisiones(t), liga: () => liga(t), reglas: () => reglas(t) })[k]?.(); });
   }
 
   function clasico(t) {
@@ -270,6 +412,7 @@ ${(() => { const E = eventoActivo(); if (!E) return ''; const x = evProg(p, E), 
 <div class="yc-menu"><div><b>Jugadores</b><div class="yc-opc" id="ycN">${[2, 3, 4].map(n => `<button data-n="${n}" class="${opc.n === n ? 'on' : ''}">${n}</button>`).join('')}</div></div>
 <div><b>Dificultad de la IA</b><div class="yc-opc" id="ycD">${[['facil', '😊 Fácil'], ['medio', '🤔 Medio'], ['dificil', '😈 Difícil']].map(([k, l]) => `<button data-d="${k}" class="${opc.dif === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
 <label style="font-size:.9rem;display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="ycAc" ${opc.acum ? 'checked' : ''}> Regla Yupi: acumular +2 y +4</label>
+<label style="font-size:.9rem;display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="ycMn" ${opc.masN !== false ? 'checked' : ''}> ➕ Cartas +3, +4, +5 y +6</label>
 <label style="font-size:.9rem;display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="ycHe" ${opc.heroes !== false ? 'checked' : ''}> 🌟 Cartas de personaje (con sonido y poder)</label>
 <div class="yc-vitrina">${Object.keys(HEROES).map((v, i) => `<button type="button" data-heroe="${v}" title="${HEROES[v].n}: ${HEROES[v].h}">${svgCarta({ c: 'w', v, id: 'v' + i }, innerWidth < 600 ? 70 : 88)}</button>`).join('')}</div><p style="margin:-4px 0 0;font-size:.78rem;opacity:.8">Toca un personaje para escuchar su sonido y ver su poder 🔊</p>
 <button class="yc-yupi" id="ycJugar" style="font-size:1.4rem">▶ ¡A jugar!</button></div></div>`);
@@ -277,7 +420,7 @@ ${(() => { const E = eventoActivo(); if (!E) return ''; const x = evProg(p, E), 
     const sel = (box, attr, fn) => $(box).onclick = e => { const b = e.target.closest(`[data-${attr}]`); if (!b) return; FX.son('click'); fn(b.dataset[attr]); $(box).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
     sel('#ycN', 'n', v => opc.n = +v); sel('#ycD', 'd', v => opc.dif = v);
     $('#yc').addEventListener('click', e => { const b = e.target.closest('[data-heroe]'); if (!b) return; const H = HEROES[b.dataset.heroe]; sonar(b.dataset.heroe); toast(`${H.e} ${H.n}: ${H.h}`); });
-    $('#ycJugar').onclick = () => { opc.heroes = $('#ycHe').checked; opc.acum = $('#ycAc').checked; LS_.set('opc', JSON.stringify(opc)); partida(t, { ...opc, entrena: false }); };
+    $('#ycJugar').onclick = () => { opc.masN = $('#ycMn').checked; opc.heroes = $('#ycHe').checked; opc.acum = $('#ycAc').checked; LS_.set('opc', JSON.stringify(opc)); partida(t, { ...opc, entrena: false }); };
   }
 
   function fiesta(t) {
@@ -395,7 +538,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
   }
 
   function reglas(t) {
-    vista(t, `<div class="yc-panel" style="max-width:640px">${cab('📖 Cómo se juega')}<ul style="margin:0;padding-left:20px;line-height:1.6"><li>Todos empiezan con 7 cartas. Juega una carta del <b>mismo color o número</b> que la de la mesa.</li><li>Si no puedes, <b>roba</b> una del mazo (si sirve, puedes jugarla).</li><li><b>⦸ Saltar:</b> el siguiente pierde su turno. <b>⇄ Reversa:</b> cambia el sentido. <b>+2:</b> el siguiente roba 2 y pierde el turno.</li><li><b>★ Comodín:</b> eliges el color. <b>Comodín +4:</b> eliges color y el siguiente roba 4.</li><li>Con <b>2 cartas</b>, pulsa <b>¡YUPI!</b> antes de jugar (o justo después). Si te atrapan sin decirlo: <b>+2 cartas</b>. Tú también puedes atrapar a los rivales.</li><li>Gana quien se queda sin cartas. Sumas puntos por las cartas que les quedan a los demás.</li></ul>
+    vista(t, `<div class="yc-panel" style="max-width:640px">${cab('📖 Cómo se juega')}<ul style="margin:0;padding-left:20px;line-height:1.6"><li>Todos empiezan con 7 cartas. Juega una carta del <b>mismo color o número</b> que la de la mesa.</li><li>Si no puedes, <b>roba</b> una del mazo (si sirve, puedes jugarla).</li><li><b>⦸ Saltar:</b> el siguiente pierde su turno. <b>⇄ Reversa:</b> cambia el sentido. <b>+2:</b> el siguiente roba 2 y pierde el turno.</li><li><b>➕ +3, +4, +5 y +6</b> de colores: el siguiente roba esas cartas y pierde el turno. Con la Regla Yupi, puedes responder con un + igual o más grande.</li><li><b>★ Comodín:</b> eliges el color. <b>Comodín +4:</b> eliges color y el siguiente roba 4.</li><li>Con <b>2 cartas</b>, pulsa <b>¡YUPI!</b> antes de jugar (o justo después). Si te atrapan sin decirlo: <b>+2 cartas</b>. Tú también puedes atrapar a los rivales.</li><li>Gana quien se queda sin cartas. Sumas puntos por las cartas que les quedan a los demás.</li></ul>
 <h3 style="margin:14px 0 6px">🌟 Cartas de personaje</h3><div class="yc-vitrina">${Object.keys(HEROES).map((v, i) => `<button type="button" data-heroe="${v}" title="${HEROES[v].n}: ${HEROES[v].h}">${svgCarta({ c: 'w', v, id: 'r' + i }, innerWidth < 600 ? 70 : 88)}</button>`).join('')}</div><ul style="padding-left:20px;line-height:1.6">${Object.values(HEROES).map(H => `<li>${H.e} <b>${H.n}:</b> ${H.h}.</li>`).join('')}</ul>
 <h3 style="margin:14px 0 6px">⭐ Progreso</h3><p style="margin:0;line-height:1.5">Jugando ganas <b>XP</b> (subes de nivel y recibes sobres), <b>estrellas</b>, <b>logros</b>, <b>figuritas</b> y <b>marcos</b>. Los reversos y las mesas se desbloquean ganando. <b>Nada se compra con dinero</b>: todo se gana jugando.</p></div>`);
     alVolver(t);
@@ -411,7 +554,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     const J = [{ yo: true, n: LS.get('chatNom') || 'Tú', cara: '😎', mano: [] }, ...[...Array(opc.n - 1)].map((_, i) => ({ yo: false, n: nombres[i], cara: caras[i], mano: [], vistos: {} }))];
     if (opc.jefe) Object.assign(J[1], { n: opc.jefe.n, cara: opc.jefe.art && hayArte(opc.jefe.art) ? 'art:' + opc.jefe.art : opc.jefe.cara, jefe: true });
     const SS = { esp: 0, yupi: 0, heroes: 0, atrapa: 0, atrapado: false, mega: false };
-    let ocupado = false, turnoId = 0, pila = mazo(opc.heroes === false ? 0 : (opc.heroesX || 1)), desc = [], turno = 0, dir = 1, color = null, acum = 0, yupi = new Set(), vulnerable = null, robado = false, fin_ = false, pistaN = 0;
+    let ocupado = false, turnoId = 0, pila = mazo(opc.heroes === false ? 0 : (opc.heroesX || 1), opc.masN !== false), desc = [], turno = 0, dir = 1, color = null, acum = 0, yupi = new Set(), vulnerable = null, robado = false, fin_ = false, pistaN = 0;
     for (let k = 0; k < 7; k++) for (const j of J) j.mano.push(pila.pop());
     if (opc.jefe) pila.unshift(...J[1].mano.splice(5)); // el jefe empieza con 5 cartas
     let ini; do { ini = pila.pop(); if (ini.c === 'w' || ini.v === 'mas4') { pila.unshift(ini); ini = null; } } while (!ini);
@@ -421,9 +564,9 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     const sig = (k = 1) => (turno + dir * k + J.length * 4) % J.length;
     const LOG = []; const total = () => J.reduce((a, j) => a + j.mano.length, 0) + pila.length + desc.length;
     const robar = (j, n) => { LOG.push(['robar', J.indexOf(j), n, total()]); for (let i = 0; i < n; i++) { if (!pila.length) { const top = desc.pop(); pila = mezclar(desc.map(x => x.c === 'w' ? { ...x, elegido: undefined } : x)); desc = [top]; } if (pila.length) j.mano.push(pila.pop()); } yupi.delete(J.indexOf(j)); };
-    const puede = x => { const T = tope(); if (acum) return opc.acum && ((T.v === 'mas2' && (x.v === 'mas2' || cuatro(x.v))) || (cuatro(T.v) && cuatro(x.v))); return x.c === 'w' || x.c === color || x.v === T.v; };
-    const nombreC = x => esHeroe(x) ? HEROES[x.v].n : x.c === 'w' ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : `${COL[x.c].n} ${/^\d$/.test(x.v) ? x.v : { saltar: 'Saltar', reversa: 'Reversa', mas2: '+2' }[x.v]}`;
-    const EXPLICA = { saltar: '⦸ <b>Saltar</b>: el siguiente jugador pierde su turno.', reversa: '⇄ <b>Reversa</b>: el juego cambia de sentido.', mas2: '<b>+2</b>: el siguiente roba 2 cartas y pierde el turno.', comodin: '★ <b>Comodín</b>: quien lo juega elige el nuevo color.', mas4: '<b>Comodín +4</b>: elige color y el siguiente roba 4 cartas.', ...Object.fromEntries(Object.entries(HEROES).map(([k, H]) => [k, `${H.e} <b>${H.n}</b>: ${H.h}.`])) };
+    const puede = x => { const T = tope(); if (acum) return opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === color || x.v === T.v; };
+    const nombreC = x => esHeroe(x) ? HEROES[x.v].n : x.c === 'w' ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : `${COL[x.c].n} ${/^\d$/.test(x.v) ? x.v : ({ saltar: 'Saltar', reversa: 'Reversa' }[x.v] || '+' + suma(x))}`;
+    const EXPLICA = { saltar: '⦸ <b>Saltar</b>: el siguiente jugador pierde su turno.', reversa: '⇄ <b>Reversa</b>: el juego cambia de sentido.', mas3: '<b>+3</b>: el siguiente roba 3 cartas y pierde el turno.', mas4c: '<b>+4</b> de color: el siguiente roba 4 cartas y pierde el turno.', mas5: '<b>+5</b>: el siguiente roba 5 cartas y pierde el turno.', mas6: '<b>+6</b>: ¡el siguiente roba 6 cartas y pierde el turno!', mas2: '<b>+2</b>: el siguiente roba 2 cartas y pierde el turno.', comodin: '★ <b>Comodín</b>: quien lo juega elige el nuevo color.', mas4: '<b>Comodín +4</b>: elige color y el siguiente roba 4 cartas.', ...Object.fromEntries(Object.entries(HEROES).map(([k, H]) => [k, `${H.e} <b>${H.n}</b>: ${H.h}.`])) };
 
     // ---- Pintar mesa ----
     function pintar(msg) {
@@ -464,7 +607,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       if (x.v === 'bruja') salto = 2;
       if (x.v === 'idol') { J.forEach((o, i) => { if (i !== k) robar(o, 1); }); botReacciona(k, 'feliz'); }
       if (x.v === 'coquito') { const v = J.filter((o, i) => i !== k).sort((a, b) => a.mano.length - b.mano.length)[0]; if (v && v.mano.length < j.mano.length) { botReacciona(J.indexOf(v), 'sufre'); const tmp = j.mano; j.mano = v.mano; v.mano = tmp; yupi.delete(k); yupi.delete(J.indexOf(v)); if (opc.entrena || j.yo || v.yo) tip(`🐶 ¡Coquito cambió las cartas de ${escH(j.n)} con ${escH(v.n)}!`, 2200); } }
-      if (x.v === 'mas2' || cuatro(x.v)) { acum += x.v === 'mas2' ? 2 : 4; const s = J[sig()]; const responde = opc.acum && s.mano.some(c => (x.v === 'mas2' && (c.v === 'mas2' || cuatro(c.v))) || (cuatro(x.v) && cuatro(c.v)));
+      if (suma(x)) { acum += suma(x); const s = J[sig()]; const responde = opc.acum && s.mano.some(c => suma(c) > 0 && suma(c) >= suma(x));
         if (!responde) { robar(s, acum); FX.son('error'); botReacciona(J.indexOf(s), 'sufre'); if (!s.yo && k !== 0) botReacciona(k, 'feliz'); if (opc.entrena && s.yo) tip(`Te tocó robar ${acum} cartas y pierdes el turno.`, 2000); acum = 0; salto = 2; } }
       if (vulnerable !== null && vulnerable !== k) vulnerable = null;
       turno = sig(salto); siguienteTurno();
@@ -515,7 +658,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       let x;
       const prox = J[sig()], proxPocas = prox.mano.length <= 2;
       if (opc.dif === 'facil') x = azar(ops);
-      else { const val = c => { let s = 0; if (c.c === 'w') s -= 30; if (esp(c) && c.c !== 'w') s += proxPocas ? 40 : 8; if (cuatro(c.v)) s += proxPocas ? 60 : -20; if (c.v === 'bruja') s += proxPocas ? 50 : -10; if (c.v === 'idol') s += J.length > 2 ? 30 : 5; if (c.v === 'coquito') { const menor = Math.min(...J.filter(o => o !== j).map(o => o.mano.length)); s += j.mano.length - 1 - menor >= 3 ? 80 : -60; } if (/^\d$/.test(c.v)) s += +c.v; const mismos = j.mano.filter(o => o.c === c.c).length; s += mismos * 3; if (opc.dif === 'dificil' && j.mano.length <= 3 && c.c === 'w') s += 25; return s; };
+      else { const val = c => { let s = 0; if (c.c === 'w') s -= 30; if (esp(c) && c.c !== 'w') s += proxPocas ? 40 : 8; if (cuatro(c.v)) s += proxPocas ? 60 : -20; if (c.c !== 'w' && suma(c) >= 3) s += proxPocas ? 45 + suma(c) : 6 + suma(c); if (c.v === 'bruja') s += proxPocas ? 50 : -10; if (c.v === 'idol') s += J.length > 2 ? 30 : 5; if (c.v === 'coquito') { const menor = Math.min(...J.filter(o => o !== j).map(o => o.mano.length)); s += j.mano.length - 1 - menor >= 3 ? 80 : -60; } if (/^\d$/.test(c.v)) s += +c.v; const mismos = j.mano.filter(o => o.c === c.c).length; s += mismos * 3; if (opc.dif === 'dificil' && j.mano.length <= 3 && c.c === 'w') s += 25; return s; };
         x = ops.sort((a, b) => val(b) - val(a))[0]; }
       if (j.mano.length === 2 && Math.random() > { facil: .45, medio: .2, dificil: .03 }[opc.dif]) yupi.add(k); // dice ¡YUPI! antes de jugar
       const desde = document.querySelector(`[data-op="${k}"]`) || $('#ycPila');
@@ -552,7 +695,7 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
 
     // ---- Montaje ----
     const M = MESAS.find(m => m.k === LS_.get('mesa')) || MESAS[0];
-    stage(`<style>${CSS}${CSS2}</style><div id="yc" class="full"><div class="fondo" style="background:${M.k === 'cielo' && hayArte('fondo_mesa') ? `url(${artUrl('fondo_mesa')}) center/cover,` : ''}${M.g}"></div>${M.k === 'cielo' && !hayArte('fondo_mesa') ? '<div class="yc-palmas"><span>🌴</span><span>🌺</span><span>🌴</span><span>🌺</span></div>' : ''}<div class="luz"></div><div class="capa">
+    stage(`<style>${CSS}${CSS2}</style><div id="yc" class="full"><div class="fondo" style="background:${M.k === 'cielo' && hayArte('fondo_terraza') ? `url(${artUrl('fondo_terraza')}) center/cover,` : ''}${M.g}"></div>${M.k === 'cielo' && !hayArte('fondo_terraza') ? '<div class="yc-palmas"><span>🌴</span><span>🌺</span><span>🌴</span><span>🌺</span></div>' : ''}<div class="luz"></div><div class="capa">
 <div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">← Menú</button><b style="text-align:center">🃏 YUPI CARDS${opc.entrena ? ' · 🎓 Entrenamiento' : ''}${opc.aventura ? ' · 🗺️ Nivel ' + opc.aventura : opc.modo ? ' · ' + (MODOS.find(m => m.k === opc.modo)?.e || '🎉') + ' ' + (MODOS.find(m => m.k === opc.modo)?.n || '') : ''}</b><button class="yc-btn" id="ycMus" style="padding:6px 10px" title="Música">${LS.get('arcMusica') === '0' ? '🔇' : '🎵'}</button><span id="ycReloj" style="min-width:96px;text-align:right"></span></div><div class="yc-top" id="ycTop"></div></div>
 <div class="yc-centro"><div class="yc-mesa"></div><div class="yc-pila" id="ycPila" title="Robar carta" style="width:${innerWidth < 600 ? 84 : 112}px;height:${innerWidth < 600 ? 122 : 162}px">${[0, 1, 2].map(i => `<div style="position:absolute;top:${-i * 3}px;left:${i * 2}px">${reverso(innerWidth < 600 ? 84 : 112)}</div>`).join('')}<span id="ycPilaN" style="position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:.8rem;opacity:.8"></span></div>
 <div class="yc-desc" id="ycDesc"></div><svg class="yc-dir" id="ycDir" viewBox="0 0 200 200" aria-hidden="true"><defs><marker id="ycFl" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fde68a"/></marker></defs><path d="M100 12A88 88 0 0 1 188 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/><path d="M100 188A88 88 0 0 1 12 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/></svg><div class="yc-info" id="ycInfo"></div></div>
@@ -575,7 +718,7 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
     };
     window.addEventListener('resize', () => vivo && pintar());
     if (opc.entrena) tip('🎓 <b>Entrenamiento</b>: las cartas que puedes jugar brillan. Juega por <b>color</b> o por <b>número</b>. Si ninguna sirve, toca el mazo.', 4200);
-    if (esp(ini) && ini.v !== 'mas4') { if (ini.v === 'saltar') turno = sig(); if (ini.v === 'reversa') dir = -1; if (ini.v === 'mas2') { robar(J[0], 2); turno = sig(); } }
+    if (esp(ini) && ini.v !== 'mas4') { if (ini.v === 'saltar') turno = sig(); if (ini.v === 'reversa') dir = -1; if (suma(ini) && ini.c !== 'w') { robar(J[0], suma(ini)); turno = sig(); } }
     siguienteTurno();
     setParar(() => { vivo = false; clearTimeout(timer); clearInterval(relojT); salirCompleta(); });
     window.__yc = { log: () => LOG.slice(-25), estado: () => ({ turno, color, acum, dir, top: tope(), manos: J.map(j => j.mano.length), pila: pila.length, desc: desc.length, fin: fin_, vulnerable, yupi: [...yupi] }), mano: () => J[0].mano };
