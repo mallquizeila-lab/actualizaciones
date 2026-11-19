@@ -1,3 +1,6 @@
+9.27.1
+- 🎨 Ilustraciones con NVIDIA (respaldo cuando se acaba el cupo gratis de Cloudflare): NVIDIA dejó de aceptar un dato («seed») y daba error 422. Ya no se envía, y si NVIDIA vuelve a rechazar algún dato, ShortForge lo quita solo y reintenta.
+
 9.27.0
 - 🌐 YUPI CARDS CON AMIGOS (en línea): crea una sala privada y juega 1 vs 1, de 3, de 4 o 2 vs 2 por equipos.
   · Cada sala tiene su código (ej. K7P2Q): compártelo con «Copiar» o por WhatsApp, o invita a tus amigos con un toque.
