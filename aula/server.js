@@ -287,6 +287,10 @@ const correo = require('./correo').crear({ db, q, q1, run, getS, setS, limpio })
 for (const [k, f] of Object.entries(correo.API)) API[k] = ctx => f({ ...ctx, aulaDe, membresia });
 const conCorreo = (u, a, tipo, asunto, cuerpo, extra = {}) => { if (!correo.listo()) return 0; const dest = correo.familiasDe(a.id); if (!dest.length) return 0; correo.encolar({ colegioId: a.colegio_id, aulaId: a.id, autorId: u.id, tipo, asunto, cuerpo, destinatarios: dest, ...extra }); return dest.length; };
 
+// 🤖 «Mi asistente» con IA para cada docente (ver asistente.js)
+const asistente = require('./asistente').crear({ db, q, q1, run, getS, riesgo, aulaDe, membresia, E });
+for (const [k, f] of Object.entries(asistente.API)) API[k] = f;
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
 const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio']);
 

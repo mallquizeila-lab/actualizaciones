@@ -35,3 +35,12 @@ Para internet: Cloudflare → Zero Trust → Networks → Tunnels → tu túnel 
 - Para miles de docentes: **Amazon SES** (≈ US$ 0.10 por cada 1 000 correos). En tu panel elige «SMTP» con
   servidor `email-smtp.us-east-1.amazonaws.com`, puerto 465 y el usuario/clave SMTP que te da SES.
 - Para que los correos no caigan en spam: usa un remitente de **tu dominio** y agrega en Cloudflare los registros SPF/DKIM que te indique Brevo o SES.
+
+## 🤖 Mi asistente (IA para cada docente)
+Menú **🤖 Mi asistente**. Libretín conoce el CNEB, las aulas, grados y cursos del docente y quiénes necesitan apoyo
+(solo con su primer nombre: nunca se envían apellidos, DNI, fotos, salud ni datos de las familias a la IA).
+Botones rápidos: sesión de aprendizaje, examen con respuestas, rúbrica AD/A/B/C, ficha de trabajo, problemas de matemática
+contextualizados en Perú, unidad didáctica, conclusiones descriptivas, plan de apoyo, mensaje para padres, dinámicas,
+adaptación para NEE y oficios/informes. Cada respuesta se puede **copiar, imprimir con el nombre del colegio o enviar a las familias** por correo.
+Usa la IA de ShortForge (sin costo extra; se conecta solo con una clave privada dentro de tu VPS).
+Consultas al mes: prueba 40 · Docente 400 · Colegio 4 000.

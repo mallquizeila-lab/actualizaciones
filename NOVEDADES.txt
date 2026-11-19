@@ -1,3 +1,8 @@
+9.31.0
+- 🤖 Libretín: «Mi asistente», un ayudante con IA para cada docente. Conoce el CNEB, sus aulas, cursos y quiénes necesitan apoyo. Con un toque arma sesiones de aprendizaje, exámenes con respuestas, rúbricas AD/A/B/C, fichas de trabajo, problemas de matemática con ejemplos del Perú, unidades didácticas, conclusiones descriptivas para la libreta, planes de apoyo, mensajes para padres, dinámicas, adaptaciones para NEE y oficios. Cada respuesta se copia, se imprime con el nombre del colegio o se envía por correo a las familias.
+  · Usa la IA de ShortForge (sin costo extra) mediante una clave privada dentro de tu VPS. A la IA nunca le llegan apellidos ni datos privados de los alumnos.
+  · En el inicio del docente aparece una invitación a usarlo, y una guía «¿Cómo te ahorro tiempo?».
+
 9.30.0
 - 📧 Libretín envía correos a las familias con un clic: plantillas de tarea, reunión (fecha, hora y enlace de Meet o Zoom), comunicado, recordatorio y felicitación, personalizadas con el nombre del papá o mamá y de su hijo(a). Las tareas y comunicados nuevos se pueden mandar por correo al publicarlos. Historial con enviados y fallidos.
 - 📣 Email marketing para ti: campañas a todos los docentes, a los que están en prueba, vencidos o activos, para vender más membresías.
