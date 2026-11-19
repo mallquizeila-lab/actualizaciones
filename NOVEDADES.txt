@@ -1,3 +1,11 @@
+9.17.0
+- 🏞️ Webs para AdSense con diseño profesional, al estilo de las mejores webs del nicho:
+  · Portada con FOTO REAL grande a lo ancho y el título centrado, temas como botones y señales de confianza (guías publicadas, última actualización, fuentes oficiales).
+  · Guía destacada en un bloque de texto y foto, «Explora por tema» con tarjetas, «Últimas guías» sin repetir artículos, bloque «Sobre nosotros» con foto y sección «Por qué confiar» con el autor.
+  · Tarjetas con foto grande, etiqueta, fecha, tiempo de lectura y botón «Leer la guía completa».
+- 📸 Las imágenes de los artículos ahora son FOTOS REALES gratis (Pexels o Pixabay); si no hay, ilustración realista con IA.
+- 🔍 Estudio del nicho: antes de planificar, la IA analiza cómo son los sitios más profesionales y mejor posicionados, y las webs de referencia que pegues (SEO: títulos, descripciones, encabezados, menú, datos estructurados; diseño: fotos, colores, tarjetas; contenido). Lo usa para planificar y escribir MEJOR, sin copiar. En cada web: campo «Webs de referencia» y botón «🔍 Estudiar el nicho ahora (y poner fotos reales)».
+
 9.16.1
 - Modo revisión de AdSense: el lema sin «gana» también en el encabezado y en todos los idiomas (inglés, portugués, francés, alemán, italiano e indonesio).
 

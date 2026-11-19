@@ -72,6 +72,9 @@
       <div class="row">${v('nombre', 'Nombre')}${v('dominio', 'Dominio', 'midominio.com')}${v('correo', 'Correo de contacto')}</div>
       ${w.tipo === 'adsense' ? `<div class="row">${v('responsable', 'Responsable (nombre real)')}${v('ciudad', 'Ciudad')}${v('lema', 'Lema corto')}</div>
       <label>Misión (aparece en la portada y en Sobre nosotros)<input id="wa-mision-${w.id}" value="${esc(w.mision || '')}"></label>
+      <label>🔍 Webs de referencia del nicho (las más profesionales; separadas por espacio). El sistema estudia su SEO, diseño y contenido para hacerlo MEJOR, sin copiar<input id="wa-referenciasWeb-${w.id}" value="${esc(w.referenciasWeb || '')}" placeholder="https://www.luxuryperu.travel/ https://..."></label>
+      <div class="btns"><button class="b ghost sm" data-act="wbAcc" data-a="estudio" data-id="${w.id}">🔍 Estudiar el nicho ahora (y poner fotos reales)</button></div>
+      ${w.estudio ? `<details class="hint"><summary style="cursor:pointer">📋 Estudio del nicho (${esc(w.estudio.fecha || '')})</summary>${['superarlos', 'tipos_de_pagina', 'bloques_utiles', 'seo_tecnico', 'diseno', 'evitar'].filter(k => (w.estudio[k] || []).length).map(k => `<p style="margin:6px 0"><b>${{ superarlos: '💡 Cómo superarlos', tipos_de_pagina: '📄 Tipos de página que posicionan', bloques_utiles: '🧩 Bloques que aportan valor', seo_tecnico: '🔎 SEO técnico', diseno: '🎨 Diseño', evitar: '🚫 Evitar' }[k]}:</b> ${w.estudio[k].map(esc).join(' · ')}</p>`).join('')}</details>` : ''}
       <div class="row">${v('autor', 'Autor', '', w.autor?.nombre)}${v('autorBio', 'Bio del autor', '', w.autor?.bio)}</div>
       <div class="row">${v('adsenseId', 'ID de AdSense (ca-pub-…)', 'ca-pub-1234567890123456')}${v('gsc', 'Verificación de Search Console', 'código de la meta google-site-verification')}</div>
       <div class="row"><label>Páginas por semana<input id="wa-ritmo-${w.id}" type="number" min="1" max="7" value="${w.ritmo || 4}"></label><label>Borradores por día (modo automático)<input id="wa-porDia-${w.id}" type="number" min="1" max="5" value="${w.porDia || 2}"></label></div>
@@ -147,7 +150,7 @@
         if (a === 'zip' && r.zip) { location.href = r.zip; toast('⬇ Descargando ZIP'); }
         else if (a === 'construir') toast(`🏗️ Sitio armado: ${r.construido?.paginas || 0} páginas. Mira la vista previa.`);
         else if (a === 'aprobarBuenas') toast(`✅ Aprobadas ${r.aprobadas} páginas (se publican a ritmo natural)`);
-        else toast({ logo: '🎨 Creando logo…', escribir: '✍️ Escribiendo páginas (unos minutos)…', planificar: '💡 Buscando ideas nuevas…', publicar: '🚀 Publicando en Cloudflare…', textos: '✍️ Reescribiendo textos…', fotosServicios: '🎨 Buscando fotos por temática y armando la portada (1 a 2 minutos)…', borrar: '🗑 Borrada' }[a] || 'Listo'); }
+        else toast({ logo: '🎨 Creando logo…', escribir: '✍️ Escribiendo páginas (unos minutos)…', planificar: '💡 Buscando ideas nuevas…', publicar: '🚀 Publicando en Cloudflare…', textos: '✍️ Reescribiendo textos…', estudio: '🔍 Estudiando el nicho y poniendo fotos reales (2 a 5 minutos)…', fotosServicios: '🎨 Buscando fotos por temática y armando la portada (1 a 2 minutos)…', borrar: '🗑 Borrada' }[a] || 'Listo'); }
       finally { el.disabled = false; } await cargar(); }),
     wbPag: guard(async el => { const a = el.dataset.a; if (a === 'descartar' && !confirm('¿Descartar esta página?')) return; el.disabled = true;
       try { await api('/api/webs', { accion: a, id: el.dataset.id, pid: el.dataset.pid }); toast({ aprobar: '✅ Aprobada: se publicará en su fecha (ritmo natural)', escribir: '✍️ Escribiendo…', descartar: '🗑 Descartada' }[a]); }
@@ -157,7 +160,7 @@
     wbCerrarEd: () => { document.getElementById('wbEd')?.remove(); editor = null; render(); },
     wbGuardarEd: guard(async () => { const { w, p } = editor; await api('/api/webs', { accion: 'editar', id: w.id, pid: p.id, tituloSeo: $('#we-tit').value, desc: $('#we-desc').value, cuerpo: $('#we-cuerpo').value, datos: $('#we-datos').value }); toast('💾 Guardado'); document.getElementById('wbEd')?.remove(); editor = null; await cargar(); }),
     wbAjustes: guard(async el => { const id = el.dataset.id, g = k => document.getElementById(`wa-${k}-${id}`), o = { accion: 'ajustes', id };
-      for (const k of ['nombre', 'dominio', 'correo', 'responsable', 'ciudad', 'lema', 'mision', 'autor', 'autorBio', 'adsenseId', 'gsc', 'ritmo', 'porDia', 'rubro', 'whatsapp', 'horario', 'direccion', 'servicios', 'diferencial', 'referencias', 'color']) if (g(k)) o[k] = g(k).value;
+      for (const k of ['nombre', 'dominio', 'correo', 'responsable', 'ciudad', 'lema', 'mision', 'referenciasWeb', 'autor', 'autorBio', 'adsenseId', 'gsc', 'ritmo', 'porDia', 'rubro', 'whatsapp', 'horario', 'direccion', 'servicios', 'diferencial', 'referencias', 'color']) if (g(k)) o[k] = g(k).value;
       for (const k of ['auto', 'autoAprobar', 'autoPublicar', 'anuncios']) if (g(k)) o[k] = g(k).checked;
       await api('/api/webs', o); toast('💾 Ajustes guardados'); await cargar(); }),
   });
