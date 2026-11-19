@@ -1,3 +1,6 @@
+9.19.2
+- 🔔 Te aviso por Telegram cuando una web AdSense cumple TODA la lista (11/11) y está lista para pedir aprobación. Y cada lunes te mando lo que le falta a cada web.
+
 9.19.1
 - Arreglo: si la IA devuelve un texto demasiado corto, ya no se rinde; lo pide de nuevo a OTRO motor con instrucciones claras (hasta 3 intentos).
 - Arreglo: las guías que quedaban trabadas en «Escribiendo…» (porque ShortForge se reinició a mitad de una) vuelven solas a «idea» y se escriben de nuevo.
