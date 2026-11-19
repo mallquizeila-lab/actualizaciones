@@ -1,3 +1,7 @@
+9.20.0
+- 🖼️🎥 Guías más visuales: además de la foto principal, cada guía lleva 2 FOTOS REALES dentro del texto (con su descripción) y 1 VIDEO real corto (Pexels/Pixabay, 720p, sin sonido, liviano y sin cargar hasta que lo tocan, para no poner lenta la web). Las guías ya escritas se completan solas (3 por día).
+- 🧪 «Evaluar nicho» al crear una web: puntaje para AdSense (pago de anuncios, competencia, si dura en el tiempo, riesgos), el mejor enfoque del nicho y alternativas con un clic.
+
 9.19.2
 - 🔔 Te aviso por Telegram cuando una web AdSense cumple TODA la lista (11/11) y está lista para pedir aprobación. Y cada lunes te mando lo que le falta a cada web.
 
