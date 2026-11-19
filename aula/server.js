@@ -318,7 +318,12 @@ const server = http.createServer(async (req, res) => {
     let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app)(\/|$)/.test(f)) f = "/index.html";
     const fp = path.join(PUB, path.normalize(f).replace(/^(\.\.[/\\])+/, ''));
     if (!fp.startsWith(PUB) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
-    let body = fs.readFileSync(fp); const h = { 'content-type': MIME[path.extname(fp)] || 'application/octet-stream', 'cache-control': fp.endsWith('.html') ? 'no-cache' : 'public, max-age=3600', ...SEG };
+    let body = fs.readFileSync(fp);
+    if (fp.endsWith('index.html')) { // vista previa al compartir (WhatsApp, Facebook, Telegram): imagen, título y descripción
+      const host = /^[a-z0-9.:-]{3,100}$/i.test(req.headers.host || '') ? req.headers.host : 'localhost', base = (req.headers['cf-connecting-ip'] || req.headers['x-forwarded-proto'] === 'https' ? 'https://' : 'http://') + host;
+      const t = 'ProfeTok · Tu aula ordenada, tus familias informadas', d = 'Asistencia, notas, tareas, alertas tempranas y Libretín, un asistente con IA que arma sesiones y exámenes en segundos. Prueba gratis 15 días.';
+      body = Buffer.from(body.toString().replace('<!--OG-->', `<meta property="og:type" content="website"><meta property="og:site_name" content="ProfeTok"><meta property="og:title" content="${t}"><meta property="og:description" content="${d}"><meta property="og:url" content="${base}/"><meta property="og:image" content="${base}/og.jpg?v=1"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="ProfeTok con Libretín, el asistente para docentes"><meta property="og:locale" content="es_PE"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${base}/og.jpg?v=1">`)); }
+    const h = { 'content-type': MIME[path.extname(fp)] || 'application/octet-stream', 'cache-control': fp.endsWith('.html') ? 'no-cache' : 'public, max-age=3600', ...SEG };
     if (/gzip/.test(req.headers['accept-encoding'] || '') && /\.(html|js|css|svg|json)$/.test(fp)) { body = zlib.gzipSync(body); h['content-encoding'] = 'gzip'; }
     res.writeHead(200, h); res.end(body);
   } catch (e) {

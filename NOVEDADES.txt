@@ -1,3 +1,6 @@
+9.31.6
+- 🖼️ ProfeTok se ve profesional al compartirlo: imagen de presentación con Libretín, el título, los beneficios y «Prueba gratis 15 días» en WhatsApp, Facebook y Telegram.
+
 9.31.5
 - 🔗 ProfeTok listo para compartir: la tarjeta explica cómo ponerlo en https://profetok.yupitok.com (enlace fijo, en el mismo túnel de Yupitok) y tiene un botón «⚡ Crear enlace instantáneo» (trycloudflare) con botones para copiar y mandar por WhatsApp.
 
