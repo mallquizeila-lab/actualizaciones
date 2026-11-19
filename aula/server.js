@@ -324,7 +324,7 @@ const server = http.createServer(async (req, res) => {
   } catch (e) {
     if (e === 403) return send(res, 403, { error: 'No tienes permiso para ver esto' }); if (e === 404) return send(res, 404, { error: 'No encontrado' }); if (e === 429) return send(res, 429, { error: 'Demasiados intentos. Intenta más tarde.' });
     if (typeof e === 'string') return send(res, 400, { error: e }); if (e?.message && /Imagen|pesad|grande/.test(e.message)) return send(res, 400, { error: e.message });
-    console.error('[ProfeTok]', e); return send(res, 500, { error: 'Algo salió mal. Intenta de nuevo.' });
+    console.error('[ProfeTok] Error en ' + clave + ': ' + (e?.stack || e)); return send(res, 500, { error: 'Algo salió mal (' + String(e?.message || e).slice(0, 120) + '). Avísale al administrador.' });
   }
 });
 // 💾 copia de seguridad diaria de la base de datos (se guardan las últimas 14)

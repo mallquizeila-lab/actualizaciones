@@ -636,6 +636,7 @@ function libretinCard() {
   <label>Tu número de Yape / WhatsApp de soporte (con 51)</label><input id="lbSop" value="${esc(l.soporte || '')}" placeholder="51987654321">
   ${l.on && l.clave ? `<p class="hint">🔑 Tu contraseña inicial de dueño: <b>${esc(l.clave)}</b> (cámbiala en «Mi cuenta» al entrar).</p>` : ''}
   <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender ProfeTok</button>'}</div>
+  ${l.log?.length ? `<details style="margin-top:8px"${l.log.some(x => /error|Error|ERR|salió mal|EADDRINUSE|no se/i.test(x)) ? ' open' : ''}><summary class="hint" style="cursor:pointer">🩺 Registro de ProfeTok (para revisar errores)</summary><pre style="white-space:pre-wrap;font-size:.78rem;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:10px;max-height:240px;overflow:auto">${esc(l.log.join('\n'))}</pre></details>` : ''}
   <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. profetok.com) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
 }
 VIEWS.profetok = () => `<h1>🎓 ProfeTok</h1><p class="sub">Tu sistema para docentes y familias (con membresías). Su personaje y asistente con IA es Libretín.</p>

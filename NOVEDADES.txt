@@ -1,3 +1,6 @@
+9.31.4
+- 🎓 ProfeTok: al encenderse cierra cualquier ProfeTok viejo que haya quedado abierto en Windows (pasaba al actualizar ShortForge: seguía respondiendo la versión anterior). La tarjeta de ProfeTok ahora muestra un «🩺 Registro» con los errores, y los errores del servidor dicen el motivo.
+
 9.31.3
 - 🎓 ProfeTok: desde tu propia PC o VPS ya no hay límite de registros ni de intentos de ingreso (antes, después de 5 pruebas en una hora no dejaba crear más cuentas). Los errores ahora se ven en rojo dentro del formulario, no solo en un aviso abajo.
 
