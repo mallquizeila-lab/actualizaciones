@@ -1,3 +1,15 @@
+9.25.0
+- 🃏 YUPI CARDS: ¡llegan las CARTAS DE PERSONAJE! Cada una con su dibujo dorado, su sonido y su poder (se pueden apagar en el menú):
+  · 🧙‍♀️ Brujita Lulú: eliges color y el siguiente se queda dormido (pierde el turno).
+  · 🤴 Rey Choki: comodín +4 real (también se puede acumular con la Regla Yupi).
+  · 🎤 Idol Yupi: eliges color y TODOS los rivales roban 1.
+  · 🐶 Coquito Travieso: eliges color y cambias tu mano con el rival que tiene menos cartas.
+  · Al jugarlas aparece el personaje en grande con su sonido. En el menú hay una vitrina: tócalas para escuchar su sonido y ver su poder. La IA sabe cuándo conviene usarlas. Ahora son 112 cartas.
+- 💬 Reacciones rápidas en la mesa: 8 emojis y 8 frases amables (¡Hola!, ¡Bien jugado!, ¡Suerte!…). Los rivales también reaccionan cuando les toca robar o cuando ganan. Sin texto libre: seguro para niños.
+- 🌀 Flechas grandes girando alrededor de la mesa que muestran el sentido del juego.
+- 🎯 La pantalla final muestra cómo vas en las misiones del día.
+- Los rivales de la IA ya no usan nombres de los personajes (para no confundir).
+
 9.24.0
 - 🃏 NUEVO JUEGO: YUPI CARDS (Fase 1). Cartas por colores y números con identidad propia de Yupitok:
   · De 2 a 4 jugadores contra la IA, con 3 dificultades (fácil, medio y difícil: la difícil recuerda qué colores le faltan a cada rival y ataca al que va ganando).
