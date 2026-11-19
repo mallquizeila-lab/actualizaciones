@@ -1,3 +1,7 @@
+9.27.2
+- 🎨 YUPI CARDS: cada ilustración lleva su número de versión, así Cloudflare nunca muestra una copia vieja o vacía (pasaba con el Pingüino de Humboldt). El contador del panel ya no pasa de 43/43.
+- 🎄 Nuevo fondo de Navidad: un pueblito nevado con árbol y regalos (el anterior lo filtró NVIDIA).
+
 9.27.1
 - 🎨 Ilustraciones con NVIDIA (respaldo cuando se acaba el cupo gratis de Cloudflare): NVIDIA dejó de aceptar un dato («seed») y daba error 422. Ya no se envía, y si NVIDIA vuelve a rechazar algún dato, ShortForge lo quita solo y reintenta.
 

@@ -26,8 +26,8 @@
     coquito: { n: 'Coquito Travieso', e: '🥥', h: 'Elige color y cambia tu mano con el rival que tiene menos cartas', g: ['#34d399', '#065f46'], icono: '🔄' },
   };
   // 🎨 Ilustraciones (las crea ShortForge con IA; mientras no estén, se usan los dibujos de respaldo)
-  const ART = new Set(), artUrl = id => `/arte/yupicards/${id}.webp`, hayArte = id => ART.has(id);
-  fetch('/arte/yupicards/manifest.json').then(r => r.ok ? r.json() : {}).then(m => { for (const id of m.arte || []) ART.add(id); }).catch(() => {});
+  const ART = new Set(), ARTV = {}, artUrl = id => `/arte/yupicards/${id}.webp${ARTV[id] ? '?v=' + ARTV[id] : ''}`, hayArte = id => ART.has(id);
+  fetch('/arte/yupicards/manifest.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).then(m => { Object.assign(ARTV, m.v || {}); for (const id of m.arte || []) ART.add(id); }).catch(() => {});
   // ➕ Cartas de robar: +2 (clásica) y las nuevas +3, +4, +5 y +6 de colores
   const SUMA = { mas2: 2, mas3: 3, mas4c: 4, mas5: 5, mas6: 6, mas4: 4, rey: 4 }, suma = x => SUMA[x?.v] || 0;
   const esHeroe = x => !!HEROES[x?.v], cuatro = v => v === 'mas4' || v === 'rey';
@@ -166,7 +166,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
   ];
   const FIGS = SETS.flatMap(s => s.f.map((f, i) => ({ id: s.k + i, set: s.k, e: f[0], n: f[1], art: f[2], rara: i < 1, evento: !!s.evento })));
   // 🎄 Eventos de temporada: misiones del día que dan sobres con figuritas exclusivas
-  const EVENTOS = [{ k: 'navidad', n: 'Evento de Navidad', e: '🎅', set: 'navidad', desde: [11, 15], hasta: [1, 6], fondo: 'fondo_navidad2', g: 'linear-gradient(135deg,#dc2626,#991b1b 45%,#166534)', mis: [{ k: 'jugar', n: '🎮 Juega 5 partidas', meta: 5 }, { k: 'ganar', n: '🏆 Gana 3 partidas', meta: 3 }, { k: 'pts', n: '⭐ Logra 500 puntos', meta: 500 }] }];
+  const EVENTOS = [{ k: 'navidad', n: 'Evento de Navidad', e: '🎅', set: 'navidad', desde: [11, 15], hasta: [1, 6], fondo: 'fondo_navidad3', g: 'linear-gradient(135deg,#dc2626,#991b1b 45%,#166534)', mis: [{ k: 'jugar', n: '🎮 Juega 5 partidas', meta: 5 }, { k: 'ganar', n: '🏆 Gana 3 partidas', meta: 3 }, { k: 'pts', n: '⭐ Logra 500 puntos', meta: 500 }] }];
   const eventoActivo = () => { const d = new Date(Date.now() - 5 * 3600e3), md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); return EVENTOS.find(E => { const a = E.desde[0] * 100 + E.desde[1], b = E.hasta[0] * 100 + E.hasta[1]; return a <= b ? md >= a && md <= b : md >= a || md <= b; }) || null; };
   const evProg = (p, E) => { const hoy = hoyMis(); p.ev = p.ev || {}; let x = p.ev[E.k]; if (!x || x.dia !== hoy) x = p.ev[E.k] = { dia: hoy, p: {}, cob: [], sobres: x?.sobres || 0 }; return x; };
   const COSTO_SOBRE = 150;
