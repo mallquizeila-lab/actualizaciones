@@ -1,3 +1,7 @@
+9.21.0
+- 📡 RADAR DE NICHOS (Web para AdSense): cada día, desde las 8 a. m., ShortForge evalúa y te propone 2 nichos nuevos para AdSense (puntaje, pago de anuncios, competencia, ejemplos de guías) con dominios .com LIBRES. Te avisa por Telegram. Creas la web con un clic («✨ Crear dominio.com») o pulsas «No me interesa» y no te lo vuelve a proponer. Evita nichos riesgosos (salud, inversiones, apuestas, niños) y no repite los que ya tienes.
+- Recordatorio: todas tus webs van en tu ÚNICA cuenta de AdSense (Sitios → Agregar sitio). No se crean cuentas nuevas.
+
 9.20.0
 - 🖼️🎥 Guías más visuales: además de la foto principal, cada guía lleva 2 FOTOS REALES dentro del texto (con su descripción) y 1 VIDEO real corto (Pexels/Pixabay, 720p, sin sonido, liviano y sin cargar hasta que lo tocan, para no poner lenta la web). Las guías ya escritas se completan solas (3 por día).
 - 🧪 «Evaluar nicho» al crear una web: puntaje para AdSense (pago de anuncios, competencia, si dura en el tiempo, riesgos), el mejor enfoque del nicho y alternativas con un clic.
