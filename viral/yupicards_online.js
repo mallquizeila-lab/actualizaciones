@@ -94,7 +94,7 @@ function crear({ apodo }) {
     const prox = s.jug[sig(s)], amigo = equipo(s, sig(s)) === equipo(s, k), pocas = prox.mano.length <= 2 && !amigo;
     const val = c => { let v = 0; if (c.c === 'w') v -= 30; if (suma(c) || ['saltar', 'bruja'].includes(c.v)) v += amigo ? -40 : pocas ? 50 : 8; if (/^\d$/.test(c.v)) v += +c.v; v += j.mano.filter(o => o.c === c.c).length * 3; if (c.v === 'coquito') v += j.mano.length >= 6 ? 60 : -60; return v + Math.random() * 4; };
     const x = ops.sort((a, b) => val(b) - val(a))[0];
-    if (j.mano.length === 2 && Math.random() < .85) s.yupi.push(k);
+    if (j.mano.length === 2 && Math.random() < .85) { s.yupi.push(k); evento(s, 'reac', { i: k, t: '¡YUPI! 📣' }); }
     const cnt = {}; for (const c of j.mano) if (c.c !== 'w' && c.id !== x.id) cnt[c.c] = (cnt[c.c] || 0) + 1;
     jugar(s, k, x, Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || azar(COLS));
   }

@@ -314,6 +314,7 @@ function modoRevision(html) {
 }
 function enviarHtml(req, res, html, extra = {}) {
   html = modoRevision(html);
+  { const cc = String(req.headers['cf-ipcountry'] || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2); if (cc) html = html.replace('<head>', `<head><script>window.YPAIS='${cc}'</script>`); } // país de la visita (Cloudflare): en Perú y Latinoamérica la página sale en español
   const ae = String(req.headers['accept-encoding'] || ''), h = { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', vary: 'Accept-Encoding', ...extra };
   let body = Buffer.from(html); if (/gzip/.test(ae)) { body = zlib.gzipSync(body, { level: 6 }); h['content-encoding'] = 'gzip'; }
   res.writeHead(200, h); res.end(body);

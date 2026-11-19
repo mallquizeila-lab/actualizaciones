@@ -37,9 +37,9 @@
   function hablar(txt, o = {}) {
     if (callado() || LS.get('arcVoz') === '0') return; const limpio = String(txt).replace(/[^\p{L}\p{N}¡!¿?,. ]/gu, '').replace(/\s+/g, ' ').trim(); if (!limpio) return;
     if (FX.voz?.(limpio, { forzar: true })) return;
-    try { if (!window.speechSynthesis) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(limpio), V = speechSynthesis.getVoices().filter(x => /^es/i.test(x.lang)); u.voice = V.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) || V[0] || null; u.lang = u.voice?.lang || 'es-MX'; u.pitch = o.tono ?? 1.25; u.rate = o.vel ?? 1.12; speechSynthesis.speak(u); } catch (e) {}
+    try { if (!window.speechSynthesis) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(limpio), V = speechSynthesis.getVoices().filter(x => /^es/i.test(x.lang)); u.voice = V.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) || V[0] || null; if (!u.voice) return; /* sin voz en español: mejor callar que mezclar idiomas */ u.lang = u.voice.lang; u.pitch = o.tono ?? 1.25; u.rate = o.vel ?? 1.12; u.volume = o.vol ?? 1; speechSynthesis.speak(u); } catch (e) {}
   }
-  const reaccionSonido = txt => { if ([...txt].length <= 2) sonar(txt); else { FX.son?.('pop'); hablar(txt); } };
+  const reaccionSonido = txt => { if ([...txt].length <= 2) sonar(txt); else if (/YUPI/i.test(txt)) { sonar('yupi'); hablar('¡Yupi!', { tono: 1.4, vol: 1 }); } else { FX.son?.('pop'); hablar(txt); } };
   const hablarJugada = x => { if (!x) return; if (x.c === 'w' && x.elegido && COL[x.elegido]) hablar('¡Cambio a ' + COL[x.elegido].n.toLowerCase() + '!'); else if (x.v === 'reversa') hablar('¡Cambio de sentido!'); else if (x.v === 'saltar') hablar('¡Turno saltado!'); };
   // 🧭 Flecha de turno: gira hacia el jugador al que le toca
   let angFlecha = 0;
@@ -68,6 +68,7 @@
       if (k === '🤔') { nota(220, 0, .25, 'triangle', .08, 260); nota(260, .25, .3, 'triangle', .07, 210); }
       if (k === '❤️') { nota(523, 0, .2, 'sine', .08); nota(784, .18, .4, 'sine', .08); }
       if (k === '🔥') { nota(180, 0, .45, 'sawtooth', .05, 1300); nota(900, .1, .35, 'triangle', .04, 300); }
+      if (k === 'yupi') { [[784, 0], [988, .08], [1175, .16], [1568, .26]].forEach(([f, t]) => { nota(f, t, .22, 'square', .09); nota(f / 2, t, .22, 'triangle', .06); }); }
       if (k === 'turno') { nota(880, 0, .12, 'triangle', .06); nota(1320, .1, .18, 'triangle', .06); }
       if (k === 'coquito') { nota(700, 0, .12, 'sawtooth', .07, 380); nota(760, .18, .12, 'sawtooth', .07, 400); [523, 659, 784].forEach((f, i) => nota(f, .4 + i * .08, .15, 'square', .05)); }
     } catch (e) {}
@@ -274,6 +275,7 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 #yc .capa{grid-template-columns:minmax(0,1fr)}.yc-yo,.yc-centro,#yc .capa>div{min-width:0;max-width:100%}.yc-mano{box-sizing:border-box;width:100%}
 @media (orientation:landscape) and (max-height:520px){#yc .capa{padding:4px 8px}.yc-op .yc-av{width:44px!important;height:44px!important}.yc-op .yc-mini,.yc-op small{display:none}.yc-op .yc-tag{font-size:.7rem!important;padding:1px 7px}.yc-pila,.yc-pila .yc-rev{width:62px!important;height:90px!important}.yc-pila .yc-rev span{font-size:.5rem!important}.yc-desc{width:70px!important;height:102px!important}#yc.full .yc-btn{padding:4px 10px!important;font-size:.85rem}.yc-pill{font-size:.85rem;padding:2px 9px}.yc-mesa{height:100%!important}#ycYupi{font-size:.95rem!important}.yc-yoav .yc-tag{display:none}.yc-centro{padding:2px 0!important}.yc-mano{padding-top:12px!important;width:auto!important;flex:1;min-width:0}.yc-yo{flex-direction:row!important;align-items:flex-end;justify-content:center;gap:6px!important;padding-right:78px}.yc-barra{position:absolute;right:6px;bottom:2px;z-index:5;flex-direction:column;flex-wrap:nowrap!important;gap:4px!important}.yc-yoav .yc-marco{width:40px!important;height:40px!important}#ycYupi{width:52px!important;height:52px!important}.yc-barra #ycReac{padding:4px 10px}#yc.full .capa>div:first-child{min-height:74px!important}}
 #yc.movil{position:fixed;inset:0;z-index:60;border-radius:0;min-height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}#yc.movil .capa{min-height:100dvh;padding:max(8px,env(safe-area-inset-top)) 8px 16px;box-sizing:border-box}#yc.movil .fondo{position:fixed}#yc.movil .capa{grid-template-columns:minmax(0,1fr);width:100%}#yc.movil .yc-lobby,#yc.movil .yc-panel{min-width:0;max-width:100%;box-sizing:border-box}@media(max-width:480px){.yc-hud{flex-wrap:wrap;row-gap:6px}.yc-hud .nv{flex:1 1 140px}.yc-chip{font-size:.85rem;padding:4px 9px}}
+.yc-bur.grito{background:linear-gradient(180deg,#ff5a6e,#e11d48);color:#fff;font:900 1.6rem 'Baloo 2',Figtree;padding:6px 16px;border:3px solid #fde047;text-shadow:0 2px 0 #7f1d1d;animation:ycGrito 2.6s ease forwards}.yc-bur.grito::after{border-top-color:#e11d48}@keyframes ycGrito{0%{transform:translate(-50%,-100%) scale(.3);opacity:0}12%{transform:translate(-50%,-100%) scale(1.25);opacity:1}25%{transform:translate(-50%,-100%) scale(1)}85%{opacity:1}100%{opacity:0}}
 .yc-mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.yc-obj{background:#ffffff10;border-radius:16px;padding:12px;text-align:center;display:grid;gap:4px}.yc-obj>span{font-size:2.6rem}.yc-obj small{opacity:.8}`;
 
   // Pantalla con fondo de mesa y una capa central
@@ -336,7 +338,7 @@ ${L.recibidas?.length ? `<h3 style="margin:10px 0 4px">📩 Solicitudes para ti<
     const tope = () => st.tope, puedeC = x => { const T = tope(); if (!T) return false; if (st.acum) return st.opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === st.color || x.v === T.v; };
     const miTurno = () => st.estado === 'jugando' && st.turno === st.yo;
     const eqTag = e => st.equipos ? `<em style="font-style:normal;font-size:.7rem;border-radius:999px;padding:1px 7px;background:${e ? '#ef4444' : '#2563eb'};color:#fff">Equipo ${e ? 'Rojo' : 'Azul'}</em>` : '';
-    function burbujaOn(i, txt) { const el = i === st.yo ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${i}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (i === st.yo ? 0 : r.height * .75)) + 'px'; $('#yc')?.append(d); setTimeout(() => d.remove(), 2600); if (/YUPI/.test(txt)) hablar('¡Yupi!', { tono: 1.4 }); else reaccionSonido(txt); }
+    function burbujaOn(i, txt) { const el = i === st.yo ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${i}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : '') + (/YUPI/.test(txt) ? ' grito' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (i === st.yo ? 0 : r.height * .75)) + 'px'; $('#yc')?.append(d); setTimeout(() => d.remove(), 2600); reaccionSonido(txt); }
     function destelloOn(H) { const d = document.createElement('div'); d.className = 'yc-heroe'; d.innerHTML = `<span>${H.e}</span><b>${H.n}</b><small>${H.h}</small>`; d.style.background = `radial-gradient(circle,${H.g[0]}ee,${H.g[1]}dd 55%,transparent 72%)`; $('#yc')?.append(d); setTimeout(() => d.remove(), 1700); }
 
     function lobby() {
@@ -659,7 +661,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     }
     function botAtrapa(k) { // un bot se olvida de decir ¡YUPI! según la dificultad
       const olvida = { facil: .45, medio: .2, dificil: .03 }[opc.dif];
-      if (Math.random() > olvida) { yupi.add(k); vulnerable = null; FX.son('punto'); pintar(); return; }
+      if (Math.random() > olvida) { yupi.add(k); vulnerable = null; burbuja(k, '¡YUPI!'); pintar(); return; }
       pintar(); // queda vulnerable: el humano puede atraparlo; los otros bots también
       if (J.length > 2) setTimeout(() => { if (!vivo || vulnerable !== k) return; if (Math.random() < { facil: .2, medio: .45, dificil: .8 }[opc.dif]) { robar(J[k], 2); vulnerable = null; FX.son('error'); tip(`🫵 Atraparon a ${escH(J[k].n)} sin decir ¡YUPI!: +2 cartas`, 1800); pintar(); } }, 2200 + Math.random() * 1500);
     }
@@ -700,7 +702,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       if (opc.dif === 'facil') x = azar(ops);
       else { const val = c => { let s = 0; if (c.c === 'w') s -= 30; if (esp(c) && c.c !== 'w') s += proxPocas ? 40 : 8; if (cuatro(c.v)) s += proxPocas ? 60 : -20; if (c.c !== 'w' && suma(c) >= 3) s += proxPocas ? 45 + suma(c) : 6 + suma(c); if (c.v === 'bruja') s += proxPocas ? 50 : -10; if (c.v === 'idol') s += J.length > 2 ? 30 : 5; if (c.v === 'coquito') { const menor = Math.min(...J.filter(o => o !== j).map(o => o.mano.length)); s += j.mano.length - 1 - menor >= 3 ? 80 : -60; } if (/^\d$/.test(c.v)) s += +c.v; const mismos = j.mano.filter(o => o.c === c.c).length; s += mismos * 3; if (opc.dif === 'dificil' && j.mano.length <= 3 && c.c === 'w') s += 25; return s; };
         x = ops.sort((a, b) => val(b) - val(a))[0]; }
-      if (j.mano.length === 2 && Math.random() > { facil: .45, medio: .2, dificil: .03 }[opc.dif]) yupi.add(k); // dice ¡YUPI! antes de jugar
+      if (j.mano.length === 2 && Math.random() > { facil: .45, medio: .2, dificil: .03 }[opc.dif]) { yupi.add(k); setTimeout(() => burbuja(k, '¡YUPI!'), 350); } // grita ¡YUPI! antes de jugar
       const desde = document.querySelector(`[data-op="${k}"]`) || $('#ycPila');
       ocupado = true; volar(desde, $('#ycDesc'), svgCarta(x, 90), () => { if (vivo) jugar(k, x, x.c === 'w' ? elegirColor(j) : null); else ocupado = false; });
     }
@@ -722,7 +724,7 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
 <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">${sigNivel ? '<button class="yc-yupi" id="ycSig">➡️ Nivel ' + sigNivel.id + '</button>' : ''}<button class="${sigNivel ? 'yc-btn' : 'yc-yupi'}" id="ycOtra">🔁 ${Lav ? (yo ? 'Repetir nivel' : 'Reintentar') : 'Otra partida'}</button><button class="yc-btn" id="ycMenu">${Lav ? '🗺️ Mapa' : '🃏 Menú'}</button><button class="yc-btn" id="ycFin">💾 Guardar puntos</button></div>`);
       $('#ycOtra').onclick = () => partida(t, opc); $('#ycMenu').onclick = () => { salirCompleta(); Lav ? mapa(t) : menu(t); }; if (sigNivel) $('#ycSig').onclick = () => partida(t, opcNivel(sigNivel)); $('#ycFin').onclick = () => { vivo = false; salirCompleta(); A.fin(t, puntos, yo ? (Lav ? `¡Superaste el nivel ${Lav.id} de la Aventura!` : `¡Ganaste a la IA (${opc.dif})!`) : 'Buena partida'); };
     }
-    function burbuja(k, txt) { if (!vivo) return; const el = k === 0 ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${k}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (k === 0 ? 0 : r.height * .75)) + 'px'; $('#yc').append(d); setTimeout(() => d.remove(), 2600); reaccionSonido(txt); }
+    function burbuja(k, txt) { if (!vivo) return; const el = k === 0 ? $('#yc .yc-yoav') : $(`#ycTop [data-op="${k}"]`); if (!el) return; const r = el.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'yc-bur' + ([...txt].length <= 2 ? ' e' : '') + (/YUPI/.test(txt) ? ' grito' : ''); d.textContent = txt; d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = (r.top + (k === 0 ? 0 : r.height * .75)) + 'px'; $('#yc').append(d); setTimeout(() => d.remove(), 2600); reaccionSonido(txt); }
     let ultReac = 0;
     function botReacciona(k, tipo) { if (!vivo || !J[k] || J[k].yo || Date.now() - ultReac < 2500 || Math.random() > .4) return; ultReac = Date.now(); const L = { sufre: ['¡Oh no! 😱', '😭', '😡', '¡Noooo!'], feliz: ['🥳', '😎', '¡Increíble! 🤩', '🔥'], yupi: ['😱', '¡Date prisa! ⏰', '🤔'], fin: ['¡Buena partida! 🤝', '¡Bien jugado! 👏', '🥳'] }[tipo]; setTimeout(() => burbuja(k, L[Math.floor(Math.random() * L.length)]), 500 + Math.random() * 700); }
     function destello(H) { const d = document.createElement('div'); d.className = 'yc-heroe'; d.innerHTML = `<span>${H.e}</span><b>${H.n}</b><small>${H.h}</small>`; d.style.background = `radial-gradient(circle,${H.g[0]}ee,${H.g[1]}dd 55%,transparent 72%)`; $('#yc')?.append(d); setTimeout(() => d.remove(), 1700); }

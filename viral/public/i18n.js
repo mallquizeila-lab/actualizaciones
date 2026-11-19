@@ -9,6 +9,8 @@
   const HL = (/[?&]hl=([a-z]{2})\b/.exec(location.search) || [])[1]; if (HL && NOMBRES[HL]) { L = HL; try { localStorage.setItem('lang', HL); } catch (e) {} } // ?hl=en (enlaces de las páginas en inglés)
   // Los robots de Google (búsqueda y AdSense) y otros buscadores ven siempre la página original en español
   if (/bot|crawl|spider|slurp|Mediapartners|Google-|APIs-Google|AdsBot|facebookexternalhit|Lighthouse|Chrome-Lighthouse/i.test(navigator.userAgent)) L = 'es';
+  // En Perú, Latinoamérica y España, siempre en español (aunque el navegador esté en inglés), salvo que la persona elija otro idioma en el selector
+  if (!NOMBRES[L] && /^(AR|BO|CL|CO|CR|CU|DO|EC|SV|GQ|GT|HN|MX|NI|PA|PY|PE|PR|ES|UY|VE)$/.test(window.YPAIS || '')) L = 'es';
   if (!NOMBRES[L]) L = (navigator.languages || [navigator.language || 'es']).map(x => String(x).toLowerCase().slice(0, 2)).find(x => NOMBRES[x]) || 'es';
   document.documentElement.lang = L;
   const D = new Map(), HECHOS = new Set(), pend = new Map(), FALLO = new Map(); // FALLO: textos sin traducción todavía (se reintenta en 30 s)

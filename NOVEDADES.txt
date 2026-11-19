@@ -1,3 +1,8 @@
+9.28.1
+- 📣 YUPI CARDS: cuando un rival se queda con una carta, GRITA «¡YUPI!» fuerte con voz natural, una fanfarria y un globo rojo grande (también en el juego con amigos).
+- 🇵🇪 Idioma: en Perú, Latinoamérica y España la página sale siempre en español, aunque el navegador esté en inglés (antes salía mezclado: «Inti's turn», «15 cards»). Quien quiera otro idioma lo elige en el selector 🌐.
+- 🗣️ Si una frase todavía no está grabada y el celular no tiene voz en español, se queda callado en vez de hablar con voz en inglés.
+
 9.28.0
 - 🗣️ YUPI CARDS habla: grita «¡Yupi!» al presionar el botón, dice el color nuevo («¡Cambio a rojo!»), «¡Cambio de sentido!» y «¡Turno saltado!». Cada reacción suena: las frases se dicen en voz alta y cada emoji tiene su sonido (risa, fiesta, corazón, fuego…). También suenan las reacciones de los rivales y de tus amigos en línea.
   · ShortForge graba solo estas 21 frases nuevas con las voces naturales (arranca a los 4 minutos). Mientras tanto se usa la voz del celular, para que nunca quede en silencio.
