@@ -1,3 +1,12 @@
+9.24.0
+- 🃏 NUEVO JUEGO: YUPI CARDS (Fase 1). Cartas por colores y números con identidad propia de Yupitok:
+  · De 2 a 4 jugadores contra la IA, con 3 dificultades (fácil, medio y difícil: la difícil recuerda qué colores le faltan a cada rival y ataca al que va ganando).
+  · 108 cartas: números del 0 al 9 en 4 colores, Saltar, Reversa, +2, Comodín y Comodín +4, dibujadas en alta calidad (nítidas en cualquier pantalla). Cada color lleva su figura (♥ ● ▲ ■) para quien no distingue bien los colores.
+  · Botón rojo «¡YUPI!» con la última carta: si te atrapan sin decirlo, robas 2; y tú puedes atrapar a la IA.
+  · Mesa ovalada de paño azul, jugadores con su foto o avatar, temporizador, animaciones al jugar y robar, música propia y pantalla completa.
+  · Modo entrenamiento (las cartas que puedes jugar brillan y te explica cada carta especial), regla opcional «acumular +2 y +4», misiones del día con premio, y reversos y mesas que se desbloquean ganando (solo estética).
+  · Partidas online, salas con amigos y torneos: próximas fases.
+
 9.23.0
 - 🌱 Huerto Defensor: ¡de 30 a 60 niveles! 3 zonas nuevas: 🌴 Selva amazónica (31-40), 🏜️ Costa y desierto (41-50) y ⛈️ Tormenta en la puna (51-60). Las plagas son cada vez más resistentes, hay más ratas jefas y más agua para plantar. Quien ya pasó el nivel 30 sigue directo en el 31.
 - Yupitok: si la lista de juegos no carga a la primera (por ejemplo, justo cuando el servidor se reinicia), reintenta sola y, si aun así falla, muestra un botón «Reintentar» en vez del aviso feo.

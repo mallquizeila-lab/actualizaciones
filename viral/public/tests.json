@@ -147,6 +147,16 @@
    "tipo": "arcade"
   },
   {
+   "id": "arcade-yupicards",
+   "juego": "yupicards",
+   "cat": "juegos",
+   "e": "🃏",
+   "t": "YUPI CARDS",
+   "d": "Juego de cartas por colores y números: Saltar, Reversa, +2 y comodines. De 2 a 4 jugadores contra la IA. ¡Grita YUPI con tu última carta!",
+   "min": 5,
+   "tipo": "arcade"
+  },
+  {
    "id": "arcade-huerto",
    "juego": "huerto",
    "cat": "juegos",
