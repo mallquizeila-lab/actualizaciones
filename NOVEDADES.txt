@@ -1,4 +1,5 @@
-v9.31.7 · ProfeTok: el video promocional con voz ya aparece en la portada (se reproduce en celular y PC).
+9.31.7
+- 🎬 ProfeTok: el video promocional con voz ya aparece en la portada («Mira ProfeTok en 70 segundos»). Se reproduce en celular y PC.
 
 9.31.6
 - 🖼️ ProfeTok se ve profesional al compartirlo: imagen de presentación con Libretín, el título, los beneficios y «Prueba gratis 15 días» en WhatsApp, Facebook y Telegram.
