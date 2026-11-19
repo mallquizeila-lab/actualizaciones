@@ -299,6 +299,7 @@ async function api(u, q, U, r) {
     const L = require('./lib/libretin'), o = P ? await json(q) : {};
     if (u === '/api/libretin/encender' && P) { L.encender(o); return L.estado(); }
     if (u === '/api/libretin/apagar' && P) { L.apagar(); return L.estado(); }
+    if (u === '/api/libretin/prueba' && P) { await L.enlacePrueba(!!o.on); await new Promise(r => setTimeout(r, o.on ? 6000 : 0)); return L.estado(); }
     return L.estado();
   }
   if (u.startsWith('/api/viral')) {

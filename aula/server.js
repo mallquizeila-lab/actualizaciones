@@ -296,7 +296,7 @@ const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /a
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
-  if (req.headers['cf-connecting-ip'] && !getS('urlPublica', '') && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(req.headers.host || '')) setS('urlPublica', 'https://' + req.headers.host); // la dirección pública se aprende sola (para los enlaces de los correos)
+  if (req.headers['cf-connecting-ip'] && !getS('urlPublica', '') && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(req.headers.host || '') && !/trycloudflare\.com$/i.test(req.headers.host || '')) setS('urlPublica', 'https://' + req.headers.host); // la dirección pública se aprende sola (para los enlaces de los correos)
   try {
     // archivos privados (fotos y logos): solo con permiso
     let m = /^\/api\/foto\/(alumno|logo)\/(\d+)$/.exec(url.pathname);

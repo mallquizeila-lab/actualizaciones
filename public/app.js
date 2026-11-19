@@ -636,6 +636,10 @@ function libretinCard() {
   <label>Tu número de Yape / WhatsApp de soporte (con 51)</label><input id="lbSop" value="${esc(l.soporte || '')}" placeholder="51987654321">
   ${l.on && l.clave ? `<p class="hint">🔑 Tu contraseña inicial de dueño: <b>${esc(l.clave)}</b> (cámbiala en «Mi cuenta» al entrar).</p>` : ''}
   <div class="btns" style="margin-top:8px">${l.on ? '<button class="b sm" data-act="lbOn">💾 Guardar y reiniciar</button><button class="b ghost sm" data-act="lbOff">Apagar</button>' : '<button class="b sm" data-act="lbOn">▶️ Encender ProfeTok</button>'}</div>
+  ${l.on ? `<div style="margin-top:12px;padding:12px;border-radius:12px;background:#ecfeff;border:1px solid #67e8f9"><b>🔗 Enlace para que tus amistades lo prueben</b>
+    <p class="hint" style="margin:4px 0"><b>Opción fija (recomendada): https://profetok.yupitok.com</b> → en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → <i>Add</i>: subdominio <b>profetok</b>, dominio <b>yupitok.com</b>, servicio <b>HTTP</b> → <b>localhost:3400</b>. Listo en 1 minuto y no cambia nunca.</p>
+    ${l.enlace ? `<p style="margin:6px 0">Enlace instantáneo: <a href="${esc(l.enlace)}" target="_blank"><b>${esc(l.enlace)}</b></a> <button class="b ghost sm" data-act="lbCopiar" data-u="${esc(l.enlace)}">📋 Copiar</button> <a class="b sm" target="_blank" href="https://wa.me/?text=${encodeURIComponent('🎓 Te invito a probar ProfeTok, el sistema para docentes: asistencia, notas, tareas y un asistente con IA. Pruébalo gratis 15 días: ' + l.enlace)}">🟢 Enviar por WhatsApp</a></p><p class="hint">⚠️ Este enlace cambia si se reinicia ShortForge o la PC.</p>` : l.prueba ? '<p class="hint">⏳ Creando el enlace instantáneo…</p>' : ''}
+    <div class="btns">${l.prueba ? '<button class="b ghost sm" data-act="lbPrueba" data-on="0">Apagar enlace instantáneo</button>' : '<button class="b sm" data-act="lbPrueba" data-on="1">⚡ Crear enlace instantáneo</button>'}</div></div>` : ''}
   ${l.log?.length ? `<details style="margin-top:8px"${l.log.some(x => /error|Error|ERR|salió mal|EADDRINUSE|no se/i.test(x)) ? ' open' : ''}><summary class="hint" style="cursor:pointer">🩺 Registro de ProfeTok (para revisar errores)</summary><pre style="white-space:pre-wrap;font-size:.78rem;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:10px;max-height:240px;overflow:auto">${esc(l.log.join('\n'))}</pre></details>` : ''}
   <p class="hint" style="margin-top:8px">🌐 Para verlo en internet: en Cloudflare → Zero Trust → Networks → Tunnels → tu túnel → «Public Hostname» → agrega tu dominio (ej. profetok.com) con servicio <b>http://localhost:3400</b>. Es el mismo túnel de la página viral.</p></div>`;
 }
@@ -1338,6 +1342,8 @@ const ACT = {
   adjDel: el => { chatAdj.splice(+el.dataset.i, 1); $('#adjBox').innerHTML = adjPend(); },
   vfYupicards: guard(async () => { VS = await api('/api/viral/yupicards-arte', {}); toast('🃏 Creando las ilustraciones de YUPI CARDS…'); render(); }),
   lbOn: guard(async () => { const email = $('#lbEmail')?.value.trim(); if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email || '')) return toast('Escribe tu correo de dueño'); LB = await api('/api/libretin/encender', { email, soporte: $('#lbSop')?.value || '' }); toast('🎓 ProfeTok encendido'); render(); }),
+  lbPrueba: guard(async el => { LB = await api('/api/libretin/prueba', { on: el?.dataset?.on === '1' }); render(); }),
+  lbCopiar: guard(async el => { navigator.clipboard?.writeText(el.dataset.u); toast('📋 Enlace copiado'); }),
   lbOff: guard(async () => { LB = await api('/api/libretin/apagar', {}); render(); }),
   vfHuerto: guard(async () => { VS = await api('/api/viral/huerto-medios', {}); toast('🌱 Creando voces e ilustraciones de Huerto Defensor…'); render(); }),
   apReload: () => { AP = null; render(); },

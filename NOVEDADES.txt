@@ -1,3 +1,6 @@
+9.31.5
+- 🔗 ProfeTok listo para compartir: la tarjeta explica cómo ponerlo en https://profetok.yupitok.com (enlace fijo, en el mismo túnel de Yupitok) y tiene un botón «⚡ Crear enlace instantáneo» (trycloudflare) con botones para copiar y mandar por WhatsApp.
+
 9.31.4
 - 🎓 ProfeTok: al encenderse cierra cualquier ProfeTok viejo que haya quedado abierto en Windows (pasaba al actualizar ShortForge: seguía respondiendo la versión anterior). La tarjeta de ProfeTok ahora muestra un «🩺 Registro» con los errores, y los errores del servidor dicen el motivo.
 
