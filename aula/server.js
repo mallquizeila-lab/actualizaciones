@@ -59,7 +59,8 @@ if (E.AULA_OWNER_EMAIL && !q1("select 1 from usuarios where rol='dueno'")) {
 }
 
 // ---------- membresía ----------
-const PLANES = getS('planes', { docente: { nombre: 'Docente', precio: 19, aulas: 6, ia: 60 }, colegio: { nombre: 'Colegio', precio: 149, aulas: 200, ia: 800 } });
+const PLANES = getS('planes', { docente: { nombre: 'Docente', precio: 19, aulas: 2, ia: 60 }, colegio: { nombre: 'Colegio', precio: 149, aulas: 200, ia: 800 } });
+PLANES.docente.aulas = 2; // plan Docente: 2 aulas (también en cuentas que ya tenían guardado el valor anterior)
 const membresia = c => { if (!c) return { activa: false }; const v = c.vence ? new Date(c.vence).getTime() : 0, dias = Math.ceil((v - Date.now()) / DIA); return { plan: c.plan, vence: c.vence, dias, activa: dias > 0, prueba: c.plan === 'prueba' }; };
 
 // ---------- permisos (el corazón de la privacidad) ----------
@@ -194,7 +195,7 @@ API['POST /api/aula'] = async ({ u, b }) => {
   if (!esStaff(u)) throw 403; const col = q1('select * from colegios where id=?', u.colegio_id), m = membresia(col);
   const datos = [limpio(b.nombre, 60), limpio(b.nivel, 20), limpio(b.grado, 20), limpio(b.seccion, 10), b.escala === 'vigesimal' ? 'vigesimal' : 'letras', /^https:\/\/meet\.google\.com\/[a-z0-9-]{6,40}$/i.test(b.meet || '') ? b.meet : null, limpio(b.horario, 200)];
   if (b.id) { const a = aulaDe(u, b.id); if (!a) throw 403; run('update aulas set nombre=?, nivel=?, grado=?, seccion=?, escala=?, meet=?, horario=? where id=?', ...datos, a.id); return { id: a.id }; }
-  const n = q1('select count(*) n from aulas where colegio_id=?', u.colegio_id).n, max = m.prueba ? 3 : (PLANES[col.plan]?.aulas || 3); if (n >= max) throw `Tu plan permite ${max} aulas. Mejora tu plan para crear más.`;
+  const n = q1('select count(*) n from aulas where colegio_id=?', u.colegio_id).n, max = m.prueba ? (u.rol === 'director' ? 10 : PLANES.docente.aulas) : (PLANES[col.plan]?.aulas || 2); if (n >= max) throw `Tu plan permite ${max} aulas. Mejora tu plan para crear más.`;
   const docente = u.rol === 'director' && b.docente_id && q1("select id from usuarios where id=? and colegio_id=? and rol='docente'", +b.docente_id, u.colegio_id) ? +b.docente_id : u.id;
   const id = run('insert into aulas(colegio_id, docente_id, nombre, nivel, grado, seccion, escala, meet, horario) values(?,?,?,?,?,?,?,?,?)', u.colegio_id, docente, ...datos).lastInsertRowid;
   const base = { inicial: ['Comunicación', 'Matemática', 'Personal Social', 'Ciencia y Tecnología', 'Psicomotriz'], primaria: ['Comunicación', 'Matemática', 'Personal Social', 'Ciencia y Tecnología', 'Arte y Cultura', 'Educación Física', 'Educación Religiosa', 'Inglés'], secundaria: ['Comunicación', 'Matemática', 'Ciencias Sociales', 'Ciencia y Tecnología', 'DPCC', 'Inglés', 'Arte y Cultura', 'Educación Física', 'EPT'] }[datos[1]] || ['Comunicación', 'Matemática'];

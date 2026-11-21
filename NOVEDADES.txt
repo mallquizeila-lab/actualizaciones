@@ -1,3 +1,8 @@
+9.33.1
+- 💳 ProfeTok: botón «Pagar ahora» en los planes de la portada (crea tu cuenta o entra y pasas directo al pago).
+- 🏫 Plan Docente: ahora es para 2 aulas (la prueba de un docente también; la de un colegio, 10).
+- La ventana del recurso gratis ya no aparece al bajar hasta los planes, para no estorbar a quien quiere pagar.
+
 9.33.0
 - 📱 ProfeTok: QR dinámico de Yape y Plin con Izipay. QR interoperable con el monto exacto (también código Yape, Plin y tarjeta) y el plan se activa solo, al instante, con el aviso de Izipay. Configúralo en 🚀 Crecimiento → 💳 Pagos.
 
