@@ -235,7 +235,7 @@ API['GET /api/alumno'] = async ({ u, url }) => { const id = +url.searchParams.ge
 API['GET /api/asistencia'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; const f = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('fecha') || '') ? url.searchParams.get('fecha') : hoy(); return { fecha: f, marcas: Object.fromEntries(q('select alumno_id, estado from asistencia where aula_id=? and fecha=?', a.id, f).map(r => [r.alumno_id, r.estado])) }; };
 API['POST /api/asistencia'] = async ({ u, b }) => {
   const a = aulaDe(u, b.aula_id); if (!a) throw 403; const f = /^\d{4}-\d{2}-\d{2}$/.test(b.fecha || '') ? b.fecha : hoy();
-  for (const [aid, est] of Object.entries(b.marcas || {})) { if (!['P', 'T', 'F', 'J'].includes(est) || !q1('select 1 from alumnos where id=? and aula_id=?', +aid, a.id)) continue; if (est === 'F' && f === hoy() && q1('select estado from asistencia where alumno_id=? and fecha=?', +aid, f)?.estado !== 'F') avisar('falta', +aid, {}, `falta|${aid}|${f}`); run('insert into asistencia(aula_id, alumno_id, fecha, estado) values(?,?,?,?) on conflict(alumno_id, fecha) do update set estado=excluded.estado', a.id, +aid, f, est); }
+  for (const [aid, est] of Object.entries(b.marcas || {})) { if (!['P', 'T', 'F', 'J'].includes(est) || !q1('select 1 from alumnos where id=? and aula_id=?', +aid, a.id)) continue; if (est === 'F' && f === hoy() && q1('select estado from asistencia where alumno_id=? and fecha=?', +aid, f)?.estado !== 'F') avisar('falta', +aid, {}, `falta|${aid}|${f}`); run('insert into asistencia(aula_id, alumno_id, fecha, estado, hora) values(?,?,?,?,?) on conflict(alumno_id, fecha) do update set hora=case when asistencia.estado=excluded.estado then asistencia.hora else excluded.hora end, estado=excluded.estado', a.id, +aid, f, est, new Date(Date.now() - 5 * 3600e3).toISOString().slice(11, 16)); }
   return { ok: 1 };
 };
 
@@ -346,7 +346,9 @@ setInterval(() => { try { saldoM.revisarAuto(activarPago); } catch (e) { console
 const cuentaM = require('./cuenta').crear({ db, q, q1, run, hashPass, nuevaSesion, correo, getS, limpio, veAlumno, emailOk, audit });
 const nubeM = require('./nube').crear({ db, getS, setS, DATA, hoy, limpio });
 const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES, ...cuentaM.LIBRES]);
-for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+// 📅 asistencia por mes para familias y reuniones con asistencia de padres (ver reuniones.js)
+const reunionesM = require('./reuniones').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar });
+for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM, reunionesM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };

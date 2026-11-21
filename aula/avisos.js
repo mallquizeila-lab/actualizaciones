@@ -32,12 +32,13 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
     }
     if (tipo === 'logro') return { sticker: 'logro', titulo: `🌟 ¡Una gran noticia sobre ${n}!`, cuerpo: d.texto || `${n} tuvo un logro hoy en clase.` };
     if (tipo === 'observacion') return { sticker: 'info', titulo: `📒 Nota de la docente sobre ${n}`, cuerpo: 'La docente dejó una nota nueva. Puedes leerla con calma en ProfeTok.', privado: true };
+    if (tipo === 'evento') return { sticker: 'info', titulo: `📅 ${d.titulo}`, cuerpo: `Te esperamos el ${new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}${d.hora ? ' a las ' + d.hora : ''}. Confirma si podrás asistir en ProfeTok 💙` };
     if (tipo === 'respuesta') return { sticker: 'info', titulo: '💬 La docente te respondió', cuerpo: `Tienes una respuesta sobre ${n}. Léela en ProfeTok.`, privado: true };
     if (tipo === 'justificacion') return d.aprobada ? { sticker: 'info', titulo: '✅ Falta justificada', cuerpo: `La docente aceptó la justificación de ${n} del ${d.fecha}. ¡Gracias por avisar!` } : { sticker: 'info', titulo: `📝 Sobre la falta de ${n}`, cuerpo: 'La docente revisó tu justificación. Si tienes dudas, escríbele desde ProfeTok.' };
     if (tipo === 'falta') return { sticker: 'info', titulo: `📅 Asistencia de ${n}`, cuerpo: `Hoy no registramos la asistencia de ${n} en clase. Si ya lo sabías, no te preocupes 🙂` };
     return null;
   }
-  const PREF_DE = { nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia', respuesta: 'mensajes', justificacion: 'asistencia' };
+  const PREF_DE = { nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia', respuesta: 'mensajes', justificacion: 'asistencia', evento: 'mensajes' };
 
   // encola el aviso para cada familia del alumno (una sola vez por clave)
   function encolar(tipo, alumnoId, d, clave, soloPadre) {

@@ -140,7 +140,7 @@ ${['docente', 'director', 'dueno', 'padre'].includes(YO.usuario.rol) && pushPosi
     if (rol === 'dueno') return dueno();
     if (p[0] === 'cuenta') return cuenta();
     if (p[0] === 'ayuda') return ayuda();
-    if (rol === 'padre' || rol === 'alumno') { if (p[0] === 'novedades') return novedades(); if (p[0] === 'alumno' && p[1]) return ficha(+p[1]); if (p[0] === 'libreta' && p[1]) return libreta(+p[1]); return casa(); }
+    if (rol === 'padre' || rol === 'alumno') { if (p[0] === 'novedades') return novedades(); if (p[0] === 'asistencia') return asistenciaFam(+p[1] || 0, p[2]); if (p[0] === 'alumno' && p[1]) return ficha(+p[1]); if (p[0] === 'libreta' && p[1]) return libreta(+p[1]); return casa(); }
     if (p[0] === 'aula' && p[1]) return aula(+p[1], p[2] || 'alumnos');
     if (p[0] === 'alumno' && p[1]) return ficha(+p[1]);
     if (p[0] === 'libreta' && p[1]) return libreta(+p[1]);
@@ -191,12 +191,12 @@ ${YO.usuario.rol === 'director' && !a.id ? `<label>Docente a cargo</label><selec
   }
 
   async function aula(id, tab) {
-    const TABS = [['dictar', '🎙️ Dictar'], ['corregir', '📸 Corregir'], ['alumnos', '👧 Alumnos'], ['asistencia', '✅ Asistencia'], ['notas', '📊 Notas'], ['tareas', '📝 Tareas'], ['bitacora', '📒 Bitácora'], ['comunicados', '📣 Comunicados'], ['correos', '📧 Correos'], ['ajustes', '⚙️ Aula']];
+    const TABS = [['dictar', '🎙️ Dictar'], ['corregir', '📸 Corregir'], ['alumnos', '👧 Alumnos'], ['asistencia', '✅ Asistencia'], ['notas', '📊 Notas'], ['tareas', '📝 Tareas'], ['bitacora', '📒 Bitácora'], ['comunicados', '📣 Comunicados'], ['reuniones', '📅 Reuniones'], ['correos', '📧 Correos'], ['ajustes', '⚙️ Aula']];
     app.innerHTML = marco(menuStaff(), `#/aula/${id}/alumnos`); const M = $('#main');
     let D; try { D = await api('aula?id=' + id); } catch (e) { M.innerHTML = `<div class="card vacio">${esc(e.message)}</div>`; return; } if (!M.isConnected) return;
     M.innerHTML = `<div class="fila entre"><div><h2 style="margin:0">${esc(D.aula.nombre)}</h2><small class="muted">${esc([D.aula.nivel, D.aula.grado, D.aula.seccion].filter(Boolean).join(' · '))} · ${D.alumnos.length} alumnos</small></div>${D.aula.meet ? `<a class="btn verde sm" href="${esc(D.aula.meet)}" target="_blank" rel="noopener">🎥 Abrir clase en Meet</a>` : ''}</div>
 <div class="fila" style="margin:12px 0;overflow-x:auto;flex-wrap:nowrap">${TABS.map(([k, t]) => `<a class="btn ${k === tab ? '' : 'sec'} sm" href="#/aula/${id}/${k}">${t}</a>`).join('')}</div><div id="tab"></div>`;
-    const T = $('#tab'); ({ dictar: tDictar, corregir: tCorregir, alumnos: tAlumnos, asistencia: tAsistencia, notas: tNotas, tareas: tTareas, bitacora: tBitacora, comunicados: tComunicados, correos: tCorreos, ajustes: tAjustes }[tab] || tAlumnos)(T, D);
+    const T = $('#tab'); ({ dictar: tDictar, corregir: tCorregir, alumnos: tAlumnos, asistencia: tAsistencia, notas: tNotas, tareas: tTareas, bitacora: tBitacora, comunicados: tComunicados, reuniones: tReuniones, correos: tCorreos, ajustes: tAjustes }[tab] || tAlumnos)(T, D);
   }
   // 🎙️ Dictar a Libretín: hablas, Libretín ordena (asistencia, notas, bitácora y tareas), revisas y guardas
   function tDictar(T, D) {
@@ -578,6 +578,40 @@ ${X.mensajes.length ? `<div class="lista" style="margin-top:10px">${X.mensajes.m
       const ms = g('[data-msj]'); if (ms) await conBoton(ms, async () => { await api('mensaje', { alumno_id: id, tipo: $('#mTipo').value, texto: $('#mTexto').value }); toast('✅ Mensaje enviado a la docente'); familiaExtra(id, F); });
     }, { once: false });
   }
+  // 📅 asistencia para la familia: Alumnos (por mes, con hora) y Padres (reuniones y eventos)
+  const EST_A = { P: ['✅', 'Presente', '#16a34a'], T: ['⏰', 'Tardanza', '#d97706'], F: ['❌', 'Falta', '#dc2626'], J: ['📄', 'Justificada', '#0284c7'] };
+  async function asistenciaFam(hid, pest) {
+    const H = YO.hijos || []; if (!H.length) { app.innerHTML = marco(menuFamilia(), '#/asistencia'); $('#main').innerHTML = '<div class="card vacio">Aún no tienes hijos vinculados.</div>'; return; }
+    const id = H.some(h => h.id === hid) ? hid : H[0].id, mes = /^\d{4}-\d{2}$/.test(pest || '') ? pest : null, padres = pest === 'padres';
+    app.innerHTML = marco(menuFamilia(), '#/asistencia'); const M = $('#main');
+    M.innerHTML = `<h2 style="margin:0">Control de asistencia</h2><p class="muted small" style="margin:2px 0 10px">La asistencia de tus hijos y tu asistencia a reuniones y eventos.</p><div class="pest"><a class="${padres ? '' : 'on'}" href="#/asistencia/${id}">🎒 Alumnos</a><a class="${padres ? 'on' : ''}" href="#/asistencia/${id}/padres">👨‍👩‍👧 Padres</a></div><div id="asZ"><div class="vacio">Cargando…</div></div>`;
+    const Z = $('#asZ');
+    if (padres) { const R = await api('mis-eventos'); if (!Z.isConnected) return; const T = R.totales;
+      Z.innerHTML = `<div class="grid g3" style="margin:10px 0"><div class="card kpi"><b style="color:#16a34a">${T.asistio || 0}</b><span>Asistí</span></div><div class="card kpi"><b style="color:#dc2626">${T.falto || 0}</b><span>No asistí</span></div><div class="card kpi"><b>${T.proximos || 0}</b><span>Próximos</span></div></div>
+${R.eventos.map(e => { const fut = e.fecha >= hoy(); return `<div class="card ev" style="margin-bottom:8px"><div class="fila entre" style="align-items:flex-start"><div><b>📅 ${esc(e.titulo)}</b><br><small class="muted">${new Date(e.fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}${e.hora ? ' · ' + esc(e.hora) : ''} · ${esc(e.aula)}</small>${e.lugar ? `<div class="small">📍 ${/^https:/.test(e.lugar) ? `<a href="${esc(e.lugar)}" target="_blank" rel="noopener">Entrar a la reunión</a>` : esc(e.lugar)}</div>` : ''}${e.detalle ? `<div class="small muted">${esc(e.detalle)}</div>` : ''}</div>
+${fut ? '' : `<span class="chip ${e.asistio === 1 ? 'bajo' : e.asistio === 0 ? 'alto' : ''}">${e.asistio === 1 ? '✅ Asististe' : e.asistio === 0 ? '❌ No asististe' : '⏳ Sin registrar'}</span>`}</div>
+${fut ? `<div class="fila" style="margin-top:8px"><button class="btn ${e.rsvp === 'si' ? 'verde' : 'sec'} sm" data-rsvp="${e.id}" data-v="si">✅ Asistiré</button><button class="btn ${e.rsvp === 'no' ? 'rojo' : 'sec'} sm" data-rsvp="${e.id}" data-v="no">No podré</button></div>` : ''}</div>`; }).join('') || '<div class="card vacio">Aún no hay reuniones ni eventos 📅</div>'}`;
+      Z.onclick = async e => { const b = e.target.closest('[data-rsvp]'); if (b) { await api('evento-rsvp', { evento_id: +b.dataset.rsvp, rsvp: b.dataset.v }); toast(b.dataset.v === 'si' ? '✅ ¡Gracias! La docente sabrá que irás' : 'Gracias por avisar'); asistenciaFam(id, 'padres'); } }; return; }
+    const R = await api(`asistencia-alumno?id=${id}${mes ? '&mes=' + mes : ''}`); if (!Z.isConnected) return; const nomMes = m => new Date(m + '-15T12:00:00').toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+    Z.innerHTML = `<div class="as-head"><span class="foto">${esc(R.alumno.nombres[0])}</span><div><b>${esc((R.alumno.apellidos || '').toUpperCase())} ${esc(R.alumno.nombres)}</b><br><small>${esc([R.alumno.nivel, R.alumno.grado, R.alumno.seccion].filter(Boolean).join(' · '))} · ${esc(nomMes(R.mes))}</small></div></div>
+<div class="grid g2" style="margin:10px 0"><select id="asHijo">${H.map(h => `<option value="${h.id}" ${h.id === id ? 'selected' : ''}>${esc(h.nombres)}</option>`).join('')}</select><select id="asMes">${R.meses.map(m => `<option value="${m}" ${m === R.mes ? 'selected' : ''}>${esc(nomMes(m))}</option>`).join('')}</select></div>
+<div class="grid g4">${Object.entries(EST_A).map(([k, [i, t, c]]) => `<div class="card kpi"><b style="color:${c}">${R.totales[k]}</b><span>${i} ${t}${k === 'J' ? 's' : k === 'F' ? 's' : k === 'T' ? 's' : 's'}</span></div>`).join('')}</div>
+<div class="card" style="margin-top:12px"><h3 style="margin-top:0">📋 Día por día</h3>${R.dias.length ? `<div class="lista">${R.dias.map(d => `<div><span class="dia-n">${new Date(d.fecha + 'T12:00:00').getDate()}</span><div style="flex:1"><b style="color:${EST_A[d.estado]?.[2]}">${EST_A[d.estado]?.[0]} ${EST_A[d.estado]?.[1]}</b><br><small class="muted">${new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'short' })}${d.hora ? ' · registrado ' + esc(d.hora) : ''}${d.just ? ` · 📝 ${d.just === 'pendiente' ? 'justificación enviada' : d.just === 'aprobada' ? 'justificación aceptada' : 'justificación revisada'}` : ''}</small></div>${d.estado === 'F' && !d.just ? `<button class="btn sec sm" data-jf2="${d.fecha}">📝 Justificar</button>` : ''}</div>`).join('')}</div>` : '<p class="muted">Sin registros este mes.</p>'}</div>`;
+    $('#asHijo').onchange = e => { location.hash = `#/asistencia/${e.target.value}`; }; $('#asMes').onchange = e => { location.hash = `#/asistencia/${id}/${e.target.value}`; };
+    Z.onclick = async e => { const b = e.target.closest('[data-jf2]'); if (!b) return; const d = modal(`<h2>📝 Justificar la falta</h2><p class="muted">Falta del <b>${fmtF(b.dataset.jf2)}</b>. Cuéntale a la docente qué pasó.</p><form><textarea name="motivo" rows="3" required placeholder="Ej: tuvo cita médica"></textarea><button class="btn" style="margin-top:10px;width:100%">Enviar a la docente</button></form>`);
+      d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await conBoton(ev.target.querySelector('button'), async () => { await api('justificar', { alumno_id: id, fecha: b.dataset.jf2, motivo: form(ev.target).motivo }); d.remove(); toast('✅ Enviado a la docente'); asistenciaFam(id, R.mes); }); }; };
+  }
+  // 📅 docente: reuniones y eventos con asistencia de las familias
+  async function tReuniones(T, D) {
+    const R = await api('eventos?aula=' + D.aula.id); if (!T.isConnected) return;
+    T.innerHTML = `<div class="card"><h3>📅 Nueva reunión o evento</h3><form><label>Nombre</label><input name="titulo" placeholder="Reunión de padres del 2.° bimestre" required><div class="grid g2"><div><label>Fecha</label><input type="date" name="fecha" value="${hoy()}" required></div><div><label>Hora</label><input type="time" name="hora" value="19:00"></div></div><label>Lugar o enlace (Meet/Zoom)</label><input name="lugar" placeholder="Aula 3.° B · o https://meet.google.com/…"><label>Detalle (opcional)</label><textarea name="detalle" rows="2"></textarea><button class="btn" style="margin-top:10px;width:100%">📣 Crear y avisar a las ${R.familias} familias</button></form></div>
+${R.eventos.map(e => { const si = e.lista.filter(x => x.rsvp === 'si').length, no = e.lista.filter(x => x.rsvp === 'no').length, fue = e.lista.filter(x => x.asistio === 1).length; return `<div class="card" style="margin-top:12px"><div class="fila entre"><div><b>📅 ${esc(e.titulo)}</b><br><small class="muted">${fmtF(e.fecha)}${e.hora ? ' · ' + esc(e.hora) : ''}${e.lugar ? ' · ' + esc(e.lugar).slice(0, 40) : ''}</small></div><button class="btn sec sm" data-borrar="${e.id}">🗑️</button></div>
+<div class="small" style="margin:6px 0">✅ ${si} irán · ❌ ${no} no podrán · ${e.lista.length - si - no} sin responder${e.fecha <= hoy() ? ` · <b>${fue} de ${e.lista.length} asistieron</b>` : ''}</div>
+<details ${e.fecha <= hoy() ? 'open' : ''}><summary class="small">Lista de familias${e.fecha <= hoy() ? ' · marca quién asistió' : ''}</summary><div class="lista">${e.lista.map(x => `<div><label class="chk" style="margin:0;flex:1"><input type="checkbox" data-ev="${e.id}" data-p="${x.padre_id}" ${x.asistio === 1 ? 'checked' : ''}> <span><b>${esc(x.nombre)}</b> <small class="muted">· ${esc(x.alumno)}</small></span></label><small>${x.rsvp === 'si' ? '✅ Irá' : x.rsvp === 'no' ? '❌ No podrá' : '—'}</small></div>`).join('')}</div><button class="btn verde sm" data-guardar-ev="${e.id}" style="margin-top:8px">💾 Guardar asistencia</button></details></div>`; }).join('')}`;
+    T.querySelector('form').onsubmit = async e => { e.preventDefault(); await conBoton(e.target.querySelector('button'), async () => { await api('evento', { ...form(e.target), aula_id: D.aula.id }); toast('📣 Creado: las familias recibirán el aviso'); tReuniones(T, D); }); };
+    T.onclick = async e => { const g = s => e.target.closest(s); if (g('[data-borrar]') && confirm('¿Borrar este evento?')) { await api('evento', { aula_id: D.aula.id, borrar: +g('[data-borrar]').dataset.borrar }); tReuniones(T, D); }
+      const gv = g('[data-guardar-ev]'); if (gv) await conBoton(gv, async () => { const id = gv.dataset.guardarEv, marcas = {}; T.querySelectorAll(`[data-ev="${id}"]`).forEach(c => { marcas[c.dataset.p] = c.checked; }); await api('evento-asistio', { evento_id: +id, marcas }); toast('✅ Asistencia de familias guardada'); tReuniones(T, D); }); };
+  }
   async function examenesAlumno(id) {
     const Z = $('#fExam'); if (!Z) return; const R = await api('examenes-alumno?id=' + id).catch(() => null); if (!R?.examenes.length || !Z.isConnected) return;
     Z.innerHTML = `<div class="card" style="margin-top:12px"><h3>📸 Exámenes corregidos</h3><div class="lista">${R.examenes.map((x, i) => `<div style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(x.titulo)}</b><br><small class="muted">${esc(x.curso || '')} · ${fmtF(String(x.fecha || '').slice(0, 10))} · ${x.puntaje} de ${x.total} pts</small></div><span class="chip bajo" style="font-size:1.05rem">${esc(x.nota)}</span><button class="btn sec sm" data-vx="${i}">Ver examen</button></div>`).join('')}</div></div>`;
@@ -605,7 +639,7 @@ ${x.retro.logros ? `<p>🌟 <b>Lo que hizo bien:</b> ${esc(x.retro.logros)}</p>`
   }
 
   // ================= Familia =================
-  const menuFamilia = () => [['#/inicio', '🏠 Inicio'], ['#/novedades', '🔔 Novedades' + (YO.noLeidos ? ` (${YO.noLeidos})` : '')], ...(YO.hijos || []).map(h => [`#/alumno/${h.id}`, '👧 ' + h.nombres]), ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
+  const menuFamilia = () => [['#/inicio', '🏠 Inicio'], ['#/novedades', '🔔 Novedades' + (YO.noLeidos ? ` (${YO.noLeidos})` : '')], ['#/asistencia', '📅 Asistencia'], ...(YO.hijos || []).map(h => [`#/alumno/${h.id}`, '👧 ' + h.nombres]), ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
   function casa() {
     const H = YO.hijos || []; if (H.length === 1) { location.hash = `#/alumno/${H[0].id}`; return; }
     app.innerHTML = marco(menuFamilia(), '#/inicio'); $('#main').innerHTML = `<h2>¡Hola, ${esc(YO.usuario.nombre.split(' ')[0])}! 👋</h2>${H.length ? `<div class="grid g3">${H.map(h => `<a class="card fila" href="#/alumno/${h.id}" style="text-decoration:none;color:inherit">${foto(h, true)}<div><b>${esc(h.nombres + ' ' + (h.apellidos || ''))}</b><br><small class="muted">${esc(h.aula)}</small></div></a>`).join('')}</div>` : '<div class="card vacio">Aún no tienes alumnos vinculados. Pide al docente tu enlace de invitación.</div>'}`;

@@ -1,3 +1,7 @@
+9.38.1
+- 📅 ProfeTok · Control de asistencia para familias: pestaña «Alumnos» con hijo y mes a elegir, totales (presentes, tardanzas, faltas, justificadas) y el detalle día por día con la hora del registro (y «Justificar» en cada falta).
+- 👨‍👩‍👧 Pestaña «Padres» y nueva pestaña «📅 Reuniones» del docente: crea reuniones o eventos (con enlace de Meet), las familias reciben el aviso y confirman «Asistiré / No podré», y el docente marca quién asistió. Cada familia ve su historial («✅ Asististe»).
+
 9.38.0
 - 🔑 ProfeTok · «¿Olvidaste tu contraseña?»: enlace al correo para crear una nueva (1 hora, un solo uso). Sin correo, ayuda por WhatsApp. El dueño y el docente (para las familias de su aula) pueden generar el enlace y mandarlo por WhatsApp.
 - ☁️ Copia de seguridad diaria en la nube, cifrada (nadie puede leerla sin tu clave): Cloudflare R2 (10 GB gratis), Backblaze B2 o Amazon S3. Se guardan 30 días, se puede descargar a tu PC y restaurar con un comando.
