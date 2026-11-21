@@ -10,7 +10,7 @@ function crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARC
   create table if not exists correcciones (id integer primary key, examen_id integer, alumno_id integer, fotos text, ia text, final text, puntaje real, total real, nota text, retro text, estado text default 'propuesta', coincidencia real, modo text, creado text default (datetime('now')), confirmado text);
   create index if not exists ex_aula on examenes(aula_id); create index if not exists co_ex on correcciones(examen_id, estado);`);
   for (const c of ['borrador text', 'publicado integer default 0', 'publicado_en text']) try { db.exec('alter table correcciones add column ' + c); } catch (e) {}
-  const J = (s, d) => { try { return JSON.parse(s); } catch (e) { return d; } };
+  const J = (s, d) => { try { return JSON.parse(s) ?? d; } catch (e) { return d; } };
   const PERFIL0 = { procedimiento: 50, ortografia: 0, caligrafia: 0, parcial: true, letra: 'flexible' };
   const iaLista = () => !!(E.AULA_SF_URL && E.AULA_IA_TOKEN);
   const deExamen = (u, id) => { const e = q1('select * from examenes where id=?', +id); if (!e || !aulaDe(u, e.aula_id)) throw 403; return e; };
