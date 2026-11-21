@@ -331,6 +331,10 @@ API['GET /api/billeteras'] = async () => billeteras();
 // 🎙️ Dictar a Libretín: el docente habla y ProfeTok ordena asistencia, notas, bitácora y tareas (ver dictado.js)
 for (const [k, f] of Object.entries(require('./dictado').crear({ q, q1, aulaDe, hoy, API, E, limpio }).API)) API[k] = f;
 
+// 📸 Corregir con Libretín: fotos de exámenes, corrección con el criterio del docente y calibración (ver correccion.js)
+const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH });
+for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
 const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta']);
 
@@ -354,6 +358,9 @@ const server = http.createServer(async (req, res) => {
     }
     m = /^\/api\/qr\/(yape|plin)\.img$/.exec(url.pathname);
     if (m) { const t = getS('qr_' + m[1], ''), f = path.join(DATA, `qr-${m[1]}.img`); if (!usuarioDe(req) && !q1('select 1 from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now())) return send(res, 401, { error: 'Inicia sesión' }); if (!t || !fs.existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': t, 'cache-control': 'private, max-age=300', ...SEG }); return res.end(fs.readFileSync(f)); }
+    m = /^\/api\/examen-foto\/(\d+)\/(\d)$/.exec(url.pathname);
+    if (m) { const s3 = q1('select * from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now()), yo = usuarioDe(req) || (s3 && q1('select * from usuarios where id=?', s3.usuario_id)); const f = yo && correccionM.fotoRuta(yo, m[1], m[2]);
+      if (!f || !fs.existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'image/jpeg', 'cache-control': 'private, max-age=600', ...SEG }); return fs.createReadStream(f).pipe(res); }
     m = /^\/api\/comprobante\/(\d+)$/.exec(url.pathname);
     if (m) { const s2 = q1('select * from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now()), yo = usuarioDe(req) || (s2 && q1('select * from usuarios where id=?', s2.usuario_id)), p = q1('select * from pagos where id=?', +m[1]);
       if (!yo || !p?.comprobante || !(yo.rol === 'dueno' || yo.colegio_id === p.colegio_id)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(p.comprobante)] || 'image/jpeg', 'cache-control': 'private, max-age=600', ...SEG }); return fs.createReadStream(path.join(ARCH, p.comprobante)).pipe(res); }

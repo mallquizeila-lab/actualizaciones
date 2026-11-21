@@ -279,9 +279,12 @@ async function api(u, q, U, r) {
   // 🎓 IA para «Mi asistente» de ProfeTok (la pide ProfeTok desde esta misma PC, con su clave privada)
   if (u === '/api/libretin-ia' && P) {
     const ipq = String(q.socket.remoteAddress || ''); if (!/^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(ipq) || !E.LIBRETIN_IA_TOKEN || q.headers['x-sf-token'] !== E.LIBRETIN_IA_TOKEN) throw new Error('No autorizado');
-    const o = JSON.parse((await body(q, 2e6)).toString() || '{}'), msgs = (Array.isArray(o.messages) ? o.messages : []).slice(-30).map(m => ({ role: ['system', 'user', 'assistant'].includes(m.role) ? m.role : 'user', content: String(m.content || '').slice(0, 12000) }));
+    const o = JSON.parse((await body(q, 16e6)).toString() || '{}'); let fotos = 0;
+    // texto, o texto + fotos (para corregir exámenes): solo imágenes JPG/PNG en base64, máximo 4
+    const parte = x => x && x.type === 'image_url' && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(x.image_url?.url || '') && x.image_url.url.length < 4e6 && fotos++ < 4 ? { type: 'image_url', image_url: { url: x.image_url.url } } : x && x.type === 'text' ? { type: 'text', text: String(x.text || '').slice(0, 12000) } : null;
+    const msgs = (Array.isArray(o.messages) ? o.messages : []).slice(-30).map(m => ({ role: ['system', 'user', 'assistant'].includes(m.role) ? m.role : 'user', content: Array.isArray(m.content) ? m.content.map(parte).filter(Boolean) : String(m.content || '').slice(0, 12000) }));
     if (!msgs.length) throw new Error('Sin mensaje');
-    const r = await ai.ask(msgs, { max: Math.min(+o.max || 3500, 6000), json: !!o.json }); return { text: r.text || '' };
+    const r = await ai.ask(msgs, { max: Math.min(+o.max || 3500, 8000), json: !!o.json, vision: fotos > 0 }); return { text: r.text || '' };
   }
   // Traducciones para la página viral (la pide la propia página desde esta PC, con la clave local)
   if (u === '/api/traducir' && P) {

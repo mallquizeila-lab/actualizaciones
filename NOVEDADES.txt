@@ -1,3 +1,6 @@
+9.35.0
+- 📸 ProfeTok: «Corregir con Libretín». Foto del examen → Libretín propone los puntos pregunta por pregunta con la clave, la rúbrica y el criterio del docente (procedimiento o resultado, ortografía, caligrafía, puntaje parcial, letra difícil). Calibración: las primeras 5 a 10 las corrige el docente y Libretín aprende de sus diferencias (memoria del criterio); con más de 90 % de coincidencia pasa a modo rápido. Muestra la foto calificada en rojo (✓ ✗ ½ y la nota), la retroalimentación y pasa la nota al registro. Lee las preguntas desde la foto del examen en blanco. La franja del nombre se tapa para la IA.
+
 9.34.1
 - 🎙️ ProfeTok: «Dictar a Libretín». El docente habla (o escribe) lo que pasó en clase —«faltaron Diego y Camila, Mateo llegó tarde, los demás presentes; en Matemática María AD, Luis B; Sebastián ayudó a sus compañeros; tarea de Comunicación para el viernes»— y Libretín lo ordena en asistencia, notas, bitácora y tareas. Se revisa y se guarda con un toque. A la IA solo van nombres de pila con la inicial del apellido. Nueva pestaña «🎙️ Dictar» en cada aula y acceso directo en Inicio.
 
