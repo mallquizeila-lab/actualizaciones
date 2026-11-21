@@ -383,8 +383,8 @@ ${staff ? `<div class="card"><h3>👨‍👩‍👧 Familia vinculada</h3><div c
 <div><label>¿Cuántos meses?</label><select id="pMeses">${[1, 3, 6, 12].map(n => `<option value="${n}" ${n === 6 ? 'selected' : ''}>${n} mes${n > 1 ? 'es' : ''}${DM[n] ? ` · ahorras ${DM[n]} %` : ''}</option>`).join('')}</select></div>
 <div><label>Cupón de descuento</label><input id="pCupon" value="${esc(qs.get('cupon') || '')}" placeholder="Opcional" style="text-transform:uppercase"></div></div>
 <div class="total-pago" id="pTotal">Calculando…</div>
-<div class="fila" style="margin-top:6px">${YO.mp ? '<button class="btn" data-mp>💳 Pagar con tarjeta o Yape (Mercado Pago)</button>' : ''}<button class="btn ${YO.mp ? 'sec' : ''} yape" data-yape>📲 Pagar con Yape o Plin</button></div>
-<p class="small muted">${YO.mp ? 'Con Mercado Pago tu plan se activa al instante. ' : ''}Con Yape o Plin tienes acceso al momento y confirmamos tu pago en pocas horas.</p></div>
+<div class="fila" style="margin-top:6px">${YO.izipay ? '<button class="btn yape" data-izi>📱 Pagar con QR · Yape, Plin o tarjeta</button>' : ''}${YO.mp ? `<button class="btn ${YO.izipay ? 'sec' : ''}" data-mp>💳 Pagar con tarjeta o Yape (Mercado Pago)</button>` : ''}<button class="btn ${YO.mp || YO.izipay ? 'sec' : 'yape'}" data-yape>📲 ${YO.izipay ? 'Yape o Plin manual (n.° de operación)' : 'Pagar con Yape o Plin'}</button></div>
+<p class="small muted">${YO.izipay ? '📱 Con el QR, el plan se activa <b>solo, al instante</b>: escanéalo con Yape, Plin o la app de tu banco. ' : YO.mp ? 'Con Mercado Pago tu plan se activa al instante. ' : ''}Con Yape o Plin manual tienes acceso al momento y confirmamos tu pago en pocas horas.</p></div>
 <div class="card" id="refCard"><p class="muted">Cargando…</p></div>`;
     let pr = null; const calc = async () => { const t = $('#pTotal'); try { pr = await api(`precio?plan=${$('#pPlan').value}&meses=${$('#pMeses').value}&cupon=${encodeURIComponent($('#pCupon').value.trim())}`); t.innerHTML = `Total: <b>S/ ${pr.total.toFixed(2)}</b>${pr.total < pr.bruto ? ` <s class="muted">S/ ${pr.bruto.toFixed(2)}</s> <span class="chip bajo">Ahorras S/ ${(pr.bruto - pr.total).toFixed(2)}</span>` : ''}${pr.cupon ? ` <span class="chip">🎟️ ${esc(pr.cupon.codigo)} −${pr.cupon.pct} %</span>` : ''} <small class="muted">· S/ ${(pr.total / pr.meses).toFixed(2)} al mes</small>`; } catch (e) { pr = null; t.innerHTML = `<span style="color:var(--bad)">⚠️ ${esc(e.message)}</span>`; } };
     ['pPlan', 'pMeses'].forEach(id => $('#' + id).onchange = calc); $('#pCupon').oninput = () => { clearTimeout(calc.t); calc.t = setTimeout(calc, 500); }; calc();
@@ -392,6 +392,7 @@ ${staff ? `<div class="card"><h3>👨‍👩‍👧 Familia vinculada</h3><div c
       const mpB = e.target.closest('[data-mp]'), y = e.target.closest('[data-yape]');
       if (mpB) await conBoton(mpB, async () => { const r = await api('checkout', { plan: $('#pPlan').value, meses: +$('#pMeses').value, cupon: $('#pCupon').value.trim() }); location.href = r.url; });
       if (y) { await calc(); if (!pr) return; billetera(pr); }
+      const iz = e.target.closest('[data-izi]'); if (iz) { await calc(); if (pr) pagoQR(pr); }
       const cp = e.target.closest('[data-copiar]'); if (cp) { navigator.clipboard?.writeText(cp.dataset.copiar); toast('📋 Enlace copiado'); }
     };
     // al volver de Mercado Pago: confirmar el pago
@@ -400,6 +401,20 @@ ${staff ? `<div class="card"><h3>👨‍👩‍👧 Familia vinculada</h3><div c
       if (box.isConnected && !box.textContent.includes('rechazado')) box.innerHTML = '<p>⏳ Tu pago aún está en proceso. Apenas Mercado Pago lo confirme, tu plan se activará solo (te llegará un correo).</p>'; }
     const R = await api('referidos').catch(() => null), rc = $('#refCard'); if (!rc || !R) return;
     rc.innerHTML = `<h3>🎁 Invita a tus colegas y gana meses gratis</h3><p class="muted">Tu colega recibe <b>7 días extra</b> de prueba y tú ganas <b>1 mes gratis</b> cuando se suscriba. Sin límite.</p><div class="fila"><input readonly value="${esc(R.enlace)}" style="flex:1;min-width:200px"><button class="btn sec sm" data-copiar="${esc(R.enlace)}">📋 Copiar</button><a class="btn wa sm" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Colega, te recomiendo ProfeTok: asistencia en 1 minuto, notas automáticas y las familias informadas en su celular. Con mi enlace tienes 7 días extra de prueba gratis 👉 ' + R.enlace)}">🟢 Enviar por WhatsApp</a></div><p class="small muted" style="margin-top:8px">Invitados: <b>${R.invitados}</b> · Se suscribieron: <b>${R.pagaron}</b> 🎉</p>`;
+  }
+  // 📱 QR dinámico de Izipay: el monto va dentro del QR y el plan se activa solo con el aviso de Izipay
+  const cargarScript = src => new Promise((ok, no) => { if (document.querySelector(`script[src="${src}"]`) && window.Izipay) return ok(); const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = () => no(new Error('No se pudo cargar Izipay. Revisa tu internet.')); document.head.append(sc); });
+  function pagoQR(pr) {
+    const d = modal(`<h2>📱 Pagar S/ ${pr.total.toFixed(2)} con QR</h2><p class="small muted">Se abrirá la ventana segura de <b>Izipay</b> con un QR con el monto exacto. Escanéalo con <b>Yape, Plin o la app de tu banco</b> (o paga con tarjeta) y tu plan se activa solo.</p><form><label>DNI (o RUC) para el comprobante</label><input name="documento" inputmode="numeric" maxlength="11" required><label>Celular</label><input name="celular" inputmode="tel" maxlength="12" value="${esc((YO.usuario.telefono || '').replace(/\D/g, '').slice(-9))}" required><button class="btn yape" style="width:100%;margin-top:12px">Continuar al QR ➤</button></form><p class="small muted" style="text-align:center">🔒 ProfeTok no ve ni guarda los datos de tu tarjeta.</p>`);
+    d.querySelector('form').onsubmit = async ev => { ev.preventDefault(); await conBoton(ev.target.querySelector('button'), async () => {
+      const r = await api('izipay/iniciar', { ...form(ev.target), plan: pr.plan, meses: pr.meses, cupon: pr.cupon?.codigo || '' }); await cargarScript(r.script); d.remove();
+      const listoPago = async res => { let est = 'pendiente'; try { if (res?.payloadHttp) est = (await api('izipay/respuesta', { id: r.id, payloadHttp: res.payloadHttp, signature: res.signature })).estado; } catch (e) {}
+        for (let i = 0; i < 8 && est === 'pendiente'; i++) { await new Promise(ok => setTimeout(ok, 2500)); est = (await api('izipay/estado?id=' + r.id).catch(() => ({}))).estado || 'pendiente'; }
+        if (est === 'aprobado') { YO = await api('yo'); modal(`<div style="text-align:center"><img src="/libretin.svg" alt="" style="width:90px"><h2>¡Pago aprobado! 🎉</h2><p>Tu plan ya está <b>activo</b>. Te enviamos el comprobante a tu correo.</p><button class="btn" data-cerrar>Seguir</button></div>`, () => { location.hash = '#/inicio'; }); }
+        else if (est === 'rechazado') toast('❌ El pago no se completó. Puedes intentarlo otra vez.');
+        else toast('⏳ Tu pago está en proceso: apenas Izipay lo confirme, tu plan se activará solo.'); };
+      try { const ck = new window.Izipay({ config: r.config }); ck.LoadForm({ authorization: r.authorization, keyRSA: r.keyRSA, callbackResponse: listoPago }); }
+      catch (er) { throw new Error(er?.message || 'Izipay no pudo abrir el pago'); } }); };
   }
   // 📲 Pago con Yape o Plin: QR, número para copiar, monto exacto, n.° de operación y captura (opcional)
   async function billetera(pr) {

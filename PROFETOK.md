@@ -63,6 +63,8 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 - Puedes editar cada texto o apagar cualquier paso. La publicidad va solo a quien marcó la casilla, y todo mensaje lleva «darse de baja».
 
 **Cobrar**
+- **📱 QR dinámico Yape + Plin (Izipay):** el docente pone su DNI y celular, se abre la ventana segura de Izipay con un **QR interoperable con el monto exacto**, lo escanea con Yape, Plin o la app de su banco (también acepta código Yape, Plin y tarjeta) e **Izipay avisa a ProfeTok (IPN) y el plan se activa solo, al instante**. Cada aviso se verifica con su firma (HMAC-SHA256 con tu Clave Hash); si algo no cuadra, ProfeTok le pregunta directo a Izipay por esa orden antes de activar. Si el aviso se demora, el navegador del docente pide la confirmación a Izipay.
+  - Configúralo en 🚀 Crecimiento → 💳 Pagos con tus claves de **panel.izipay.pe → Desarrolladores → Claves**: Código de comercio, Clave API del nuevo botón de pagos, Clave Hash y Clave pública (RSA). Empieza en modo **Pruebas** (sandbox) y luego pasa a **Producción**.
 - **Mercado Pago:** tarjeta (y Yape si tu cuenta lo tiene). El plan se activa solo con el webhook. Se verifica la firma y se consulta el pago directo a Mercado Pago (estado, monto, referencia).
 - **Yape y Plin:** número, titular y QR propios de cada uno. El docente paga, escribe el n.° de operación (y si quiere sube la captura) y **recibe 48 h de acceso al momento**. A ti te llega un aviso por correo y 🔔; lo apruebas en «📊 Panel». Si lo rechazas, se quita el acceso provisional. No se acepta el mismo n.° de operación dos veces.
 - Descuentos por pagar varios meses (3 m −10 %, 6 m −15 %, 12 m −25 %) y **cupones** (Día del Maestro, etc.).

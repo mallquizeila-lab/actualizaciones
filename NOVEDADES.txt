@@ -1,3 +1,6 @@
+9.33.0
+- 📱 ProfeTok: QR dinámico de Yape y Plin con Izipay. QR interoperable con el monto exacto (también código Yape, Plin y tarjeta) y el plan se activa solo, al instante, con el aviso de Izipay. Configúralo en 🚀 Crecimiento → 💳 Pagos.
+
 9.32.0
 - 🚀 ProfeTok: motor de crecimiento completo en la pestaña «🚀 Crecimiento» del dueño: recursos gratis para captar docentes, contactos (CRM) con puntaje, secuencias automáticas por correo, avisos 🔔 y WhatsApp, reactivación con cupón real de 72 h, referidos (1 mes gratis), testimonios, embudo por fuente y página de privacidad.
 - 💜💙 Pagos con Yape y Plin: número, titular y QR de cada uno, n.° de operación y captura, acceso al momento por 48 h mientras lo revisas y aviso al dueño. 💳 Mercado Pago con activación automática, descuentos por varios meses y cupones.

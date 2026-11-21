@@ -169,7 +169,7 @@ API['POST /api/aceptar'] = async ({ b, ip }) => {
 // --- quién soy ---
 API['GET /api/yo'] = async ({ u }) => {
   const col = u.colegio_id ? q1('select * from colegios where id=?', u.colegio_id) : null;
-  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo() };
+  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol, telefono: u.telefono || '' }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo(), izipay: izipay.listo() };
   if (u.rol === 'padre' || u.rol === 'alumno') r.hijos = q('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula, x.grado from familia f join alumnos a on a.id=f.alumno_id join aulas x on x.id=a.aula_id where f.padre_id=?', u.id);
   if (esStaff(u)) r.aulas = q(`select x.*, (select count(*) from alumnos where aula_id=x.id) alumnos, u.nombre docente from aulas x left join usuarios u on u.id=x.docente_id where ${u.rol === 'docente' ? 'x.docente_id=?' : u.rol === 'director' ? 'x.colegio_id=?' : '1=1 or ?'} order by x.id`, u.rol === 'docente' ? u.id : u.colegio_id || 0);
   if (u.rol === 'director') r.docentes = q("select id, nombre, email from usuarios where colegio_id=? and rol='docente'", u.colegio_id);
@@ -318,16 +318,17 @@ for (const [k, f] of Object.entries(asistente.API)) API[k] = f;
 // 💳 pagos automáticos (Mercado Pago) y 🚀 crecimiento (CRM, secuencias, push, WhatsApp, referidos)
 const baseUrl = req => getS('urlPublica', '') || ((req?.headers['cf-connecting-ip'] || req?.headers['x-forwarded-proto'] === 'https' ? 'https://' : 'http://') + (/^[a-z0-9.:-]{3,100}$/i.test(req?.headers.host || '') ? req.headers.host : 'localhost:' + PORT));
 const pagosM = require('./pagos').crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base: baseUrl });
+const izipay = require('./izipay').crear({ db, q1, run, getS, setS, limpio, PLANES, activarPago, base: baseUrl, precio: pagosM.precio });
 const crecer = require('./crecimiento').crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, DATA, ARCH, nuevoCupon: pagosM.nuevoCupon, E });
-const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES]);
-for (const M of [pagosM, crecer]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES]);
+for (const M of [pagosM, crecer, izipay]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
 API['GET /api/billeteras'] = async () => billeteras();
 
 // solo lectura cuando la membresía venció (los datos nunca se borran)
-const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub']);
+const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta']);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
