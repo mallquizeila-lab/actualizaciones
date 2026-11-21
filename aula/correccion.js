@@ -5,10 +5,11 @@
 // Con ≥ 90 % de coincidencia se activa el modo rápido (el docente solo revisa lo dudoso). Siempre confirma el docente.
 // Privacidad: la foto se guarda en privado; a la IA no se le da el nombre del alumno (y la franja del nombre puede taparse).
 const fs = require('fs'), path = require('path');
-function crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH }) {
+function crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno }) {
   db.exec(`create table if not exists examenes (id integer primary key, aula_id integer, curso_id integer, docente_id integer, titulo text, clave text, perfil text, calibrar integer default 6, creado text default (datetime('now')));
   create table if not exists correcciones (id integer primary key, examen_id integer, alumno_id integer, fotos text, ia text, final text, puntaje real, total real, nota text, retro text, estado text default 'propuesta', coincidencia real, modo text, creado text default (datetime('now')), confirmado text);
   create index if not exists ex_aula on examenes(aula_id); create index if not exists co_ex on correcciones(examen_id, estado);`);
+  for (const c of ['borrador text', 'publicado integer default 0', 'publicado_en text']) try { db.exec('alter table correcciones add column ' + c); } catch (e) {}
   const J = (s, d) => { try { return JSON.parse(s); } catch (e) { return d; } };
   const PERFIL0 = { procedimiento: 50, ortografia: 0, caligrafia: 0, parcial: true, letra: 'flexible' };
   const iaLista = () => !!(E.AULA_SF_URL && E.AULA_IA_TOKEN);
@@ -54,7 +55,8 @@ Si una pregunta no aparece o está en blanco: puntos 0 y "leido":"(en blanco)". 
     const conf = q("select coincidencia from correcciones where examen_id=? and estado='confirmada' order by id desc", e.id), med = conf.filter(c => c.coincidencia != null).slice(0, 10);
     const coin = med.length ? Math.round(med.reduce((s, c) => s + c.coincidencia, 0) / med.length) : null;
     const modo = conf.length < (+e.calibrar || 6) ? 'calibracion' : coin != null && coin >= 90 && med.length >= 5 ? 'rapido' : 'revision';
-    return { confirmadas: conf.length, calibrar: +e.calibrar || 6, coincidencia: coin, modo };
+    const x = q1("select sum(estado='propuesta') pend, sum(estado='confirmada' and coalesce(publicado,0)=0) porPub, sum(coalesce(publicado,0)=1) pub from correcciones where examen_id=?", e.id) || {};
+    return { confirmadas: conf.length, calibrar: +e.calibrar || 6, coincidencia: coin, modo, pendientes: x.pend || 0, porPublicar: x.porPub || 0, publicadas: x.pub || 0 };
   }
 
   const api = {};
@@ -79,9 +81,9 @@ Si una pregunta no aparece o está en blanco: puntos 0 y "leido":"(en blanco)". 
   };
   api['GET /api/examen'] = async ({ u, url }) => { const e = deExamen(u, url.searchParams.get('id'));
     return { examen: { ...e, clave: J(e.clave, []), perfil: { ...PERFIL0, ...J(e.perfil, {}) }, total: totalDe(J(e.clave, [])), ...estadistica(e) },
-      correcciones: q('select c.id, c.alumno_id, c.nota, c.puntaje, c.total, c.estado, c.coincidencia, c.modo, c.confirmado, a.nombres, a.apellidos from correcciones c join alumnos a on a.id=c.alumno_id where c.examen_id=? order by c.id desc', e.id) }; };
+      correcciones: q('select c.id, c.alumno_id, c.nota, c.puntaje, c.total, c.estado, c.coincidencia, c.modo, c.confirmado, c.publicado, c.borrador is not null borrador, a.nombres, a.apellidos from correcciones c join alumnos a on a.id=c.alumno_id where c.examen_id=? order by c.id desc', e.id) }; };
   api['GET /api/correccion'] = async ({ u, url }) => { const c = q1('select * from correcciones where id=?', +url.searchParams.get('id')); if (!c) throw 404; const e = deExamen(u, c.examen_id), al = q1('select nombres, apellidos from alumnos where id=?', c.alumno_id);
-    return { id: c.id, examen: { id: e.id, titulo: e.titulo, clave: J(e.clave, []), total: totalDe(J(e.clave, [])) }, alumno: al, fotos: J(c.fotos, []).map((f, i) => i), ia: J(c.ia, null), final: J(c.final, null), nota: c.nota, retro: J(c.retro, null), estado: c.estado, coincidencia: c.coincidencia, modo: c.modo, ...estadistica(e) }; };
+    return { id: c.id, examen: { id: e.id, titulo: e.titulo, clave: J(e.clave, []), total: totalDe(J(e.clave, [])) }, alumno: al, fotos: J(c.fotos, []).map((f, i) => i), ia: J(c.ia, null), final: J(c.final, null), borrador: J(c.borrador, null), publicado: !!c.publicado, nota: c.nota, retro: J(c.retro, null), estado: c.estado, coincidencia: c.coincidencia, modo: c.modo, ...estadistica(e) }; };
   // nueva corrección: guarda las fotos y Libretín propone (en calibración la propuesta se guarda en silencio para medir la coincidencia)
   api['POST /api/correccion'] = async ({ u, b }) => {
     const e = deExamen(u, b.examen_id), a = aulaDe(u, e.aula_id); if (!q1('select 1 from alumnos where id=? and aula_id=?', +b.alumno_id, a.id)) throw 'Elige al alumno';
@@ -99,13 +101,33 @@ Si una pregunta no aparece o está en blanco: puntos 0 y "leido":"(en blanco)". 
     if (pro) { const tol = p => Math.max(0.5, 0.1 * p.puntos); coin = Math.round(100 * clave.filter(p => { const x = pro.find(z => z.n === +p.n), f = fin.find(z => z.n === +p.n); return x && Math.abs(x.puntos - f.puntos) <= tol(p); }).length / clave.length); }
     const retro = { logros: limpio(b.retro?.logros, 400), mejorar: limpio(b.retro?.mejorar, 400) };
     run("update correcciones set final=?, puntaje=?, total=?, nota=?, retro=?, estado='confirmada', coincidencia=?, confirmado=datetime('now') where id=?", JSON.stringify(fin), pts, tot, nota, JSON.stringify(retro), coin, c.id);
-    // pasa la nota al registro (misma evaluación con el nombre del examen)
-    const ev = q1('select id from evaluaciones where aula_id=? and curso_id=? and titulo=?', a.id, e.curso_id, e.titulo)?.id || (await API['POST /api/evaluacion']({ u, b: { aula_id: a.id, curso_id: e.curso_id, titulo: e.titulo, fecha: hoy() } })).id;
-    await API['POST /api/notas']({ u, b: { aula_id: a.id, notas: [{ evaluacion_id: ev, alumno_id: c.alumno_id, valor: nota, comentario: [retro.logros, retro.mejorar].filter(Boolean).join(' · ').slice(0, 200) || null }] } });
+    run('update correcciones set borrador=null, publicado=0 where id=?', c.id); // confirmado: espera a «Registrar y publicar»
     return { nota, puntaje: pts, total: tot, coincidencia: coin, iaPuntaje: pro ? pro.reduce((s, x) => s + x.puntos, 0) : null, ...estadistica(e) };
   };
+  // 💾 borrador automático: lo que el docente va escribiendo nunca se pierde
+  api['POST /api/correccion/borrador'] = async ({ u, b }) => {
+    const c = q1('select * from correcciones where id=?', +b.id); if (!c) throw 404; deExamen(u, c.examen_id);
+    run('update correcciones set borrador=? where id=?', JSON.stringify({ puntos: (b.puntos || []).slice(0, 60).map(x => ({ n: +x.n, puntos: x.puntos === '' || x.puntos == null ? '' : +x.puntos, comentario: limpio(x.comentario, 240) })), retro: { logros: limpio(b.retro?.logros, 400), mejorar: limpio(b.retro?.mejorar, 400) }, fecha: new Date().toISOString() }), c.id);
+    return { ok: 1 };
+  };
+  // 📤 Registrar y publicar: las notas confirmadas pasan al registro (con el nombre de cada alumno) y las familias ven el examen corregido
+  api['POST /api/examen/publicar'] = async ({ u, b }) => {
+    const e = deExamen(u, b.id), a = aulaDe(u, e.aula_id), lista = q("select * from correcciones where examen_id=? and estado='confirmada' and coalesce(publicado,0)=0", e.id);
+    if (!lista.length) throw 'No hay exámenes confirmados nuevos para publicar';
+    const ev = q1('select id from evaluaciones where aula_id=? and curso_id=? and titulo=?', a.id, e.curso_id, e.titulo)?.id || (await API['POST /api/evaluacion']({ u, b: { aula_id: a.id, curso_id: e.curso_id, titulo: e.titulo, fecha: hoy() } })).id;
+    await API['POST /api/notas']({ u, b: { aula_id: a.id, notas: lista.map(c => { const r = J(c.retro, {}); return { evaluacion_id: ev, alumno_id: c.alumno_id, valor: c.nota, comentario: [r.logros, r.mejorar].filter(Boolean).join(' · ').slice(0, 200) || null }; }) } });
+    run("update correcciones set publicado=1, publicado_en=datetime('now') where examen_id=? and estado='confirmada' and coalesce(publicado,0)=0", e.id);
+    return { publicadas: lista.length, ...estadistica(e) };
+  };
+  // 👨‍👩‍👧 familias (y docentes): exámenes publicados de un alumno, con la foto calificada
+  api['GET /api/examenes-alumno'] = async ({ u, url }) => {
+    const aid = +url.searchParams.get('id'); if (!veAlumno(u, aid)) throw 403;
+    return { examenes: q("select c.id, c.nota, c.puntaje, c.total, c.final, c.ia, c.retro, c.fotos, c.publicado_en, e.titulo, e.clave, cu.nombre curso from correcciones c join examenes e on e.id=c.examen_id left join cursos cu on cu.id=e.curso_id where c.alumno_id=? and c.publicado=1 order by c.publicado_en desc limit 40", aid)
+      .map(c => ({ id: c.id, titulo: c.titulo, curso: c.curso, nota: c.nota, puntaje: c.puntaje, total: c.total, fecha: c.publicado_en, retro: J(c.retro, {}), paginas: J(c.fotos, []).length,
+        preguntas: J(c.clave, []).map(p => { const f = J(c.final, []).find(x => +x.n === +p.n) || {}, x = (J(c.ia, {}).preguntas || []).find(z => +z.n === +p.n) || {}; return { n: +p.n, max: +p.puntos, puntos: f.puntos ?? 0, comentario: f.comentario || '', y: x.y || 0, pagina: x.pagina || 1 }; }) })) };
+  };
   // foto privada del examen (solo el docente del aula)
-  function fotoRuta(u, cid, i) { const c = q1('select * from correcciones where id=?', +cid); if (!c) return null; try { deExamen(u, c.examen_id); } catch (e) { return null; } const f = J(c.fotos, [])[+i || 0]; return f ? path.join(ARCH, f) : null; }
+  function fotoRuta(u, cid, i) { const c = q1('select * from correcciones where id=?', +cid); if (!c) return null; const familia = ['padre', 'alumno'].includes(u.rol); if (familia) { if (!c.publicado || !veAlumno(u, c.alumno_id)) return null; } else try { deExamen(u, c.examen_id); } catch (e) { return null; } const f = J(c.fotos, [])[+i || 0]; return f ? path.join(ARCH, f) : null; }
   return { API: api, fotoRuta };
 }
 module.exports = { crear };

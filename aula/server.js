@@ -332,7 +332,7 @@ API['GET /api/billeteras'] = async () => billeteras();
 for (const [k, f] of Object.entries(require('./dictado').crear({ q, q1, aulaDe, hoy, API, E, limpio }).API)) API[k] = f;
 
 // 📸 Corregir con Libretín: fotos de exámenes, corrección con el criterio del docente y calibración (ver correccion.js)
-const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH });
+const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno });
 for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
 
 // solo lectura cuando la membresía venció (los datos nunca se borran)
