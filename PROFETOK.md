@@ -79,3 +79,7 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 - **🔄 Renovar en 1 clic:** repite el último plan, meses y forma de pago (o usa el saldo si alcanza).
 - **💳 Renovación automática con tarjeta** (Mercado Pago, suscripción mensual), cancelable cuando quiera.
 - **Recordatorios:** 10, 5 y 2 días antes (correo, aviso 🔔 y WhatsApp) y una franja en su panel. A quien tiene renovación automática no se le recuerda.
+
+## 🔑 Olvidé mi contraseña y ☁️ copia de seguridad
+- **Olvidé mi contraseña:** enlace al correo (vale 1 hora, un solo uso, cierra las sesiones abiertas). Sin correo configurado: botón de WhatsApp a soporte. El dueño (🔑 en Cuentas) y el docente (🔑 en Familias conectadas) pueden generar un enlace de 24 h para mandarlo por WhatsApp.
+- **Respaldo en la nube:** cada día la base de datos se comprime, se cifra (AES-256-GCM con tu clave de respaldo) y se sube a Cloudflare R2 / Backblaze B2 / Amazon S3; se guardan 30 días. Botón para descargarlo a tu PC. Restaurar: `node restaurar.js archivo.db.gz.enc "tu clave" aula.db`. Nota: las fotos (logos, fotos de exámenes, comprobantes) no van en este respaldo diario.

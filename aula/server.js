@@ -342,8 +342,11 @@ const familiaM = require('./familia').crear({ db, q, q1, run, aulaDe, veAlumno, 
 const saldoM = require('./saldo').crear({ db, q, q1, run, limpio, PLANES, pagosM, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p), DIA });
 API['POST /api/pagar-saldo'] = async ({ u, b }) => { if (!['docente', 'director'].includes(u.rol)) throw 403; return saldoM.pagarConSaldo(u.colegio_id, b.plan, +b.meses || 1, b.cupon, '', activarPago); };
 setInterval(() => { try { saldoM.revisarAuto(activarPago); } catch (e) { console.log('[ProfeTok] Saldo: ' + e.message); } }, 3600e3).unref(); setTimeout(() => { try { saldoM.revisarAuto(activarPago); } catch (e) {} }, 60000).unref();
-const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES]);
-for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+// 🔑 olvidé mi contraseña y ☁️ copia de seguridad cifrada en la nube (ver cuenta.js y nube.js)
+const cuentaM = require('./cuenta').crear({ db, q, q1, run, hashPass, nuevaSesion, correo, getS, limpio, veAlumno, emailOk, audit });
+const nubeM = require('./nube').crear({ db, getS, setS, DATA, hoy, limpio });
+const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES, ...cuentaM.LIBRES]);
+for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
@@ -379,6 +382,8 @@ const server = http.createServer(async (req, res) => {
     }
     m = /^\/api\/qr\/(yape|plin)\.img$/.exec(url.pathname);
     if (m) { const t = getS('qr_' + m[1], ''), f = path.join(DATA, `qr-${m[1]}.img`); if (!usuarioDe(req) && !q1('select 1 from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now())) return send(res, 401, { error: 'Inicia sesión' }); if (!t || !fs.existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': t, 'cache-control': 'private, max-age=300', ...SEG }); return res.end(fs.readFileSync(f)); }
+    if (url.pathname === '/api/nube-descargar') { const s4 = q1('select * from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now()), yo = usuarioDe(req) || (s4 && q1('select * from usuarios where id=?', s4.usuario_id)), d = nubeM.descarga(yo);
+      if (!d) { res.writeHead(403); return res.end(); } if (d.error) return send(res, 400, { error: d.error }); res.writeHead(200, { 'content-type': 'application/octet-stream', 'content-disposition': `attachment; filename="${d.nombre}"`, ...SEG }); return res.end(d.datos); }
     m = /^\/api\/examen-foto\/(\d+)\/(\d)$/.exec(url.pathname);
     if (m) { const s3 = q1('select * from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now()), yo = usuarioDe(req) || (s3 && q1('select * from usuarios where id=?', s3.usuario_id)); const f = yo && correccionM.fotoRuta(yo, m[1], m[2]);
       if (!f || !fs.existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'image/jpeg', 'cache-control': 'private, max-age=600', ...SEG }); return fs.createReadStream(f).pipe(res); }

@@ -1,3 +1,7 @@
+9.38.0
+- 🔑 ProfeTok · «¿Olvidaste tu contraseña?»: enlace al correo para crear una nueva (1 hora, un solo uso). Sin correo, ayuda por WhatsApp. El dueño y el docente (para las familias de su aula) pueden generar el enlace y mandarlo por WhatsApp.
+- ☁️ Copia de seguridad diaria en la nube, cifrada (nadie puede leerla sin tu clave): Cloudflare R2 (10 GB gratis), Backblaze B2 o Amazon S3. Se guardan 30 días, se puede descargar a tu PC y restaurar con un comando.
+
 9.37.1
 - 🤝 Afiliados: un colega invitado cuenta recién cuando PAGA su plan (🟢); si solo se registró queda en rojo (🔴). Con 5 colegas que pagaron se gana 1 mes gratis una vez y el contador vuelve a cero. Lista de colegas invitados con su color (solo nombre e inicial).
 
