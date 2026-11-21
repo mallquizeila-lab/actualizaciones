@@ -73,7 +73,7 @@ function alumnosVisibles(u) {
   if (u.rol === 'alumno') return new Set(q('select alumno_id id from familia where padre_id=?', u.id).map(r => r.id)); // la cuenta de alumno se vincula igual que la del padre
   return new Set();
 }
-const veAlumno = (u, aid) => { const s = alumnosVisibles(u); return s === null || s.has(+aid); };
+const veAlumno = (u, aid) => { const s = alumnosVisibles(u); return s === null ? !!q1('select 1 from alumnos where id=?', +aid) : s.has(+aid); };
 const aulaDe = (u, aid) => { const a = q1('select * from aulas where id=?', +aid); if (!a) return null; if (u.rol === 'dueno') return a; if (u.rol === 'director' && a.colegio_id === u.colegio_id) return a; if (u.rol === 'docente' && a.docente_id === u.id) return a; return null; };
 const esStaff = u => ['docente', 'director', 'dueno'].includes(u.rol);
 
@@ -193,7 +193,7 @@ API['POST /api/docente'] = async ({ u, b }) => { // el director agrega docentes 
 
 // --- aulas y cursos ---
 API['POST /api/aula'] = async ({ u, b }) => {
-  if (!esStaff(u)) throw 403; const col = q1('select * from colegios where id=?', u.colegio_id), m = membresia(col);
+  if (!esStaff(u)) throw 403; const col = q1('select * from colegios where id=?', u.colegio_id); if (!col) throw 'Para crear aulas entra con una cuenta de docente o director'; const m = membresia(col);
   const datos = [limpio(b.nombre, 60), limpio(b.nivel, 20), limpio(b.grado, 20), limpio(b.seccion, 10), b.escala === 'vigesimal' ? 'vigesimal' : 'letras', /^https:\/\/meet\.google\.com\/[a-z0-9-]{6,40}$/i.test(b.meet || '') ? b.meet : null, limpio(b.horario, 200)];
   if (b.id) { const a = aulaDe(u, b.id); if (!a) throw 403; run('update aulas set nombre=?, nivel=?, grado=?, seccion=?, escala=?, meet=?, horario=? where id=?', ...datos, a.id); return { id: a.id }; }
   const n = q1('select count(*) n from aulas where colegio_id=?', u.colegio_id).n, max = m.prueba ? (u.rol === 'director' ? 10 : PLANES.docente.aulas) : (PLANES[col.plan]?.aulas || 2); if (n >= max) throw `Tu plan permite ${max} aulas. Mejora tu plan para crear más.`;
@@ -226,7 +226,9 @@ API['POST /api/alumnos-lote'] = async ({ u, b }) => { // pegar una lista (uno po
 };
 API['POST /api/alumno-borrar'] = async ({ u, b }) => { // borra al alumno y todos sus datos (derecho de cancelación)
   if (!esStaff(u) || !veAlumno(u, b.id)) throw 403; const al = q1('select * from alumnos where id=?', +b.id); borrarArchivo(al.foto);
-  for (const t of ['notas', 'asistencia', 'entregas', 'incidencias', 'familia']) run(`delete from ${t} where alumno_id=?`, al.id); run('delete from invitaciones where alumno_id=?', al.id); run('delete from alumnos where id=?', al.id); audit(u.id, 'borrar alumno', al.nombres); return { ok: 1 };
+  for (const c of q('select fotos from correcciones where alumno_id=?', al.id)) { try { for (const f of JSON.parse(c.fotos || '[]')) borrarArchivo(f); } catch (e) {} } // fotos de sus exámenes
+  for (const { name } of q("select name from sqlite_master where type='table'")) if (q(`pragma table_info(${name})`).some(c => c.name === 'alumno_id')) run(`delete from ${name} where alumno_id=?`, al.id); // TODO lo suyo: notas, asistencia, avisos, mensajes, justificaciones, exámenes…
+  run('delete from alumnos where id=?', al.id); audit(u.id, 'borrar alumno', al.nombres); return { ok: 1 };
 };
 API['POST /api/invitar'] = async ({ u, b }) => { if (!esStaff(u) || !veAlumno(u, b.alumno_id)) throw 403; const t = crypto.randomBytes(18).toString('base64url'); run('insert into invitaciones(token, alumno_id, rol, creado) values(?,?,?,?)', t, +b.alumno_id, b.rol === 'alumno' ? 'alumno' : 'padre', Date.now()); return { token: t }; };
 API['GET /api/alumno'] = async ({ u, url }) => { const id = +url.searchParams.get('id'); if (!veAlumno(u, id)) throw 403; const f = fichaAlumno(id, u); if (esStaff(u)) { const al = q1('select dni, notas_salud, consentimiento from alumnos where id=?', id); Object.assign(f.alumno, al); f.familia = q('select x.nombre, x.email, x.telefono, x.rol, f.parentesco from familia f join usuarios x on x.id=f.padre_id where f.alumno_id=?', id); } return f; };

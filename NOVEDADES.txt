@@ -1,3 +1,9 @@
+9.38.2
+- 🔧 ProfeTok · Revisión general (las 45 funciones probadas como dueño, director, docente y padre, en 40 pantallas de celular):
+  · Privacidad: al borrar a un alumno ahora se borra TODO lo suyo (avisos, mensajes, justificaciones, exámenes y sus fotos, reuniones), como pide la Ley 29733.
+  · Crecimiento: los ingresos ya no se cuentan dos veces (pagar con saldo no es dinero nuevo) ni se multiplican en colegios con varios docentes.
+  · Se corrigieron 4 errores del servidor con datos inexistentes y el texto «avisar a 1 familia».
+
 9.38.1
 - 📅 ProfeTok · Control de asistencia para familias: pestaña «Alumnos» con hijo y mes a elegir, totales (presentes, tardanzas, faltas, justificadas) y el detalle día por día con la hora del registro (y «Justificar» en cada falta).
 - 👨‍👩‍👧 Pestaña «Padres» y nueva pestaña «📅 Reuniones» del docente: crea reuniones o eventos (con enlace de Meet), las familias reciben el aviso y confirman «Asistiré / No podré», y el docente marca quién asistió. Cada familia ve su historial («✅ Asististe»).
