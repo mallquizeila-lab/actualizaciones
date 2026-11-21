@@ -1,3 +1,6 @@
+9.35.3
+- 🗣️ ProfeTok: nuevo tono con voz «¡ProfeTok, ProfeTok, ProfeTok, ProfeTok!» con campanita (es el tono principal). Las familias pueden elegir entre el tono con voz y la campanita, escucharlos y descargarlos para ponerlos como sonido de los avisos en Android.
+
 9.35.2
 - 🔔 ProfeTok: avisos a las familias en su celular con stickers animados de Libretín. Notas, exámenes corregidos, logros, notas de la docente y faltas del día. Palabras cuidadas: se celebra lo bueno («🎉 ¡Felicitaciones, familia!») y, cuando hace falta apoyo, se dice con cariño («🤝 Acompañemos a…» con ideas para casa), nunca «mala nota» ni «desaprobó».
 - 🎵 Tono del colegio «Campanita ProfeTok»: suena al abrir cada novedad; en Android se puede poner como sonido de los avisos (guía incluida). Vibración propia «corta-corta-larga».
