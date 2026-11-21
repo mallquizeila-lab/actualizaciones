@@ -350,7 +350,9 @@ const nubeM = require('./nube').crear({ db, getS, setS, DATA, hoy, limpio });
 const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES, ...cuentaM.LIBRES]);
 // 📅 asistencia por mes para familias y reuniones con asistencia de padres (ver reuniones.js)
 const reunionesM = require('./reuniones').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar });
-for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM, reunionesM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+// 📋 «Mi equipo» del director: cómo va cada docente y cada aula (ver director.js)
+const directorM = require('./director').crear({ q, q1, run, hoy, riesgo, letraDe, audit, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
+for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM, reunionesM, directorM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
@@ -364,7 +366,7 @@ const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy,
 for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
 
 // solo lectura cuando la membresía venció (los datos nunca se borran)
-const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta', 'POST /api/pagar-saldo', 'POST /api/saldo-auto']);
+const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta', 'POST /api/pagar-saldo', 'POST /api/saldo-auto', 'POST /api/equipo-recordar']);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;

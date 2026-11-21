@@ -1,3 +1,9 @@
+9.39.0
+- 📋 ProfeTok · «Mi equipo» para el director: cómo va cada docente de un vistazo con semáforo 🟢🟡🔴 (asistencia de hoy, días sin asistencia o sin notas, mensajes de familias sin responder, familias conectadas y último ingreso).
+- 🏫 Comparar aulas: asistencia de 30 días, promedio, alumnos en riesgo y familias conectadas de cada aula.
+- 🔔 «Recordar»: un aviso amable al celular del docente (asistencia, notas o mensajes), uno por día. Si aún no activó las notificaciones, se abre un correo listo.
+- En el inicio del director: tarjeta «Mi equipo hoy».
+
 9.38.3
 - 📱 ProfeTok · Lista de alumnos más clara en el celular: el nombre completo en una sola línea y debajo su estado y su familia.
 
