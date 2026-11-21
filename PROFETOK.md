@@ -52,7 +52,7 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 **Captar**
 - **Recursos gratis** (registro auxiliar CNEB, plantilla de sesión y 30 mensajes para familias, todos originales). El docente deja nombre, correo y, si quiere, WhatsApp, y descarga al instante; el enlace del correo confirma su dirección. Puedes subir más (texto o PDF propio).
 - Enlace para anuncios y grupos: `https://profetok.yupitok.com/recursos?utm_source=facebook` (cambia la fuente: `tiktok`, `grupo-wa`…). La ventana del recurso también aparece sola al leer media página, a los 40 s o al intentar salir (una sola vez).
-- **Referidos:** cada docente tiene su enlace en «Plan». El invitado recibe 7 días extra y quien invita, 1 mes gratis cuando el invitado paga.
+- **Afiliados:** cada docente tiene su enlace en «Plan». El invitado recibe 7 días extra y, por cada 5 colegas que se registran y usan ProfeTok (un aula con 3 o más alumnos, o que pagan), quien invita gana 1 mes gratis.
 
 **Convertir (automático cada 5 minutos)**
 - Contactos: día 2 beneficios · día 5 testimonio · día 9 último empujón.
@@ -72,3 +72,10 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 **Medir:** embudo visitas → contactos → pruebas → pagos, por fuente, con ingresos. Contactos con puntaje de interés, historial y exportación a Excel.
 
 **Privacidad (Ley 29733):** página `/privacidad` con tus datos, permisos separados, baja con un clic y borrado de contacto. Los datos de alumnos y familias nunca se usan para publicidad. Te toca inscribir tus bancos de datos ante la Autoridad Nacional de Protección de Datos Personales.
+
+## 👛 Saldo, renovación fácil y recordatorios
+- **Saldo:** el docente recarga cuando quiere (Yape/Plin, tarjeta o QR). Regalo: +5 % desde S/ 100 y +8 % desde S/ 200. Paga su plan con «👛 Pagar con mi saldo» y, si lo deja activado, ProfeTok renueva 1 mes con el saldo un día antes de vencer (si no alcanza, le avisa).
+- **🎁 Premio por renovar antes:** +7 días si paga con 7 días o más de anticipación (no aplica a la renovación automática con tarjeta).
+- **🔄 Renovar en 1 clic:** repite el último plan, meses y forma de pago (o usa el saldo si alcanza).
+- **💳 Renovación automática con tarjeta** (Mercado Pago, suscripción mensual), cancelable cuando quiera.
+- **Recordatorios:** 10, 5 y 2 días antes (correo, aviso 🔔 y WhatsApp) y una franja en su panel. A quien tiene renovación automática no se le recuerda.

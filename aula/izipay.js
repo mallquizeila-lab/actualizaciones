@@ -36,7 +36,7 @@ function crear({ db, q1, run, getS, setS, limpio, PLANES, activarPago, base, pre
     if (d.code !== '00') { if (p.estado === 'pendiente' && d.code !== '021') run("update pagos set estado='rechazado', revisado=datetime('now') where id=?", p.id); return 'no aprobado ' + d.code; }
     if (o.stateMessage && !/autoriz|aprob|exitos/i.test(o.stateMessage)) return 'estado ' + o.stateMessage; // aún no pagado
     if ((o.currency || 'PEN') !== 'PEN' || +o.amount + 0.01 < +p.monto) { run("update pagos set estado='revisar' where id=?", p.id); return 'monto distinto'; }
-    run('update pagos set operacion=? where id=?', `Izipay ${o.payMethodAuthorization || d.response?.payMethod || ''} · ${o.referenceNumber || o.uniqueId || ''} · ${p.meses || 1} mes(es)`, p.id);
+    run('update pagos set operacion=? where id=?', `Izipay ${o.payMethodAuthorization || d.response?.payMethod || ''} · ${o.referenceNumber || o.uniqueId || ''} · ${p.plan === 'recarga' ? 'recarga' : (p.meses || 1) + ' mes(es)'}`, p.id);
     activarPago(p.id, 'Izipay ' + (o.payMethodAuthorization || '') + ' ' + via); return 'aprobado';
   }
 
@@ -46,8 +46,9 @@ function crear({ db, q1, run, getS, setS, limpio, PLANES, activarPago, base, pre
     const dni = String(b.documento || '').replace(/\D/g, ''), cel = String(b.celular || '').replace(/\D/g, '').slice(-9);
     if (!/^\d{8}$/.test(dni) && !/^\d{11}$/.test(dni)) throw 'Escribe tu DNI (8 dígitos) o RUC (11) para el comprobante';
     if (!/^9\d{8}$/.test(cel)) throw 'Escribe tu celular (9 dígitos)';
-    const pr = precio(b.plan, +b.meses || 1, b.cupon || ''), amount = pr.total.toFixed(2), transactionId = trx();
-    const id = run('insert into pagos(colegio_id, plan, monto, metodo, operacion, cupon, meses, iz_trx) values(?,?,?,?,?,?,?,?)', u.colegio_id, pr.plan, pr.total, 'izipay', 'Izipay · ' + pr.meses + ' mes(es)', pr.cupon?.codigo || null, pr.meses, transactionId).lastInsertRowid;
+    const pr = b.recarga ? { plan: 'recarga', meses: 0, total: Math.round(+b.recarga * 100) / 100 } : precio(b.plan, +b.meses || 1, b.cupon || ''), amount = pr.total.toFixed(2), transactionId = trx();
+    if (b.recarga && !(pr.total >= 10 && pr.total <= 2000)) throw 'La recarga debe ser de S/ 10 a S/ 2000';
+    const id = run('insert into pagos(colegio_id, plan, monto, metodo, operacion, cupon, meses, iz_trx) values(?,?,?,?,?,?,?,?)', u.colegio_id, pr.plan, pr.total, 'izipay', b.recarga ? 'Izipay · recarga' : 'Izipay · ' + pr.meses + ' mes(es)', pr.cupon?.codigo || null, pr.meses, transactionId).lastInsertRowid;
     const orderNumber = 'PT' + String(id).padStart(8, '0'); run('update pagos set iz_orden=? where id=?', orderNumber, id);
     const auth = await token(transactionId, orderNumber, amount), url = base(req), [nom, ...ape] = limpio(u.nombre, 100).split(' ');
     return { id, script: ent().script, keyRSA: conf().rsa, authorization: auth, config: {

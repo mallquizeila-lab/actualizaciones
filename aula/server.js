@@ -170,7 +170,7 @@ API['POST /api/aceptar'] = async ({ b, ip }) => {
 // --- quién soy ---
 API['GET /api/yo'] = async ({ u }) => {
   const col = u.colegio_id ? q1('select * from colegios where id=?', u.colegio_id) : null;
-  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol, telefono: u.telefono || '' }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo(), izipay: izipay.listo() };
+  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol, telefono: u.telefono || '' }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo(), izipay: izipay.listo(), bonoPronto: BONO_PRONTO, ...(['docente', 'director'].includes(u.rol) ? { saldo: saldoM.saldoDe(u.colegio_id), ultimoPago: q1("select plan, meses, metodo, monto from pagos where colegio_id=? and estado='aprobado' order by id desc limit 1", u.colegio_id) || null, auto: pagosM.suscripcion(u.colegio_id) } : {}) };
   if (u.rol === 'padre' || u.rol === 'alumno') r.noLeidos = q1('select count(*) n from avisos where padre_id=? and leido is null', u.id).n;
   if (u.rol === 'padre' || u.rol === 'alumno') r.hijos = q('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula, x.grado from familia f join alumnos a on a.id=f.alumno_id join aulas x on x.id=a.aula_id where f.padre_id=?', u.id);
   if (esStaff(u)) r.aulas = q(`select x.*, (select count(*) from alumnos where aula_id=x.id) alumnos, u.nombre docente from aulas x left join usuarios u on u.id=x.docente_id where ${u.rol === 'docente' ? 'x.docente_id=?' : u.rol === 'director' ? 'x.colegio_id=?' : '1=1 or ?'} order by x.id`, u.rol === 'docente' ? u.id : u.colegio_id || 0);
@@ -278,7 +278,11 @@ API['GET /api/alertas'] = async ({ u }) => { if (!esStaff(u)) throw 403; const i
 
 // --- membresía y pagos (Yape / Plin con número de operación; el dueño lo aprueba) ---
 API['POST /api/pago'] = async ({ u, b }) => { // Yape, Plin o transferencia: el docente manda el n.° de operación (y si quiere, la captura)
-  if (!['docente', 'director'].includes(u.rol)) throw 403; const pr = pagosM.precio(b.plan, +b.meses || 1, b.cupon || ''), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape';
+  if (!['docente', 'director'].includes(u.rol)) throw 403;
+  if (b.recarga) { const monto = saldoM.montoRecarga(b.recarga), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape', op = String(b.operacion || '').replace(/[^\dA-Za-z-]/g, '').slice(0, 30); if (op.length < 4) throw 'Escribe el número de operación (está en la constancia)';
+    if (q1("select 1 from pagos where metodo=? and operacion like ? and estado<>'rechazado'", metodo, op + ' ·%')) throw 'Ese número de operación ya fue registrado';
+    run("insert into pagos(colegio_id, plan, monto, metodo, operacion, meses, comprobante) values(?, 'recarga', ?, ?, ?, 0, ?)", u.colegio_id, monto, metodo, op + ' · recarga', b.comprobante ? guardarImagen(b.comprobante) : null);
+    crecer.avisarDueno(`👛 Recarga por ${metodo}: S/ ${monto}`, `${u.email} · Operación ${op}. Revísala y apruébala en el panel.`, '/#/inicio').catch(() => {}); return { ok: 1, recarga: monto }; } const pr = pagosM.precio(b.plan, +b.meses || 1, b.cupon || ''), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape';
   const op = String(b.operacion || '').replace(/[^\dA-Za-z-]/g, '').slice(0, 30); if (op.length < 4) throw `Escribe el número de operación de tu ${metodo === 'plin' ? 'Plin' : metodo === 'yape' ? 'Yape' : 'transferencia'} (está en la constancia)`;
   if (q1("select 1 from pagos where metodo=? and operacion like ? and estado<>'rechazado'", metodo, op + ' ·%')) throw 'Ese número de operación ya fue registrado. Si es un error, escríbenos por WhatsApp.';
   if (q1("select count(*) n from pagos where colegio_id=? and estado='pendiente' and metodo in ('yape','plin','transferencia')", u.colegio_id).n >= 3) throw 'Ya tienes pagos esperando revisión. Te avisamos apenas los confirmemos.';
@@ -291,10 +295,13 @@ API['POST /api/pago'] = async ({ u, b }) => { // Yape, Plin o transferencia: el 
   return { ok: 1, total: pr.total, provisional: prov };
 };
 // activar un pago (lo llama el dueño al aprobar un Yape/Plin, o Mercado Pago solo con su webhook)
+const BONO_PRONTO = 7; // días de regalo por renovar con 7 días o más de anticipación
 function activarPago(id, via = '') {
   const p = q1('select * from pagos where id=?', +id); if (!p || p.estado === 'aprobado') return false;
+  if (p.plan === 'recarga') { run("update pagos set estado='aprobado', revisado=? where id=?", ahora(), p.id); saldoM.acreditar(p); audit(null, 'recarga aprobada', `${p.id} ${via}`); return true; } // 👛 recarga de saldo
   const c = q1('select * from colegios where id=?', p.colegio_id), meses = +p.meses || +(/(\d+) mes/.exec(p.operacion)?.[1] || 1), venceReal = p.provisional ? p.vence_antes : c.vence, base = Math.max(Date.now(), venceReal ? new Date(venceReal).getTime() : 0); // los 2 días provisionales no se suman dos veces // si paga antes de que termine su prueba, no pierde los días que le quedaban
-  run('update colegios set plan=?, vence=? where id=?', p.plan, new Date(base + meses * 30 * DIA).toISOString(), c.id); run("update pagos set estado='aprobado', revisado=? where id=?", ahora(), p.id);
+  const bono = p.metodo !== 'mp-auto' && venceReal && new Date(venceReal).getTime() - Date.now() >= 7 * DIA ? BONO_PRONTO : 0; // 🎁 renovó a mano con anticipación (la renovación automática no lo acumula)
+  run('update colegios set plan=?, vence=? where id=?', p.plan, new Date(base + (meses * 30 + bono) * DIA).toISOString(), c.id); run("update pagos set estado='aprobado', revisado=?, bono=? where id=?", ahora(), bono, p.id);
   if (p.cupon) run('update cupones set usos=usos+1 where codigo=?', p.cupon); audit(null, 'pago aprobado', `${p.id} ${via}`);
   try { crecer.alPagar(q1('select * from pagos where id=?', p.id)); } catch (e) { console.log('[ProfeTok] ' + e.message); } return true;
 }
@@ -331,8 +338,12 @@ const avisosM = require('./avisos').crear({ db, q, q1, run, hoy, pushUsuario: (u
 const avisar = (...a) => { try { return avisosM.encolar(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } };
 // 👨‍👩‍👧 familia ↔ docente: «Enterado», justificar faltas, mensajes y reuniones, lista de familias (ver familia.js)
 const familiaM = require('./familia').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
+// 👛 saldo: recargas y pago de la membresía desde el saldo (ver saldo.js)
+const saldoM = require('./saldo').crear({ db, q, q1, run, limpio, PLANES, pagosM, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p), DIA });
+API['POST /api/pagar-saldo'] = async ({ u, b }) => { if (!['docente', 'director'].includes(u.rol)) throw 403; return saldoM.pagarConSaldo(u.colegio_id, b.plan, +b.meses || 1, b.cupon, '', activarPago); };
+setInterval(() => { try { saldoM.revisarAuto(activarPago); } catch (e) { console.log('[ProfeTok] Saldo: ' + e.message); } }, 3600e3).unref(); setTimeout(() => { try { saldoM.revisarAuto(activarPago); } catch (e) {} }, 60000).unref();
 const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES]);
-for (const M of [pagosM, crecer, izipay, avisosM, familiaM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
@@ -346,7 +357,7 @@ const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy,
 for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
 
 // solo lectura cuando la membresía venció (los datos nunca se borran)
-const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta']);
+const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta', 'POST /api/pagar-saldo', 'POST /api/saldo-auto']);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;

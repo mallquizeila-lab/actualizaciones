@@ -92,9 +92,15 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
       asunto: 'Último día de tu descuento', boton: 'Activar con descuento',
       texto: 'Hoy es el último día para usar tu código {cupon} con {pct} % de descuento.\n\nDespués de hoy no te volveremos a escribir sobre esto. Gracias por haber probado ProfeTok 💙.',
       wa: 'Hola {nombre}. Hoy vence tu código {cupon} de {pct} % en ProfeTok. ¡Te esperamos! {enlace}' },
+    { id: 'C0', grupo: 'cliente', desde: 'vence', dias: -10, mk: 0, nombre: 'Cliente · faltan 10 días (premio)', canales: ['correo', 'push'], ir: 'plan',
+      asunto: '🎁 Renueva hoy y gana 7 días gratis', boton: 'Renovar en 1 clic',
+      texto: 'Tu plan de ProfeTok vence en 10 días. Si renuevas ahora (con 7 días o más de anticipación) te regalamos 7 días extra, y no pierdes ninguno de los que te quedan.\n\nTambién puedes activar la renovación automática con tarjeta y olvidarte de las fechas.' },
     { id: 'C1', grupo: 'cliente', desde: 'vence', dias: -5, mk: 0, nombre: 'Cliente · renovar en 5 días', canales: ['correo', 'push'], ir: 'plan',
-      asunto: 'Tu plan de ProfeTok se renueva en 5 días', boton: 'Renovar',
+      asunto: 'Tu plan de ProfeTok se renueva en 5 días', boton: 'Renovar en 1 clic',
       texto: 'Tu plan vence en 5 días. Renueva con un clic para que tus familias sigan recibiendo la información sin pausa.\n\n¡Gracias por confiar en ProfeTok! 💙' },
+    { id: 'C2', grupo: 'cliente', desde: 'vence', dias: -2, mk: 0, nombre: 'Cliente · faltan 2 días', canales: ['push', 'wa'], ir: 'plan',
+      asunto: '⏳ Tu plan vence en 2 días', boton: 'Renovar', texto: 'Tu plan de ProfeTok vence en 2 días. Renueva en 1 clic para no pausar tu registro.',
+      wa: 'Hola {nombre} 👋. Tu plan de ProfeTok vence en 2 días. Renueva en 1 clic aquí: {enlace}' },
     { id: 'A1', grupo: 'abandono', desde: 'pago', dias: 0.1, mk: 0, nombre: 'Pago no terminado', canales: ['correo', 'wa'], ir: 'plan',
       asunto: '¿Tuviste algún problema al pagar?', boton: 'Intentar de nuevo',
       texto: 'Vimos que empezaste a pagar tu plan pero no se completó. A veces el banco rechaza la tarjeta por seguridad.\n\nPuedes intentarlo otra vez o pagar con Yape o Plin. Si algo falla, responde este correo y te ayudamos al momento.',
@@ -107,14 +113,14 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
   // estado de cada contacto para decidir qué secuencia le toca
   function fichas() {
     return q(`select c.*, u.creado u_creado, u.no_correo, u.activo, col.plan, col.vence, col.id colegio_id,
-      (select count(*) from pagos p where p.colegio_id=col.id and p.estado='aprobado') pagados,
+      (select count(*) from pagos p where p.colegio_id=col.id and p.estado='aprobado') pagados, (select count(*) from suscripciones s where s.colegio_id=col.id and s.estado='activa') auto,
       (select max(id) from pagos p where p.colegio_id=col.id and p.metodo='mercadopago' and p.estado='pendiente' and p.creado<=datetime('now','-2 hours') and p.creado>datetime('now','-2 days') and not exists (select 1 from pagos p2 where p2.colegio_id=col.id and p2.estado='aprobado' and p2.id>p.id)) pago_pend
       from contactos c left join usuarios u on u.id=c.usuario_id left join colegios col on col.id=u.colegio_id
-      where c.baja=0 and (c.creado>datetime('now','-12 days') or u.creado>datetime('now','-3 days') or (col.vence between datetime('now','-8 days') and datetime('now','+7 days')) or exists (select 1 from pagos p where p.colegio_id=col.id and p.estado='pendiente' and p.creado>datetime('now','-2 days')))`);
+      where c.baja=0 and (c.creado>datetime('now','-12 days') or u.creado>datetime('now','-3 days') or (julianday(col.vence) between julianday('now','-8 days') and julianday('now','+7 days')) or exists (select 1 from pagos p where p.colegio_id=col.id and p.estado='pendiente' and p.creado>datetime('now','-2 days')))`);
   }
   const gruposDe = f => { // en qué secuencias está hoy cada contacto (si paga, sale solo de la reactivación)
     if (!f.usuario_id) return f.confirmado ? ['lead'] : []; if (f.activo === 0) return [];
-    const v = f.vence ? new Date(f.vence).getTime() : 0, g = [v <= Date.now() ? 'vencido' : f.plan === 'prueba' ? 'prueba' : 'cliente'];
+    const v = f.vence ? new Date(f.vence).getTime() : 0, g = [v <= Date.now() ? 'vencido' : f.plan === 'prueba' ? 'prueba' : f.auto ? 'cliente-auto' : 'cliente']; // con renovación automática no se le recuerda
     if (f.pago_pend) g.push('abandono'); return g;
   };
   let trabajando = false;
@@ -170,16 +176,11 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
       const col = q1('select * from colegios where id=?', cid); run('update colegios set referido_por=?, vence=? where id=?', padrino.colegio_id, new Date(new Date(col.vence).getTime() + 7 * DIA).toISOString(), cid); evento(c.id, 'referido', 'invitado por ' + padrino.email);
     }
   }
-  async function alPagar(p) { // recibo + premio al colega que lo invitó (1 mes gratis, una sola vez por invitado)
+  async function alPagar(p) { // recibo del pago (y revisa el premio de afiliados de quien lo invitó)
     const col = q1('select * from colegios where id=?', p.colegio_id), u = q1("select * from usuarios where colegio_id=? and rol in ('director','docente') order by id limit 1", p.colegio_id);
     const c = u && q1('select * from contactos where usuario_id=? or email=?', u.id, u.email);
-    if (c) { evento(c.id, 'pago', `${p.plan} S/ ${p.monto}`, 50); porCorreo(c, { asunto: '✅ ¡Gracias! Tu plan de ProfeTok está activo', texto: `Recibimos tu pago de S/ ${p.monto} (${PLANES[p.plan]?.nombre || p.plan}).\n\nTu plan está activo hasta el ${new Date(col.vence).toLocaleDateString('es-PE', { timeZone: 'America/Lima' })}.\n\n¿Sabías que puedes ganar meses gratis? Invita a un colega desde «Plan»: cuando se suscriba, te regalamos 1 mes.`, boton: 'Abrir ProfeTok', url: base() + '/#/inicio' }).catch(() => {}); porPush(c, { titulo: '✅ Plan activo', texto: 'Gracias por tu pago. ¡A seguir!', url: base() + '/#/inicio' }).catch(() => {}); }
-    if (col.referido_por && !col.ref_bono) {
-      const pad = q1('select * from colegios where id=?', col.referido_por); run('update colegios set ref_bono=1 where id=?', col.id); if (!pad) return;
-      run('update colegios set vence=? where id=?', new Date(Math.max(Date.now(), pad.vence ? new Date(pad.vence).getTime() : 0) + 30 * DIA).toISOString(), pad.id);
-      const pu = q1("select * from usuarios where colegio_id=? and rol in ('director','docente') order by id limit 1", pad.id), pc = pu && q1('select * from contactos where usuario_id=?', pu.id);
-      if (pc) { evento(pc.id, 'premio', '+30 días por referido', 10); porCorreo(pc, { asunto: '🎁 ¡Ganaste 1 mes gratis en ProfeTok!', texto: `Un colega que invitaste se suscribió a ProfeTok. Como agradecimiento, sumamos 30 días a tu plan.\n\n¡Gracias por recomendarnos! Cada colega que se suscriba te da otro mes.`, boton: 'Ver mi plan', url: base() + '/#/plan' }).catch(() => {}); }
-    }
+    if (c) { evento(c.id, 'pago', `${p.plan} S/ ${p.monto}`, 50); porCorreo(c, { asunto: '✅ ¡Gracias! Tu plan de ProfeTok está activo', texto: `Recibimos tu pago de S/ ${p.monto} (${PLANES[p.plan]?.nombre || p.plan}).\n\nTu plan está activo hasta el ${new Date(col.vence).toLocaleDateString('es-PE', { timeZone: 'America/Lima' })}.\n\n¿Sabías que puedes ganar meses gratis? Invita a tus colegas desde «Plan»: por cada 5 que se registren y usen ProfeTok, te regalamos 1 mes.`, boton: 'Abrir ProfeTok', url: base() + '/#/inicio' }).catch(() => {}); porPush(c, { titulo: '✅ Plan activo', texto: 'Gracias por tu pago. ¡A seguir!', url: base() + '/#/inicio' }).catch(() => {}); }
+    revisarReferidos(col.referido_por); // ver «cada 5 colegas = 1 mes gratis»
   }
 
   // aviso push a un usuario (por ejemplo, a una familia)
@@ -192,6 +193,24 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
       for (const s of q('select * from push_subs where usuario_id=?', d.id)) await push.enviar(VAPID, s, { title: titulo, body: texto.split('\n')[0], url, icon: '/icono-192.png' }, 'mailto:' + (correo.remitente() || 'soporte@profetok.com')).then(r => r === 'borrar' && run('delete from push_subs where id=?', s.id)).catch(() => {});
     }
   }
+
+  // 🤝 afiliados: por cada 5 colegas invitados que se registran y USAN ProfeTok (un aula con 3 o más alumnos, o que pagaron), 1 mes gratis.
+  // (exigir uso real evita cuentas falsas). Cada invitado cuenta una sola vez.
+  try { db.exec('alter table colegios add column ref_contado integer default 0'); } catch (e) {}
+  const REF_META = 5;
+  const refActivos = pid => q(`select c.id from colegios c where c.referido_por=? and (exists (select 1 from aulas x where x.colegio_id=c.id and (select count(*) from alumnos al where al.aula_id=x.id) >= 3) or exists (select 1 from pagos p where p.colegio_id=c.id and p.estado='aprobado'))`, pid);
+  function revisarReferidos(pid) {
+    if (!pid) return; const pad = q1('select * from colegios where id=?', pid); if (!pad) return;
+    const nuevos = refActivos(pid).filter(x => !q1('select ref_contado from colegios where id=?', x.id).ref_contado);
+    for (let k = 0; k + REF_META <= nuevos.length; k += REF_META) {
+      for (const x of nuevos.slice(k, k + REF_META)) run('update colegios set ref_contado=1 where id=?', x.id);
+      const v = q1('select vence from colegios where id=?', pid).vence; run('update colegios set vence=? where id=?', new Date(Math.max(Date.now(), v ? new Date(v).getTime() : 0) + 30 * DIA).toISOString(), pid);
+      const pu = q1("select * from usuarios where colegio_id=? and rol in ('director','docente') order by id limit 1", pid), pc = pu && q1('select * from contactos where usuario_id=?', pu.id);
+      if (pc) { evento(pc.id, 'premio', '+30 días por 5 colegas', 10); porCorreo(pc, { asunto: '🎁 ¡Ganaste 1 mes gratis en ProfeTok!', texto: `${REF_META} colegas que invitaste ya usan ProfeTok. Como agradecimiento, sumamos 30 días a tu plan.\n\n¡Sigue invitando! Cada ${REF_META} colegas más, otro mes gratis.`, boton: 'Ver mi plan', url: base() + '/#/plan' }).catch(() => {}); }
+      if (pu) pushUsuario(pu.id, { title: '🎁 ¡Ganaste 1 mes gratis!', body: `${REF_META} colegas que invitaste ya usan ProfeTok. Sumamos 30 días a tu plan.`, url: '/#/plan', icon: '/icono-192.png' }).catch(() => {});
+    }
+  }
+  setInterval(() => { try { for (const r of q('select distinct referido_por p from colegios where referido_por is not null and coalesce(ref_contado,0)=0')) revisarReferidos(r.p); } catch (e) {} }, 3600e3).unref();
 
   // ---------- API ----------
   const API = {}, LIBRES = ['POST /api/lead', 'GET /api/publico', 'POST /api/v', 'POST /api/push-sub'];
@@ -221,8 +240,9 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
   API['GET /api/referidos'] = async ({ u }) => {
     if (!['docente', 'director'].includes(u.rol)) throw 403; let ref = u.ref;
     if (!ref) { ref = 'P' + u.id.toString(36).toUpperCase() + crypto.randomBytes(2).toString('hex').toUpperCase(); run('update usuarios set ref=? where id=?', ref, u.id); }
-    const inv = q1('select count(*) n, sum(ref_bono) pagaron from colegios where referido_por=?', u.colegio_id);
-    return { enlace: (base() || '') + '/?ref=' + ref, invitados: inv.n || 0, pagaron: inv.pagaron || 0 };
+    revisarReferidos(u.colegio_id);
+    const inv = q1('select count(*) n, coalesce(sum(ref_contado),0) contados from colegios where referido_por=?', u.colegio_id), act = refActivos(u.colegio_id).length;
+    return { enlace: (base() || '') + '/?ref=' + ref, invitados: inv.n || 0, activos: act, meta: REF_META, progreso: act - inv.contados, meses: Math.floor(inv.contados / REF_META) };
   };
 
   // dueño: panel de crecimiento

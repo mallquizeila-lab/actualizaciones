@@ -1,3 +1,9 @@
+9.37.0
+- 👛 ProfeTok · Saldo: el docente recarga cuando quiera (Yape, Plin, tarjeta o QR; regalo de +5 % desde S/ 100 y +8 % desde S/ 200) y paga su plan desde el saldo. Si lo deja activado, ProfeTok renueva solo con el saldo un día antes de vencer.
+- 🔄 Renovar fácil: «Renovar en 1 clic» (como la última vez), 🎁 +7 días por renovar con anticipación, renovación automática con tarjeta (Mercado Pago) y recordatorios 10, 5 y 2 días antes con una franja en el panel.
+- 🤝 Afiliados: por cada 5 colegas que se registran con tu enlace y usan ProfeTok, 1 mes gratis (con barra de progreso). Ellos reciben 7 días extra.
+- 🛠️ Arreglo: las fechas de vencimiento ahora se comparan bien en recordatorios y campañas.
+
 9.36.1
 - 📝 ProfeTok: la familia puede «Avisar o justificar una inasistencia» en cualquier momento, incluso antes de que ocurra («mañana no irá: cita médica»), con motivos rápidos. La docente lo ve en su bandeja como «Avisa que faltará» y lo acepta con un toque.
 

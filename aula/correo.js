@@ -113,7 +113,7 @@ ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="backgr
   API['GET /api/correo-config'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; const c = conf(); return { proveedor: c.proveedor || 'brevo', remitente: c.remitente || '', nombre: c.nombre || 'ProfeTok', host: c.host || '', port: c.port || 465, user: c.user || '', tieneClave: !!(c.apiKey || c.pass), listo: listo(), urlPublica: getS('urlPublica', ''), campanas: q("select id, asunto, total, enviados, fallidos, estado, creado from campanas where tipo='campana' order by id desc limit 20") }; };
   API['POST /api/campana'] = async ({ u, b }) => {
     if (u.rol !== 'dueno') throw 403; if (!listo()) throw 'Primero configura el envío de correos';
-    const seg = { todos: "1=1", prueba: "c.plan='prueba'", pagando: "c.plan<>'prueba' and c.vence>datetime('now')", vencidos: "c.vence<=datetime('now')" }[b.segmento] || '1=1';
+    const seg = { todos: "1=1", prueba: "c.plan='prueba'", pagando: "c.plan<>'prueba' and julianday(c.vence)>julianday('now')", vencidos: "julianday(c.vence)<=julianday('now')" }[b.segmento] || '1=1';
     const dest = q(`select u.id, u.email, u.nombre from usuarios u join colegios c on c.id=u.colegio_id where u.rol in ('docente','director') and coalesce(u.no_correo,0)=0 and u.activo=1 and ${seg}`);
     if (!dest.length) throw 'No hay docentes en ese grupo'; const asunto = limpio(b.asunto, 120), cuerpo = String(b.cuerpo || '').replace(/[<>]/g, '').slice(0, 6000);
     if (asunto.length < 3 || cuerpo.length < 3) throw 'Escribe el asunto y el mensaje';
