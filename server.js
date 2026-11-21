@@ -281,7 +281,7 @@ async function api(u, q, U, r) {
     const ipq = String(q.socket.remoteAddress || ''); if (!/^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(ipq) || !E.LIBRETIN_IA_TOKEN || q.headers['x-sf-token'] !== E.LIBRETIN_IA_TOKEN) throw new Error('No autorizado');
     const o = JSON.parse((await body(q, 2e6)).toString() || '{}'), msgs = (Array.isArray(o.messages) ? o.messages : []).slice(-30).map(m => ({ role: ['system', 'user', 'assistant'].includes(m.role) ? m.role : 'user', content: String(m.content || '').slice(0, 12000) }));
     if (!msgs.length) throw new Error('Sin mensaje');
-    const r = await ai.ask(msgs, { max: Math.min(+o.max || 3500, 6000) }); return { text: r.text || '' };
+    const r = await ai.ask(msgs, { max: Math.min(+o.max || 3500, 6000), json: !!o.json }); return { text: r.text || '' };
   }
   // Traducciones para la página viral (la pide la propia página desde esta PC, con la clave local)
   if (u === '/api/traducir' && P) {

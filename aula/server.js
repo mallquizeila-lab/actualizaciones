@@ -328,6 +328,9 @@ try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.j
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
 API['GET /api/billeteras'] = async () => billeteras();
 
+// 🎙️ Dictar a Libretín: el docente habla y ProfeTok ordena asistencia, notas, bitácora y tareas (ver dictado.js)
+for (const [k, f] of Object.entries(require('./dictado').crear({ q, q1, aulaDe, hoy, API, E, limpio }).API)) API[k] = f;
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
 const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta']);
 

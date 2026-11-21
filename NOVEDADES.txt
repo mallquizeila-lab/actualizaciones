@@ -1,3 +1,6 @@
+9.34.1
+- 🎙️ ProfeTok: «Dictar a Libretín». El docente habla (o escribe) lo que pasó en clase —«faltaron Diego y Camila, Mateo llegó tarde, los demás presentes; en Matemática María AD, Luis B; Sebastián ayudó a sus compañeros; tarea de Comunicación para el viernes»— y Libretín lo ordena en asistencia, notas, bitácora y tareas. Se revisa y se guarda con un toque. A la IA solo van nombres de pila con la inicial del apellido. Nueva pestaña «🎙️ Dictar» en cada aula y acceso directo en Inicio.
+
 9.34.0
 - 🧠 Nuevo «Centro de IA»: todos tus motores en un solo lugar, cada uno con su estado de conexión, consumo del día, límite diario y botón para activarlo o desactivarlo.
 - 🎬 Videos con IA GRATIS usando las GPU gratuitas de Hugging Face: LTX-Video (rápido), Wan 2.2 (mejor calidad), HunyuanVideo 1.5, CogVideoX y FramePack (anima una imagen). Si el modelo necesita una imagen, primero la crea gratis con FLUX. Cola en segundo plano: si se acaba el cupo gratis, espera y sigue sola.
