@@ -1,3 +1,6 @@
+9.38.3
+- 📱 ProfeTok · Lista de alumnos más clara en el celular: el nombre completo en una sola línea y debajo su estado y su familia.
+
 9.38.2
 - 🔧 ProfeTok · Revisión general (las 45 funciones probadas como dueño, director, docente y padre, en 40 pantallas de celular):
   · Privacidad: al borrar a un alumno ahora se borra TODO lo suyo (avisos, mensajes, justificaciones, exámenes y sus fotos, reuniones), como pide la Ley 29733.
