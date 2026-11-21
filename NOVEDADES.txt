@@ -1,3 +1,8 @@
+9.35.2
+- 🔔 ProfeTok: avisos a las familias en su celular con stickers animados de Libretín. Notas, exámenes corregidos, logros, notas de la docente y faltas del día. Palabras cuidadas: se celebra lo bueno («🎉 ¡Felicitaciones, familia!») y, cuando hace falta apoyo, se dice con cariño («🤝 Acompañemos a…» con ideas para casa), nunca «mala nota» ni «desaprobó».
+- 🎵 Tono del colegio «Campanita ProfeTok»: suena al abrir cada novedad; en Android se puede poner como sonido de los avisos (guía incluida). Vibración propia «corta-corta-larga».
+- No molesta: junta varias novedades en un solo aviso, no avisa de noche (21:00 a 7:00) y cada familia elige qué recibir. Lo de salud nunca se avisa y las observaciones no muestran el texto en la pantalla bloqueada.
+
 9.35.1
 - 📤 Corregir con Libretín: ahora nada se pierde. Lo que el docente va corrigiendo se guarda solo como borrador; «Confirmar» deja cada examen listo y, cuando termina, el botón «📤 Registrar y publicar» pasa todas las notas al registro (con el nombre de cada alumno) y cada familia ve el examen corregido de su hijo: foto calificada en rojo, nota y retroalimentación. Si se corrige algo ya publicado, queda como cambio por publicar.
 - 🛠️ Arreglo de la portada de ProfeTok (la 9.35.0 tenía un error que podía dejarla en blanco).

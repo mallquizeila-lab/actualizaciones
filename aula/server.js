@@ -114,7 +114,7 @@ function fichaAlumno(aid, u) {
 }
 
 // ---------- HTTP ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.mp4': 'video/mp4' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg' };
 const SEG = { 'x-content-type-options': 'nosniff', 'referrer-policy': 'same-origin', 'x-frame-options': 'DENY', 'permissions-policy': 'camera=(self), microphone=()' };
 function send(res, code, body, req) { let b = Buffer.from(JSON.stringify(body)); const h = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...SEG }; if (req && /gzip/.test(req.headers['accept-encoding'] || '') && b.length > 1500) { b = zlib.gzipSync(b); h['content-encoding'] = 'gzip'; } res.writeHead(code, h); res.end(b); }
 const json = (req, max = 4e6) => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > max) { no(new Error('Archivo muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { ok({}); } }); });
@@ -171,6 +171,7 @@ API['POST /api/aceptar'] = async ({ b, ip }) => {
 API['GET /api/yo'] = async ({ u }) => {
   const col = u.colegio_id ? q1('select * from colegios where id=?', u.colegio_id) : null;
   const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol, telefono: u.telefono || '' }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo(), izipay: izipay.listo() };
+  if (u.rol === 'padre' || u.rol === 'alumno') r.noLeidos = q1('select count(*) n from avisos where padre_id=? and leido is null', u.id).n;
   if (u.rol === 'padre' || u.rol === 'alumno') r.hijos = q('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula, x.grado from familia f join alumnos a on a.id=f.alumno_id join aulas x on x.id=a.aula_id where f.padre_id=?', u.id);
   if (esStaff(u)) r.aulas = q(`select x.*, (select count(*) from alumnos where aula_id=x.id) alumnos, u.nombre docente from aulas x left join usuarios u on u.id=x.docente_id where ${u.rol === 'docente' ? 'x.docente_id=?' : u.rol === 'director' ? 'x.colegio_id=?' : '1=1 or ?'} order by x.id`, u.rol === 'docente' ? u.id : u.colegio_id || 0);
   if (u.rol === 'director') r.docentes = q("select id, nombre, email from usuarios where colegio_id=? and rol='docente'", u.colegio_id);
@@ -234,7 +235,7 @@ API['GET /api/alumno'] = async ({ u, url }) => { const id = +url.searchParams.ge
 API['GET /api/asistencia'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; const f = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('fecha') || '') ? url.searchParams.get('fecha') : hoy(); return { fecha: f, marcas: Object.fromEntries(q('select alumno_id, estado from asistencia where aula_id=? and fecha=?', a.id, f).map(r => [r.alumno_id, r.estado])) }; };
 API['POST /api/asistencia'] = async ({ u, b }) => {
   const a = aulaDe(u, b.aula_id); if (!a) throw 403; const f = /^\d{4}-\d{2}-\d{2}$/.test(b.fecha || '') ? b.fecha : hoy();
-  for (const [aid, est] of Object.entries(b.marcas || {})) { if (!['P', 'T', 'F', 'J'].includes(est) || !q1('select 1 from alumnos where id=? and aula_id=?', +aid, a.id)) continue; run('insert into asistencia(aula_id, alumno_id, fecha, estado) values(?,?,?,?) on conflict(alumno_id, fecha) do update set estado=excluded.estado', a.id, +aid, f, est); }
+  for (const [aid, est] of Object.entries(b.marcas || {})) { if (!['P', 'T', 'F', 'J'].includes(est) || !q1('select 1 from alumnos where id=? and aula_id=?', +aid, a.id)) continue; if (est === 'F' && f === hoy() && q1('select estado from asistencia where alumno_id=? and fecha=?', +aid, f)?.estado !== 'F') avisar('falta', +aid, {}, `falta|${aid}|${f}`); run('insert into asistencia(aula_id, alumno_id, fecha, estado) values(?,?,?,?) on conflict(alumno_id, fecha) do update set estado=excluded.estado', a.id, +aid, f, est); }
   return { ok: 1 };
 };
 
@@ -246,7 +247,9 @@ API['POST /api/notas'] = async ({ u, b }) => {
   for (const n of (b.notas || []).slice(0, 3000)) { const ev = q1('select * from evaluaciones where id=? and aula_id=?', +n.evaluacion_id, a.id); if (!ev || !q1('select 1 from alumnos where id=? and aula_id=?', +n.alumno_id, a.id)) continue;
     let v = String(n.valor ?? '').trim().toUpperCase(); if (v === '') { run('delete from notas where evaluacion_id=? and alumno_id=?', ev.id, +n.alumno_id); continue; }
     if (a.escala === 'vigesimal') { const x = parseFloat(v); if (isNaN(x) || x < 0 || x > 20) continue; v = String(Math.round(x * 10) / 10); } else if (!VAL_LETRA[v]) continue;
-    run('insert into notas(evaluacion_id, alumno_id, valor, comentario) values(?,?,?,?) on conflict(evaluacion_id, alumno_id) do update set valor=excluded.valor, comentario=coalesce(excluded.comentario, notas.comentario)', ev.id, +n.alumno_id, v, n.comentario != null ? limpio(n.comentario, 200) : null); }
+    const antes = q1('select valor from notas where evaluacion_id=? and alumno_id=?', ev.id, +n.alumno_id)?.valor;
+    run('insert into notas(evaluacion_id, alumno_id, valor, comentario) values(?,?,?,?) on conflict(evaluacion_id, alumno_id) do update set valor=excluded.valor, comentario=coalesce(excluded.comentario, notas.comentario)', ev.id, +n.alumno_id, v, n.comentario != null ? limpio(n.comentario, 200) : null);
+    if (!b.sinAviso && antes !== v) avisar('nota', +n.alumno_id, { valor: v, curso: q1('select nombre from cursos where id=?', ev.curso_id)?.nombre, evaluacion: ev.titulo }, `nota|${ev.id}|${n.alumno_id}|${v}`); }
   return { ok: 1 };
 };
 
@@ -261,7 +264,9 @@ API['POST /api/entrega'] = async ({ u, b }) => { const t = q1('select * from tar
 API['POST /api/incidencia'] = async ({ u, b }) => {
   if (!esStaff(u) || !veAlumno(u, b.alumno_id)) throw 403; if (b.borrar) { run('delete from incidencias where id=? and alumno_id=?', +b.id, +b.alumno_id); return { ok: 1 }; }
   const al = q1('select * from alumnos where id=?', +b.alumno_id), tipo = ['conducta', 'académica', 'salud', 'logro', 'otro'].includes(b.tipo) ? b.tipo : 'otro';
-  return { id: run('insert into incidencias(alumno_id, aula_id, docente_id, fecha, tipo, descripcion, visible_padre) values(?,?,?,?,?,?,?)', al.id, al.aula_id, u.id, /^\d{4}-\d{2}-\d{2}$/.test(b.fecha || '') ? b.fecha : hoy(), tipo, limpio(b.descripcion, 1000), b.visible_padre === false ? 0 : 1).lastInsertRowid };
+  const iid = run('insert into incidencias(alumno_id, aula_id, docente_id, fecha, tipo, descripcion, visible_padre) values(?,?,?,?,?,?,?)', al.id, al.aula_id, u.id, /^\d{4}-\d{2}-\d{2}$/.test(b.fecha || '') ? b.fecha : hoy(), tipo, limpio(b.descripcion, 1000), b.visible_padre === false ? 0 : 1).lastInsertRowid;
+  if (b.visible_padre !== false && tipo !== 'salud') avisar(tipo === 'logro' ? 'logro' : 'observacion', al.id, { texto: limpio(b.descripcion, 300) }, 'inc|' + iid);
+  return { id: iid };
 };
 API['GET /api/incidencias'] = async ({ u, url }) => { const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403; return { incidencias: q('select i.*, a.nombres, a.apellidos from incidencias i join alumnos a on a.id=i.alumno_id where i.aula_id=? order by i.fecha desc, i.id desc limit 300', a.id) }; };
 
@@ -321,8 +326,11 @@ const baseUrl = req => getS('urlPublica', '') || ((req?.headers['cf-connecting-i
 const pagosM = require('./pagos').crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base: baseUrl });
 const izipay = require('./izipay').crear({ db, q1, run, getS, setS, limpio, PLANES, activarPago, base: baseUrl, precio: pagosM.precio });
 const crecer = require('./crecimiento').crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, DATA, ARCH, nuevoCupon: pagosM.nuevoCupon, E });
+// 🔔 avisos a las familias (notas, exámenes, logros, observaciones y faltas) con palabras cuidadas
+const avisosM = require('./avisos').crear({ db, q, q1, run, hoy, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
+const avisar = (...a) => { try { return avisosM.encolar(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } };
 const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES]);
-for (const M of [pagosM, crecer, izipay]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+for (const M of [pagosM, crecer, izipay, avisosM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
@@ -332,7 +340,7 @@ API['GET /api/billeteras'] = async () => billeteras();
 for (const [k, f] of Object.entries(require('./dictado').crear({ q, q1, aulaDe, hoy, API, E, limpio }).API)) API[k] = f;
 
 // 📸 Corregir con Libretín: fotos de exámenes, corrección con el criterio del docente y calibración (ver correccion.js)
-const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno });
+const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno, avisar: (...a) => avisar(...a) });
 for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
 
 // solo lectura cuando la membresía venció (los datos nunca se borran)

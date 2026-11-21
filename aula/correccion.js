@@ -5,7 +5,7 @@
 // Con ≥ 90 % de coincidencia se activa el modo rápido (el docente solo revisa lo dudoso). Siempre confirma el docente.
 // Privacidad: la foto se guarda en privado; a la IA no se le da el nombre del alumno (y la franja del nombre puede taparse).
 const fs = require('fs'), path = require('path');
-function crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno }) {
+function crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno, avisar = () => {} }) {
   db.exec(`create table if not exists examenes (id integer primary key, aula_id integer, curso_id integer, docente_id integer, titulo text, clave text, perfil text, calibrar integer default 6, creado text default (datetime('now')));
   create table if not exists correcciones (id integer primary key, examen_id integer, alumno_id integer, fotos text, ia text, final text, puntaje real, total real, nota text, retro text, estado text default 'propuesta', coincidencia real, modo text, creado text default (datetime('now')), confirmado text);
   create index if not exists ex_aula on examenes(aula_id); create index if not exists co_ex on correcciones(examen_id, estado);`);
@@ -115,8 +115,9 @@ Si una pregunta no aparece o está en blanco: puntos 0 y "leido":"(en blanco)". 
     const e = deExamen(u, b.id), a = aulaDe(u, e.aula_id), lista = q("select * from correcciones where examen_id=? and estado='confirmada' and coalesce(publicado,0)=0", e.id);
     if (!lista.length) throw 'No hay exámenes confirmados nuevos para publicar';
     const ev = q1('select id from evaluaciones where aula_id=? and curso_id=? and titulo=?', a.id, e.curso_id, e.titulo)?.id || (await API['POST /api/evaluacion']({ u, b: { aula_id: a.id, curso_id: e.curso_id, titulo: e.titulo, fecha: hoy() } })).id;
-    await API['POST /api/notas']({ u, b: { aula_id: a.id, notas: lista.map(c => { const r = J(c.retro, {}); return { evaluacion_id: ev, alumno_id: c.alumno_id, valor: c.nota, comentario: [r.logros, r.mejorar].filter(Boolean).join(' · ').slice(0, 200) || null }; }) } });
+    await API['POST /api/notas']({ u, b: { aula_id: a.id, sinAviso: true, notas: lista.map(c => { const r = J(c.retro, {}); return { evaluacion_id: ev, alumno_id: c.alumno_id, valor: c.nota, comentario: [r.logros, r.mejorar].filter(Boolean).join(' · ').slice(0, 200) || null }; }) } });
     run("update correcciones set publicado=1, publicado_en=datetime('now') where examen_id=? and estado='confirmada' and coalesce(publicado,0)=0", e.id);
+    const cur = q1('select nombre from cursos where id=?', e.curso_id)?.nombre; for (const c of lista) avisar('examen', c.alumno_id, { valor: c.nota, curso: cur, evaluacion: e.titulo, mejorar: J(c.retro, {}).mejorar }, `examen|${c.id}|${c.nota}`);
     return { publicadas: lista.length, ...estadistica(e) };
   };
   // 👨‍👩‍👧 familias (y docentes): exámenes publicados de un alumno, con la foto calificada

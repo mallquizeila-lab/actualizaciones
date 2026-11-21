@@ -182,6 +182,8 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
     }
   }
 
+  // aviso push a un usuario (por ejemplo, a una familia)
+  async function pushUsuario(uid, payload) { let n = 0; for (const s of q('select * from push_subs where usuario_id=?', uid)) { try { (await push.enviar(VAPID, s, payload, 'mailto:' + (correo.remitente() || 'soporte@profetok.com'))) === 'borrar' ? run('delete from push_subs where id=?', s.id) : n++; } catch (e) {} } return n; }
   // aviso al dueño (correo + 🔔) cuando entra un pago por revisar
   async function avisarDueno(titulo, texto, ruta = '/') {
     const D = q("select * from usuarios where rol='dueno' and activo=1"), url = (base() || '') + ruta;
@@ -306,6 +308,6 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
     }
     return false;
   }
-  return { API, LIBRES, alRegistrar, alPagar, pagina, tick, contacto, avisarDueno };
+  return { API, LIBRES, alRegistrar, alPagar, pagina, tick, contacto, avisarDueno, pushUsuario };
 }
 module.exports = { crear };

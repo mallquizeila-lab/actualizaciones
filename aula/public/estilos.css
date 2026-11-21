@@ -66,3 +66,14 @@ main{max-width:1200px;margin:0 auto;padding:16px 14px 80px}
 @media(max-width:760px){.corr{grid-template-columns:1fr}}
 
 .pub-caja{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:10px 12px;margin:10px 0}
+
+/* novedades para familias: stickers animados */
+.lista-nov{display:grid;gap:8px;margin-top:10px}.nov{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--bd);border-radius:16px;padding:10px;cursor:pointer;font:inherit;color:inherit;position:relative}.nov.nueva{border-color:#7dd3fc;box-shadow:0 4px 14px #0284c722}.nov .punto{width:12px;height:12px;border-radius:50%;background:#ef4444;flex:none}
+.stk{position:relative;width:70px;height:70px;flex:none;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#e0f2fe,#7dd3fc)}.stk.xl{width:170px;height:170px;margin:0 auto;border-radius:34px}
+.stk-felicita{background:linear-gradient(135deg,#fde68a,#f97316)}.stk-logro{background:linear-gradient(135deg,#fef3c7,#facc15)}.stk-animo{background:linear-gradient(135deg,#bae6fd,#38bdf8)}.stk-apoyo{background:linear-gradient(135deg,#ddd6fe,#a78bfa)}
+.stk-l{position:absolute;left:8%;bottom:4%;width:70%;animation:stkSalto 1.4s ease-in-out infinite}.stk-apoyo .stk-l,.stk-animo .stk-l,.stk-info .stk-l{animation:stkVaiven 2.4s ease-in-out infinite}
+.stk-e{position:absolute;right:4%;top:2%;font-size:1.6em;animation:stkLatido 1.2s ease-in-out infinite}.stk.xl .stk-e{font-size:3.6em}.stk-e2{position:absolute;right:8%;bottom:8%;font-size:1.1em;animation:stkLatido 1.6s .4s ease-in-out infinite}.stk.xl .stk-e2{font-size:2.4em}
+.stk i{position:absolute;top:-10%;left:var(--x);width:6px;height:10px;background:var(--c);border-radius:2px;animation:stkConfeti 1.8s var(--d) linear infinite}.stk.xl i{width:10px;height:16px}
+@keyframes stkSalto{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12%) rotate(4deg)}}@keyframes stkVaiven{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes stkLatido{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}@keyframes stkConfeti{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(900%) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.stk *{animation:none!important}}

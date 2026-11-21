@@ -113,7 +113,7 @@ ${padre ? `<label style="display:flex;gap:8px;align-items:flex-start;font-weight
     const c = YO.colegio || { nombre: 'ProfeTok', color: '#0284c7' }, m = YO.membresia;
     document.title = (c.nombre || 'ProfeTok') + ' · ProfeTok';
     return `<div class="top" style="--col:${esc(c.color || '#0284c7')}"><div class="in"><div class="logo">${c.logo ? `<img src="/api/foto/logo/${c.id}?t=${encodeURIComponent(TOK)}" alt="">` : '🎓'}</div><div class="t"><b>${esc(c.nombre)}</b><small>${esc(c.lema || YO.usuario.nombre)}</small></div>${['docente', 'director'].includes(YO.usuario.rol) && m && (m.prueba || m.dias <= 5) ? `<a class="chip" href="#/plan" style="background:#fff">${m.activa ? (m.prueba ? `🎁 Prueba: ${m.dias} día${m.dias === 1 ? '' : 's'}` : `⏳ Vence en ${m.dias} días`) : '⚠️ Membresía vencida'}</a>` : ''}<a class="btn sec sm" href="#/cuenta" title="Mi cuenta">👤</a></div></div>
-${['docente', 'director', 'dueno'].includes(YO.usuario.rol) && pushPosible() && Notification.permission === 'default' && !LS.get('pt_push') ? `<div class="aviso-push"><span>${YO.usuario.rol === 'dueno' ? '🔔 Activa los avisos para enterarte al instante de cada pago por Yape o Plin.' : '🔔 Activa los avisos: te recordamos tareas pendientes, alumnos en riesgo y novedades.'}</span><button class="btn sm" data-apush>Activar</button><button class="btn sec sm" data-npush>Ahora no</button></div>` : ''}<nav class="menu"><div class="in">${menu.map(([h, t]) => `<a href="${h}" class="${actual === h ? 'on' : ''}">${t}</a>`).join('')}</div></nav><main id="main"><div class="vacio">Cargando…</div></main>`;
+${['docente', 'director', 'dueno', 'padre'].includes(YO.usuario.rol) && pushPosible() && Notification.permission === 'default' && !LS.get('pt_push') ? `<div class="aviso-push"><span>${YO.usuario.rol === 'padre' ? '🔔 Activa los avisos para enterarte al instante de las notas y logros de tu hijo(a).' : YO.usuario.rol === 'dueno' ? '🔔 Activa los avisos para enterarte al instante de cada pago por Yape o Plin.' : '🔔 Activa los avisos: te recordamos tareas pendientes, alumnos en riesgo y novedades.'}</span><button class="btn sm" data-apush>Activar</button><button class="btn sec sm" data-npush>Ahora no</button></div>` : ''}<nav class="menu"><div class="in">${menu.map(([h, t]) => `<a href="${h}" class="${actual === h ? 'on' : ''}">${t}</a>`).join('')}</div></nav><main id="main"><div class="vacio">Cargando…</div></main>`;
   }
   const menuStaff = () => [['#/inicio', '🏠 Inicio'], ['#/asistente', '🤖 Mi asistente'], ...(YO.aulas || []).map(a => [`#/aula/${a.id}/alumnos`, '🏫 ' + a.nombre]), ['#/colegio', '🏛️ Colegio'], ['#/plan', '💳 Plan'], ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
 
@@ -126,7 +126,7 @@ ${['docente', 'director', 'dueno'].includes(YO.usuario.rol) && pushPosible() && 
     if (rol === 'dueno') return dueno();
     if (p[0] === 'cuenta') return cuenta();
     if (p[0] === 'ayuda') return ayuda();
-    if (rol === 'padre' || rol === 'alumno') { if (p[0] === 'alumno' && p[1]) return ficha(+p[1]); if (p[0] === 'libreta' && p[1]) return libreta(+p[1]); return casa(); }
+    if (rol === 'padre' || rol === 'alumno') { if (p[0] === 'novedades') return novedades(); if (p[0] === 'alumno' && p[1]) return ficha(+p[1]); if (p[0] === 'libreta' && p[1]) return libreta(+p[1]); return casa(); }
     if (p[0] === 'aula' && p[1]) return aula(+p[1], p[2] || 'alumnos');
     if (p[0] === 'alumno' && p[1]) return ficha(+p[1]);
     if (p[0] === 'libreta' && p[1]) return libreta(+p[1]);
@@ -498,6 +498,28 @@ ${staff ? `<div class="card"><h3>👨‍👩‍👧 Familia vinculada</h3><div c
     examenesAlumno(id);
   }
   // 📸 exámenes corregidos y publicados (familia y docente), con la foto calificada
+  // 🔔 Novedades para las familias: stickers animados de Libretín y el tono del colegio
+  const STK = { felicita: ['🎉', '🎊'], logro: ['🌟', '✨'], animo: ['💪', '📘'], apoyo: ['🤝', '💜'], info: ['📒', '🔔'] };
+  const sticker = (st, grande) => { const [a, b] = STK[st] || STK.info; return `<div class="stk stk-${st} ${grande ? 'xl' : ''}"><img src="/libretin.svg" alt="" class="stk-l"><span class="stk-e">${a}</span>${st === 'felicita' || st === 'logro' ? Array.from({ length: 10 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 5) * 0.25}s;--c:${['#f97316', '#facc15', '#22c55e', '#3b82f6', '#ec4899'][i % 5]}"></i>`).join('') : `<span class="stk-e2">${b}</span>`}</div>`; };
+  const tono = () => { try { const a = new Audio('/tono-profetok.mp3'); a.volume = 0.9; a.play().catch(() => {}); } catch (e) {} };
+  async function novedades() {
+    app.innerHTML = marco(menuFamilia(), '#/novedades'); const M = $('#main'), R = await api('avisos'); if (!M.isConnected) return; const P = R.prefs;
+    const android = /Android/i.test(navigator.userAgent), iOS = /iPhone|iPad/.test(navigator.userAgent);
+    M.innerHTML = `<div class="fila entre"><h2 style="margin:0">🔔 Novedades</h2>${R.noLeidos ? '<button class="btn sec sm" data-todos>✔️ Marcar todo como leído</button>' : ''}</div>
+<div class="lista-nov">${R.avisos.map(a => `<button class="nov ${a.leido ? '' : 'nueva'}" data-av="${a.id}">${sticker(a.detalle.sticker)}<div style="flex:1;min-width:0;text-align:left"><b>${esc(a.titulo)}</b><div class="small muted">${esc(a.detalle.privado ? 'Toca para leerla' : a.cuerpo).slice(0, 110)}${a.cuerpo.length > 110 ? '…' : ''}</div><small class="muted">${fmtF(a.creado.slice(0, 10))}</small></div>${a.leido ? '' : '<span class="punto"></span>'}</button>`).join('') || '<div class="card vacio">Aquí llegarán las notas, logros y avisos de tu hijo(a) 💙</div>'}</div>
+<div class="card" style="margin-top:14px"><h3>🎵 El tono de tu colegio</h3><p class="small muted">Cada novedad de ProfeTok suena con esta campanita, para que la reconozcas apenas la escuches.</p><div class="fila"><button class="btn" data-tono>▶️ Escuchar</button><a class="btn sec" href="/tono-profetok.mp3" download="Tono ProfeTok.mp3">⬇️ Descargar tono</a></div>
+${android ? `<details style="margin-top:10px" open><summary class="small"><b>📱 Ponlo como sonido de los avisos (Android)</b></summary><ol class="small" style="margin:6px 0 0;padding-left:18px"><li>Descarga el tono (botón de arriba).</li><li>Abre <b>Ajustes del celular → Aplicaciones → Chrome → Notificaciones</b> y busca <b>${esc(location.hostname)}</b>.</li><li>Toca <b>Sonido</b> y elige <b>«Tono ProfeTok»</b>. ¡Listo! 🎵</li></ol></details>` : iOS ? '<p class="small muted">En iPhone, los avisos suenan con el tono del sistema; al abrir cada novedad suena la campanita de ProfeTok. Para recibir avisos, primero agrega ProfeTok a tu pantalla de inicio (Compartir → Agregar a inicio).</p>' : '<p class="small muted">En la computadora los avisos suenan con el tono del sistema; al abrir cada novedad suena la campanita de ProfeTok.</p>'}
+${pushPosible() && Notification.permission !== 'granted' ? '<button class="btn verde" data-push style="margin-top:10px;width:100%">🔔 Activar avisos en este celular</button>' : pushPosible() ? '<p class="small" style="margin-top:8px">✅ Los avisos están activados en este celular.</p>' : ''}</div>
+<div class="card" style="margin-top:12px"><h3>⚙️ ¿Qué avisos quieres recibir?</h3>${[['notas', '📊 Notas nuevas'], ['examenes', '📸 Exámenes corregidos'], ['logros', '🌟 Logros'], ['observaciones', '📒 Notas de la docente'], ['asistencia', '📅 Faltas del día'], ['silencio', '🌙 No avisarme de noche (21:00 a 7:00)']].map(([k, t]) => `<label class="chk"><input type="checkbox" data-pref="${k}" ${P[k] ? 'checked' : ''}> ${t}</label>`).join('')}</div>`;
+    const abrir = a => { const d = a.detalle; tono(); if (!a.leido) { api('avisos/leido', { id: a.id }).catch(() => {}); a.leido = 1; YO.noLeidos = Math.max(0, (YO.noLeidos || 1) - 1); }
+      modal(`<div style="text-align:center">${sticker(d.sticker, true)}<h2 style="margin:10px 0 6px">${esc(a.titulo)}</h2><p style="font-size:1.05rem">${esc(a.cuerpo)}</p>
+${d.mejorar ? `<p class="small" style="background:#f0f9ff;border-radius:10px;padding:8px">📌 <b>La docente sugiere:</b> ${esc(d.mejorar)}</p>` : ''}${d.ideas ? `<div style="text-align:left;background:#f5f3ff;border-radius:12px;padding:10px 14px;margin:8px 0"><b>💡 Ideas para acompañar en casa</b><ul class="small" style="margin:6px 0 0;padding-left:18px">${d.ideas.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>` : ''}
+<div class="fila" style="justify-content:center;margin-top:8px"><a class="btn" href="#/alumno/${a.alumno_id}">Ver a ${esc(String(a.alumno || '').split(' ')[0])}</a><button class="btn sec" data-cerrar>Cerrar</button></div></div>`, () => novedades()); };
+    M.onclick = async e => { const g = s => e.target.closest(s); if (g('[data-av]')) abrir(R.avisos.find(x => x.id === +g('[data-av]').dataset.av)); if (g('[data-tono]')) tono();
+      if (g('[data-todos]')) { await api('avisos/leido', { todos: 1 }); YO.noLeidos = 0; novedades(); }
+      if (g('[data-push]')) { try { await activarPush(); toast('🔔 ¡Avisos activados!'); novedades(); } catch (er) { toast('⚠️ ' + er.message); } } };
+    M.onchange = async e => { const k = e.target.dataset.pref; if (!k) return; P[k] = e.target.checked; await api('avisos/prefs', P); toast('✅ Guardado'); };
+  }
   async function examenesAlumno(id) {
     const Z = $('#fExam'); if (!Z) return; const R = await api('examenes-alumno?id=' + id).catch(() => null); if (!R?.examenes.length || !Z.isConnected) return;
     Z.innerHTML = `<div class="card" style="margin-top:12px"><h3>📸 Exámenes corregidos</h3><div class="lista">${R.examenes.map((x, i) => `<div style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(x.titulo)}</b><br><small class="muted">${esc(x.curso || '')} · ${fmtF(String(x.fecha || '').slice(0, 10))} · ${x.puntaje} de ${x.total} pts</small></div><span class="chip bajo" style="font-size:1.05rem">${esc(x.nota)}</span><button class="btn sec sm" data-vx="${i}">Ver examen</button></div>`).join('')}</div></div>`;
@@ -525,7 +547,7 @@ ${x.retro.logros ? `<p>🌟 <b>Lo que hizo bien:</b> ${esc(x.retro.logros)}</p>`
   }
 
   // ================= Familia =================
-  const menuFamilia = () => [['#/inicio', '🏠 Inicio'], ...(YO.hijos || []).map(h => [`#/alumno/${h.id}`, '👧 ' + h.nombres]), ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
+  const menuFamilia = () => [['#/inicio', '🏠 Inicio'], ['#/novedades', '🔔 Novedades' + (YO.noLeidos ? ` (${YO.noLeidos})` : '')], ...(YO.hijos || []).map(h => [`#/alumno/${h.id}`, '👧 ' + h.nombres]), ...(YO.soporte ? [['#/ayuda', '💬 Ayuda']] : [])];
   function casa() {
     const H = YO.hijos || []; if (H.length === 1) { location.hash = `#/alumno/${H[0].id}`; return; }
     app.innerHTML = marco(menuFamilia(), '#/inicio'); $('#main').innerHTML = `<h2>¡Hola, ${esc(YO.usuario.nombre.split(' ')[0])}! 👋</h2>${H.length ? `<div class="grid g3">${H.map(h => `<a class="card fila" href="#/alumno/${h.id}" style="text-decoration:none;color:inherit">${foto(h, true)}<div><b>${esc(h.nombres + ' ' + (h.apellidos || ''))}</b><br><small class="muted">${esc(h.aula)}</small></div></a>`).join('')}</div>` : '<div class="card vacio">Aún no tienes alumnos vinculados. Pide al docente tu enlace de invitación.</div>'}`;
