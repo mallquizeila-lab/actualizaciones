@@ -1,3 +1,6 @@
+9.35.4
+- 🗣️ Tono de ProfeTok renovado: «¡ProfeTok, ProfeTok, ProfeTok, ProfeTooook!» (el último más largo, con acorde y brillito final).
+
 9.35.3
 - 🗣️ ProfeTok: nuevo tono con voz «¡ProfeTok, ProfeTok, ProfeTok, ProfeTok!» con campanita (es el tono principal). Las familias pueden elegir entre el tono con voz y la campanita, escucharlos y descargarlos para ponerlos como sonido de los avisos en Android.
 
