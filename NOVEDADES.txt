@@ -1,3 +1,7 @@
+9.32.0
+- 🚀 ProfeTok: motor de crecimiento completo en la pestaña «🚀 Crecimiento» del dueño: recursos gratis para captar docentes, contactos (CRM) con puntaje, secuencias automáticas por correo, avisos 🔔 y WhatsApp, reactivación con cupón real de 72 h, referidos (1 mes gratis), testimonios, embudo por fuente y página de privacidad.
+- 💜💙 Pagos con Yape y Plin: número, titular y QR de cada uno, n.° de operación y captura, acceso al momento por 48 h mientras lo revisas y aviso al dueño. 💳 Mercado Pago con activación automática, descuentos por varios meses y cupones.
+
 9.31.7
 - 🎬 ProfeTok: el video promocional con voz ya aparece en la portada («Mira ProfeTok en 70 segundos»). Se reproduce en celular y PC.
 

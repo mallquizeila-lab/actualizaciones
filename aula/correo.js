@@ -121,6 +121,6 @@ ${enlace ? `<p style="margin:8px 0 18px"><a href="${escH(enlace)}" style="backgr
   };
   // baja de correos (sin iniciar sesión, con firma)
   function baja(url) { const id = +url.searchParams.get('u'), f = url.searchParams.get('f'); if (!id || f !== firma(id)) return false; run('update usuarios set no_correo=1 where id=?', id); return true; }
-  return { API, encolar, familiasDe, listo, baja, plantilla };
+  return { API, encolar, familiasDe, listo, baja, plantilla, enviar, nombre: () => conf().nombre || 'ProfeTok', remitente: () => conf().remitente || '' };
 }
 module.exports = { crear };

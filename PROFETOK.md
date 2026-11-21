@@ -45,3 +45,28 @@ contextualizados en Perú, unidad didáctica, conclusiones descriptivas, plan de
 adaptación para NEE y oficios/informes. Cada respuesta se puede **copiar, imprimir con el nombre del colegio o enviar a las familias** por correo.
 Usa la IA de ShortForge (sin costo extra; se conecta solo con una clave privada dentro de tu VPS).
 Consultas al mes: prueba 40 · Docente 400 · Colegio 4 000.
+
+## 🚀 Crecimiento: captar, convertir y cobrar en automático
+Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como dueño → **🚀 Crecimiento**.
+
+**Captar**
+- **Recursos gratis** (registro auxiliar CNEB, plantilla de sesión y 30 mensajes para familias, todos originales). El docente deja nombre, correo y, si quiere, WhatsApp, y descarga al instante; el enlace del correo confirma su dirección. Puedes subir más (texto o PDF propio).
+- Enlace para anuncios y grupos: `https://profetok.yupitok.com/recursos?utm_source=facebook` (cambia la fuente: `tiktok`, `grupo-wa`…). La ventana del recurso también aparece sola al leer media página, a los 40 s o al intentar salir (una sola vez).
+- **Referidos:** cada docente tiene su enlace en «Plan». El invitado recibe 7 días extra y quien invita, 1 mes gratis cuando el invitado paga.
+
+**Convertir (automático cada 5 minutos)**
+- Contactos: día 2 beneficios · día 5 testimonio · día 9 último empujón.
+- Prueba gratis: día 1 primeros pasos · faltan 3 días · último día.
+- Reactivación si no paga: testimonios → **cupón personal real de 30 % por 72 h** → último aviso. Si paga, sale solo.
+- Clientes: aviso de renovación 5 días antes. Pago con tarjeta que no se completó: «¿tuviste problemas?».
+- Canales: correo, avisos 🔔 en el celular o PC (Web Push propio, gratis) y WhatsApp. Sin la API de Meta, WhatsApp queda en una **lista para enviar con un toque** desde tu celular; con la API oficial (y plantillas aprobadas) sale solo, de a poco.
+- Puedes editar cada texto o apagar cualquier paso. La publicidad va solo a quien marcó la casilla, y todo mensaje lleva «darse de baja».
+
+**Cobrar**
+- **Mercado Pago:** tarjeta (y Yape si tu cuenta lo tiene). El plan se activa solo con el webhook. Se verifica la firma y se consulta el pago directo a Mercado Pago (estado, monto, referencia).
+- **Yape y Plin:** número, titular y QR propios de cada uno. El docente paga, escribe el n.° de operación (y si quiere sube la captura) y **recibe 48 h de acceso al momento**. A ti te llega un aviso por correo y 🔔; lo apruebas en «📊 Panel». Si lo rechazas, se quita el acceso provisional. No se acepta el mismo n.° de operación dos veces.
+- Descuentos por pagar varios meses (3 m −10 %, 6 m −15 %, 12 m −25 %) y **cupones** (Día del Maestro, etc.).
+
+**Medir:** embudo visitas → contactos → pruebas → pagos, por fuente, con ingresos. Contactos con puntaje de interés, historial y exportación a Excel.
+
+**Privacidad (Ley 29733):** página `/privacidad` con tus datos, permisos separados, baja con un clic y borrado de contacto. Los datos de alumnos y familias nunca se usan para publicidad. Te toca inscribir tus bancos de datos ante la Autoridad Nacional de Protección de Datos Personales.

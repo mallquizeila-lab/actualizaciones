@@ -141,7 +141,8 @@ API['POST /api/registro'] = async ({ b, ip }) => { // docente nuevo: crea su col
   const cid = run('insert into colegios(nombre, plan, vence) values(?,?,?)', colegio, 'prueba', new Date(Date.now() + PRUEBA_DIAS * DIA).toISOString()).lastInsertRowid;
   const rol = b.tipo === 'colegio' ? 'director' : 'docente';
   const uid = run('insert into usuarios(email, nombre, hash, rol, colegio_id, telefono) values(?,?,?,?,?,?)', email, nombre, hashPass(b.clave), rol, cid, limpio(b.telefono, 20)).lastInsertRowid;
-  audit(uid, 'registro', colegio); return { token: nuevaSesion(uid) };
+  audit(uid, 'registro', colegio); try { crecer.alRegistrar({ uid, cid, b, email, nombre }); } catch (e) { console.log('[ProfeTok] Crecimiento: ' + e.message); }
+  return { token: nuevaSesion(uid) };
 };
 API['POST /api/entrar'] = async ({ b, ip }) => {
   if (!/^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(ip) && limite(ip, 'login', 10, 15 * 60000)) throw 'Demasiados intentos. Espera 15 minutos.';
@@ -168,7 +169,7 @@ API['POST /api/aceptar'] = async ({ b, ip }) => {
 // --- quién soy ---
 API['GET /api/yo'] = async ({ u }) => {
   const col = u.colegio_id ? q1('select * from colegios where id=?', u.colegio_id) : null;
-  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', '') };
+  const r = { usuario: { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol }, colegio: col && { id: col.id, nombre: col.nombre, color: col.color, lema: col.lema, logo: !!col.logo, whatsapp: col.whatsapp }, membresia: membresia(col), planes: PLANES, soporte: E.AULA_WHATSAPP || getS('soporteWa', ''), mp: pagosM.listo() };
   if (u.rol === 'padre' || u.rol === 'alumno') r.hijos = q('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula, x.grado from familia f join alumnos a on a.id=f.alumno_id join aulas x on x.id=a.aula_id where f.padre_id=?', u.id);
   if (esStaff(u)) r.aulas = q(`select x.*, (select count(*) from alumnos where aula_id=x.id) alumnos, u.nombre docente from aulas x left join usuarios u on u.id=x.docente_id where ${u.rol === 'docente' ? 'x.docente_id=?' : u.rol === 'director' ? 'x.colegio_id=?' : '1=1 or ?'} order by x.id`, u.rol === 'docente' ? u.id : u.colegio_id || 0);
   if (u.rol === 'director') r.docentes = q("select id, nombre, email from usuarios where colegio_id=? and rol='docente'", u.colegio_id);
@@ -270,12 +271,35 @@ API['POST /api/comunicado'] = async ({ u, b }) => { if (!esStaff(u)) throw 403; 
 API['GET /api/alertas'] = async ({ u }) => { if (!esStaff(u)) throw 403; const ids = alumnosVisibles(u); const lista = ids === null ? q('select id from alumnos limit 500').map(r => r.id) : [...ids]; return { alertas: lista.map(id => { const r = riesgo(id), al = q1('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula from alumnos a join aulas x on x.id=a.aula_id where a.id=?', id); return { ...al, ...r }; }).filter(x => x.nivel !== 'bajo').sort((a, b) => b.puntos - a.puntos) }; };
 
 // --- membresía y pagos (Yape / Plin con número de operación; el dueño lo aprueba) ---
-API['POST /api/pago'] = async ({ u, b }) => { if (!['docente', 'director'].includes(u.rol)) throw 403; if (!PLANES[b.plan]) throw 'Plan no válido'; const meses = [1, 3, 6, 12].includes(+b.meses) ? +b.meses : 1; const op = limpio(b.operacion, 30); if (op.length < 4) throw 'Escribe el número de operación de tu Yape o Plin'; run('insert into pagos(colegio_id, plan, monto, metodo, operacion) values(?,?,?,?,?)', u.colegio_id, b.plan, PLANES[b.plan].precio * meses, limpio(b.metodo, 10) || 'yape', op + ' · ' + meses + ' mes(es)'); return { ok: 1 }; };
-API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c order by c.id desc"), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
+API['POST /api/pago'] = async ({ u, b }) => { // Yape, Plin o transferencia: el docente manda el n.° de operación (y si quiere, la captura)
+  if (!['docente', 'director'].includes(u.rol)) throw 403; const pr = pagosM.precio(b.plan, +b.meses || 1, b.cupon || ''), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape';
+  const op = String(b.operacion || '').replace(/[^\dA-Za-z-]/g, '').slice(0, 30); if (op.length < 4) throw `Escribe el número de operación de tu ${metodo === 'plin' ? 'Plin' : metodo === 'yape' ? 'Yape' : 'transferencia'} (está en la constancia)`;
+  if (q1("select 1 from pagos where metodo=? and operacion like ? and estado<>'rechazado'", metodo, op + ' ·%')) throw 'Ese número de operación ya fue registrado. Si es un error, escríbenos por WhatsApp.';
+  if (q1("select count(*) n from pagos where colegio_id=? and estado='pendiente' and metodo in ('yape','plin','transferencia')", u.colegio_id).n >= 3) throw 'Ya tienes pagos esperando revisión. Te avisamos apenas los confirmemos.';
+  const comp = b.comprobante ? guardarImagen(b.comprobante) : null, col = q1('select * from colegios where id=?', u.colegio_id);
+  // activación provisional: 48 horas de acceso mientras se revisa (una vez a la vez y solo si nunca le rechazaron un pago)
+  const prov = !q1("select 1 from pagos where colegio_id=? and (estado='rechazado' or provisional=1 and estado='pendiente')", u.colegio_id);
+  const id = run('insert into pagos(colegio_id, plan, monto, metodo, operacion, cupon, meses, comprobante, provisional, vence_antes) values(?,?,?,?,?,?,?,?,?,?)', u.colegio_id, pr.plan, pr.total, metodo, op + ' · ' + pr.meses + ' mes(es)', pr.cupon?.codigo || null, pr.meses, comp, prov ? 1 : 0, col.vence).lastInsertRowid;
+  if (prov && (!col.vence || new Date(col.vence) < new Date(Date.now() + 2 * DIA))) run('update colegios set vence=? where id=?', new Date(Date.now() + 2 * DIA).toISOString(), col.id);
+  crecer.avisarDueno(`💸 Nuevo pago por ${metodo === 'plin' ? 'Plin' : metodo === 'yape' ? 'Yape' : 'transferencia'}: S/ ${pr.total}`, `${col.nombre} · ${u.email}\nOperación: ${op} · ${PLANES[pr.plan].nombre}, ${pr.meses} mes(es).\n\nRevísalo en tu ${metodo === 'plin' ? 'Plin' : 'Yape'} y apruébalo en el panel.`, '/#/inicio').catch(() => {});
+  return { ok: 1, total: pr.total, provisional: prov };
+};
+// activar un pago (lo llama el dueño al aprobar un Yape/Plin, o Mercado Pago solo con su webhook)
+function activarPago(id, via = '') {
+  const p = q1('select * from pagos where id=?', +id); if (!p || p.estado === 'aprobado') return false;
+  const c = q1('select * from colegios where id=?', p.colegio_id), meses = +p.meses || +(/(\d+) mes/.exec(p.operacion)?.[1] || 1), venceReal = p.provisional ? p.vence_antes : c.vence, base = Math.max(Date.now(), venceReal ? new Date(venceReal).getTime() : 0); // los 2 días provisionales no se suman dos veces // si paga antes de que termine su prueba, no pierde los días que le quedaban
+  run('update colegios set plan=?, vence=? where id=?', p.plan, new Date(base + meses * 30 * DIA).toISOString(), c.id); run("update pagos set estado='aprobado', revisado=? where id=?", ahora(), p.id);
+  if (p.cupon) run('update cupones set usos=usos+1 where codigo=?', p.cupon); audit(null, 'pago aprobado', `${p.id} ${via}`);
+  try { crecer.alPagar(q1('select * from pagos where id=?', p.id)); } catch (e) { console.log('[ProfeTok] ' + e.message); } return true;
+}
+API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c order by c.id desc"), billeteras: billeteras(), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
 API['POST /api/dueno'] = async ({ u, b }) => {
   if (u.rol !== 'dueno') throw 403;
-  if (b.accion === 'aprobar') { const p = q1('select * from pagos where id=?', +b.id); if (!p) throw 404; const c = q1('select * from colegios where id=?', p.colegio_id), meses = +(/(\d+) mes/.exec(p.operacion)?.[1] || 1), base = Math.max(Date.now(), c.vence ? new Date(c.vence).getTime() : 0); run('update colegios set plan=?, vence=? where id=?', p.plan, new Date(base + meses * 30 * DIA).toISOString(), c.id); run("update pagos set estado='aprobado', revisado=? where id=?", ahora(), p.id); return { ok: 1 }; }
-  if (b.accion === 'rechazar') { run("update pagos set estado='rechazado', revisado=? where id=?", ahora(), +b.id); return { ok: 1 }; }
+  if (b.accion === 'aprobar') { if (!q1('select 1 from pagos where id=?', +b.id)) throw 404; activarPago(+b.id, 'aprobado por el dueño'); return { ok: 1 }; }
+  if (b.accion === 'billetera') { const t = b.tipo === 'plin' ? 'plin' : 'yape', W = getS('billeteras', {}); W[t] = { numero: limpio(b.numero, 15).replace(/[^\d]/g, ''), titular: limpio(b.titular, 60) }; setS('billeteras', W);
+    if (b.imagen) { const m = /^data:image\/(png|jpeg|webp);base64,(.+)$/.exec(b.imagen); if (!m) throw 'Sube una imagen PNG o JPG de tu QR'; const buf = Buffer.from(m[2], 'base64'); if (buf.length > 1.5e6) throw 'La imagen pesa mucho'; fs.writeFileSync(path.join(DATA, `qr-${t}.img`), buf); setS('qr_' + t, 'image/' + m[1]); }
+    if (b.quitarQr) { fs.rmSync(path.join(DATA, `qr-${t}.img`), { force: true }); setS('qr_' + t, ''); } return { ok: 1 }; }
+  if (b.accion === 'rechazar') { const p = q1('select * from pagos where id=?', +b.id); if (!p) throw 404; run("update pagos set estado='rechazado', revisado=? where id=?", ahora(), p.id); if (p.provisional && p.estado === 'pendiente' && !q1("select 1 from pagos where colegio_id=? and estado='aprobado' and id>?", p.colegio_id, p.id)) run('update colegios set vence=? where id=?', p.vence_antes, p.colegio_id); return { ok: 1 }; } // se quita el acceso provisional
   if (b.accion === 'extender') { const c = q1('select * from colegios where id=?', +b.id); const base = Math.max(Date.now(), c.vence ? new Date(c.vence).getTime() : 0); run('update colegios set vence=?, plan=? where id=?', new Date(base + (+b.dias || 30) * DIA).toISOString(), PLANES[b.plan] ? b.plan : c.plan, c.id); return { ok: 1 }; }
   if (b.accion === 'soporte') { setS('soporteWa', limpio(b.whatsapp, 20).replace(/[^\d+]/g, '')); return { ok: 1 }; }
   if (b.accion === 'planes') { const P = {}; for (const k of ['docente', 'colegio']) P[k] = { ...PLANES[k], precio: Math.max(0, +b[k] || PLANES[k].precio) }; Object.assign(PLANES, P); setS('planes', PLANES); return { ok: 1 }; }
@@ -291,8 +315,19 @@ const conCorreo = (u, a, tipo, asunto, cuerpo, extra = {}) => { if (!correo.list
 const asistente = require('./asistente').crear({ db, q, q1, run, getS, riesgo, aulaDe, membresia, E });
 for (const [k, f] of Object.entries(asistente.API)) API[k] = f;
 
+// 💳 pagos automáticos (Mercado Pago) y 🚀 crecimiento (CRM, secuencias, push, WhatsApp, referidos)
+const baseUrl = req => getS('urlPublica', '') || ((req?.headers['cf-connecting-ip'] || req?.headers['x-forwarded-proto'] === 'https' ? 'https://' : 'http://') + (/^[a-z0-9.:-]{3,100}$/i.test(req?.headers.host || '') ? req.headers.host : 'localhost:' + PORT));
+const pagosM = require('./pagos').crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base: baseUrl });
+const crecer = require('./crecimiento').crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, DATA, ARCH, nuevoCupon: pagosM.nuevoCupon, E });
+const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES]);
+for (const M of [pagosM, crecer]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+// Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
+try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
+const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
+API['GET /api/billeteras'] = async () => billeteras();
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
-const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio']);
+const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub']);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
@@ -305,17 +340,23 @@ const server = http.createServer(async (req, res) => {
       if (!f || !fs.existsSync(path.join(ARCH, f))) { res.writeHead(404); return res.end(); }
       res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'image/jpeg', 'cache-control': 'private, max-age=3600', ...SEG }); return fs.createReadStream(path.join(ARCH, f)).pipe(res); }
     if (API[clave]) {
-      const libre = ['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar'].includes(clave);
+      const libre = LIBRES.has(clave);
       const u = usuarioDe(req); if (!libre && !u) return send(res, 401, { error: 'Tu sesión terminó. Vuelve a entrar.' });
       if (limite(ip, 'api', 400)) return send(res, 429, { error: 'Más despacio, por favor' });
       if (u && req.method === 'POST' && esStaff(u) && u.rol !== 'dueno' && !ESCRIBE_SIN_PLAN.has(clave) && !membresia(q1('select * from colegios where id=?', u.colegio_id)).activa) return send(res, 402, { error: 'Tu membresía venció. Tus datos están a salvo: renueva para seguir editando.' });
       const b = req.method === 'POST' ? await json(req) : {};
       return send(res, 200, await API[clave]({ u, b, url, ip, req }), req);
     }
+    m = /^\/api\/qr\/(yape|plin)\.img$/.exec(url.pathname);
+    if (m) { const t = getS('qr_' + m[1], ''), f = path.join(DATA, `qr-${m[1]}.img`); if (!usuarioDe(req) && !q1('select 1 from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now())) return send(res, 401, { error: 'Inicia sesión' }); if (!t || !fs.existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': t, 'cache-control': 'private, max-age=300', ...SEG }); return res.end(fs.readFileSync(f)); }
+    m = /^\/api\/comprobante\/(\d+)$/.exec(url.pathname);
+    if (m) { const s2 = q1('select * from sesiones where token=? and expira>?', url.searchParams.get('t') || '', Date.now()), yo = usuarioDe(req) || (s2 && q1('select * from usuarios where id=?', s2.usuario_id)), p = q1('select * from pagos where id=?', +m[1]);
+      if (!yo || !p?.comprobante || !(yo.rol === 'dueno' || yo.colegio_id === p.colegio_id)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(p.comprobante)] || 'image/jpeg', 'cache-control': 'private, max-age=600', ...SEG }); return fs.createReadStream(path.join(ARCH, p.comprobante)).pipe(res); }
     if (url.pathname.startsWith('/api/')) return send(res, 404, { error: 'No existe' });
+    if (crecer.pagina(req, res, url)) return; // /r/recurso, /privacidad, /baja?c=
     if (url.pathname === '/baja') { const ok = correo.baja(url); res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', ...SEG }); return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>ProfeTok</title><body style="font-family:Arial;background:#f0f9ff;display:grid;place-items:center;min-height:90vh"><div style="background:#fff;padding:28px;border-radius:16px;max-width:420px;text-align:center"><img src="/libretin.svg" width="110" alt=""><h2>${ok ? '✅ Listo, ya no recibirás correos' : 'Enlace no válido'}</h2><p>${ok ? 'Puedes seguir viendo todo en tu panel de ProfeTok. Si cambias de opinión, avísale al colegio.' : ''}</p><a href="/">Ir a ProfeTok</a></div></body>`); }
     // archivos públicos de la aplicación
-    let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app)(\/|$)/.test(f)) f = "/index.html";
+    let f = decodeURIComponent(url.pathname); if (f === "/" || /^\/(invitacion|app|recursos)(\/|$)/.test(f)) f = "/index.html";
     const fp = path.join(PUB, path.normalize(f).replace(/^(\.\.[/\\])+/, ''));
     if (!fp.startsWith(PUB) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
     if (fp.endsWith('.mp4')) { // video por partes (Range) para que el celular lo reproduzca y adelante sin descargarlo entero
