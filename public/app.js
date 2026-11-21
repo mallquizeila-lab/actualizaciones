@@ -83,6 +83,7 @@ async function refresh(force) {
   if (tab === 'desarmar' && Date.now() - DSt > 5000 && (DS || []).some(d => !['listo', 'error'].includes(d.estado))) loadDS().catch(() => {});
   if (tab === 'estadisticas' && Date.now() - BRt > 30000) loadBrain(true).catch(() => {});
   if (tab === 'mando' && Date.now() - MDt > 15000) loadMando().catch(() => {});
+  if (tab === 'centroia' && Date.now() - CIt > 5000) cargarCI();
   if (tab === 'viral' && Date.now() - VSt > 5000 && document.activeElement?.tagName !== 'INPUT') loadViral().catch(() => {});
   if (Date.now() - CMt > (tab === 'comentarios' ? 15000 : 120000)) loadComments().catch(() => {});
   document.querySelectorAll('[data-log]').forEach(el => { const j = S.jobs.find(x => x.id === el.dataset.log); if (j) { el.innerHTML = j.log.map(esc).join('<br>'); el.scrollTop = 1e6; } });
@@ -625,6 +626,50 @@ function yupiVideosCard() {
     ${listos.length ? listos.map(j => `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #e5e7eb;padding:6px 0;font-size:.9rem"><span style="flex:1">${esc(j.title || j.topic || 'Video')} <small class="hint">· ${esc(j.status)}${j.pub?.youtube?.ok ? ' · ✅ YouTube' : ''}${j.pub?.facebook?.ok ? ' · ✅ Facebook' : ''}${j.pub?.tiktok?.ok ? ' · ✅ TikTok' : ''}</small></span>${j.pub?.tiktok?.ok ? '' : `<button class="b ghost sm" data-act="pub" data-id="${j.id}" data-p="tiktok">🎵 Subir a TikTok</button>`}</div>`).join('') : '<p class="hint">Cuando el agente termine los primeros videos de Yupitok, aparecerán aquí.</p>'}
     <div class="btns" style="margin-top:6px"><button class="b ghost sm" data-act="yvAhora">🎬 Hacer un video de Yupitok ahora</button>${ch.active === false ? `<button class="b sm" data-act="yvActivar">▶️ Activar</button>` : ''}</div></div>`;
 }
+// ---- 🧠 Centro de IA (motores de texto, video y animación; cola de tareas e historial) ----
+let CI = null, CIt = 0;
+const cargarCI = () => api('/api/centroia').then(r => { CI = r; CIt = Date.now(); if (tab === 'centroia' && !document.activeElement?.closest?.('#ciNueva, .ci-motor')) render(); }).catch(() => {});
+const CI_TIPO = { texto: '✍️ Texto y razonamiento', video: '🎬 Generación de videos', animar: '🖼️ Animación de imágenes' };
+const CI_EST = { 'en cola': '⏳ En cola', trabajando: '⚙️ Trabajando', 'esperando cupo': '⏸️ Esperando', listo: '✅ Listo', error: '❌ Error', cancelado: '🚫 Cancelada' };
+function ciMotor(m) {
+  const c = m.conexion, luz = !m.activo ? '⚪' : !c ? '🔘' : c.ok ? '🟢' : '🔴', usoTxt = `Hoy: ${m.uso.ok} ok · ${m.uso.fallos} fallos${m.uso.seg ? ' · ' + m.uso.seg + ' s' : ''}${m.limite ? ' · límite ' + m.limite + '/día' : ''}`;
+  return `<div class="ci-motor" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin:8px 0;${m.activo ? '' : 'opacity:.7'}">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="flex:1;min-width:180px">${luz} ${esc(m.nombre)}</b><small class="hint">${esc(usoTxt)}</small>
+  <button class="b ghost sm" data-act="ciProbar" data-id="${m.id}">🔌 Probar</button><button class="b ${m.activo ? 'ghost' : ''} sm" data-act="ciOn" data-id="${m.id}" data-on="${m.activo ? 0 : 1}">${m.activo ? 'Desactivar' : 'Activar'}</button></div>
+  ${c ? `<div class="hint" style="margin-top:4px">${c.ok ? '✅' : '⚠️'} ${esc(c.msg)}${m.sinCupoHasta ? ` · ⏳ cupo gratis vuelve ~${new Date(m.sinCupoHasta).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}` : ''}</div>` : ''}
+  ${m.nota ? `<div class="hint" style="margin-top:4px">ℹ️ ${esc(m.nota)}</div>` : ''}
+  ${m.via !== 'ai' || m.id === 'ollama' ? `<details style="margin-top:6px"><summary class="hint" style="cursor:pointer">⚙️ Configurar</summary>
+    ${m.space ? `<label>Space de Hugging Face (usuario/nombre)</label><input id="ciSp_${m.id}" value="${esc(m.space)}">` : ''}
+    ${m.id === 'ollama' || m.id === 'comfyui' ? `<label>Dirección del servidor</label><input id="ciUrl_${m.id}" value="${esc(m.url)}" placeholder="${m.id === 'ollama' ? 'http://127.0.0.1:11434' : 'http://IP:8188'}">` : ''}
+    ${m.id === 'comfyui' ? `<label>Flujo de ComfyUI exportado «para API» (JSON; usa {PROMPT} donde va el texto) ${m.flujo ? '· ✅ cargado' : ''}</label><textarea id="ciFl_${m.id}" rows="3" placeholder='{"3": {"class_type": "...", "inputs": {...}}}'></textarea>` : ''}
+    ${m.via !== 'ai' ? `<label>Límite de usos por día (0 = sin límite)</label><input id="ciLim_${m.id}" type="number" min="0" value="${m.limite}" style="max-width:120px">` : ''}
+    <div class="btns" style="margin-top:6px"><button class="b sm" data-act="ciGuardar" data-id="${m.id}">💾 Guardar</button></div></details>` : ''}</div>`;
+}
+VIEWS.centroia = () => {
+  if (!CI || Date.now() - CIt > 5000) cargarCI(); if (!CI) return '<h1>🧠 Centro de IA</h1><div class="card">Cargando…</div>';
+  const mot = CI.motores, vid = mot.filter(m => m.tipo !== 'texto' && m.activo && m.via !== 'ai');
+  return `<h1>🧠 Centro de IA</h1><p class="sub">Todos tus motores de IA en un solo lugar: elige el adecuado para cada tarea, mira su estado y su consumo. Lo que ya funcionaba sigue igual.</p>
+  ${!CI.hfToken ? `<div class="card" style="border:2px solid #fbbf24;background:#fffbeb"><b>🔑 Paso único para videos gratis:</b> crea tu cuenta gratis en <b>huggingface.co</b> → Settings → <b>Access Tokens</b> → «Create new token» (tipo <b>Read</b>) y pégalo en <b>Ajustes → Claves → HF_TOKEN</b>. Con él tienes tu propio cupo diario de GPU gratis (sin él, el cupo es compartido y casi siempre está agotado).</div>` : ''}
+  <div class="card" id="ciNueva"><h2>✨ Generar</h2>
+    <div class="row" style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px"><label>¿Qué quieres?</label><select id="ciTipo"><option value="video">🎬 Video desde texto</option><option value="animar">🖼️ Animar una imagen</option><option value="texto">✍️ Texto (guion, ideas…)</option></select></div>
+      <div style="flex:1;min-width:150px"><label>Motor</label><select id="ciMotor"><option value="auto">🤖 Automático (el mejor con cupo)</option>${mot.filter(m => m.activo).map(m => `<option value="${m.id}">${esc(CI_TIPO[m.tipo].split(' ')[0] + ' ' + m.nombre)}</option>`).join('')}</select></div>
+      <div style="min-width:120px"><label>Formato</label><select id="ciFmt"><option value="vertical">📱 Vertical</option><option value="horizontal">🖥️ Horizontal</option><option value="cuadrado">⬛ Cuadrado</option></select></div>
+      <div style="width:110px"><label>Segundos</label><input id="ciSeg" type="number" min="1" max="10" placeholder="auto"></div></div>
+    <label>Describe la escena (mejor en inglés para los modelos de video: escribe en español y Libretín puede traducir con 🌐)</label><textarea id="ciPrompt" rows="3" placeholder="Ej: A cute blue notebook cartoon character waving hello in a sunny classroom, pixar style, soft light"></textarea>
+    <label>Imagen de partida (opcional; si el modelo la necesita y no subes una, se crea gratis con FLUX)</label><input id="ciImg" type="file" accept="image/*">
+    <div class="btns" style="margin-top:8px"><button class="b" data-act="ciCrear">🚀 Poner en la cola</button><button class="b ghost" data-act="ciTraducir">🌐 Traducir y mejorar con IA</button></div>
+    <p class="hint">Se genera en segundo plano: puedes seguir usando ShortForge. Si se acaba el cupo gratis, la tarea espera y sigue sola cuando vuelve (o usa otro motor en modo automático). ${vid.length} motores de video activos.</p></div>
+  <div class="card"><h2>📜 Tareas e historial</h2>${CI.tareas.length ? CI.tareas.map(t => `<div style="border-top:1px solid #e5e7eb;padding:8px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1;min-width:220px"><b>${CI_EST[t.estado] || esc(t.estado)}</b> · <small class="hint">${esc(t.tipo)} · ${esc(t.motorUsado || t.motor)} · ${new Date(t.creado).toLocaleString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${t.segundos ? ' · ' + t.segundos + ' s' : ''}</small><div>${esc(t.prompt.slice(0, 160))}</div>
+    ${t.avance && t.estado !== 'listo' ? `<div class="hint">${esc(t.avance)}</div>` : ''}${t.texto ? `<pre style="white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:8px;max-height:220px;overflow:auto">${esc(t.texto)}</pre>` : ''}
+    ${t.historial?.length && t.estado !== 'listo' ? `<details><summary class="hint" style="cursor:pointer">Ver pasos</summary><div class="hint">${t.historial.map(esc).join('<br>')}</div></details>` : ''}</div>
+    ${t.archivo ? `<video src="/api/centroia/archivo?id=${t.id}" controls loop playsinline style="width:160px;max-height:260px;border-radius:10px;background:#000"></video>` : t.imagen ? `<img src="/api/centroia/imagen?id=${t.id}" style="width:90px;border-radius:8px">` : ''}
+    <div class="btns" style="flex-direction:column">${t.archivo ? `<a class="b sm" href="/api/centroia/archivo?id=${t.id}" download="${t.id}.mp4">⬇️ Descargar</a>` : ''}${['error', 'cancelado', 'esperando cupo'].includes(t.estado) ? `<button class="b ghost sm" data-act="ciAccion" data-a="reintentar" data-id="${t.id}">🔁 Reintentar ya</button>` : ''}${['en cola', 'esperando cupo'].includes(t.estado) ? `<button class="b ghost sm" data-act="ciAccion" data-a="cancelar" data-id="${t.id}">Cancelar</button>` : ''}${t.estado !== 'trabajando' ? `<button class="b ghost sm" data-act="ciAccion" data-a="borrar" data-id="${t.id}">🗑️</button>` : ''}</div></div>`).join('') : '<p class="hint">Aún no hay tareas.</p>'}</div>
+  <div class="card"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="flex:1;margin:0">🔌 Motores</h2><button class="b ghost sm" data-act="ciProbar" data-id="*">🔌 Probar todos</button></div>
+  ${['texto', 'video', 'animar'].map(tp => `<h3 style="margin:14px 0 4px">${CI_TIPO[tp]}</h3>${mot.filter(m => m.tipo === tp).map(ciMotor).join('')}`).join('')}
+  <p class="hint">🔐 Las claves se guardan solo en tu servidor (Ajustes → Claves) y nunca se muestran. Los videos gratis usan las GPU gratuitas de Hugging Face (ZeroGPU): el cupo es diario, así que salen unos cuantos clips al día.</p></div>`;
+};
 // ---- 🎓 Libretín (sistema para docentes y familias, se cobra por membresía) ----
 let LB = null, LBt = 0;
 const cargarLB = () => api('/api/libretin').then(r => { LB = r; LBt = Date.now(); if (tab === 'profetok') render(); }).catch(() => {});
@@ -793,6 +838,7 @@ const KEYINFO = [
   ['OPENROUTER_API_KEY', 'OpenRouter (reserva)', 'Usa solo modelos gratis (:free). openrouter.ai → Keys', 'https://openrouter.ai/settings/keys'],
   ['TELEGRAM_BOT_TOKEN', 'Telegram: token del bot', 'Avisos al celular gratis. En Telegram habla con @BotFather → /newbot → copia el token', 'https://t.me/BotFather'],
   ['MESHY_API_KEY', 'Meshy (modelos 3D)', 'Agente del Juego: convierte tus imágenes en personajes 3D profesionales. Necesita el plan Pro con API. meshy.ai → Settings → API', 'https://www.meshy.ai/settings/api'],
+  ['HF_TOKEN', 'Hugging Face (videos gratis)', 'Centro de IA: tu cupo diario de GPU gratis para LTX-Video, Wan 2.2, HunyuanVideo, CogVideoX y FramePack. huggingface.co → Settings → Access Tokens → Create new token (tipo Read)', 'https://huggingface.co/settings/tokens'],
   ['OMNIROUTE_API_KEY', 'OmniRoute (opcional)', 'Solo si en su panel activas «Require API key». Está en su panel → Endpoints', 'http://localhost:20128/dashboard'],
   ['FREESOUND_API_KEY', 'Freesound', 'Biblioteca gratis de efectos y música CC0', 'https://freesound.org/apiv2/apply'],
   ['GOOGLE_CLIENT_ID', 'Google OAuth: Client ID', 'Para publicar en YouTube (ver guía abajo)', 'https://console.cloud.google.com/apis/credentials'],
@@ -1671,3 +1717,21 @@ document.addEventListener('keydown', e => { if (e.target.id === 'chatIn' && e.ke
 
 refresh(true).catch(e => { $('#main').innerHTML = `<div class="card">No se pudo conectar con el servidor. ¿Está abierta la ventana de ShortForge? (${esc(e.message)})</div>`; });
 setInterval(() => refresh().catch(() => {}), 3000);
+
+// ---- 🧠 Centro de IA: acciones ----
+const leerImg = f => new Promise((ok, no) => { if (!f) return ok(null); if (f.size > 8e6) return no(new Error('La imagen pesa más de 8 MB')); const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => no(new Error('No se pudo leer la imagen')); r.readAsDataURL(f); });
+Object.assign(ACT, {
+  ciProbar: guard(async el => { el.disabled = true; el.textContent = '⏳ Probando…'; CI = await api('/api/centroia/probar', { id: el.dataset.id }); CIt = Date.now(); render(); }),
+  ciOn: guard(async el => { await api('/api/centroia/motor', { id: el.dataset.id, on: el.dataset.on === '1' }); await cargarCI(); render(); }),
+  ciGuardar: guard(async el => { const id = el.dataset.id, o = { id }; const v = x => document.getElementById(x + id);
+    if (v('ciSp_')) o.space = v('ciSp_').value; if (v('ciUrl_')) o.url = v('ciUrl_').value; if (v('ciLim_')) o.limite = v('ciLim_').value; if (v('ciFl_') && v('ciFl_').value.trim()) o.flujo = v('ciFl_').value;
+    await api('/api/centroia/motor', o); toast('✅ Guardado'); await api('/api/centroia/probar', { id }); await cargarCI(); render(); }),
+  ciCrear: guard(async el => { const prompt = $('#ciPrompt').value.trim(); if (prompt.length < 3) return toast('Describe qué quieres generar');
+    el.disabled = true; const imagen = await leerImg($('#ciImg').files[0]);
+    await api('/api/centroia/tarea', { tipo: $('#ciTipo').value, motor: $('#ciMotor').value, formato: $('#ciFmt').value, seg: $('#ciSeg').value, prompt, imagen });
+    toast('🚀 En la cola: se genera en segundo plano'); $('#ciPrompt').value = ''; await cargarCI(); render(); }),
+  ciTraducir: guard(async el => { const t = $('#ciPrompt').value.trim(); if (!t) return toast('Escribe primero la idea'); el.disabled = true; el.textContent = '⏳…';
+    const r = await api('/api/centroia/mejorar', { texto: t }).catch(e => (toast('⚠️ ' + e.message), null));
+    if (r?.texto) $('#ciPrompt').value = r.texto; else toast('No se pudo traducir ahora'); el.disabled = false; el.textContent = '🌐 Traducir y mejorar con IA'; }),
+  ciAccion: guard(async el => { if (el.dataset.a === 'borrar' && !confirm('¿Borrar esta tarea y su archivo?')) return; await api('/api/centroia/accion', { id: el.dataset.id, a: el.dataset.a }); await cargarCI(); render(); }),
+});

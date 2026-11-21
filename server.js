@@ -24,7 +24,7 @@ const freesound = require('./lib/freesound');
 const { chatSystem } = require('./lib/prompts');
 
 const PORT = E.PORT || 3200, PUB = path.join(ROOT, 'public');
-const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY', 'MESHY_API_KEY', 'OMNIROUTE_API_KEY'];
+const KEYS = ['GEMINI_API_KEY', 'GROQ_API_KEY', 'NVIDIA_API_KEY', 'ANTHROPIC_API_KEY', 'PEXELS_API_KEY', 'PIXABAY_API_KEY', 'YOUTUBE_API_KEY', 'CF_ACCOUNT_ID', 'CF_API_TOKEN', 'FREESOUND_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FB_APP_ID', 'FB_APP_SECRET', 'FB_CONFIG_ID', 'TELEGRAM_BOT_TOKEN', 'GITHUB_TOKEN', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY', 'CEREBRAS_API_KEY', 'MESHY_API_KEY', 'OMNIROUTE_API_KEY', 'HF_TOKEN'];
 const MIME = { '.webm': 'audio/webm', '.html': 'text/html;charset=utf-8', '.js': 'text/javascript;charset=utf-8', '.css': 'text/css;charset=utf-8', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aiff': 'audio/aiff', '.png': 'image/png', '.jpg': 'image/jpeg', '.txt': 'text/plain;charset=utf-8', '.svg': 'image/svg+xml', '.zip': 'application/zip', '.xml': 'application/xml;charset=utf-8' };
 const DEFAULT_TIMES = { youtube: '18:00', tiktok: '20:00', facebook: '13:00' };
 
@@ -294,6 +294,19 @@ async function api(u, q, U, r) {
     const j = parseJSON(r.text) || {}, t = Array.isArray(j.t) ? j.t : Array.isArray(j) ? j : [];
     if (t.length !== textos.length) throw new Error('La IA no devolvió todas las traducciones');
     return { t: t.map((x, i) => String(x ?? textos[i]).slice(0, 800)) };
+  }
+  if (u.startsWith('/api/centroia')) { // 🧠 Centro de IA: motores, estado, cola de videos e historial
+    const CI = require('./lib/centroia');
+    if (u === '/api/centroia') return CI.estado();
+    if (u === '/api/centroia/motor' && P) return CI.configurar(JSON.parse((await body(q, 2e6)).toString() || '{}'));
+    if (u === '/api/centroia/probar' && P) { const o = await json(q); if (o.id === '*') { await Promise.all(Object.keys(CI.MOTORES).map(id => CI.probar(id))); return CI.estado(); } await CI.probar(o.id); return CI.estado(); }
+    if (u === '/api/centroia/tarea' && P) return CI.crearTarea(JSON.parse((await body(q, 12e6)).toString() || '{}'));
+    if (u === '/api/centroia/mejorar' && P) { const o = await json(q); const t = String(o.texto || '').slice(0, 1500); if (t.length < 3) throw new Error('Escribe la idea');
+      const r = await ai.ask([{ role: 'system', content: 'You write prompts for open-source AI video models (LTX-Video, Wan 2.2). Rewrite the user idea (any language) as ONE vivid English prompt of 40-70 words: subject, action and motion, camera movement, lighting, style. Family-friendly. No lists, no quotes, reply with the prompt only.' }, { role: 'user', content: t }], { max: 600, rapido: true });
+      return { texto: String(r.text || '').trim().replace(/^["']|["']$/g, '') }; }
+    if (u === '/api/centroia/accion' && P) { const o = await json(q); return CI.accion(o.id, o.a); }
+    if (u === '/api/centroia/archivo' || u === '/api/centroia/imagen') { const f = u.endsWith('imagen') ? CI.imagenDe(U.searchParams.get('id')) : CI.archivo(U.searchParams.get('id')); if (f && serveFile(r, f, path.dirname(f))) return STREAMED; return null; }
+    return null;
   }
   if (u.startsWith('/api/libretin')) { // 🎓 ProfeTok (sistema para docentes y familias; su personaje es Libretín)
     const L = require('./lib/libretin'), o = P ? await json(q) : {};

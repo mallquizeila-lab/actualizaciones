@@ -1,3 +1,9 @@
+9.34.0
+- 🧠 Nuevo «Centro de IA»: todos tus motores en un solo lugar, cada uno con su estado de conexión, consumo del día, límite diario y botón para activarlo o desactivarlo.
+- 🎬 Videos con IA GRATIS usando las GPU gratuitas de Hugging Face: LTX-Video (rápido), Wan 2.2 (mejor calidad), HunyuanVideo 1.5, CogVideoX y FramePack (anima una imagen). Si el modelo necesita una imagen, primero la crea gratis con FLUX. Cola en segundo plano: si se acaba el cupo gratis, espera y sigue sola.
+- ✍️ Texto: se suman Ollama (modelos locales) y Hugging Face a Gemini, Groq, NVIDIA, OpenRouter y OmniRoute (que siguen igual).
+- 🔑 Pega tu token gratis de Hugging Face en Ajustes → Claves → HF_TOKEN.
+
 9.33.1
 - 💳 ProfeTok: botón «Pagar ahora» en los planes de la portada (crea tu cuenta o entra y pasas directo al pago).
 - 🏫 Plan Docente: ahora es para 2 aulas (la prueba de un docente también; la de un colegio, 10).
