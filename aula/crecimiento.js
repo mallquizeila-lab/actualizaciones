@@ -194,11 +194,11 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
     }
   }
 
-  // 🤝 afiliados: por cada 5 colegas invitados que se registran y USAN ProfeTok (un aula con 3 o más alumnos, o que pagaron), 1 mes gratis.
-  // (exigir uso real evita cuentas falsas). Cada invitado cuenta una sola vez.
+  // 🤝 afiliados: un colega invitado cuenta (🟢) recién cuando PAGA su plan; si solo se registró, queda en rojo (🔴).
+  // Al juntar 5 colegas que pagaron se gana 1 mes gratis y el contador vuelve a cero (cada colega cuenta una sola vez).
   try { db.exec('alter table colegios add column ref_contado integer default 0'); } catch (e) {}
   const REF_META = 5;
-  const refActivos = pid => q(`select c.id from colegios c where c.referido_por=? and (exists (select 1 from aulas x where x.colegio_id=c.id and (select count(*) from alumnos al where al.aula_id=x.id) >= 3) or exists (select 1 from pagos p where p.colegio_id=c.id and p.estado='aprobado'))`, pid);
+  const refActivos = pid => q(`select c.id from colegios c where c.referido_por=? and exists (select 1 from pagos p where p.colegio_id=c.id and p.estado='aprobado' and p.plan<>'recarga')`, pid); // solo los que pagaron
   function revisarReferidos(pid) {
     if (!pid) return; const pad = q1('select * from colegios where id=?', pid); if (!pad) return;
     const nuevos = refActivos(pid).filter(x => !q1('select ref_contado from colegios where id=?', x.id).ref_contado);
@@ -206,8 +206,8 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
       for (const x of nuevos.slice(k, k + REF_META)) run('update colegios set ref_contado=1 where id=?', x.id);
       const v = q1('select vence from colegios where id=?', pid).vence; run('update colegios set vence=? where id=?', new Date(Math.max(Date.now(), v ? new Date(v).getTime() : 0) + 30 * DIA).toISOString(), pid);
       const pu = q1("select * from usuarios where colegio_id=? and rol in ('director','docente') order by id limit 1", pid), pc = pu && q1('select * from contactos where usuario_id=?', pu.id);
-      if (pc) { evento(pc.id, 'premio', '+30 días por 5 colegas', 10); porCorreo(pc, { asunto: '🎁 ¡Ganaste 1 mes gratis en ProfeTok!', texto: `${REF_META} colegas que invitaste ya usan ProfeTok. Como agradecimiento, sumamos 30 días a tu plan.\n\n¡Sigue invitando! Cada ${REF_META} colegas más, otro mes gratis.`, boton: 'Ver mi plan', url: base() + '/#/plan' }).catch(() => {}); }
-      if (pu) pushUsuario(pu.id, { title: '🎁 ¡Ganaste 1 mes gratis!', body: `${REF_META} colegas que invitaste ya usan ProfeTok. Sumamos 30 días a tu plan.`, url: '/#/plan', icon: '/icono-192.png' }).catch(() => {});
+      if (pc) { evento(pc.id, 'premio', '+30 días por 5 colegas', 10); porCorreo(pc, { asunto: '🎁 ¡Ganaste 1 mes gratis en ProfeTok!', texto: `${REF_META} colegas que invitaste ya se suscribieron a ProfeTok. Como agradecimiento, sumamos 30 días a tu plan.\n\nTu contador vuelve a cero: con ${REF_META} colegas nuevos que se suscriban, ganas otro mes gratis.`, boton: 'Ver mi plan', url: base() + '/#/plan' }).catch(() => {}); }
+      if (pu) pushUsuario(pu.id, { title: '🎁 ¡Ganaste 1 mes gratis!', body: `${REF_META} colegas que invitaste ya se suscribieron. Sumamos 30 días a tu plan.`, url: '/#/plan', icon: '/icono-192.png' }).catch(() => {});
     }
   }
   setInterval(() => { try { for (const r of q('select distinct referido_por p from colegios where referido_por is not null and coalesce(ref_contado,0)=0')) revisarReferidos(r.p); } catch (e) {} }, 3600e3).unref();
@@ -242,7 +242,11 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
     if (!ref) { ref = 'P' + u.id.toString(36).toUpperCase() + crypto.randomBytes(2).toString('hex').toUpperCase(); run('update usuarios set ref=? where id=?', ref, u.id); }
     revisarReferidos(u.colegio_id);
     const inv = q1('select count(*) n, coalesce(sum(ref_contado),0) contados from colegios where referido_por=?', u.colegio_id), act = refActivos(u.colegio_id).length;
-    return { enlace: (base() || '') + '/?ref=' + ref, invitados: inv.n || 0, activos: act, meta: REF_META, progreso: act - inv.contados, meses: Math.floor(inv.contados / REF_META) };
+    // lista para el docente: solo el nombre de pila e inicial del colega, y si ya pagó (verde) o no (rojo)
+    const lista = q(`select c.id, c.creado, coalesce(c.ref_contado,0) contado, (select u.nombre from usuarios u where u.colegio_id=c.id and u.rol in ('docente','director') order by u.id limit 1) nombre,
+      exists (select 1 from pagos p where p.colegio_id=c.id and p.estado='aprobado' and p.plan<>'recarga') pago from colegios c where c.referido_por=? order by c.id desc limit 100`, u.colegio_id)
+      .map(x => { const [n, a] = String(x.nombre || 'Colega').trim().split(/\s+/); return { nombre: n + (a ? ' ' + a[0] + '.' : ''), pago: !!x.pago, contado: !!x.contado, desde: String(x.creado).slice(0, 10) }; });
+    return { enlace: (base() || '') + '/?ref=' + ref, invitados: inv.n || 0, activos: act, meta: REF_META, progreso: act - inv.contados, meses: Math.floor(inv.contados / REF_META), colegas: lista.filter(x => !x.contado) };
   };
 
   // dueño: panel de crecimiento

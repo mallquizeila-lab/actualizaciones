@@ -52,7 +52,7 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 **Captar**
 - **Recursos gratis** (registro auxiliar CNEB, plantilla de sesión y 30 mensajes para familias, todos originales). El docente deja nombre, correo y, si quiere, WhatsApp, y descarga al instante; el enlace del correo confirma su dirección. Puedes subir más (texto o PDF propio).
 - Enlace para anuncios y grupos: `https://profetok.yupitok.com/recursos?utm_source=facebook` (cambia la fuente: `tiktok`, `grupo-wa`…). La ventana del recurso también aparece sola al leer media página, a los 40 s o al intentar salir (una sola vez).
-- **Afiliados:** cada docente tiene su enlace en «Plan». El invitado recibe 7 días extra y, por cada 5 colegas que se registran y usan ProfeTok (un aula con 3 o más alumnos, o que pagan), quien invita gana 1 mes gratis.
+- **Afiliados:** cada docente tiene su enlace en «Plan». El invitado recibe 7 días extra. Un colega cuenta (🟢) recién cuando paga su plan; si solo se registró queda en rojo (🔴). Con 5 colegas que pagaron se gana 1 mes gratis y el contador vuelve a cero (para otro mes, 5 nuevos). Las recargas de saldo no cuentan como suscripción.
 
 **Convertir (automático cada 5 minutos)**
 - Contactos: día 2 beneficios · día 5 testimonio · día 9 último empujón.

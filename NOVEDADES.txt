@@ -1,3 +1,6 @@
+9.37.1
+- 🤝 Afiliados: un colega invitado cuenta recién cuando PAGA su plan (🟢); si solo se registró queda en rojo (🔴). Con 5 colegas que pagaron se gana 1 mes gratis una vez y el contador vuelve a cero. Lista de colegas invitados con su color (solo nombre e inicial).
+
 9.37.0
 - 👛 ProfeTok · Saldo: el docente recarga cuando quiera (Yape, Plin, tarjeta o QR; regalo de +5 % desde S/ 100 y +8 % desde S/ 200) y paga su plan desde el saldo. Si lo deja activado, ProfeTok renueva solo con el saldo un día antes de vencer.
 - 🔄 Renovar fácil: «Renovar en 1 clic» (como la última vez), 🎁 +7 días por renovar con anticipación, renovación automática con tarjeta (Mercado Pago) y recordatorios 10, 5 y 2 días antes con una franja en el panel.
