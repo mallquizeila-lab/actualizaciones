@@ -7,7 +7,7 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
   db.exec(`create table if not exists avisos (id integer primary key, padre_id integer, alumno_id integer, tipo text, nivel text, titulo text, cuerpo text, detalle text, url text, clave text unique, creado text default (datetime('now')), enviado text, leido text);
   create table if not exists avisos_pref (usuario_id integer primary key, prefs text);
   create index if not exists av_p on avisos(padre_id, id); create index if not exists av_env on avisos(enviado);`);
-  const PREF0 = { notas: true, examenes: true, logros: true, observaciones: true, asistencia: true, silencio: true };
+  const PREF0 = { notas: true, examenes: true, logros: true, observaciones: true, asistencia: true, mensajes: true, silencio: true };
   const prefs = uid => ({ ...PREF0, ...(JSON.parse(q1('select prefs from avisos_pref where usuario_id=?', uid)?.prefs || '{}')) });
   const pila = n => String(n || '').trim().split(/\s+/)[0] || 'tu hijo(a)';
   const nivelDe = (escala, v) => { const s = String(v || '').toUpperCase().trim(); if (escala === 'vigesimal') { const n = parseFloat(s); return isNaN(n) ? null : n >= 18 ? 'destacado' : n >= 14 ? 'logrado' : n >= 11 ? 'proceso' : 'inicio'; } return { AD: 'destacado', A: 'logrado', B: 'proceso', C: 'inicio' }[s] || null; };
@@ -32,18 +32,20 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
     }
     if (tipo === 'logro') return { sticker: 'logro', titulo: `🌟 ¡Una gran noticia sobre ${n}!`, cuerpo: d.texto || `${n} tuvo un logro hoy en clase.` };
     if (tipo === 'observacion') return { sticker: 'info', titulo: `📒 Nota de la docente sobre ${n}`, cuerpo: 'La docente dejó una nota nueva. Puedes leerla con calma en ProfeTok.', privado: true };
+    if (tipo === 'respuesta') return { sticker: 'info', titulo: '💬 La docente te respondió', cuerpo: `Tienes una respuesta sobre ${n}. Léela en ProfeTok.`, privado: true };
+    if (tipo === 'justificacion') return d.aprobada ? { sticker: 'info', titulo: '✅ Falta justificada', cuerpo: `La docente aceptó la justificación de ${n} del ${d.fecha}. ¡Gracias por avisar!` } : { sticker: 'info', titulo: `📝 Sobre la falta de ${n}`, cuerpo: 'La docente revisó tu justificación. Si tienes dudas, escríbele desde ProfeTok.' };
     if (tipo === 'falta') return { sticker: 'info', titulo: `📅 Asistencia de ${n}`, cuerpo: `Hoy no registramos la asistencia de ${n} en clase. Si ya lo sabías, no te preocupes 🙂` };
     return null;
   }
-  const PREF_DE = { nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia' };
+  const PREF_DE = { nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia', respuesta: 'mensajes', justificacion: 'asistencia' };
 
   // encola el aviso para cada familia del alumno (una sola vez por clave)
-  function encolar(tipo, alumnoId, d, clave) {
+  function encolar(tipo, alumnoId, d, clave, soloPadre) {
     const al = q1('select a.id, a.nombres, x.escala from alumnos a join aulas x on x.id=a.aula_id where a.id=?', +alumnoId); if (!al) return 0;
     const nivel = d.nivel || (d.valor != null ? nivelDe(al.escala, d.valor) : null), m = mensaje(tipo, { ...d, nivel, alumno: al.nombres }); if (!m) return 0;
     let n = 0;
     for (const p of q("select u.id from familia f join usuarios u on u.id=f.padre_id where f.alumno_id=? and u.rol='padre' and u.activo=1", al.id)) {
-      if (!prefs(p.id)[PREF_DE[tipo]]) continue;
+      if (soloPadre && p.id !== +soloPadre) continue; if (!prefs(p.id)[PREF_DE[tipo]]) continue;
       try { run('insert into avisos(padre_id, alumno_id, tipo, nivel, titulo, cuerpo, detalle, url, clave) values(?,?,?,?,?,?,?,?,?)', p.id, al.id, tipo, nivel, m.titulo, m.cuerpo, JSON.stringify({ sticker: m.sticker, ideas: m.ideas || null, privado: !!m.privado, mejorar: d.mejorar || null }), `/#/novedades`, `${p.id}|${clave || tipo + '|' + al.id + '|' + Date.now()}`); n++; } catch (e) {} // clave repetida: ya se avisó
     }
     return n;

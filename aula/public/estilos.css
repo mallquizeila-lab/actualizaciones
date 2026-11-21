@@ -78,3 +78,4 @@ main{max-width:1200px;margin:0 auto;padding:16px 14px 80px}
 @keyframes stkLatido{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}@keyframes stkConfeti{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(900%) rotate(540deg)}}
 @media (prefers-reduced-motion:reduce){.stk *{animation:none!important}}
 .tonos{display:grid;gap:8px;margin-top:6px}.tono{display:flex;gap:8px;align-items:center;border:1px solid var(--bd);border-radius:12px;padding:8px 10px}.tono.on{border-color:#0284c7;background:#f0f9ff}
+.bandeja{border:2px solid #fde68a}.bj{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding:10px 0;border-top:1px solid var(--bd)}.bj.hecho{opacity:.65}.resp{background:#ecfdf5;border-radius:10px;padding:6px 10px;margin-top:4px;font-size:.92rem}

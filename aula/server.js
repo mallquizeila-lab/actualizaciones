@@ -329,8 +329,10 @@ const crecer = require('./crecimiento').crear({ db, q, q1, run, getS, setS, limp
 // 🔔 avisos a las familias (notas, exámenes, logros, observaciones y faltas) con palabras cuidadas
 const avisosM = require('./avisos').crear({ db, q, q1, run, hoy, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
 const avisar = (...a) => { try { return avisosM.encolar(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } };
+// 👨‍👩‍👧 familia ↔ docente: «Enterado», justificar faltas, mensajes y reuniones, lista de familias (ver familia.js)
+const familiaM = require('./familia').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
 const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES]);
-for (const M of [pagosM, crecer, izipay, avisosM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
+for (const M of [pagosM, crecer, izipay, avisosM, familiaM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}
 const billeteras = () => { const W = getS('billeteras', {}), sop = (E.AULA_WHATSAPP || getS('soporteWa', '')).replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, ''); return Object.fromEntries(['yape', 'plin'].map(t => [t, { numero: W[t]?.numero || sop, titular: W[t]?.titular || 'ProfeTok', qr: !!getS('qr_' + t, '') }])); };
