@@ -1,3 +1,6 @@
+9.35.5
+- 🗣️ Tono de ProfeTok de 7 segundos: entrada con brillitos, «¡ProfeTok, ProfeTok, ProfeTok, ProfeTooook!» más pausado y un acorde final que resuena hasta cerrar.
+
 9.35.4
 - 🗣️ Tono de ProfeTok renovado: «¡ProfeTok, ProfeTok, ProfeTok, ProfeTooook!» (el último más largo, con acorde y brillito final).
 
