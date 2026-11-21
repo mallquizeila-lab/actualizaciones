@@ -31,10 +31,11 @@ function crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar,
   // --- justificar faltas ---
   API['POST /api/justificar'] = async ({ u, b }) => {
     if (!esPadre(u) || !veAlumno(u, b.alumno_id)) throw 403; const fecha = /^\d{4}-\d{2}-\d{2}$/.test(b.fecha || '') ? b.fecha : null; if (!fecha) throw 'Elige la fecha';
+    const dif = (new Date(fecha + 'T12:00:00') - new Date(hoy() + 'T12:00:00')) / 864e5; if (dif > 30 || dif < -60) throw 'Elige una fecha cercana (hasta 30 días antes o 2 meses atrás)';
     const motivo = limpio(b.motivo, 500); if (motivo.length < 4) throw 'Cuéntale a la docente el motivo';
     if (q1("select 1 from justificaciones where alumno_id=? and fecha=? and estado='pendiente'", +b.alumno_id, fecha)) throw 'Ya enviaste una justificación para ese día';
     const id = run('insert into justificaciones(alumno_id, padre_id, fecha, motivo) values(?,?,?,?)', +b.alumno_id, u.id, fecha, motivo).lastInsertRowid;
-    const au = aulaDeAlumno(b.alumno_id), al = q1('select nombres from alumnos where id=?', +b.alumno_id); if (au?.docente_id) avisarDocente(au.docente_id, `📝 Justificación de ${pila(al.nombres)}`, `La familia justificó la falta del ${fecha}. Revísala en ProfeTok.`);
+    const au = aulaDeAlumno(b.alumno_id), al = q1('select nombres from alumnos where id=?', +b.alumno_id); if (au?.docente_id) avisarDocente(au.docente_id, `📝 Justificación de ${pila(al.nombres)}`, fecha > hoy() ? `La familia avisa que faltará el ${fecha}: ${motivo.slice(0, 80)}` : `La familia justificó la falta del ${fecha}: ${motivo.slice(0, 80)}`);
     return { id };
   };
   API['POST /api/justificacion'] = async ({ u, b }) => {

@@ -1,3 +1,6 @@
+9.36.1
+- 📝 ProfeTok: la familia puede «Avisar o justificar una inasistencia» en cualquier momento, incluso antes de que ocurra («mañana no irá: cita médica»), con motivos rápidos. La docente lo ve en su bandeja como «Avisa que faltará» y lo acepta con un toque.
+
 9.36.0
 - 📧 ProfeTok · Correos: lista de «Familias conectadas» con sus correos (se suman solas al registrarse con el enlace de invitación), «📋 Copiar todos los correos» y «📨 Enviar desde mi Gmail» (abre tu Gmail con todas las familias en copia oculta y el mensaje listo; funciona aunque el envío automático con Brevo aún no esté activado).
 - 👨‍👩‍👧 Panel de la familia: «✅ Enterado» en los comunicados (la docente ve quién leyó), «📝 Justificar» faltas desde el celular y «💬 Hablar con la docente» (mensajes y pedidos de reunión).
