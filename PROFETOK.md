@@ -88,3 +88,10 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 - `GET /api/equipo` (solo director): por docente → semáforo 🟢🟡🔴 con motivos (días de clase sin asistencia, días sin notas, mensajes/justificaciones sin responder, % familias conectadas, asistencia de hoy después de las 11 a. m.), último ingreso; por aula → asistencia 30 días, promedio, alumnos en riesgo, % familias.
 - `POST /api/equipo-recordar {docente_id, tipo: asistencia|notas|mensajes}`: aviso amable al celular del docente (1 por día, queda en auditoría). Si el docente no activó notificaciones, la app abre un correo con el mismo texto.
 - App: pestaña «📋 Mi equipo» y tarjeta «Mi equipo hoy» en el inicio del director.
+
+## 👩‍🏫 Cupo de docentes del plan Colegio
+- Plan Colegio (S/ 149) incluye hasta 14 docentes activos (`PLANES.colegio.docentes`); desde el 15, S/ 10 al mes cada uno (`PLANES.colegio.extra`). El dueño puede cambiar ambos en su panel (💲 Precios).
+- `pagos.precio(plan, meses, cupón, colegio_id)` suma los adicionales en Yape/Plin, Mercado Pago, Izipay, pago con saldo y renovación automática.
+- En la prueba gratis el tope es 14. Con el plan Docente el director no puede sumar docentes.
+- `POST /api/docente`: desde el 15 responde `{confirmar}` y solo agrega con `confirmo: true`. `{quitar: id}` desactiva al docente (sus aulas y datos se quedan; se pueden reasignar editando el aula). Volver a agregar su correo lo reactiva con una clave nueva.
+- La suscripción automática de Mercado Pago guarda el monto del día en que se creó: si cambia el número de docentes, se debe volver a activar.

@@ -21,7 +21,7 @@ function crear({ db, q, q1, run, limpio, PLANES, pagosM, pushUsuario, avisarDuen
   }
   // pagar la membresía con el saldo (lo usa el botón y la renovación automática)
   function pagarConSaldo(cid, plan, meses, cupon, via, activarPago) {
-    const pr = pagosM.precio(plan, meses, cupon || ''), s = saldoDe(cid); if (s + 0.001 < pr.total) throw `Tu saldo (S/ ${s.toFixed(2)}) no alcanza: faltan S/ ${(pr.total - s).toFixed(2)}. Recarga o paga de otra forma.`;
+    const pr = pagosM.precio(plan, meses, cupon || '', cid), s = saldoDe(cid); if (s + 0.001 < pr.total) throw `Tu saldo (S/ ${s.toFixed(2)}) no alcanza: faltan S/ ${(pr.total - s).toFixed(2)}. Recarga o paga de otra forma.`;
     const pid = run("insert into pagos(colegio_id, plan, monto, metodo, operacion, cupon, meses) values(?,?,?, 'saldo', ?, ?, ?)", cid, pr.plan, pr.total, `Pagado con saldo · ${pr.meses} mes(es)`, pr.cupon?.codigo || null, pr.meses).lastInsertRowid;
     run("insert into saldo_mov(colegio_id, monto, tipo, detalle, pago_id) values(?,?, 'pago', ?, ?)", cid, -pr.total, `${PLANES[pr.plan].nombre} · ${pr.meses} mes(es)${via ? ' · ' + via : ''}`, pid);
     activarPago(pid, 'saldo ' + (via || '')); return { pago: pid, total: pr.total, saldo: saldoDe(cid) };
@@ -31,7 +31,7 @@ function crear({ db, q, q1, run, limpio, PLANES, pagosM, pushUsuario, avisarDuen
     const lista = q("select c.* from colegios c where coalesce(c.auto_saldo,1)=1 and julianday(c.vence) between julianday('now','-3 days') and julianday('now','+1 day')");
     for (const c of lista) {
       const s = saldoDe(c.id); if (s <= 0) continue; const d = docenteDe(c.id); if (!d) continue;
-      const plan = PLANES[c.plan] ? c.plan : d.rol === 'director' ? 'colegio' : 'docente', precio = PLANES[plan].precio;
+      const plan = PLANES[c.plan] ? c.plan : d.rol === 'director' ? 'colegio' : 'docente', precio = pagosM.precio(plan, 1, '', c.id).total;
       if (q1("select 1 from pagos where colegio_id=? and metodo='saldo' and operacion like '%renovación automática%' and creado>datetime('now','-1 day')", c.id)) continue; // una sola vez por vencimiento
       if (s + 0.001 >= precio) { try { const r = pagarConSaldo(c.id, plan, 1, '', 'renovación automática', activarPago); pushUsuario(d.id, { title: '✅ Renovamos tu plan con tu saldo', body: `Usamos S/ ${r.total.toFixed(2)} de tu saldo. Te quedan S/ ${r.saldo.toFixed(2)}.`, url: '/#/plan', icon: '/icono-192.png' }).catch(() => {}); } catch (e) {} }
       else if (!q1("select 1 from saldo_mov where colegio_id=? and tipo='aviso' and creado>datetime('now','-2 days')", c.id)) {

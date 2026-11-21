@@ -24,12 +24,15 @@ function crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base }
     if (c.vence && new Date(c.vence) < new Date()) return null; if (c.usos_max && c.usos >= c.usos_max) return null; if (c.plan && plan && c.plan !== plan) return null;
     return c;
   }
-  function precio(plan, meses, codigo) {
+  // 👩‍🏫 plan Colegio: incluye hasta 14 docentes; desde el 15 cada uno suma S/ 10 al mes
+  const extrasDe = cid => cid ? Math.max(0, q1("select count(*) n from usuarios where colegio_id=? and rol='docente' and activo=1", cid).n - (PLANES.colegio.docentes || 14)) : 0;
+  function precio(plan, meses, codigo, cid) {
     const P = PLANES[plan]; if (!P) throw 'Plan no válido'; meses = DESC_MESES[meses] !== undefined ? +meses : 1;
-    const bruto = P.precio * meses, dm = DESC_MESES[meses], cu = codigo ? cupon(codigo, plan) : null;
+    const extras = plan === 'colegio' ? extrasDe(cid) : 0, extraMes = extras * (PLANES.colegio.extra || 10), mensual = P.precio + extraMes;
+    const bruto = mensual * meses, dm = DESC_MESES[meses], cu = codigo ? cupon(codigo, plan) : null;
     if (codigo && !cu) throw 'Ese cupón no existe, ya venció o ya se usó';
     const total = Math.max(1, Math.round(bruto * (1 - dm) * (1 - (cu ? cu.pct : 0) / 100) * 100) / 100);
-    return { plan, meses, bruto, descMeses: Math.round(dm * 100), cupon: cu ? { codigo: cu.codigo, pct: cu.pct } : null, total };
+    return { plan, meses, base: P.precio, extras, extraMes, mensual, incluidos: plan === 'colegio' ? (PLANES.colegio.docentes || 14) : 0, bruto, descMeses: Math.round(dm * 100), cupon: cu ? { codigo: cu.codigo, pct: cu.pct } : null, total };
   }
   const nuevoCupon = ({ pct, horas, plan, usos = 1, contactoId, nota, prefijo = 'PROFE' }) => {
     const codigo = prefijo + '-' + crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -56,10 +59,10 @@ function crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base }
   };
 
   const API = {}, LIBRES = ['POST /api/mp/webhook'];
-  API['GET /api/precio'] = async ({ url }) => { return precio(url.searchParams.get('plan'), +url.searchParams.get('meses') || 1, url.searchParams.get('cupon')); };
+  API['GET /api/precio'] = async ({ u, url }) => { return precio(url.searchParams.get('plan'), +url.searchParams.get('meses') || 1, url.searchParams.get('cupon'), u?.colegio_id); };
   API['POST /api/checkout'] = async ({ u, b, req }) => {
     if (!['docente', 'director'].includes(u.rol)) throw 403; if (!listo()) throw 'El pago con tarjeta aún no está activado. Usa Yape o Plin.';
-    const pr = b.recarga ? { plan: 'recarga', meses: 0, total: Math.round(+b.recarga * 100) / 100 } : precio(b.plan, +b.meses || 1, b.cupon), P = PLANES[pr.plan] || { nombre: 'Recarga de saldo' }, url = base(req);
+    const pr = b.recarga ? { plan: 'recarga', meses: 0, total: Math.round(+b.recarga * 100) / 100 } : precio(b.plan, +b.meses || 1, b.cupon, u.colegio_id), P = PLANES[pr.plan] || { nombre: 'Recarga de saldo' }, url = base(req);
     if (b.recarga && !(pr.total >= 10 && pr.total <= 2000)) throw 'La recarga debe ser de S/ 10 a S/ 2000';
     const id = run('insert into pagos(colegio_id, plan, monto, metodo, operacion, cupon, meses) values(?,?,?,?,?,?,?)', u.colegio_id, pr.plan, pr.total, 'mercadopago', b.recarga ? 'Mercado Pago · recarga' : 'Mercado Pago · ' + pr.meses + ' mes(es)', pr.cupon?.codigo || null, pr.meses).lastInsertRowid;
     const pref = await mp('/checkout/preferences', { method: 'POST', body: JSON.stringify({
@@ -116,7 +119,7 @@ function crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base }
   API['POST /api/suscripcion'] = async ({ u, b, req }) => {
     if (!['docente', 'director'].includes(u.rol)) throw 403; if (!listo()) throw 'La renovación automática necesita Mercado Pago (aún no está activado).';
     if (q1("select 1 from suscripciones where colegio_id=? and estado='activa'", u.colegio_id)) throw 'Ya tienes la renovación automática activada';
-    const pr = precio(b.plan, 1, ''), url = base(req), P = PLANES[pr.plan];
+    const pr = precio(b.plan, 1, '', u.colegio_id), url = base(req), P = PLANES[pr.plan];
     const r = await mp('/preapproval', { method: 'POST', body: JSON.stringify({ reason: `ProfeTok ${P.nombre} · mensual`, external_reference: 'col-' + u.colegio_id, payer_email: u.email, back_url: `${url}/#/plan?auto=1`, status: 'pending',
       auto_recurring: { frequency: 1, frequency_type: 'months', transaction_amount: pr.total, currency_id: 'PEN' } }) });
     run("delete from suscripciones where colegio_id=? and estado='pendiente'", u.colegio_id);
@@ -127,6 +130,6 @@ function crear({ db, q, q1, run, getS, setS, limpio, PLANES, activarPago, base }
   API['POST /api/suscripcion-cancelar'] = async ({ u }) => { const s = q1("select * from suscripciones where colegio_id=? and estado in ('activa','pendiente','pausada') order by id desc limit 1", u.colegio_id || -1); if (!s) throw 'No tienes renovación automática';
     if (listo()) await mp('/preapproval/' + encodeURIComponent(s.mp_id), { method: 'PUT', body: JSON.stringify({ status: 'cancelled' }) }).catch(e => { throw 'Mercado Pago no respondió: ' + e.message; });
     run("update suscripciones set estado='cancelada' where id=?", s.id); return { ok: 1 }; };
-  return { API, LIBRES, precio, nuevoCupon, listo, DESC_MESES, suscripcion };
+  return { API, LIBRES, precio, extrasDe, nuevoCupon, listo, DESC_MESES, suscripcion };
 }
 module.exports = { crear, DESC_MESES };

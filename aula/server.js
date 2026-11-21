@@ -61,6 +61,7 @@ if (E.AULA_OWNER_EMAIL && !q1("select 1 from usuarios where rol='dueno'")) {
 // ---------- membresía ----------
 const PLANES = getS('planes', { docente: { nombre: 'Docente', precio: 19, aulas: 2, ia: 60 }, colegio: { nombre: 'Colegio', precio: 149, aulas: 200, ia: 800 } });
 PLANES.docente.aulas = 2; // plan Docente: 2 aulas (también en cuentas que ya tenían guardado el valor anterior)
+PLANES.colegio.docentes ||= 14; PLANES.colegio.extra ||= 10; // plan Colegio: hasta 14 docentes; cada docente adicional suma S/ 10 al mes
 const membresia = c => { if (!c) return { activa: false }; const v = c.vence ? new Date(c.vence).getTime() : 0, dias = Math.ceil((v - Date.now()) / DIA); return { plan: c.plan, vence: c.vence, dias, activa: dias > 0, prueba: c.plan === 'prueba' }; };
 
 // ---------- permisos (el corazón de la privacidad) ----------
@@ -174,7 +175,7 @@ API['GET /api/yo'] = async ({ u }) => {
   if (u.rol === 'padre' || u.rol === 'alumno') r.noLeidos = q1('select count(*) n from avisos where padre_id=? and leido is null', u.id).n;
   if (u.rol === 'padre' || u.rol === 'alumno') r.hijos = q('select a.id, a.nombres, a.apellidos, a.foto is not null foto, x.nombre aula, x.grado from familia f join alumnos a on a.id=f.alumno_id join aulas x on x.id=a.aula_id where f.padre_id=?', u.id);
   if (esStaff(u)) r.aulas = q(`select x.*, (select count(*) from alumnos where aula_id=x.id) alumnos, u.nombre docente from aulas x left join usuarios u on u.id=x.docente_id where ${u.rol === 'docente' ? 'x.docente_id=?' : u.rol === 'director' ? 'x.colegio_id=?' : '1=1 or ?'} order by x.id`, u.rol === 'docente' ? u.id : u.colegio_id || 0);
-  if (u.rol === 'director') r.docentes = q("select id, nombre, email from usuarios where colegio_id=? and rol='docente'", u.colegio_id);
+  if (u.rol === 'director') { r.docentes = q("select id, nombre, email from usuarios where colegio_id=? and rol='docente' and activo=1", u.colegio_id); r.cupo = { incluidos: PLANES.colegio.docentes, extra: PLANES.colegio.extra, usados: r.docentes.length }; }
   return r;
 };
 
@@ -186,8 +187,14 @@ API['POST /api/colegio'] = async ({ u, b }) => {
   run('update colegios set nombre=?, color=?, lema=?, logo=?, whatsapp=? where id=?', limpio(b.nombre, 100) || c.nombre, /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : c.color, limpio(b.lema, 120), logo, limpio(b.whatsapp, 20).replace(/[^\d+]/g, ''), c.id);
   return { ok: 1 };
 };
-API['POST /api/docente'] = async ({ u, b }) => { // el director agrega docentes a su colegio
-  if (u.rol !== 'director') throw 403; const email = String(b.email || '').toLowerCase().trim(); if (!emailOk(email)) throw 'Correo no válido'; if (q1('select 1 from usuarios where email=?', email)) throw 'Ese correo ya tiene cuenta';
+API['POST /api/docente'] = async ({ u, b }) => { // el director agrega docentes a su colegio (hasta 14 incluidos; desde el 15, +S/ 10 al mes cada uno)
+  if (u.rol !== 'director') throw 403; const col = q1('select * from colegios where id=?', u.colegio_id), m = membresia(col);
+  if (b.quitar) { const d = q1("select * from usuarios where id=? and colegio_id=? and rol='docente'", +b.quitar, u.colegio_id); if (!d) throw 404; run('update usuarios set activo=0 where id=?', d.id); run('delete from sesiones where usuario_id=?', d.id); audit(u.id, 'quitar docente', d.email); return { ok: 1 }; } // sus aulas y datos quedan en el colegio
+  const n = q1("select count(*) n from usuarios where colegio_id=? and rol='docente' and activo=1", u.colegio_id).n, inc = PLANES.colegio.docentes, extra = PLANES.colegio.extra;
+  if (col.plan === 'docente') throw 'Tu plan Docente es solo para ti. Para sumar docentes, pasa al plan Colegio (incluye hasta ' + inc + ' docentes).';
+  if (n >= inc && m.prueba) throw `En la prueba gratis puedes tener hasta ${inc} docentes. Activa el plan Colegio para sumar más (S/ ${extra} al mes por cada docente adicional).`;
+  if (n >= inc && !b.confirmo) return { confirmar: true, docentes: n, incluidos: inc, extra, nuevoMensual: PLANES.colegio.precio + (n + 1 - inc) * extra };
+  const email = String(b.email || '').toLowerCase().trim(); if (!emailOk(email)) throw 'Correo no válido'; const ya = q1('select * from usuarios where email=?', email); if (ya) { if (ya.colegio_id === u.colegio_id && ya.rol === 'docente' && !ya.activo) { run('update usuarios set activo=1 where id=?', ya.id); const c2 = crypto.randomBytes(5).toString('base64url'); run('update usuarios set hash=? where id=?', hashPass(c2), ya.id); return { clave: c2, volvio: true }; } throw 'Ese correo ya tiene cuenta'; }
   const clave = crypto.randomBytes(5).toString('base64url'); run("insert into usuarios(email, nombre, hash, rol, colegio_id) values(?,?,?,'docente',?)", email, limpio(b.nombre, 80), hashPass(clave), u.colegio_id); return { clave };
 };
 
@@ -195,7 +202,7 @@ API['POST /api/docente'] = async ({ u, b }) => { // el director agrega docentes 
 API['POST /api/aula'] = async ({ u, b }) => {
   if (!esStaff(u)) throw 403; const col = q1('select * from colegios where id=?', u.colegio_id); if (!col) throw 'Para crear aulas entra con una cuenta de docente o director'; const m = membresia(col);
   const datos = [limpio(b.nombre, 60), limpio(b.nivel, 20), limpio(b.grado, 20), limpio(b.seccion, 10), b.escala === 'vigesimal' ? 'vigesimal' : 'letras', /^https:\/\/meet\.google\.com\/[a-z0-9-]{6,40}$/i.test(b.meet || '') ? b.meet : null, limpio(b.horario, 200)];
-  if (b.id) { const a = aulaDe(u, b.id); if (!a) throw 403; run('update aulas set nombre=?, nivel=?, grado=?, seccion=?, escala=?, meet=?, horario=? where id=?', ...datos, a.id); return { id: a.id }; }
+  if (b.id) { const a = aulaDe(u, b.id); if (!a) throw 403; run('update aulas set nombre=?, nivel=?, grado=?, seccion=?, escala=?, meet=?, horario=? where id=?', ...datos, a.id); if (u.rol === 'director' && b.docente_id !== undefined) { const nd = b.docente_id ? q1("select id from usuarios where id=? and colegio_id=? and rol='docente' and activo=1", +b.docente_id, u.colegio_id)?.id : u.id; if (nd) run('update aulas set docente_id=? where id=?', nd, a.id); } return { id: a.id }; }
   const n = q1('select count(*) n from aulas where colegio_id=?', u.colegio_id).n, max = m.prueba ? (u.rol === 'director' ? 10 : PLANES.docente.aulas) : (PLANES[col.plan]?.aulas || 2); if (n >= max) throw `Tu plan permite ${max} aulas. Mejora tu plan para crear más.`;
   const docente = u.rol === 'director' && b.docente_id && q1("select id from usuarios where id=? and colegio_id=? and rol='docente'", +b.docente_id, u.colegio_id) ? +b.docente_id : u.id;
   const id = run('insert into aulas(colegio_id, docente_id, nombre, nivel, grado, seccion, escala, meet, horario) values(?,?,?,?,?,?,?,?,?)', u.colegio_id, docente, ...datos).lastInsertRowid;
@@ -284,7 +291,7 @@ API['POST /api/pago'] = async ({ u, b }) => { // Yape, Plin o transferencia: el 
   if (b.recarga) { const monto = saldoM.montoRecarga(b.recarga), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape', op = String(b.operacion || '').replace(/[^\dA-Za-z-]/g, '').slice(0, 30); if (op.length < 4) throw 'Escribe el número de operación (está en la constancia)';
     if (q1("select 1 from pagos where metodo=? and operacion like ? and estado<>'rechazado'", metodo, op + ' ·%')) throw 'Ese número de operación ya fue registrado';
     run("insert into pagos(colegio_id, plan, monto, metodo, operacion, meses, comprobante) values(?, 'recarga', ?, ?, ?, 0, ?)", u.colegio_id, monto, metodo, op + ' · recarga', b.comprobante ? guardarImagen(b.comprobante) : null);
-    crecer.avisarDueno(`👛 Recarga por ${metodo}: S/ ${monto}`, `${u.email} · Operación ${op}. Revísala y apruébala en el panel.`, '/#/inicio').catch(() => {}); return { ok: 1, recarga: monto }; } const pr = pagosM.precio(b.plan, +b.meses || 1, b.cupon || ''), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape';
+    crecer.avisarDueno(`👛 Recarga por ${metodo}: S/ ${monto}`, `${u.email} · Operación ${op}. Revísala y apruébala en el panel.`, '/#/inicio').catch(() => {}); return { ok: 1, recarga: monto }; } const pr = pagosM.precio(b.plan, +b.meses || 1, b.cupon || '', u.colegio_id), metodo = ['yape', 'plin', 'transferencia'].includes(b.metodo) ? b.metodo : 'yape';
   const op = String(b.operacion || '').replace(/[^\dA-Za-z-]/g, '').slice(0, 30); if (op.length < 4) throw `Escribe el número de operación de tu ${metodo === 'plin' ? 'Plin' : metodo === 'yape' ? 'Yape' : 'transferencia'} (está en la constancia)`;
   if (q1("select 1 from pagos where metodo=? and operacion like ? and estado<>'rechazado'", metodo, op + ' ·%')) throw 'Ese número de operación ya fue registrado. Si es un error, escríbenos por WhatsApp.';
   if (q1("select count(*) n from pagos where colegio_id=? and estado='pendiente' and metodo in ('yape','plin','transferencia')", u.colegio_id).n >= 3) throw 'Ya tienes pagos esperando revisión. Te avisamos apenas los confirmemos.';
@@ -317,7 +324,7 @@ API['POST /api/dueno'] = async ({ u, b }) => {
   if (b.accion === 'rechazar') { const p = q1('select * from pagos where id=?', +b.id); if (!p) throw 404; run("update pagos set estado='rechazado', revisado=? where id=?", ahora(), p.id); if (p.provisional && p.estado === 'pendiente' && !q1("select 1 from pagos where colegio_id=? and estado='aprobado' and id>?", p.colegio_id, p.id)) run('update colegios set vence=? where id=?', p.vence_antes, p.colegio_id); return { ok: 1 }; } // se quita el acceso provisional
   if (b.accion === 'extender') { const c = q1('select * from colegios where id=?', +b.id); const base = Math.max(Date.now(), c.vence ? new Date(c.vence).getTime() : 0); run('update colegios set vence=?, plan=? where id=?', new Date(base + (+b.dias || 30) * DIA).toISOString(), PLANES[b.plan] ? b.plan : c.plan, c.id); return { ok: 1 }; }
   if (b.accion === 'soporte') { setS('soporteWa', limpio(b.whatsapp, 20).replace(/[^\d+]/g, '')); return { ok: 1 }; }
-  if (b.accion === 'planes') { const P = {}; for (const k of ['docente', 'colegio']) P[k] = { ...PLANES[k], precio: Math.max(0, +b[k] || PLANES[k].precio) }; Object.assign(PLANES, P); setS('planes', PLANES); return { ok: 1 }; }
+  if (b.accion === 'planes') { const P = {}; for (const k of ['docente', 'colegio']) P[k] = { ...PLANES[k], precio: Math.max(0, +b[k] || PLANES[k].precio) }; P.colegio.docentes = Math.max(1, +b.incluidos || PLANES.colegio.docentes); P.colegio.extra = Math.max(0, +b.extra || PLANES.colegio.extra); Object.assign(PLANES, P); setS('planes', PLANES); return { ok: 1 }; }
   throw 404;
 };
 

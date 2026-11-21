@@ -1,3 +1,9 @@
+9.40.0
+- 👩‍🏫 ProfeTok · Plan Colegio (S/ 149) incluye hasta 14 docentes. Desde el docente 15, cada uno suma S/ 10 al mes (antes de agregarlo, ProfeTok le muestra al director cuánto quedará su plan y le pide confirmar).
+- El precio se calcula solo en todos los pagos (Yape, Plin, tarjeta, QR, saldo y renovación automática) y se ve el detalle: «S/ 149 + 1 docente adicional × S/ 10 = S/ 159 al mes».
+- 🗑️ El director puede quitar docentes (sus aulas y notas se quedan en el colegio) y pasar un aula a otro docente desde ✏️. Si vuelve a agregar el correo, el docente recupera su acceso.
+- En la prueba gratis, máximo 14 docentes. Tú puedes cambiar los docentes incluidos y el precio por adicional en tu panel (💲 Precios).
+
 9.39.0
 - 📋 ProfeTok · «Mi equipo» para el director: cómo va cada docente de un vistazo con semáforo 🟢🟡🔴 (asistencia de hoy, días sin asistencia o sin notas, mensajes de familias sin responder, familias conectadas y último ingreso).
 - 🏫 Comparar aulas: asistencia de 30 días, promedio, alumnos en riesgo y familias conectadas de cada aula.
