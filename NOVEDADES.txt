@@ -1,3 +1,7 @@
+9.41.2
+- 🎵 Video de YUPI CARDS en la portada ahora con la canción oficial (52 s), escenas sincronizadas con la voz.
+- 🎤 Esa voz queda como la oficial para futuras promociones de juegos.
+
 9.41.1
 - 🎬 Portada de Yupitok: nuevo video «Mira cómo se juega YUPI CARDS» (39 s) con botón «Jugar gratis».
 - 📱 Los videos de la página ahora se reproducen bien en iPhone (el servidor entrega el video por partes).

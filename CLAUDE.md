@@ -26,6 +26,10 @@ Cada actualización sube `VERSION` y agrega su nota arriba en `NOVEDADES.txt` (e
 - Bajo demanda: `pipx install agent-reach` (o `pip install agent-reach`), `agent-reach doctor`, `agent-reach read <enlace>`.
 - En la nube muchos sitios están bloqueados por la red; sirve más en el VPS. Nunca pedir contraseñas ni cookies al usuario por el chat.
 
+## 🎤 Voz para promociones de juegos (Yupitok)
+- Para TODO video promocional de juegos usar la voz del usuario de `voces/promo_juegos_yupicards.mp3` (canción de Suno con música; `voces/promo_juegos_solo_voz.mp3` = solo voz separada). No usar voces de edge-tts en promos de juegos.
+- Flujo: escribir el guion → el usuario genera la voz/canción en Suno con esa misma voz → yo corto las escenas en las pausas de la voz (silencedetect sobre la voz separada) y uso su audio completo como banda sonora.
+
 ## Reglas del usuario (no romper)
 - Nunca pedir claves o tokens por el chat: van en sus paneles o en el formulario seguro.
 - No poner su número de WhatsApp en el código. No enviar apellidos ni datos sensibles de alumnos a IAs (Ley 29733).
