@@ -1,3 +1,6 @@
+9.40.6
+- 👨‍👩‍👧 ProfeTok · Página principal: nuevo video «Lo que ven los papás» (1:17, en tiza): lo que la familia ve de verdad, avisos, examen corregido, justificar faltas, chat con la profe, y además tareas, alerta temprana, libretas e IA. Ya son 5 videos.
+
 9.40.5
 - 🧑‍🏫 ProfeTok · Página principal: nuevo video «La pizarra de la profe» (1:11, hecho con tiza animada). Ahora son 4 videos en una fila en computadora; en el celular se deslizan de uno en uno.
 
