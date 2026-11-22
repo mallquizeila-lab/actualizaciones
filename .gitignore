@@ -1,1 +1,4 @@
 descargas/
+# Graphify: solo se guarda el informe; el resto se regenera con «graphify update .»
+graphify-out/*
+!graphify-out/GRAPH_REPORT.md
