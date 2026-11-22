@@ -380,7 +380,7 @@
 
     function pintarFondo(F) {
       F.setTransform(dpr, 0, 0, dpr, 0, 0); const r = rng(n * 31 + 7);
-      const PAL = { dia: { c1: '#38bdf8', c2: '#bae6fd', g1: '#5cb845', g2: '#6cc653', t1: '#8a6a45', t2: '#977552' }, noche: { c1: '#020617', c2: '#1e1b4b', g1: '#2c6a3a', g2: '#347a44', t1: '#4a3a2a', t2: '#544231' }, andes: { c1: '#f97316', c2: '#fde68a', g1: '#7cb342', g2: '#8bc34a', t1: '#8d6e4a', t2: '#9b7b55' } }[Z];
+      const PAL = { dia: { c1: '#38bdf8', c2: '#bae6fd', g1: '#5cb845', g2: '#6cc653', t1: '#8a6a45', t2: '#977552' }, noche: { c1: '#020617', c2: '#1e1b4b', g1: '#2c6a3a', g2: '#347a44', t1: '#4a3a2a', t2: '#544231' }, andes: { c1: '#f97316', c2: '#fde68a', g1: '#7cb342', g2: '#8bc34a', t1: '#8d6e4a', t2: '#9b7b55' }, selva: { c1: '#065f46', c2: '#6ee7b7', g1: '#2f8a3a', g2: '#3a9a45', t1: '#6b4f2f', t2: '#7a5c38' }, costa: { c1: '#0ea5e9', c2: '#fde68a', g1: '#a3b84a', g2: '#b4c75a', t1: '#c2955a', t2: '#cfa468' }, puna: { c1: '#1e293b', c2: '#64748b', g1: '#5f8a4a', g2: '#6b9a55', t1: '#6b5a48', t2: '#7a6853' } }[Z];
       const cielo = F.createLinearGradient(0, 0, 0, TOP); cielo.addColorStop(0, PAL.c1); cielo.addColorStop(1, PAL.c2); F.fillStyle = cielo; F.fillRect(0, 0, W, TOP + 2);
       if (Z === 'dia') {
         F.fillStyle = '#fff7b0'; F.shadowColor = '#fff3a0'; F.shadowBlur = 20; F.beginPath(); F.arc(W * .85, TOP * .38, S * .2, 0, 7); F.fill(); F.shadowBlur = 0;

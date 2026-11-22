@@ -1,3 +1,6 @@
+9.41.3
+- 🌱 Huerto Defensor: arreglado el congelamiento desde el nivel 31 (Selva, Costa y Tormenta en la puna no tenían colores de fondo). Ya se pueden jugar los 60 niveles.
+
 9.41.2
 - 🎵 Video de YUPI CARDS en la portada ahora con la canción oficial (52 s), escenas sincronizadas con la voz.
 - 🎤 Esa voz queda como la oficial para futuras promociones de juegos.
