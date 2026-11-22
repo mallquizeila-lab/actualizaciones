@@ -276,7 +276,7 @@ async function avisoHoraFeliz() {
 setInterval(() => reloj().then(() => juegoDelDia()).then(() => avisoReto()).then(() => avisoCampeones()).then(() => avisoHoraFeliz()).then(() => avisoRacha()).catch(console.error), 30000).unref();
 
 // ---------------- Servidor ----------------
-const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
+const MIME = { '.webp': 'image/webp', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon', '.mp4': 'video/mp4' };
 const PUB = path.join(__dirname, 'public');
 function send(res, code, body, type = 'application/json; charset=utf-8', extra = {}) {
   res.writeHead(code, { 'content-type': type, 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', ...extra });
@@ -299,6 +299,11 @@ function archivo(req, res, f, type, extra = {}) {
   if (req.headers['if-none-match'] === c.etag) { res.writeHead(304, h); return res.end(); }
   const ae = String(req.headers['accept-encoding'] || ''); let body = c.raw;
   if (c.br && /\bbr\b/.test(ae)) { body = c.br; h['content-encoding'] = 'br'; } else if (c.gz && /gzip/.test(ae)) { body = c.gz; h['content-encoding'] = 'gzip'; }
+  // rangos de bytes: Safari/iPhone no reproduce un video sin ellos
+  const rg = body === c.raw && /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || '')); h['accept-ranges'] = 'bytes';
+  if (rg && (rg[1] || rg[2])) { const n = body.length, a = rg[1] ? +rg[1] : Math.max(0, n - +rg[2]), b = rg[1] && rg[2] ? Math.min(+rg[2], n - 1) : n - 1;
+    if (a > b) { res.writeHead(416, { 'content-range': `bytes */${n}` }); return res.end(); }
+    body = body.subarray(a, b + 1); h['content-range'] = `bytes ${a}-${b}/${n}`; h['content-length'] = body.length; res.writeHead(206, h); return res.end(req.method === 'HEAD' ? undefined : body); }
   h['content-length'] = body.length; res.writeHead(200, h); res.end(req.method === 'HEAD' ? undefined : body);
 }
 // HTML que cambia por pedido (la portada con sus etiquetas para redes): se comprime al vuelo.

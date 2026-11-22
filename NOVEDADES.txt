@@ -1,3 +1,7 @@
+9.41.1
+- 🎬 Portada de Yupitok: nuevo video «Mira cómo se juega YUPI CARDS» (39 s) con botón «Jugar gratis».
+- 📱 Los videos de la página ahora se reproducen bien en iPhone (el servidor entrega el video por partes).
+
 9.41.0
 - 🃏 YUPI CARDS · Cada partida dura máximo 5 minutos (⏳ arriba). Al terminar el tiempo gana quien tiene menos cartas: se acabaron las partidas eternas.
 - 🪭 Nueva carta ABANICO (una de cada color): al jugarla botas de golpe TODAS tus cartas de ese color, con animación de abanico y sonido.
