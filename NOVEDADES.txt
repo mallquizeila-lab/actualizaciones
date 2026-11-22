@@ -1,3 +1,6 @@
+9.40.4
+- 🎬 ProfeTok · Página principal: se suma el video «Para las familias» (2:31). Ahora son 3 videos lado a lado: la canción, «Así se ve por dentro» y lo que ven los papás en su celular.
+
 9.40.3
 - 🎬 ProfeTok · Página principal con 2 videos lado a lado: «ProfeTok en pocas palabras» (la canción) y «Así se ve por dentro» (el video anterior vuelve). En el celular se desliza de uno a otro, y al reproducir uno el otro se pausa solo.
 
