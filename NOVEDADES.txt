@@ -1,3 +1,6 @@
+9.40.5
+- 🧑‍🏫 ProfeTok · Página principal: nuevo video «La pizarra de la profe» (1:11, hecho con tiza animada). Ahora son 4 videos en una fila en computadora; en el celular se deslizan de uno en uno.
+
 9.40.4
 - 🎬 ProfeTok · Página principal: se suma el video «Para las familias» (2:31). Ahora son 3 videos lado a lado: la canción, «Así se ve por dentro» y lo que ven los papás en su celular.
 
