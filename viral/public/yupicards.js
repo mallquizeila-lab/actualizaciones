@@ -39,8 +39,9 @@
     if (FX.voz?.(limpio, { forzar: true })) return;
     try { if (!window.speechSynthesis) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(limpio), V = speechSynthesis.getVoices().filter(x => /^es/i.test(x.lang)); u.voice = V.find(x => /419|MX|US|PE|CO|AR/i.test(x.lang)) || V[0] || null; if (!u.voice) return; /* sin voz en español: mejor callar que mezclar idiomas */ u.lang = u.voice.lang; u.pitch = o.tono ?? 1.25; u.rate = o.vel ?? 1.12; u.volume = o.vol ?? 1; speechSynthesis.speak(u); } catch (e) {}
   }
-  const reaccionSonido = txt => { if ([...txt].length <= 2) sonar(txt); else if (/YUPI/i.test(txt)) { sonar('yupi'); hablar('¡Yupi!', { tono: 1.4, vol: 1 }); } else { FX.son?.('pop'); hablar(txt); } };
-  const hablarJugada = x => { if (!x) return; if (x.c === 'w' && x.elegido && COL[x.elegido]) hablar('¡Cambio a ' + COL[x.elegido].n.toLowerCase() + '!'); else if (x.v === 'reversa') hablar('¡Cambio de sentido!'); else if (x.v === 'saltar') hablar('¡Turno saltado!'); };
+  const VOZ_EMO = { '😂': '¡Ja, ja, ja!', '😎': '¡Facilito!', '😡': '¡Grrr!', '😭': '¡Buaaa!', '🥳': '¡Fiesta!', '🤔': 'Mmm…', '❤️': '¡Te quiero!', '🔥': '¡Fuego!' };
+  const reaccionSonido = txt => { if ([...txt].length <= 2) { sonar(txt); FX.son?.('pop'); if (VOZ_EMO[txt]) setTimeout(() => hablar(VOZ_EMO[txt], { tono: 1.35, vol: 1 }), 250); } else if (/YUPI/i.test(txt)) { sonar('yupi'); hablar('¡Yupi!', { tono: 1.4, vol: 1 }); } else { FX.son?.('pop'); hablar(txt); } };
+  const hablarJugada = x => { if (!x) return; if (x.v === 'abanico') return hablar('¡Abanico! ¡Se van todas las cartas de ese color!'); if (x.c === 'w' && x.elegido && COL[x.elegido]) hablar('¡Cambio a ' + COL[x.elegido].n.toLowerCase() + '!'); else if (x.v === 'reversa') hablar('¡Cambio de sentido!'); else if (x.v === 'saltar') hablar('¡Turno saltado!'); };
   // 🧭 Flecha de turno: gira hacia el jugador al que le toca
   let angFlecha = 0;
   function apuntar(el) { const f = document.getElementById('ycFlecha'), c = document.querySelector('#yc .yc-mesa'); if (!f || !el || !c) return; const a = c.getBoundingClientRect(), b = el.getBoundingClientRect(); let ang = Math.atan2((b.left + b.width / 2) - (a.left + a.width / 2), -((b.top + b.height / 2) - (a.top + a.height / 2))) * 180 / Math.PI; let d = ((ang - angFlecha) % 360 + 540) % 360 - 180; angFlecha += d; f.style.transform = `translate(-50%,-50%) rotate(${angFlecha}deg)`; }
@@ -56,7 +57,7 @@
   function medirMano(n) { const bajo = innerHeight < 520 && innerWidth > innerHeight, ancho = Math.min(document.getElementById('yc')?.clientWidth || innerWidth, innerWidth) - 24 - (bajo ? 90 : 0), alto = innerHeight, wC = Math.round(Math.max(52, Math.min(ancho < 600 ? 104 : 140, alto * (bajo ? .17 : .17)))); const paso = n > 1 ? Math.max(14, Math.min(wC * .66, (ancho - wC) / (n - 1))) : wC; return { wC, sol: Math.round(wC - paso) }; }
   function sonar(k) { // sonidos de cada personaje (sintetizados, sin archivos)
     try { if (callado()) return; ACs = ACs || new (window.AudioContext || window.webkitAudioContext)(); if (ACs.state === 'suspended') ACs.resume(); const t0 = ACs.currentTime;
-      const nota = (f, t, d, tipo = 'sine', vol = .09, f2) => { const o = ACs.createOscillator(), g = ACs.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0 + t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + t + d); g.gain.setValueAtTime(0.0001, t0 + t); g.gain.linearRampToValueAtTime(vol, t0 + t + .02); g.gain.exponentialRampToValueAtTime(.001, t0 + t + d); o.connect(g); g.connect(ACs.destination); o.start(t0 + t); o.stop(t0 + t + d + .05); };
+      const GZ = [...k].length <= 2 ? 1.9 : 1; const nota = (f, t, d, tipo = 'sine', vol = .09, f2) => { vol = Math.min(.3, vol * GZ); const o = ACs.createOscillator(), g = ACs.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0 + t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + t + d); g.gain.setValueAtTime(0.0001, t0 + t); g.gain.linearRampToValueAtTime(vol, t0 + t + .02); g.gain.exponentialRampToValueAtTime(.001, t0 + t + d); o.connect(g); g.connect(ACs.destination); o.start(t0 + t); o.stop(t0 + t + d + .05); };
       if (k === 'bruja') { [784, 988, 1175, 1568, 1976, 2349].forEach((f, i) => nota(f, i * .06, .5, 'sine', .07)); nota(220, 0, .9, 'triangle', .05, 110); }
       if (k === 'rey') { [[523, 0], [523, .14], [523, .28], [659, .42], [784, .62]].forEach(([f, t]) => { nota(f, t, .3, 'square', .06); nota(f / 2, t, .3, 'sawtooth', .03); }); nota(1047, .62, .8, 'triangle', .07); }
       if (k === 'idol') { [[659, 0], [784, .12], [880, .24], [988, .36], [880, .48], [1175, .6]].forEach(([f, t]) => nota(f, t, .22, 'triangle', .08)); [[330, 0], [392, .24], [440, .48]].forEach(([f, t]) => nota(f, t, .3, 'sine', .05)); }
@@ -69,6 +70,9 @@
       if (k === '❤️') { nota(523, 0, .2, 'sine', .08); nota(784, .18, .4, 'sine', .08); }
       if (k === '🔥') { nota(180, 0, .45, 'sawtooth', .05, 1300); nota(900, .1, .35, 'triangle', .04, 300); }
       if (k === 'yupi') { [[784, 0], [988, .08], [1175, .16], [1568, .26]].forEach(([f, t]) => { nota(f, t, .22, 'square', .09); nota(f / 2, t, .22, 'triangle', .06); }); }
+      if (k === 'yupiGrito') { const b = ACs.createBuffer(1, ACs.sampleRate * .9, ACs.sampleRate), dd = b.getChannelData(0); for (let i = 0; i < dd.length; i++) dd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / dd.length, 2); const n = ACs.createBufferSource(), fl = ACs.createBiquadFilter(), g = ACs.createGain(); fl.type = 'bandpass'; fl.frequency.value = 1400; g.gain.value = .22; n.buffer = b; n.connect(fl).connect(g).connect(ACs.destination); n.start(t0);
+        [[523, 0], [659, .07], [784, .14], [1047, .22], [1319, .32], [1568, .42]].forEach(([f, t]) => { nota(f, t, .3, 'square', .1); nota(f * 1.5, t, .3, 'triangle', .06); }); nota(196, 0, .6, 'sawtooth', .08, 392); nota(1568, .5, .7, 'triangle', .1, 2093); }
+      if (k === 'abanico') { [1568, 1319, 1175, 1047, 880, 784, 659].forEach((f, i) => nota(f, i * .05, .18, 'triangle', .08)); nota(330, .05, .4, 'sawtooth', .05, 990); }
       if (k === 'turno') { nota(880, 0, .12, 'triangle', .06); nota(1320, .1, .18, 'triangle', .06); }
       if (k === 'coquito') { nota(700, 0, .12, 'sawtooth', .07, 380); nota(760, .18, .12, 'sawtooth', .07, 400); [523, 659, 784].forEach((f, i) => nota(f, .4 + i * .08, .15, 'square', .05)); }
     } catch (e) {}
@@ -86,7 +90,7 @@
   let uidC = 0;
   function mazo(heroes, masN) {
     const M = [];
-    for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); if (masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
+    for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); M.push({ c, v: 'abanico' }); if (masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
     for (let i = 0; i < 4; i++) M.push({ c: 'w', v: 'comodin' }, { c: 'w', v: 'mas4' });
     for (let r = 0; r < (+heroes || 0); r++) for (const v of Object.keys(HEROES)) M.push({ c: 'w', v });
     return mezclar(M.map(x => ({ ...x, id: ++uidC })));
@@ -96,6 +100,7 @@
 
   // ---------- Diseño de cartas (SVG propio) ----------
   const ICO = {
+    abanico: '<g fill="#fff" stroke="#0006" stroke-width="1.5"><rect x="-11" y="-20" width="22" height="32" rx="4" transform="rotate(-28 0 14)"/><rect x="-11" y="-20" width="22" height="32" rx="4" transform="rotate(0 0 14)"/><rect x="-11" y="-20" width="22" height="32" rx="4" transform="rotate(28 0 14)"/></g><circle cy="14" r="4" fill="#0006"/>',
     saltar: '<circle cx="0" cy="0" r="22" fill="none" stroke="#fff" stroke-width="7"/><line x1="-15" y1="15" x2="15" y2="-15" stroke="#fff" stroke-width="7" stroke-linecap="round"/>',
     reversa: '<path d="M-18 -4 A18 18 0 0 1 14 -12" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M8 -22 L18 -11 L4 -6 Z" fill="#fff"/><path d="M18 4 A18 18 0 0 1 -14 12" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M-8 22 L-18 11 L-4 6 Z" fill="#fff"/>',
   };
@@ -121,10 +126,10 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 <rect x="6" y="6" width="88" height="133" rx="10" fill="none" stroke="#fff" stroke-opacity=".5"/></svg>`; }
     const h = Math.round(w * 1.45), id = 'g' + x.id + 'w' + w, comodin = x.c === 'w', C = COL[x.c] || { a: '#334155', b: '#0f172a' };
     const txt = /^\d$/.test(x.v) ? x.v : suma(x) ? '+' + suma(x) : '';
-    const centro = x.v === 'saltar' || x.v === 'reversa' ? `<g transform="translate(50 72) scale(1.15)">${ICO[x.v]}</g>`
+    const centro = x.v === 'saltar' || x.v === 'reversa' || x.v === 'abanico' ? `<g transform="translate(50 72) scale(1.15)">${ICO[x.v]}</g>`
       : comodin ? `<g transform="translate(50 72)"><circle r="31" fill="#0b1020"/><g transform="rotate(${x.v === 'mas4' ? 45 : 0})">${ruedaColores(27)}</g>${estrella(13, '#fff')}${x.v === 'mas4' ? '<text x="0" y="52" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="Figtree,Arial">+4</text>' : ''}</g>`
       : `<text x="50" y="${txt.length > 1 ? 86 : 90}" text-anchor="middle" font-size="${txt.length > 1 ? 42 : 58}" font-weight="900" font-style="italic" fill="#fff" font-family="Baloo 2,Figtree,Arial" stroke="${C.b}" stroke-width="3" paint-order="stroke">${txt}</text>`;
-    const esq = comodin ? (x.v === 'mas4' ? '+4' : '★') : x.v === 'saltar' ? '⦸' : x.v === 'reversa' ? '⇄' : txt;
+    const esq = comodin ? (x.v === 'mas4' ? '+4' : '★') : x.v === 'saltar' ? '⦸' : x.v === 'reversa' ? '⇄' : x.v === 'abanico' ? '⋔' : txt;
     return `<svg viewBox="0 0 100 145" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" aria-label="${comodin ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : COL[x.c].n + ' ' + (txt || x.v)}"><defs>
 <linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${comodin ? '<stop offset="0" stop-color="#312e81"/><stop offset=".55" stop-color="#1e1b4b"/><stop offset="1" stop-color="#05060f"/>' : `<stop offset="0" stop-color="${C.a}"/><stop offset=".5" stop-color="${C.m}"/><stop offset="1" stop-color="${C.b}"/>`}</linearGradient>
 <linearGradient id="${id}o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7cc"/><stop offset=".5" stop-color="#facc15"/><stop offset="1" stop-color="#b45309"/></linearGradient>
@@ -276,7 +281,14 @@ ${[[16, 18], [84, 18], [14, 96], [86, 96]].map(([a, b]) => `<g transform="transl
 @media (orientation:landscape) and (max-height:520px){#yc .capa{padding:4px 8px}.yc-op .yc-av{width:44px!important;height:44px!important}.yc-op .yc-mini,.yc-op small{display:none}.yc-op .yc-tag{font-size:.7rem!important;padding:1px 7px}.yc-pila,.yc-pila .yc-rev{width:62px!important;height:90px!important}.yc-pila .yc-rev span{font-size:.5rem!important}.yc-desc{width:70px!important;height:102px!important}#yc.full .yc-btn{padding:4px 10px!important;font-size:.85rem}.yc-pill{font-size:.85rem;padding:2px 9px}.yc-mesa{height:100%!important}#ycYupi{font-size:.95rem!important}.yc-yoav .yc-tag{display:none}.yc-centro{padding:2px 0!important}.yc-mano{padding-top:12px!important;width:auto!important;flex:1;min-width:0}.yc-yo{flex-direction:row!important;align-items:flex-end;justify-content:center;gap:6px!important;padding-right:78px}.yc-barra{position:absolute;right:6px;bottom:2px;z-index:5;flex-direction:column;flex-wrap:nowrap!important;gap:4px!important}.yc-yoav .yc-marco{width:40px!important;height:40px!important}#ycYupi{width:52px!important;height:52px!important}.yc-barra #ycReac{padding:4px 10px}#yc.full .capa>div:first-child{min-height:74px!important}}
 #yc.movil{position:fixed;inset:0;z-index:60;border-radius:0;min-height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}#yc.movil .capa{min-height:100dvh;padding:max(8px,env(safe-area-inset-top)) 8px 16px;box-sizing:border-box}#yc.movil .fondo{position:fixed}#yc.movil .capa{grid-template-columns:minmax(0,1fr);width:100%}#yc.movil .yc-lobby,#yc.movil .yc-panel{min-width:0;max-width:100%;box-sizing:border-box}@media(max-width:480px){.yc-hud{flex-wrap:wrap;row-gap:6px}.yc-hud .nv{flex:1 1 140px}.yc-chip{font-size:.85rem;padding:4px 9px}}
 .yc-bur.grito{background:linear-gradient(180deg,#ff5a6e,#e11d48);color:#fff;font:900 1.6rem 'Baloo 2',Figtree;padding:6px 16px;border:3px solid #fde047;text-shadow:0 2px 0 #7f1d1d;animation:ycGrito 2.6s ease forwards}.yc-bur.grito::after{border-top-color:#e11d48}@keyframes ycGrito{0%{transform:translate(-50%,-100%) scale(.3);opacity:0}12%{transform:translate(-50%,-100%) scale(1.25);opacity:1}25%{transform:translate(-50%,-100%) scale(1)}85%{opacity:1}100%{opacity:0}}
-.yc-mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.yc-obj{background:#ffffff10;border-radius:16px;padding:12px;text-align:center;display:grid;gap:4px}.yc-obj>span{font-size:2.6rem}.yc-obj small{opacity:.8}`;
+.yc-mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.yc-obj{background:#ffffff10;border-radius:16px;padding:12px;text-align:center;display:grid;gap:4px}.yc-obj>span{font-size:2.6rem}.yc-obj small{opacity:.8}
+.yc-tiempo{font-weight:900;background:#0b1b4dcc;border:2px solid #fde68a;border-radius:999px;padding:3px 10px;margin-right:6px;white-space:nowrap}.yc-tiempo.poco{background:#b91c1c;border-color:#fecaca;animation:ycLatido 1s infinite}@keyframes ycLatido{50%{transform:scale(1.12)}}.yc-tfin{margin:2px 0;font-weight:900;color:#fde68a}
+.yc-modal{overflow-y:auto;align-items:center}.yc-caja{max-height:calc(100% - 8px);overflow-y:auto;overscroll-behavior:contain}
+@media (max-height:560px){.yc-modal{padding:6px}.yc-caja{max-width:min(720px,96vw);padding:10px 14px}.yc-caja>div:first-child{font-size:2rem!important}.yc-caja h2{font-size:1.2rem;margin:2px 0!important}.yc-caja p{margin:3px 0;font-size:.85rem}.yc-misfin{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;font-size:.75rem;padding:6px 8px}.yc-misfin>b{grid-column:1/-1}.yc-estr{font-size:1.6rem!important}}
+.yc-abanico{position:absolute;left:50%;top:46%;z-index:18;pointer-events:none;width:0;height:0}.yc-abanico>div{position:absolute;left:-35px;top:-50px;transform-origin:50% 140%;opacity:0;animation:ycFan 1.5s var(--d) cubic-bezier(.2,.9,.3,1.2) forwards;filter:drop-shadow(0 6px 10px #0008)}@keyframes ycFan{0%{opacity:0;transform:translateY(160px) rotate(0) scale(.6)}25%{opacity:1;transform:translateY(0) rotate(var(--r)) scale(1.15)}75%{opacity:1;transform:translateY(0) rotate(var(--r)) scale(1.1)}100%{opacity:0;transform:translateY(10px) rotate(calc(var(--r)*.2)) scale(.7)}}.yc-abanico>b{position:absolute;left:0;top:70px;transform:translateX(-50%);white-space:nowrap;font:900 1.4rem 'Baloo 2',Figtree,Arial;color:#fde047;text-shadow:0 3px 0 #7c2d12,0 0 18px #000;animation:ycPop .4s}
+.yc-grito{position:absolute;inset:0;z-index:19;pointer-events:none;display:grid;place-items:center;overflow:hidden}.yc-grito span{font:900 clamp(4rem,18vw,9rem)/1 'Baloo 2',Figtree,Arial;color:#fde047;-webkit-text-stroke:6px #b45309;paint-order:stroke;text-shadow:0 8px 0 #7c2d12,0 0 40px #facc15;animation:ycGrito 1.4s cubic-bezier(.2,1.4,.4,1) forwards}@keyframes ycGrito{0%{transform:scale(.2) rotate(-12deg);opacity:0}18%{transform:scale(1.25) rotate(4deg);opacity:1}30%{transform:scale(.95) rotate(-2deg)}45%{transform:scale(1.08)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.4)}}.yc-grito i{position:absolute;left:50%;top:50%;width:14px;height:14px;border-radius:3px;background:hsl(calc(var(--n,1)*47deg) 95% 60%);animation:ycChispa 1.1s ease-out forwards}.yc-grito i:nth-of-type(1){--n:0;--x:320px;--y:0px}.yc-grito i:nth-of-type(2){--n:1;--x:288px;--y:112px}.yc-grito i:nth-of-type(3){--n:2;--x:199px;--y:203px}.yc-grito i:nth-of-type(4){--n:3;--x:71px;--y:253px}.yc-grito i:nth-of-type(5){--n:4;--x:-71px;--y:253px}.yc-grito i:nth-of-type(6){--n:5;--x:-199px;--y:203px}.yc-grito i:nth-of-type(7){--n:6;--x:-288px;--y:112px}.yc-grito i:nth-of-type(8){--n:7;--x:-319px;--y:0px}.yc-grito i:nth-of-type(9){--n:8;--x:-288px;--y:-112px}.yc-grito i:nth-of-type(10){--n:9;--x:-199px;--y:-203px}.yc-grito i:nth-of-type(11){--n:10;--x:-71px;--y:-253px}.yc-grito i:nth-of-type(12){--n:11;--x:71px;--y:-253px}.yc-grito i:nth-of-type(13){--n:12;--x:199px;--y:-203px}.yc-grito i:nth-of-type(14){--n:13;--x:288px;--y:-112px}@keyframes ycChispa{0%{transform:translate(-50%,-50%) scale(.4);opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(540deg) scale(1);opacity:0}}
+#yc.temblor{animation:ycTiembla .55s}@keyframes ycTiembla{0%,100%{transform:none}15%{transform:translate(-8px,4px) rotate(-.6deg)}30%{transform:translate(7px,-5px) rotate(.6deg)}45%{transform:translate(-6px,-3px)}60%{transform:translate(5px,4px)}80%{transform:translate(-2px,1px)}}
+`;
 
   // Pantalla con fondo de mesa y una capa central
   const esMovil = () => matchMedia('(pointer:coarse)').matches && Math.min(innerWidth, innerHeight) < 820;
@@ -607,8 +619,8 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     const LOG = []; const total = () => J.reduce((a, j) => a + j.mano.length, 0) + pila.length + desc.length;
     const robar = (j, n) => { LOG.push(['robar', J.indexOf(j), n, total()]); for (let i = 0; i < n; i++) { if (!pila.length) { const top = desc.pop(); pila = mezclar(desc.map(x => x.c === 'w' ? { ...x, elegido: undefined } : x)); desc = [top]; } if (pila.length) j.mano.push(pila.pop()); } yupi.delete(J.indexOf(j)); };
     const puede = x => { const T = tope(); if (acum) return opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === color || x.v === T.v; };
-    const nombreC = x => esHeroe(x) ? HEROES[x.v].n : x.c === 'w' ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : `${COL[x.c].n} ${/^\d$/.test(x.v) ? x.v : ({ saltar: 'Saltar', reversa: 'Reversa' }[x.v] || '+' + suma(x))}`;
-    const EXPLICA = { saltar: '⦸ <b>Saltar</b>: el siguiente jugador pierde su turno.', reversa: '⇄ <b>Reversa</b>: el juego cambia de sentido.', mas3: '<b>+3</b>: el siguiente roba 3 cartas y pierde el turno.', mas4c: '<b>+4</b> de color: el siguiente roba 4 cartas y pierde el turno.', mas5: '<b>+5</b>: el siguiente roba 5 cartas y pierde el turno.', mas6: '<b>+6</b>: ¡el siguiente roba 6 cartas y pierde el turno!', mas2: '<b>+2</b>: el siguiente roba 2 cartas y pierde el turno.', comodin: '★ <b>Comodín</b>: quien lo juega elige el nuevo color.', mas4: '<b>Comodín +4</b>: elige color y el siguiente roba 4 cartas.', ...Object.fromEntries(Object.entries(HEROES).map(([k, H]) => [k, `${H.e} <b>${H.n}</b>: ${H.h}.`])) };
+    const nombreC = x => esHeroe(x) ? HEROES[x.v].n : x.c === 'w' ? (x.v === 'mas4' ? 'Comodín +4' : 'Comodín') : `${COL[x.c].n} ${/^\d$/.test(x.v) ? x.v : ({ saltar: 'Saltar', reversa: 'Reversa', abanico: 'Abanico' }[x.v] || '+' + suma(x))}`;
+    const EXPLICA = { abanico: '🪭 <b>Abanico</b>: botas de golpe TODAS tus cartas de ese color.', saltar: '⦸ <b>Saltar</b>: el siguiente jugador pierde su turno.', reversa: '⇄ <b>Reversa</b>: el juego cambia de sentido.', mas3: '<b>+3</b>: el siguiente roba 3 cartas y pierde el turno.', mas4c: '<b>+4</b> de color: el siguiente roba 4 cartas y pierde el turno.', mas5: '<b>+5</b>: el siguiente roba 5 cartas y pierde el turno.', mas6: '<b>+6</b>: ¡el siguiente roba 6 cartas y pierde el turno!', mas2: '<b>+2</b>: el siguiente roba 2 cartas y pierde el turno.', comodin: '★ <b>Comodín</b>: quien lo juega elige el nuevo color.', mas4: '<b>Comodín +4</b>: elige color y el siguiente roba 4 cartas.', ...Object.fromEntries(Object.entries(HEROES).map(([k, H]) => [k, `${H.e} <b>${H.n}</b>: ${H.h}.`])) };
 
     // ---- Pintar mesa ----
     function pintar(msg) {
@@ -632,9 +644,44 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
         requestAnimationFrame(() => { d.style.transform = `translate(${b.left - a.left + (b.width - a.width) / 2}px,${b.top - a.top}px) rotate(${Math.random() * 30 - 15}deg)`; }); setTimeout(() => { d.remove(); cb && cb(); }, 470); } catch (e) { cb && cb(); }
     }
 
+    // ---- Robar de una en una: se ve y se oye llegar cada carta ----
+    const destinoDe = k => k === 0 ? $('#ycMano') : (document.querySelector(`#ycTop [data-op="${k}"]`) || $('#ycPila'));
+    function robarUno(j, n, luego) {
+      const k = J.indexOf(j); if (n <= 1) { robar(j, n); pintar(); return luego && luego(); }
+      ocupado = true; let i = 0;
+      const paso = () => { if (!vivo || fin_) { ocupado = false; return; } robar(j, 1); FX.son('pop'); FX.vibrar?.(k === 0 ? 25 : 0); volar($('#ycPila'), destinoDe(k), reverso(k === 0 ? 70 : 50));
+        pintar(`🃏 ${k === 0 ? 'Robas' : escH(j.n) + ' roba'} ${i + 1} de ${n}…`); if (++i < n) setTimeout(paso, 300); else setTimeout(() => { ocupado = false; luego && luego(); }, 420); };
+      paso();
+    }
+    function verRobar(k, n) { for (let i = 0; i < n; i++) setTimeout(() => { if (!vivo) return; FX.son('pop'); volar($('#ycPila'), destinoDe(k), reverso(k === 0 ? 70 : 50)); }, i * 300); }
+    // ---- Abanico: las cartas del color salen en abanico hacia la mesa ----
+    function abanicoFx(k, fan) {
+      const d = document.createElement('div'); d.className = 'yc-abanico'; const n = fan.length + 1;
+      d.innerHTML = [...fan].map((x, i) => `<div style="--r:${(i - (n - 1) / 2) * 14}deg;--d:${i * 70}ms">${svgCarta(x, 70)}</div>`).join('') + `<b>🪭 ¡Abanico! ${fan.length + 1} cartas</b>`;
+      $('#yc')?.append(d); setTimeout(() => d.remove(), 1700); sonar('abanico'); FX.vibrar?.(40);
+      if (J[k]) tip(`🪭 ${k === 0 ? '¡Botaste' : escH(J[k].n) + ' botó'} <b>${fan.length + 1}</b> cartas ${COL[fan[0].c]?.s || ''} de golpe!`, 1800);
+    }
+    // ---- ¡YUPI! con emoción: grito, estallido y temblor ----
+    function gritoYupi(k) {
+      sonar('yupiGrito'); hablar('¡¡Yupiii!!', { tono: 1.7, vel: 1.05, vol: 1 }); FX.vibrar?.([60, 40, 120]);
+      const d = document.createElement('div'); d.className = 'yc-grito'; d.innerHTML = '<span>¡YUPI!</span>' + '<i></i>'.repeat(14); $('#yc')?.append(d); setTimeout(() => d.remove(), 1500);
+      const y = $('#yc'); if (y) { y.classList.remove('temblor'); void y.offsetWidth; y.classList.add('temblor'); setTimeout(() => y.classList.remove('temblor'), 600); }
+    }
+    // ---- Reloj de la partida: al terminar el tiempo gana quien tiene menos cartas ----
+    const LIM = opc.entrena ? 0 : (opc.limite ?? (+new URLSearchParams(location.search).get('yclim') || 300)); let finAt = LIM ? Date.now() + LIM * 1000 : 0, relojP = null; // ?yclim=20: prueba rápida del reloj
+    function relojPartida() {
+      if (!LIM) return; clearInterval(relojP);
+      const dib = () => { const el = $('#ycTiempo'); const r = Math.max(0, Math.ceil((finAt - Date.now()) / 1000)); if (el) { el.textContent = `⏳ ${Math.floor(r / 60)}:${String(r % 60).padStart(2, '0')}`; el.classList.toggle('poco', r <= 30); }
+        if (r <= 10 && r > 0) FX.son('click'); if (r === 30) tip('⏳ ¡Quedan 30 segundos! Gana quien tenga menos cartas', 1800);
+        if (r <= 0 && !fin_) { clearInterval(relojP); const pts = j => j.mano.reduce((a, c) => a + valor(c), 0); const k = J.map((j, i) => i).sort((a, b) => J[a].mano.length - J[b].mano.length || pts(J[a]) - pts(J[b]))[0]; ocupado = false; ganar(k, true); } };
+      dib(); relojP = setInterval(dib, 1000);
+    }
+
     // ---- Jugar una carta ----
     function jugar(k, x, colorElegido) {
-      ocupado = false; const j = J[k]; LOG.push(['jugar', k, x.c + x.v, x.id, total()]); if (!j.mano.some(c => c.id === x.id)) { LOG.push(['DUP', k, x.id]); return; } /* ya se jugó (doble toque) */ j.mano = j.mano.filter(c => c.id !== x.id); if (LOG.length > 200) LOG.splice(0, 100); if (x.c === 'w') x.elegido = colorElegido;
+      ocupado = false; if (fin_) return; const j = J[k]; LOG.push(['jugar', k, x.c + x.v, x.id, total()]); if (!j.mano.some(c => c.id === x.id)) { LOG.push(['DUP', k, x.id]); return; } /* ya se jugó (doble toque) */ j.mano = j.mano.filter(c => c.id !== x.id); if (LOG.length > 200) LOG.splice(0, 100); if (x.c === 'w') x.elegido = colorElegido;
+      const fan = x.v === 'abanico' ? j.mano.filter(c => c.c === x.c) : [];
+      if (fan.length) { j.mano = j.mano.filter(c => c.c !== x.c); desc.push(...fan); abanicoFx(k, fan); }
       desc.push(x); color = x.c === 'w' ? colorElegido : x.c; robado = false; hablarJugada(x);
       FX.son(esp(x) ? 'combo' : 'swish'); FX.vibrar(15); if (k === 0 && esp(x)) { avanzar('esp'); SS.esp++; if (esHeroe(x)) SS.heroes++; }
       if (k === 0 && j.mano.length === 1 && !yupi.has(0) && !opc.entrena && !SS.mega && usarMegafono()) { SS.mega = true; yupi.add(0); FX.son('moneda'); tip('📣 ¡El <b>Megáfono Yupi</b> gritó ¡YUPI! por ti!', 1800); }
@@ -642,7 +689,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       // ¡YUPI!: si queda con 1 carta y no lo dijo, se puede atrapar hasta que juegue el siguiente
       if (j.mano.length === 1 && !yupi.has(k)) { vulnerable = k; if (k) setTimeout(() => botAtrapa(k), 0); else botsAtrapanAlHumano(); } else if (vulnerable === k) vulnerable = null;
       if (!j.mano.length) return ganar(k);
-      let salto = 1;
+      let salto = 1, penal = null;
       if (x.v === 'reversa') { dir = -dir; if (J.length === 2) salto = 2; }
       if (x.v === 'saltar') salto = 2;
       if (esHeroe(x)) { sonar(x.v); destello(HEROES[x.v]); }
@@ -650,26 +697,26 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       if (x.v === 'idol') { J.forEach((o, i) => { if (i !== k) robar(o, 1); }); botReacciona(k, 'feliz'); }
       if (x.v === 'coquito') { const v = J.filter((o, i) => i !== k).sort((a, b) => a.mano.length - b.mano.length)[0]; if (v && v.mano.length < j.mano.length) { botReacciona(J.indexOf(v), 'sufre'); const tmp = j.mano; j.mano = v.mano; v.mano = tmp; yupi.delete(k); yupi.delete(J.indexOf(v)); if (opc.entrena || j.yo || v.yo) tip(`🐶 ¡Coquito cambió las cartas de ${escH(j.n)} con ${escH(v.n)}!`, 2200); } }
       if (suma(x)) { acum += suma(x); const s = J[sig()]; const responde = opc.acum && s.mano.some(c => suma(c) > 0 && suma(c) >= suma(x));
-        if (!responde) { robar(s, acum); FX.son('error'); botReacciona(J.indexOf(s), 'sufre'); if (!s.yo && k !== 0) botReacciona(k, 'feliz'); if (opc.entrena && s.yo) tip(`Te tocó robar ${acum} cartas y pierdes el turno.`, 2000); acum = 0; salto = 2; } }
+        if (!responde) { penal = [s, acum]; FX.son('error'); botReacciona(J.indexOf(s), 'sufre'); if (!s.yo && k !== 0) botReacciona(k, 'feliz'); if (opc.entrena && s.yo) tip(`Te tocó robar ${acum} cartas y pierdes el turno.`, 2000); acum = 0; salto = 2; } }
       if (vulnerable !== null && vulnerable !== k) vulnerable = null;
-      turno = sig(salto); siguienteTurno();
+      turno = sig(salto); if (penal) robarUno(penal[0], penal[1], siguienteTurno); else siguienteTurno();
     }
 
     function botsAtrapanAlHumano() { // los bots pueden atraparte si no dijiste ¡YUPI!
       const prob = { facil: .35, medio: .7, dificil: .95 }[opc.dif]; if (Math.random() > prob) return;
-      setTimeout(() => { if (!vivo || vulnerable !== 0 || yupi.has(0) || J[0].mano.length !== 1) return; const quien = J[1 + Math.floor(Math.random() * (J.length - 1))]; SS.atrapado = true; robar(J[0], 2); vulnerable = null; FX.son('error'); FX.vibrar(80); tip(`🫵 ${escH(quien.n)} te atrapó sin decir <b>¡YUPI!</b>: +2 cartas`, 2200); pintar(); }, 1200 + Math.random() * 1600);
+      setTimeout(() => { if (!vivo || vulnerable !== 0 || yupi.has(0) || J[0].mano.length !== 1) return; const quien = J[1 + Math.floor(Math.random() * (J.length - 1))]; SS.atrapado = true; robar(J[0], 2); verRobar(0, 2); vulnerable = null; FX.son('error'); FX.vibrar(80); tip(`🫵 ${escH(quien.n)} te atrapó sin decir <b>¡YUPI!</b>: +2 cartas`, 2200); pintar(); }, 1200 + Math.random() * 1600);
     }
     function botAtrapa(k) { // un bot se olvida de decir ¡YUPI! según la dificultad
       const olvida = { facil: .45, medio: .2, dificil: .03 }[opc.dif];
       if (Math.random() > olvida) { yupi.add(k); vulnerable = null; burbuja(k, '¡YUPI!'); pintar(); return; }
       pintar(); // queda vulnerable: el humano puede atraparlo; los otros bots también
-      if (J.length > 2) setTimeout(() => { if (!vivo || vulnerable !== k) return; if (Math.random() < { facil: .2, medio: .45, dificil: .8 }[opc.dif]) { robar(J[k], 2); vulnerable = null; FX.son('error'); tip(`🫵 Atraparon a ${escH(J[k].n)} sin decir ¡YUPI!: +2 cartas`, 1800); pintar(); } }, 2200 + Math.random() * 1500);
+      if (J.length > 2) setTimeout(() => { if (!vivo || vulnerable !== k) return; if (Math.random() < { facil: .2, medio: .45, dificil: .8 }[opc.dif]) { robar(J[k], 2); verRobar(k, 2); vulnerable = null; FX.son('error'); tip(`🫵 Atraparon a ${escH(J[k].n)} sin decir ¡YUPI!: +2 cartas`, 1800); pintar(); } }, 2200 + Math.random() * 1500);
     }
 
     // ---- Turno ----
     function siguienteTurno() {
       clearTimeout(timer); clearInterval(relojT); turnoId++; pintar(); if (!vivo || fin_) return;
-      if (acum && !J[turno].mano.some(puede)) { robar(J[turno], acum); FX.son('error'); acum = 0; turno = sig(); return setTimeout(siguienteTurno, 500); }
+      if (acum && !J[turno].mano.some(puede)) { const v = J[turno], n = acum; FX.son('error'); acum = 0; turno = sig(); return robarUno(v, n, siguienteTurno); }
       if (turno === 0) { reloj(opc.entrena ? 60 : opc.turbo ? (+opc.turbo > 1 ? +opc.turbo : 8) : 20); return; }
       const tid = turnoId; timer = setTimeout(() => { if (tid === turnoId) turnoBot(turno); }, opc.turbo ? 380 + Math.random() * 300 : 900 + Math.random() * 700);
     }
@@ -679,12 +726,16 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     }
     function accionRobar() {
       if (turno !== 0 || robado || fin_ || ocupado) return; const yo = J[0];
-      if (acum) { robar(yo, acum); acum = 0; FX.son('error'); turno = sig(); return siguienteTurno(); }
-      robar(yo, 1); if (opc.robaHasta) { let n = 0; while (!puede(yo.mano[yo.mano.length - 1]) && n++ < 12 && (pila.length || desc.length > 1)) robar(yo, 1); if (n) tip(`🎣 Robaste ${n + 1} cartas hasta encontrar una que sirve`, 1500); } robado = true; FX.son('pop'); pistaN++;
-      const nueva = yo.mano[yo.mano.length - 1]; volar($('#ycPila'), $('#ycMano'), reverso(70));
-      if (!puede(nueva)) { pintar('Robaste: no sirve. Pasa el turno…'); setTimeout(() => { if (turno === 0 && robado) pasar(); }, 900); } else pintar();
+      if (acum) { const n = acum; acum = 0; FX.son('error'); turno = sig(); return robarUno(yo, n, siguienteTurno); }
+      const tras = () => { robado = true; pistaN++; const nueva = yo.mano[yo.mano.length - 1];
+        if (!puede(nueva)) { pintar('Robaste: no sirve. Pasa el turno…'); setTimeout(() => { if (turno === 0 && robado) pasar(); }, 900); } else pintar(); };
+      if (opc.robaHasta) { ocupado = true; let n = 0; // roba de una en una hasta que salga una que sirva: se ve y se oye cada carta
+        const paso = () => { if (!vivo || fin_) { ocupado = false; return; } robar(yo, 1); FX.son('pop'); volar($('#ycPila'), $('#ycMano'), reverso(70)); n++; pintar(`🎣 Robas ${n}…`);
+          if (!puede(yo.mano[yo.mano.length - 1]) && n < 13 && (pila.length || desc.length > 1)) setTimeout(paso, 300); else { ocupado = false; if (n > 1) tip(`🎣 Robaste ${n} cartas hasta encontrar una que sirve`, 1500); tras(); } };
+        return paso(); }
+      robar(yo, 1); FX.son('pop'); volar($('#ycPila'), $('#ycMano'), reverso(70)); tras();
     }
-    function pasar() { if (turno !== 0) return; robado = false; clearInterval(relojT); turno = sig(); siguienteTurno(); }
+    function pasar() { if (turno !== 0 || ocupado) return; robado = false; clearInterval(relojT); turno = sig(); siguienteTurno(); }
 
     // ---- IA ----
     function elegirColor(j) { const cnt = {}; for (const c of j.mano) if (c.c !== 'w') cnt[c.c] = (cnt[c.c] || 0) + 1;
@@ -692,15 +743,20 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       return Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || azar(COLS); }
     function turnoBot(k) {
       if (!vivo || fin_ || turno !== k || ocupado) return; const j = J[k]; let ops = j.mano.filter(puede);
-      if (!ops.length) { if (acum) { robar(j, acum); acum = 0; turno = sig(); return siguienteTurno(); }
-        robar(j, 1); if (opc.robaHasta) { let n = 0; while (!puede(j.mano[j.mano.length - 1]) && n++ < 12 && (pila.length || desc.length > 1)) robar(j, 1); } FX.son('pop'); volar($('#ycPila'), document.querySelector(`[data-op="${k}"]`) || $('#ycPila'), reverso(50)); const nv = j.mano[j.mano.length - 1]; pintar();
+      if (!ops.length) { if (acum) { const n = acum; acum = 0; turno = sig(); return robarUno(j, n, siguienteTurno); }
+        if (opc.robaHasta) { ocupado = true; let n = 0; // el bot también roba de una en una
+          const paso = () => { if (!vivo || fin_) { ocupado = false; return; } robar(j, 1); FX.son('pop'); volar($('#ycPila'), document.querySelector(`[data-op="${k}"]`) || $('#ycPila'), reverso(50)); n++; pintar(`🎣 ${escH(j.n)} roba ${n}…`);
+            if (!puede(j.mano[j.mano.length - 1]) && n < 13 && (pila.length || desc.length > 1)) return setTimeout(paso, 300);
+            ocupado = false; if (j.vistos) j.vistos[color] = (j.vistos[color] || 0) + 1; if (puede(j.mano[j.mano.length - 1])) return turnoBot(k); turno = sig(); setTimeout(siguienteTurno, 500); };
+          return paso(); }
+        robar(j, 1); FX.son('pop'); volar($('#ycPila'), document.querySelector(`[data-op="${k}"]`) || $('#ycPila'), reverso(50)); const nv = j.mano[j.mano.length - 1]; pintar();
         // recuerda qué color le faltaba al bot (para la IA difícil)
         for (const o of J) if (o.vistos && o !== j) o.vistos = o.vistos; if (j.vistos) j.vistos[color] = (j.vistos[color] || 0) + 1;
         if (puede(nv)) ops = [nv]; else { turno = sig(); return setTimeout(siguienteTurno, 500); } }
       let x;
       const prox = J[sig()], proxPocas = prox.mano.length <= 2;
       if (opc.dif === 'facil') x = azar(ops);
-      else { const val = c => { let s = 0; if (c.c === 'w') s -= 30; if (esp(c) && c.c !== 'w') s += proxPocas ? 40 : 8; if (cuatro(c.v)) s += proxPocas ? 60 : -20; if (c.c !== 'w' && suma(c) >= 3) s += proxPocas ? 45 + suma(c) : 6 + suma(c); if (c.v === 'bruja') s += proxPocas ? 50 : -10; if (c.v === 'idol') s += J.length > 2 ? 30 : 5; if (c.v === 'coquito') { const menor = Math.min(...J.filter(o => o !== j).map(o => o.mano.length)); s += j.mano.length - 1 - menor >= 3 ? 80 : -60; } if (/^\d$/.test(c.v)) s += +c.v; const mismos = j.mano.filter(o => o.c === c.c).length; s += mismos * 3; if (opc.dif === 'dificil' && j.mano.length <= 3 && c.c === 'w') s += 25; return s; };
+      else { const val = c => { let s = 0; if (c.c === 'w') s -= 30; if (esp(c) && c.c !== 'w') s += proxPocas ? 40 : 8; if (cuatro(c.v)) s += proxPocas ? 60 : -20; if (c.c !== 'w' && suma(c) >= 3) s += proxPocas ? 45 + suma(c) : 6 + suma(c); if (c.v === 'bruja') s += proxPocas ? 50 : -10; if (c.v === 'idol') s += J.length > 2 ? 30 : 5; if (c.v === 'coquito') { const menor = Math.min(...J.filter(o => o !== j).map(o => o.mano.length)); s += j.mano.length - 1 - menor >= 3 ? 80 : -60; } if (c.v === 'abanico') s += j.mano.filter(o => o.c === c.c).length * 14; if (/^\d$/.test(c.v)) s += +c.v; const mismos = j.mano.filter(o => o.c === c.c).length; s += mismos * 3; if (opc.dif === 'dificil' && j.mano.length <= 3 && c.c === 'w') s += 25; return s; };
         x = ops.sort((a, b) => val(b) - val(a))[0]; }
       if (j.mano.length === 2 && Math.random() > { facil: .45, medio: .2, dificil: .03 }[opc.dif]) { yupi.add(k); setTimeout(() => burbuja(k, '¡YUPI!'), 350); } // grita ¡YUPI! antes de jugar
       const desde = document.querySelector(`[data-op="${k}"]`) || $('#ycPila');
@@ -708,8 +764,8 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
     }
 
     // ---- Final ----
-    function ganar(k) {
-      fin_ = true; clearTimeout(timer); clearInterval(relojT); pintar(); const yo = k === 0;
+    function ganar(k, porTiempo) {
+      fin_ = true; clearTimeout(timer); clearInterval(relojT); clearInterval(relojP); pintar(); const yo = k === 0;
       const pts = J.filter((j, i) => i !== k).reduce((a, j) => a + j.mano.reduce((s, c) => s + valor(c), 0), 0);
       avanzar('jugar'); if (yo) avanzar('ganar');
       const restan = J.reduce((a, j, i) => a + (i ? j.mano.length : 0), 0), estrellasAv = yo ? 1 + (SS.atrapado ? 0 : 1) + (restan >= 5 * (J.length - 1) ? 1 : 0) : 0;
@@ -718,7 +774,7 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
       const bono = yo ? Math.min(400, +LS_.get('bono') || 0) : 0; if (bono) LS_.set('bono', 0);
       const puntos0 = (yo ? Math.min(4000, pts * ({ facil: 1, medio: 1.5, dificil: 2 }[opc.dif]) | 0) + (opc.entrena ? 0 : 50) : Math.min(60, Math.max(0, 7 - J[0].mano.length) * 8)) + bono, puntos = puntos0;
       const R = registrarFin({ yo, puntos, opc, S: SS, estrellasAv }), st = prog().st, nuevos = yo ? [...REVERSOS, ...MESAS].filter(x => x.min === st.g) : [], Lav = opc.aventura ? NIVELES[opc.aventura - 1] : null, sigNivel = Lav && yo && opc.aventura < 15 ? NIVELES[opc.aventura] : null;
-      modal(`<div style="font-size:3rem">${yo ? '🏆' : `<span style="display:inline-block;width:72px;height:72px;border-radius:50%;overflow:hidden;border:4px solid #f5c451;background:#fff;vertical-align:middle">${caraH(J[k].cara, 64)}</span>`}</div><h2 style="margin:4px 0">${yo ? '¡Ganaste!' : escH(J[k].n) + ' ganó'}</h2><p style="opacity:.9">${yo ? `Sumaste <b>${puntos}</b> puntos por las cartas que les quedaron a los demás${bono ? ` (incluye 🎁 +${bono} de misiones)` : ''}.` : `Te quedaron ${J[0].mano.length} cartas. ¡La próxima es tuya!`}</p>${Lav && yo ? `<div class="yc-estr" style="font-size:2.2rem">${'★'.repeat(estrellasAv)}${'☆'.repeat(3 - estrellasAv)}</div>` : ''}
+      modal(`<div style="font-size:3rem">${yo ? '🏆' : `<span style="display:inline-block;width:72px;height:72px;border-radius:50%;overflow:hidden;border:4px solid #f5c451;background:#fff;vertical-align:middle">${caraH(J[k].cara, 64)}</span>`}</div>${porTiempo ? '<p class="yc-tfin">⏰ ¡Se acabó el tiempo! Gana quien tenía menos cartas</p>' : ''}<h2 style="margin:4px 0">${yo ? '¡Ganaste!' : escH(J[k].n) + ' ganó'}</h2><p style="opacity:.9">${yo ? `Sumaste <b>${puntos}</b> puntos por las cartas que les quedaron a los demás${bono ? ` (incluye 🎁 +${bono} de misiones)` : ''}.` : `Te quedaron ${J[0].mano.length} cartas. ¡La próxima es tuya!`}</p>${Lav && yo ? `<div class="yc-estr" style="font-size:2.2rem">${'★'.repeat(estrellasAv)}${'☆'.repeat(3 - estrellasAv)}</div>` : ''}
 <div class="yc-resumen">${R.xp ? `<span>🆙 +${R.xp} XP</span>` : ''}${R.est ? `<span>⭐ +${R.est}</span>` : ''}${R.sobres ? `<span>🎴 +${R.sobres} sobre${R.sobres > 1 ? 's' : ''}</span>` : ''}${R.subio ? `<span>🎉 ¡Nivel ${R.subio}!</span>` : ''}${R.liga ? `<span>${R.liga.e} ¡Subiste a liga ${R.liga.n}!</span>` : ''}</div>${R.logros.length ? `<p style="margin:4px 0">🏅 Logros nuevos: <b>${R.logros.join(' · ')}</b></p>` : ''}${R.marcos.length ? `<p style="margin:4px 0">🖼️ ¡Marco nuevo: <b>${R.marcos.map(k => MARCOS[k].n).join(', ')}</b>! Póntelo en Perfil.</p>` : ''}${nuevos.length ? `<p>🎁 ¡Desbloqueaste: <b>${nuevos.map(x => x.n).join(', ')}</b>!</p>` : ''}
 ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones de hoy</b>${MIS.map(x => { const v = Math.min(x.meta, m.p[x.k] || 0); return `<div><span style="min-width:150px">${x.n}</span><i><u style="width:${v / x.meta * 100}%"></u></i><b>${v >= x.meta ? '✅' : v + '/' + x.meta}</b></div>`; }).join('')}</div>`; })()}
 <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">${sigNivel ? '<button class="yc-yupi" id="ycSig">➡️ Nivel ' + sigNivel.id + '</button>' : ''}<button class="${sigNivel ? 'yc-btn' : 'yc-yupi'}" id="ycOtra">🔁 ${Lav ? (yo ? 'Repetir nivel' : 'Reintentar') : 'Otra partida'}</button><button class="yc-btn" id="ycMenu">${Lav ? '🗺️ Mapa' : '🃏 Menú'}</button><button class="yc-btn" id="ycFin">💾 Guardar puntos</button></div>`);
@@ -738,18 +794,18 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
     // ---- Montaje ----
     const M = MESAS.find(m => m.k === LS_.get('mesa')) || MESAS[0];
     stage(`<style>${CSS}${CSS2}</style><div id="yc" class="full"><div class="fondo" style="background:${M.k === 'cielo' && hayArte('fondo_terraza') ? `url(${artUrl('fondo_terraza')}) center/cover,` : ''}${M.g}"></div>${M.k === 'cielo' && !hayArte('fondo_terraza') ? '<div class="yc-palmas"><span>🌴</span><span>🌺</span><span>🌴</span><span>🌺</span></div>' : ''}<div class="luz"></div><div class="capa">
-<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">← Menú</button><b style="text-align:center">🃏 YUPI CARDS${opc.entrena ? ' · 🎓 Entrenamiento' : ''}${opc.aventura ? ' · 🗺️ Nivel ' + opc.aventura : opc.modo ? ' · ' + (MODOS.find(m => m.k === opc.modo)?.e || '🎉') + ' ' + (MODOS.find(m => m.k === opc.modo)?.n || '') : ''}</b><button class="yc-btn" id="ycMus" style="padding:6px 10px" title="Música">${LS.get('arcMusica') === '0' ? '🔇' : '🎵'}</button><span id="ycReloj" style="min-width:96px;text-align:right"></span></div><div class="yc-top" id="ycTop"></div></div>
+<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><button class="yc-btn" id="ycSalir" style="padding:6px 12px">← Menú</button><b style="text-align:center">🃏 YUPI CARDS${opc.entrena ? ' · 🎓 Entrenamiento' : ''}${opc.aventura ? ' · 🗺️ Nivel ' + opc.aventura : opc.modo ? ' · ' + (MODOS.find(m => m.k === opc.modo)?.e || '🎉') + ' ' + (MODOS.find(m => m.k === opc.modo)?.n || '') : ''}</b><button class="yc-btn" id="ycMus" style="padding:6px 10px" title="Música">${LS.get('arcMusica') === '0' ? '🔇' : '🎵'}</button><span class="yc-tiempo" id="ycTiempo"></span><span id="ycReloj" style="min-width:96px;text-align:right"></span></div><div class="yc-top" id="ycTop"></div></div>
 <div class="yc-centro"><div class="yc-mesa"></div><div class="yc-pila" id="ycPila" title="Robar carta" style="width:${innerWidth < 600 ? 84 : 112}px;height:${innerWidth < 600 ? 122 : 162}px">${[0, 1, 2].map(i => `<div style="position:absolute;top:${-i * 3}px;left:${i * 2}px">${reverso(innerWidth < 600 ? 84 : 112)}</div>`).join('')}<span id="ycPilaN" style="position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:.8rem;opacity:.8"></span></div>
 <div class="yc-desc" id="ycDesc"></div>${FLECHA}<svg class="yc-dir" id="ycDir" viewBox="0 0 200 200" aria-hidden="true"><defs><marker id="ycFl" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fde68a"/></marker></defs><path d="M100 12A88 88 0 0 1 188 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/><path d="M100 188A88 88 0 0 1 12 100" fill="none" stroke="#fde68a" stroke-width="6" stroke-linecap="round" marker-end="url(#ycFl)"/></svg><div class="yc-info" id="ycInfo"></div></div>
 <div class="yc-yo"><div class="yc-mano" id="ycMano"></div><div class="yc-barra"><div class="yc-yoav" title="Cambia tu foto en tu perfil de Yupitok">${avatarYo(52)}<b class="yc-tag">${escH(LS.get('chatNom') || 'Tú')}</b></div><button class="yc-btn yc-reacBtn" id="ycReac" title="Reacciones">💬</button><span class="yc-yupiwrap" id="ycYupiW"><span class="glob">¡YUPI!</span><button class="yc-yupi" id="ycYupi">YUPI</button><span class="mano">👆</span></span><button class="yc-btn" id="ycPasar" hidden>⏭ Pasar</button></div></div></div></div>`);
-    $('#ycSalir').onclick = () => { vivo = false; clearTimeout(timer); clearInterval(relojT); salirCompleta(); opc.aventura ? mapa(t) : menu(t); };
+    $('#ycSalir').onclick = () => { vivo = false; clearTimeout(timer); clearInterval(relojT); clearInterval(relojP); salirCompleta(); opc.aventura ? mapa(t) : menu(t); };
     $('#ycMus').onclick = e => { FX.alternar?.('arcMusica', e.currentTarget); e.currentTarget.textContent = LS.get('arcMusica') === '0' ? '🔇' : '🎵'; if (LS.get('arcMusica') !== '0') FX.musica?.('cartas'); };
     pantallaCompleta(); FX.musica?.('cartas');
     $('#ycPila').onclick = () => accionRobar();
     $('#ycPasar').onclick = () => pasar();
-    $('#ycYupi').onclick = () => { if (J[0].mano.length <= 2) { if (!yupi.has(0)) SS.yupi++; yupi.add(0); avanzar('yupi'); if (vulnerable === 0) vulnerable = null; FX.son('moneda'); hablar('¡Yupi!', { tono: 1.4 }); tip('🎉 ¡Dijiste <b>¡YUPI!</b>!', 1100); pintar(); } };
+    $('#ycYupi').onclick = () => { if (J[0].mano.length <= 2) { if (!yupi.has(0)) SS.yupi++; yupi.add(0); avanzar('yupi'); if (vulnerable === 0) vulnerable = null; FX.son('moneda'); gritoYupi(0); tip('🎉 ¡Dijiste <b>¡YUPI!</b>!', 1100); pintar(); } };
     $('#ycReac').onclick = () => { const p = $('#yc .yc-reacs'); if (p) return p.remove(); FX.son('click'); const d = document.createElement('div'); d.className = 'yc-reacs'; d.innerHTML = `<div class="em">${EMOJIS.map(e => `<button data-r="${e}">${e}</button>`).join('')}</div><div class="fr">${FRASES.map(f => `<button data-r="${f}">${f}</button>`).join('')}</div>`; d.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; d.remove(); if (Date.now() - (window.__ycR || 0) < 1500) return; window.__ycR = Date.now(); burbuja(0, b.dataset.r); if (J.length > 1 && Math.random() < .5) setTimeout(() => burbuja(1 + Math.floor(Math.random() * (J.length - 1)), ['😂', '😎', '🤔', '¡Suerte! 🍀', '❤️'][Math.floor(Math.random() * 5)]), 1300); }; $('#yc').append(d); };
-    $('#ycTop').onclick = e => { const b = e.target.closest('[data-atrapar]'); if (!b) return; const k = +b.dataset.atrapar; if (vulnerable !== k) return; SS.atrapa++; robar(J[k], 2); vulnerable = null; FX.son('punto'); tip(`🫵 ¡Atrapaste a ${escH(J[k].n)}! Roba 2 cartas`, 1600); pintar(); };
+    $('#ycTop').onclick = e => { const b = e.target.closest('[data-atrapar]'); if (!b) return; const k = +b.dataset.atrapar; if (vulnerable !== k) return; SS.atrapa++; robar(J[k], 2); verRobar(k, 2); vulnerable = null; FX.son('punto'); tip(`🫵 ¡Atrapaste a ${escH(J[k].n)}! Roba 2 cartas`, 1600); pintar(); };
     $('#ycMano').onclick = e => {
       const el = e.target.closest('[data-id]'); if (!el || turno !== 0 || fin_ || ocupado || document.querySelector('#yc .yc-colores')) return; const x = J[0].mano.find(c => c.id === +el.dataset.id);
       if (!x || !puede(x)) { FX.son('error'); if (opc.entrena) tip(acum ? 'Hay un + acumulado: responde con +2/+4 o toca el mazo para robar.' : `Esa carta no sirve: necesitas <b>${COL[color]?.n || ''}</b> o el número/símbolo de la carta de la mesa.`, 2200); return; }
@@ -762,8 +818,9 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
     if (opc.entrena) tip('🎓 <b>Entrenamiento</b>: las cartas que puedes jugar brillan. Juega por <b>color</b> o por <b>número</b>. Si ninguna sirve, toca el mazo.', 4200);
     if (esp(ini) && ini.v !== 'mas4') { if (ini.v === 'saltar') turno = sig(); if (ini.v === 'reversa') dir = -1; if (suma(ini) && ini.c !== 'w') { robar(J[0], suma(ini)); turno = sig(); } }
     siguienteTurno();
-    setParar(() => { vivo = false; clearTimeout(timer); clearInterval(relojT); salirCompleta(); });
-    window.__yc = { log: () => LOG.slice(-25), estado: () => ({ turno, color, acum, dir, top: tope(), manos: J.map(j => j.mano.length), pila: pila.length, desc: desc.length, fin: fin_, vulnerable, yupi: [...yupi] }), mano: () => J[0].mano };
+    setParar(() => { vivo = false; clearTimeout(timer); clearInterval(relojT); clearInterval(relojP); salirCompleta(); });
+    relojPartida();
+    window.__yc = { log: () => LOG.slice(-25), estado: () => ({ turno, color, acum, dir, top: tope(), manos: J.map(j => j.mano.length), pila: pila.length, desc: desc.length, fin: fin_, vulnerable, yupi: [...yupi] }), mano: () => J[0].mano, grito: () => gritoYupi(0) };
   }
   JUEGOS.yupicards = menu;
 })();

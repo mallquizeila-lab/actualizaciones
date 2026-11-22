@@ -1,3 +1,11 @@
+9.41.0
+- 🃏 YUPI CARDS · Cada partida dura máximo 5 minutos (⏳ arriba). Al terminar el tiempo gana quien tiene menos cartas: se acabaron las partidas eternas.
+- 🪭 Nueva carta ABANICO (una de cada color): al jugarla botas de golpe TODAS tus cartas de ese color, con animación de abanico y sonido.
+- 📣 ¡YUPI! con emoción: grito más fuerte, letras gigantes, chispas de colores, temblor de pantalla y vibración.
+- 🃏 Robar se ve carta por carta: los +2, +4, +6 y el modo «Roba hasta poder» reparten de una en una, con sonido.
+- 🏆 La pantalla del final ahora se ve completa en el celular horizontal (con desplazamiento si hace falta).
+- 😂 Emojis con más sonido: más fuertes y cada uno con su exclamación («¡Ja, ja, ja!», «¡Grrr!», «¡Fiesta!»…).
+
 9.40.6
 - 👨‍👩‍👧 ProfeTok · Página principal: nuevo video «Lo que ven los papás» (1:17, en tiza): lo que la familia ve de verdad, avisos, examen corregido, justificar faltas, chat con la profe, y además tareas, alerta temprana, libretas e IA. Ya son 5 videos.
 
