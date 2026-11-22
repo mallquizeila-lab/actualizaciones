@@ -1,3 +1,6 @@
+9.40.3
+- 🎬 ProfeTok · Página principal con 2 videos lado a lado: «ProfeTok en pocas palabras» (la canción) y «Así se ve por dentro» (el video anterior vuelve). En el celular se desliza de uno a otro, y al reproducir uno el otro se pausa solo.
+
 9.40.2
 - 🎵 ProfeTok · Nuevo video en la página principal: «ProfeTok en pocas palabras», con la voz oficial y la canción de ProfeTok (80 segundos, para docentes, familias y directores).
 
