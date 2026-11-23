@@ -32,7 +32,8 @@ function crear({ apodo }) {
     const yo = s.jug.findIndex(j => j.uid === uid), T = s.desc[s.desc.length - 1];
     return { codigo: s.id, modo: s.modo, nombreModo: MODOS[s.modo].nombre, equipos: !!s.equipos, n: MODOS[s.modo].n, estado: s.estado, host: s.jug[0]?.uid === uid, yo, opc: s.opc,
       jugadores: s.jug.map((j, i) => ({ nombre: j.nombre, avatar: j.avatar, bot: !!j.bot, cartas: j.mano.length, equipo: equipo(s, i), yupi: s.yupi.includes(i), conectado: j.bot || !!subs[s.id] && [...subs[s.id]].some(x => x.uid === j.uid) })),
-      mano: yo >= 0 ? s.jug[yo].mano : [], tope: T || null, color: s.color, turno: s.turno, dir: s.dir, acum: s.acum, robado: s.robado && s.turno === yo, vulnerable: s.vulnerable, quedan: s.turnoFin ? Math.max(0, s.turnoFin - Date.now()) : 0,
+      mano: yo >= 0 ? s.jug[yo].mano : [], socio: s.equipos && yo >= 0 ? s.jug[(yo + 2) % 4]?.mano || [] : null, // 🤝 en 2 vs 2 ves las cartas de tu compañero (y él las tuyas)
+      tope: T || null, color: s.color, turno: s.turno, dir: s.dir, acum: s.acum, robado: s.robado && s.turno === yo, vulnerable: s.vulnerable, quedan: s.turnoFin ? Math.max(0, s.turnoFin - Date.now()) : 0,
       pila: s.pila.length, ganador: s.ganador, ultimo: s.ultimo, n_ev: s.nEv, publica: !!s.publica, arranca: s.arranca ? Math.max(0, s.arranca - Date.now()) : 0, finEn: s.finAt && s.estado === 'jugando' ? Math.max(0, s.finAt - Date.now()) : 0 };
   }
   function avisar(s) { s.nEv++; for (const x of subs[s.id] || []) { try { x.res.write(`event: sala\ndata: ${JSON.stringify(vista(s, x.uid))}\n\n`); } catch (e) {} } }
@@ -42,7 +43,8 @@ function crear({ apodo }) {
   const tope = s => s.desc[s.desc.length - 1];
   const sig = (s, k = 1) => (s.turno + s.dir * k + s.jug.length * 4) % s.jug.length;
   function robar(s, j, n) { for (let i = 0; i < n; i++) { if (!s.pila.length) { const top = s.desc.pop(); s.pila = mezclar(s.desc.map(x => x.c === 'w' ? { ...x, elegido: undefined } : x)); s.desc = [top]; } if (s.pila.length) j.mano.push(s.pila.pop()); } s.yupi = s.yupi.filter(i => s.jug[i] !== j); }
-  function puede(s, x) { const T = tope(s); if (s.acum) return s.opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === s.color || x.v === T.v; }
+  function puede(s, x) { const T = tope(s); if (s.acum) return suma(x) > 0; // ⛓️ cadena de +: cualquier carta + defiende y se suma
+    return x.c === 'w' || x.c === s.color || x.v === T.v; }
 
   function empezar(s) {
     clearTimeout(s.timer); clearTimeout(s.relojP); clearTimeout(s.arrT); s.arranca = 0; s.finAt = Date.now() + PARTIDA_MS; s.relojP = setTimeout(() => porTiempo(s), PARTIDA_MS); s.pila = mazo(s.opc); s.desc = []; s.dir = 1; s.acum = 0; s.yupi = []; s.vulnerable = null; s.robado = false; s.ganador = null; s.ultimo = null; s.estado = 'jugando';
@@ -83,7 +85,7 @@ function crear({ apodo }) {
     if (x.v === 'saltar' || x.v === 'bruja') salto = 2;
     if (x.v === 'idol') s.jug.forEach((o, i) => { if (i !== k) robar(s, o, 1); });
     if (x.v === 'coquito') { const v = s.jug.filter((o, i) => i !== k && equipo(s, i) !== equipo(s, k)).sort((a, b) => a.mano.length - b.mano.length)[0]; if (v && v.mano.length < j.mano.length) { const t = j.mano; j.mano = v.mano; v.mano = t; s.yupi = s.yupi.filter(i => s.jug[i] !== j && s.jug[i] !== v); s.ultimo.cambio = v.nombre; } }
-    if (suma(x)) { s.acum += suma(x); const sg = s.jug[sig(s)]; const responde = s.opc.acum && sg.mano.some(c => suma(c) > 0 && suma(c) >= suma(x));
+    if (suma(x)) { s.acum += suma(x); const sg = s.jug[sig(s)]; const responde = sg.mano.some(c => suma(c) > 0);
       if (!responde) { robar(s, sg, s.acum); s.ultimo.roba = { nombre: sg.nombre, n: s.acum }; s.acum = 0; salto = 2; } }
     if (s.vulnerable !== null && s.vulnerable !== k) s.vulnerable = null;
     s.turno = sig(s, salto); turnoNuevo(s);

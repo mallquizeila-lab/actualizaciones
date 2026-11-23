@@ -1,3 +1,8 @@
+9.44.0 · 🃏 YUPI CARDS: cadena de + y juego en equipo
+- ⛓️ Cadena de +: si te tiran un +2, +3, +4, +6… y tienes cualquier carta +, te defiendes lanzándola; se suman y pasan al siguiente, hasta que llega a quien no tiene defensa, que se lleva todo automáticamente. Ahora es la regla normal (contra la IA y en línea). Un contador rojo grande muestra el total acumulado.
+- 🤝 2 vs 2 en línea: ves las cartas de tu compañero y él ve las tuyas.
+- 🏆 Cuando gana el equipo, el premio es para los dos (XP, estrellas y puntos de liga) y se dice en la pantalla final.
+
 9.43.2 · 🏆 YUPI CARDS: gran celebración al ganar
 - Fanfarria de victoria, fuegos artificiales de colores por toda la pantalla, trofeo que salta con rayos dorados girando, «¡GANASTE!» en letras arcoíris, los puntos suben contando y el cuadro brilla en dorado. También en las partidas en línea.
 
