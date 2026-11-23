@@ -4,7 +4,7 @@
 //  - El QR lleva un código al azar (no se puede adivinar) o el código del fotocheck que el colegio ya tenía (se vincula una sola vez).
 //  - Solo el personal del colegio escanea, y solo a alumnos que puede ver (director: todo el colegio · docente: sus aulas).
 const crypto = require('crypto');
-function crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff, aulaDe, avisarYa }) {
+function crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff, aulaDe, avisarYa, guardarImagen, borrarArchivo }) {
   try { db.exec('alter table asistencia add column salida text'); } catch (e) {}
   try { db.exec("alter table colegios add column entrada text default '08:00'"); } catch (e) {}
   try { db.exec('alter table colegios add column tolerancia integer default 10'); } catch (e) {}
@@ -66,6 +66,11 @@ function crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff
     staff(u); const a = aulaDe(u, url.searchParams.get('aula')); if (!a) throw 403;
     for (const s of q('select id from alumnos where aula_id=? and codigo is null', a.id)) run('update alumnos set codigo=? where id=?', 'PT' + crypto.randomBytes(8).toString('base64url'), s.id);
     return { aula: { nombre: a.nombre, grado: a.grado, seccion: a.seccion, nivel: a.nivel }, alumnos: q('select id, nombres, apellidos, foto is not null as foto, codigo from alumnos where aula_id=? order by apellidos, nombres', a.id) };
+  };
+  // 📸 foto del alumno tomada en la misma hoja de fotochecks
+  API['POST /api/porteria/foto'] = async ({ u, b }) => {
+    staff(u); if (!veAlumno(u, b.alumno_id) || !b.foto) throw 403; const al = q1('select foto from alumnos where id=?', +b.alumno_id);
+    const nf = guardarImagen(b.foto); run('update alumnos set foto=? where id=?', nf, +b.alumno_id); if (al.foto) borrarArchivo(al.foto); return { ok: 1 };
   };
   return { API };
 }

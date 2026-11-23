@@ -360,7 +360,7 @@ const reunionesM = require('./reuniones').crear({ db, q, q1, run, aulaDe, veAlum
 // 📋 «Mi equipo» del director: cómo va cada docente y cada aula (ver director.js)
 const directorM = require('./director').crear({ q, q1, run, hoy, riesgo, letraDe, audit, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
 // 🚪 Portería con QR: escanean el fotocheck en la puerta, se marca la asistencia y la familia recibe la hora al instante (ver porteria.js)
-const porteriaM = require('./porteria').crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff, aulaDe, avisarYa: (...a) => { try { return avisosM.alInstante(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } } });
+const porteriaM = require('./porteria').crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff, aulaDe, guardarImagen, borrarArchivo, avisarYa: (...a) => { try { return avisosM.alInstante(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } } });
 for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM, reunionesM, directorM, porteriaM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;
 // Yape y Plin: número, titular y QR que configura el dueño (el QR antiguo de Yape se conserva)
 try { if (fs.existsSync(path.join(DATA, 'yape-qr.img')) && !fs.existsSync(path.join(DATA, 'qr-yape.img'))) { fs.renameSync(path.join(DATA, 'yape-qr.img'), path.join(DATA, 'qr-yape.img')); setS('qr_yape', getS('yapeQr', 'image/png')); } } catch (e) {}

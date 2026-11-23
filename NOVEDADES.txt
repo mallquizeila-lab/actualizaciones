@@ -1,3 +1,6 @@
+9.42.1 · ProfeTok: 📸 fotos para los fotochecks
+- En la hoja de Fotochecks, tocas el círculo de cada alumno y le tomas la foto con el celular: se guarda sola y ya sale en su fotocheck (no hace falta que traigan foto impresa).
+
 9.42.0 · ProfeTok: 🚪 Portería con QR
 - En la puerta del colegio se escanea el QR del fotocheck con el celular (o con un lector USB): la asistencia se marca sola (✅ presente o ⏰ tardanza según la hora de entrada y la tolerancia del colegio).
 - La familia recibe AL INSTANTE en su celular «🎒 Thiago llegó al colegio a las 7:52 a. m.» y, a la salida, «🏠 salió a la 1:05 p. m.».
