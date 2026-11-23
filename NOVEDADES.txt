@@ -1,3 +1,8 @@
+9.46.0 · ✨ YUPI CARDS: filtros para tu foto
+- Perfil → Personalizar → Filtros: efectos animados alrededor de tu foto que se ven mientras juegas (y en el menú y la pantalla VS): Estrellitas, Mariquitas, Burbujas del mar, Plumas de cóndor, Mariposas, Corazones, Fuego imparable, Nieve navideña, Confeti y Lago Titicaca.
+- Se ganan jugando (victorias, jefes de la Aventura, ¡YUPI!, racha, nivel, evento de Navidad); nada se compra. El elegido dice «✅ Usado».
+- Corregido: los nombres de marcos, reversos y mesas en Personalizar se veían blancos sobre fondo claro; ahora se leen.
+
 9.45.0 · 🎬 YUPI CARDS: inicio de partida y mesa nueva
 - Al empezar: pantalla «VS» con los jugadores (en 2 vs 2, tú y tu compañero contra los rivales), se baraja el mazo y se reparten las cartas una por una a cada jugador; al final tus cartas se voltean. Se puede saltar tocando. También en línea (el servidor espera a que termine el reparto).
 - Mesa más realista: borde de madera con vetas y filo dorado, paño con textura, el logo YUPI grabado en el centro, sombras y un brillo que pasa.
