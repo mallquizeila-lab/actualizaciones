@@ -316,6 +316,16 @@ ${esqT(17, 27, 0)}${esqT(83, 118, 180)}
 .yc-cuenta{font-size:1.25em;color:#e08a00}
 .yc-acum{position:absolute;z-index:6;top:-18px;right:-26px;min-width:64px;padding:4px 12px;border-radius:999px;background:linear-gradient(160deg,#ff6363,#d90f25);border:4px solid #fff;color:#fff;font:900 1.9rem/1 'Baloo 2',Figtree;text-align:center;box-shadow:0 6px 0 #7f1d1d,0 0 30px #f87171;animation:ycLatido .8s ease-in-out infinite}
 .yc-socio{display:flex;justify-content:center;max-width:min(46vw,260px);flex-wrap:nowrap}.yc-op[data-pos="arr"] .yc-socio{position:absolute;left:100%;top:6px;margin-left:10px;max-width:none}.yc-socio svg{margin-left:-12px;filter:drop-shadow(0 3px 5px #0006);flex:none}.yc-socio svg:first-child{margin-left:0}
+.yc-vs{position:absolute;inset:0;z-index:23;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:linear-gradient(115deg,#f2132b 0 49.4%,#fff 49.4% 50.6%,#0a72ff 50.6%);cursor:pointer}.yc-vs.sale{animation:ycSale .45s forwards}@keyframes ycSale{to{opacity:0;transform:scale(1.2)}}
+.yc-vs .l,.yc-vs .r{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:10px}.yc-vs .l{animation:ycIzq .55s cubic-bezier(.2,1.4,.4,1) both}.yc-vs .r{animation:ycDer .55s cubic-bezier(.2,1.4,.4,1) both}@keyframes ycIzq{from{transform:translateX(-60vw)}}@keyframes ycDer{from{transform:translateX(60vw)}}
+.yc-vs .p{display:grid;justify-items:center;gap:6px;color:#fff;font:900 1rem Figtree,sans-serif;text-shadow:0 2px 4px #0009}.yc-vs .p .av{width:82px;height:82px;border-radius:50%;border:4px solid #fff;overflow:hidden;background:#fff;display:grid;place-items:center;font-size:2.6rem;box-shadow:0 8px 22px #0008}.yc-vs .p .av img{width:100%;height:100%;object-fit:cover;border:0!important;box-shadow:none!important}
+.yc-vs>b{font:900 clamp(4rem,14vw,7.5rem)/1 'Baloo 2',Figtree;color:#ffd23f;-webkit-text-stroke:5px #7c2d12;paint-order:stroke;text-shadow:0 0 34px #fff,0 8px 0 #7c2d12;animation:ycGolpeVS .6s .25s both}@keyframes ycGolpeVS{from{transform:scale(4) rotate(-20deg);opacity:0}}
+.yc-vs small{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;opacity:.85;font-weight:800}
+.yc-baraja{position:absolute;left:50%;top:44%;z-index:22;width:0;height:0;cursor:pointer}.yc-baraja .m{position:absolute;left:-39px;top:-56px}.yc-baraja .a{animation:ycCorteA .75s ease-in-out 2}.yc-baraja .b{animation:ycCorteB .75s ease-in-out 2}@keyframes ycCorteA{40%{transform:translateX(-70px) rotate(-14deg)}60%{transform:translateX(-70px) rotate(-14deg);z-index:2}}@keyframes ycCorteB{40%{transform:translateX(70px) rotate(14deg)}60%{transform:translateX(70px) rotate(14deg)}}.yc-baraja small{position:absolute;top:80px;left:-80px;width:160px;text-align:center;color:#fff;font-weight:900;text-shadow:0 2px 6px #000}
+#yc.repartiendo #ycMano .c,#yc.repartiendo #ycDesc{visibility:hidden}#yc.revela #ycMano .c{animation:ycVoltea .45s ease-out both}#yc.revela #ycDesc{animation:ycPop .5s}@keyframes ycVoltea{from{transform:rotateY(90deg) translateY(30px)}}
+.yc-mesa{border:16px solid transparent!important;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") padding-box,radial-gradient(ellipse at 50% 35%,#4ea0ff 0%,#2368d8 40%,#0f3a92 78%,#0a2563 100%) padding-box,repeating-linear-gradient(100deg,#9a5a26 0 7px,#7c4419 7px 11px,#a8682f 11px 16px,#6e3a14 16px 19px) border-box!important;box-shadow:inset 0 0 0 3px #f5c451,inset 0 0 0 6px #7c4419,inset 0 26px 60px #0007,inset 0 -10px 30px #ffffff14,0 22px 0 -6px #3b1d08,0 30px 60px #000a!important}
+.yc-mesa::before{content:'YUPI';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font:900 clamp(3.5rem,12vw,8rem)/1 'Baloo 2',Figtree;letter-spacing:.06em;color:#ffffff12;text-shadow:0 3px 0 #00000030,0 -1px 0 #ffffff1c;pointer-events:none;white-space:nowrap}
+.yc-mesa::after{border:2px solid #ffffff1f!important;box-shadow:0 0 0 6px #ffffff08;background:linear-gradient(105deg,transparent 35%,#ffffff12 50%,transparent 65%) -200% 0/200% 100% no-repeat;animation:ycBrilloMesa 7s ease-in-out infinite}@keyframes ycBrilloMesa{60%,100%{background-position:300% 0}}
 `;
 
   // Pantalla con fondo de mesa y una capa central
@@ -456,8 +466,10 @@ ${st.publica ? `<p style="text-align:center;font-weight:800;font-size:1.1rem;mar
       ES = new EventSource(`/api/yc/stream?id=${encodeURIComponent(id)}&uid=${encodeURIComponent(yoOn().uid)}`);
       ES.addEventListener('sala', ev => { if (!vivoOn) return; const prev = st; st = JSON.parse(ev.data); if (st.yo < 0) { cerrar(); toast('Ya no estás en esta sala'); return online(t); }
         if (st.estado === 'esperando') { if (modoMesa || !prev || JSON.stringify(prev.jugadores) !== JSON.stringify(st.jugadores) || prev.host !== st.host) lobby(); return; }
+        const nueva = !modoMesa || (prev && prev.estado === 'fin' && st.estado === 'jugando');
         if (!modoMesa) montarMesa();
         if (prev && prev.estado === 'fin' && st.estado === 'jugando') { finMostrado = false; $('#yc .yc-modal')?.remove(); }
+        if (nueva && st.estado === 'jugando') { const yoE = st.jugadores[st.yo]?.equipo, J2 = st.jugadores.map((j, i) => ({ ...j, i })); setTimeout(() => introReparto({ izq: J2.filter(j => j.i === st.yo || (st.equipos && j.equipo === yoE)).map(j => [avImg(j.avatar, 76), j.i === st.yo ? 'Tú' : j.nombre]), der: J2.filter(j => j.i !== st.yo && !(st.equipos && j.equipo === yoE)).map(j => [avImg(j.avatar, 76), j.nombre]), n: st.jugadores.length, destino: p => { const k = (st.yo + p) % st.jugadores.length; return k === st.yo ? $('#ycMano') : $(`#ycTop [data-op="${k}"]`); }, alFin: () => {} }), 0); }
         const u = st.ultimo; if (u && st.n_ev !== ultEv && u.tipo === 'juega' && (!prev || JSON.stringify(prev.ultimo) !== JSON.stringify(u))) { FX.son(esp(u.carta) ? 'combo' : 'swish'); hablarJugada(u.carta); efectosJugada(u.carta, st.color);
           if (u.fan) { const d = document.createElement('div'); d.className = 'yc-abanico'; const n = u.fan.length + 1; d.innerHTML = u.fan.map((x, i) => `<div style="--r:${(i - (n - 1) / 2) * 14}deg;--d:${i * 70}ms">${svgCarta(x, 70)}</div>`).join('') + `<b>🪭 ¡Abanico! ${n} cartas</b>`; $('#yc')?.append(d); setTimeout(() => d.remove(), 1700); sonar('abanico'); } if (esHeroe(u.carta)) { sonar(u.carta.v); destelloOn(HEROES[u.carta.v]); } if (u.i === st.yo && esp(u.carta)) avanzar('esp'); }
         ultEv = st.n_ev; pintar(); if (st.estado === 'fin') finPartida(); });
@@ -646,6 +658,19 @@ ${sig_ ? `<p style="text-align:center;margin:10px 0 0">Te faltan <b>${sig_.min -
   }
   const trofeoHTML = () => '<div class="yc-trofeo"><span class="rayos"></span><span class="copa">🏆</span></div>';
   const contar = el => { if (!el) return; const n = +el.dataset.n || 0, t0 = performance.now(); const paso = t => { const k = Math.min(1, (t - t0) / 1400); el.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))); if (k < 1 && el.isConnected) requestAnimationFrame(paso); }; requestAnimationFrame(paso); };
+  // 🎬 Inicio de partida: presentación VS, barajado del mazo y reparto de cartas una por una (tocar para saltar)
+  function volarM(desde, hacia, html) { try { const a = desde.getBoundingClientRect(), b = hacia.getBoundingClientRect(), d = document.createElement('div'); d.className = 'yc-vuela'; d.innerHTML = html; d.style.left = a.left + 'px'; d.style.top = a.top + 'px'; document.body.append(d); requestAnimationFrame(() => { d.style.transform = `translate(${b.left - a.left + (b.width - a.width) / 2}px,${b.top - a.top}px) rotate(${Math.random() * 30 - 15}deg)`; }); setTimeout(() => d.remove(), 470); } catch (e) {} }
+  function introReparto({ izq, der, n, destino, alFin }) {
+    const y = $('#yc'); if (!y) return alFin(); y.classList.add('repartiendo'); let hecho = false; const timers = [];
+    const fin = () => { if (hecho) return; hecho = true; timers.forEach(clearTimeout); y.querySelectorAll('.yc-vs,.yc-baraja').forEach(e => e.remove()); y.classList.remove('repartiendo'); y.classList.add('revela'); setTimeout(() => y.classList.remove('revela'), 700); alFin(); };
+    const T = (f, ms) => timers.push(setTimeout(() => { if (!hecho && y.isConnected) f(); }, ms));
+    const pj = L => L.map(([av, nom]) => `<div class="p"><span class="av">${av}</span>${escH(nom)}</div>`).join('');
+    const ov = document.createElement('div'); ov.className = 'yc-vs'; ov.innerHTML = `<div class="l">${pj(izq)}</div><b>VS</b><div class="r">${pj(der)}</div><small>Toca para saltar</small>`; ov.onclick = fin; y.append(ov); FX.son('combo'); FX.vibrar?.(40);
+    T(() => { ov.classList.add('sale'); const b = document.createElement('div'); b.className = 'yc-baraja'; const pila = cl => `<div class="m ${cl}">${[...Array(6)].map((_, i) => `<div style="position:absolute;top:${-i * 2}px;left:${i}px">${reverso(78)}</div>`).join('')}</div>`; b.innerHTML = pila('a') + pila('b') + '<small>Barajando…</small>'; b.onclick = fin; y.append(b); for (let i = 0; i < 10; i++) T(() => FX.son('pop'), i * 130); }, 1500);
+    T(() => { ov.remove(); y.querySelector('.yc-baraja')?.remove(); let k = 0; const origen = $('#ycPila');
+      for (let r = 0; r < 7; r++) for (let p = 0; p < n; p++) { const d = k++ * 55; T(() => { const h = destino(p); if (origen && h) volarM(origen, h, reverso(p === 0 ? 58 : 40)); if (d % 110 === 0) FX.son('swish'); }, d); }
+      T(fin, k * 55 + 450); }, 3100);
+  }
   const efectosJugada = (x, col) => { if (x.c === 'w') olaColor(col); if (suma(x) >= 4) golpe('+' + suma(x)); };
 
   // ---------- Partida ----------
@@ -868,9 +893,10 @@ ${(() => { const m = misiones(); return `<div class="yc-misfin"><b>🎯 Misiones
     window.addEventListener('resize', () => vivo && pintar());
     if (opc.entrena) tip('🎓 <b>Entrenamiento</b>: las cartas que puedes jugar brillan. Juega por <b>color</b> o por <b>número</b>. Si ninguna sirve, toca el mazo.', 4200);
     if (esp(ini) && ini.v !== 'mas4') { if (ini.v === 'saltar') turno = sig(); if (ini.v === 'reversa') dir = -1; if (suma(ini) && ini.c !== 'w') { robar(J[0], suma(ini)); turno = sig(); } }
-    siguienteTurno();
+    const arrancar = () => { if (!vivo) return; finAt = LIM ? Date.now() + LIM * 1000 : 0; siguienteTurno(); relojPartida(); };
     setParar(() => { vivo = false; clearTimeout(timer); clearInterval(relojT); clearInterval(relojP); salirCompleta(); });
-    relojPartida();
+    pintar();
+    if (opc.entrena) arrancar(); else introReparto({ izq: [[avatarYo(76), LS.get('chatNom') || 'Tú']], der: J.slice(1).map(j => [caraH(j.cara, 76), j.n]), n: J.length, destino: p => p === 0 ? $('#ycMano') : $(`#ycTop [data-op="${p}"]`), alFin: arrancar });
     window.__yc = { log: () => LOG.slice(-25), estado: () => ({ turno, color, acum, dir, top: tope(), manos: J.map(j => j.mano.length), pila: pila.length, desc: desc.length, fin: fin_, vulnerable, yupi: [...yupi] }), mano: () => J[0].mano, grito: () => gritoYupi(0), pintar: () => pintar() };
   }
   JUEGOS.yupicards = menu;

@@ -1,3 +1,7 @@
+9.45.0 · 🎬 YUPI CARDS: inicio de partida y mesa nueva
+- Al empezar: pantalla «VS» con los jugadores (en 2 vs 2, tú y tu compañero contra los rivales), se baraja el mazo y se reparten las cartas una por una a cada jugador; al final tus cartas se voltean. Se puede saltar tocando. También en línea (el servidor espera a que termine el reparto).
+- Mesa más realista: borde de madera con vetas y filo dorado, paño con textura, el logo YUPI grabado en el centro, sombras y un brillo que pasa.
+
 9.44.0 · 🃏 YUPI CARDS: cadena de + y juego en equipo
 - ⛓️ Cadena de +: si te tiran un +2, +3, +4, +6… y tienes cualquier carta +, te defiendes lanzándola; se suman y pasan al siguiente, hasta que llega a quien no tiene defensa, que se lleva todo automáticamente. Ahora es la regla normal (contra la IA y en línea). Un contador rojo grande muestra el total acumulado.
 - 🤝 2 vs 2 en línea: ves las cartas de tu compañero y él ve las tuyas.

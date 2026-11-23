@@ -10,7 +10,7 @@ const cuatro = v => v === 'mas4' || v === 'rey';
 const MODOS = { '1v1': { n: 2, nombre: '1 vs 1' }, '3': { n: 3, nombre: '3 jugadores' }, '4': { n: 4, nombre: '4 jugadores' }, '2v2': { n: 4, nombre: '2 vs 2', equipos: true } };
 const REACCIONES = ['¡Hola! 👋', '¡Bien jugado! 👏', '¡Oh no! 😱', '¡Date prisa! ⏰', '¡Increíble! 🤩', '¡Cambia de color! 🎨', '¡Suerte! 🍀', '¡Buena partida! 🤝', '😂', '😎', '😡', '😭', '🥳', '🤔', '❤️', '🔥'];
 const BOTS = [['Nico', 'a05'], ['Sami', 'a12'], ['Lupe', 'a18'], ['Beto', 'a23'], ['Maya', 'a31'], ['Inti', 'a40']];
-const TURNO_MS = 25000, PARTIDA_MS = 5 * 60000, ESPERA_RAPIDA = 15000; // reloj de la partida (gana quien tiene menos cartas) y espera de la partida rápida
+const INTRO_MS = 4600, TURNO_MS = 25000, PARTIDA_MS = 5 * 60000, ESPERA_RAPIDA = 15000; // reloj de la partida (gana quien tiene menos cartas) y espera de la partida rápida
 const mezclar = l => { for (let i = l.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [l[i], l[j]] = [l[j], l[i]]; } return l; };
 const azar = l => l[crypto.randomInt(l.length)];
 const codigoNuevo = salas => { const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c; do { c = [...Array(5)].map(() => A[crypto.randomInt(A.length)]).join(''); } while (salas[c]); return c; };
@@ -47,13 +47,13 @@ function crear({ apodo }) {
     return x.c === 'w' || x.c === s.color || x.v === T.v; }
 
   function empezar(s) {
-    clearTimeout(s.timer); clearTimeout(s.relojP); clearTimeout(s.arrT); s.arranca = 0; s.finAt = Date.now() + PARTIDA_MS; s.relojP = setTimeout(() => porTiempo(s), PARTIDA_MS); s.pila = mazo(s.opc); s.desc = []; s.dir = 1; s.acum = 0; s.yupi = []; s.vulnerable = null; s.robado = false; s.ganador = null; s.ultimo = null; s.estado = 'jugando';
+    clearTimeout(s.timer); clearTimeout(s.relojP); clearTimeout(s.arrT); s.arranca = 0; s.finAt = Date.now() + INTRO_MS + PARTIDA_MS; s.relojP = setTimeout(() => porTiempo(s), INTRO_MS + PARTIDA_MS); s.pila = mazo(s.opc); s.desc = []; s.dir = 1; s.acum = 0; s.yupi = []; s.vulnerable = null; s.robado = false; s.ganador = null; s.ultimo = null; s.estado = 'jugando';
     for (const j of s.jug) j.mano = [];
     for (let k = 0; k < 7; k++) for (const j of s.jug) j.mano.push(s.pila.pop());
     let ini; do { ini = s.pila.pop(); if (ini.c === 'w' || suma(ini)) { s.pila.unshift(ini); ini = null; } } while (!ini);
     s.desc.push(ini); s.color = ini.c; s.turno = crypto.randomInt(s.jug.length);
     if (ini.v === 'saltar') s.turno = sig(s); if (ini.v === 'reversa') s.dir = -1;
-    turnoNuevo(s);
+    s.turnoFin = 0; avisar(s); s.timer = setTimeout(() => turnoNuevo(s), INTRO_MS); // 🎬 primero se ve el VS, el barajado y el reparto
   }
   // ⏳ se acabó el reloj: gana quien tiene menos cartas (en 2 vs 2, el equipo de ese jugador)
   function porTiempo(s) { if (s.estado !== 'jugando') return; const pts = j => j.mano.reduce((a, c) => a + (/^\d$/.test(c.v) ? +c.v : c.c === 'w' ? 50 : 20), 0); const k = s.jug.map((_, i) => i).sort((a, b) => s.jug[a].mano.length - s.jug[b].mano.length || pts(s.jug[a]) - pts(s.jug[b]))[0]; terminar(s, k, true); }
