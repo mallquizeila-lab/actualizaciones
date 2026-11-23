@@ -1,3 +1,13 @@
+9.43.0 · 🃏 YUPI CARDS mejorado + 📿 pulsera de juegos en la portada
+- Cartas nuevas más coloridas: colores vivos, número gigante con borde, esquinas grandes y brillo (diseño propio de YUPI).
+- Ya no aparece el letrero «Tu turno: elige una carta»: se enciende (brilla en verde) solo el jugador al que le toca, y cuando te toca a ti suena un tono distinto y vibra.
+- Ficha de nivel de la Aventura: ahora se lee bien el texto (rivales, dificultad, regla y premio).
+- En línea: ⚡ Partida rápida con gente al azar (1 vs 1 o 4 jugadores; a los 15 s la IA completa), la carta 🪭 Abanico y el reloj de 5 minutos (gana quien tiene menos cartas).
+- Más emoción: ola del color elegido al jugar un comodín, golpe gigante en los +4/+5/+6 con temblor, y lluvia de cartas al ganar.
+- Nueva zona de la Aventura: 🛶 Lago Titicaca (niveles 16 a 20) con el jefe Cóndor Kuntur, el marco «Totora dorada» y 6 figuritas nuevas en el álbum.
+- Al ganar: botones para presumir la victoria en WhatsApp y Facebook con el enlace del juego.
+- Portada de Yupitok: «pulsera» deslizable con la foto real y el nombre de cada uno de los 33 juegos; avanza sola y se detiene al tocarla.
+
 9.42.1 · ProfeTok: 📸 fotos para los fotochecks
 - En la hoja de Fotochecks, tocas el círculo de cada alumno y le tomas la foto con el celular: se guarda sola y ya sale en su fotocheck (no hace falta que traigan foto impresa).
 

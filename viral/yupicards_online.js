@@ -10,14 +10,14 @@ const cuatro = v => v === 'mas4' || v === 'rey';
 const MODOS = { '1v1': { n: 2, nombre: '1 vs 1' }, '3': { n: 3, nombre: '3 jugadores' }, '4': { n: 4, nombre: '4 jugadores' }, '2v2': { n: 4, nombre: '2 vs 2', equipos: true } };
 const REACCIONES = ['¡Hola! 👋', '¡Bien jugado! 👏', '¡Oh no! 😱', '¡Date prisa! ⏰', '¡Increíble! 🤩', '¡Cambia de color! 🎨', '¡Suerte! 🍀', '¡Buena partida! 🤝', '😂', '😎', '😡', '😭', '🥳', '🤔', '❤️', '🔥'];
 const BOTS = [['Nico', 'a05'], ['Sami', 'a12'], ['Lupe', 'a18'], ['Beto', 'a23'], ['Maya', 'a31'], ['Inti', 'a40']];
-const TURNO_MS = 25000;
+const TURNO_MS = 25000, PARTIDA_MS = 5 * 60000, ESPERA_RAPIDA = 15000; // reloj de la partida (gana quien tiene menos cartas) y espera de la partida rápida
 const mezclar = l => { for (let i = l.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [l[i], l[j]] = [l[j], l[i]]; } return l; };
 const azar = l => l[crypto.randomInt(l.length)];
 const codigoNuevo = salas => { const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c; do { c = [...Array(5)].map(() => A[crypto.randomInt(A.length)]).join(''); } while (salas[c]); return c; };
 
 function mazo(o) {
   const M = []; let id = 0;
-  for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); if (o.masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
+  for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); if (o.abanico !== false) M.push({ c, v: 'abanico' }); if (o.masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
   for (let i = 0; i < 4; i++) M.push({ c: 'w', v: 'comodin' }, { c: 'w', v: 'mas4' });
   if (o.heroes) for (const v of HEROES) M.push({ c: 'w', v });
   return mezclar(M.map(x => ({ ...x, id: ++id })));
@@ -33,7 +33,7 @@ function crear({ apodo }) {
     return { codigo: s.id, modo: s.modo, nombreModo: MODOS[s.modo].nombre, equipos: !!s.equipos, n: MODOS[s.modo].n, estado: s.estado, host: s.jug[0]?.uid === uid, yo, opc: s.opc,
       jugadores: s.jug.map((j, i) => ({ nombre: j.nombre, avatar: j.avatar, bot: !!j.bot, cartas: j.mano.length, equipo: equipo(s, i), yupi: s.yupi.includes(i), conectado: j.bot || !!subs[s.id] && [...subs[s.id]].some(x => x.uid === j.uid) })),
       mano: yo >= 0 ? s.jug[yo].mano : [], tope: T || null, color: s.color, turno: s.turno, dir: s.dir, acum: s.acum, robado: s.robado && s.turno === yo, vulnerable: s.vulnerable, quedan: s.turnoFin ? Math.max(0, s.turnoFin - Date.now()) : 0,
-      pila: s.pila.length, ganador: s.ganador, ultimo: s.ultimo, n_ev: s.nEv };
+      pila: s.pila.length, ganador: s.ganador, ultimo: s.ultimo, n_ev: s.nEv, publica: !!s.publica, arranca: s.arranca ? Math.max(0, s.arranca - Date.now()) : 0, finEn: s.finAt && s.estado === 'jugando' ? Math.max(0, s.finAt - Date.now()) : 0 };
   }
   function avisar(s) { s.nEv++; for (const x of subs[s.id] || []) { try { x.res.write(`event: sala\ndata: ${JSON.stringify(vista(s, x.uid))}\n\n`); } catch (e) {} } }
   function evento(s, tipo, data) { for (const x of subs[s.id] || []) { try { x.res.write(`event: ${tipo}\ndata: ${JSON.stringify(data)}\n\n`); } catch (e) {} } }
@@ -45,7 +45,7 @@ function crear({ apodo }) {
   function puede(s, x) { const T = tope(s); if (s.acum) return s.opc.acum && suma(x) > 0 && suma(x) >= suma(T); return x.c === 'w' || x.c === s.color || x.v === T.v; }
 
   function empezar(s) {
-    clearTimeout(s.timer); s.pila = mazo(s.opc); s.desc = []; s.dir = 1; s.acum = 0; s.yupi = []; s.vulnerable = null; s.robado = false; s.ganador = null; s.ultimo = null; s.estado = 'jugando';
+    clearTimeout(s.timer); clearTimeout(s.relojP); clearTimeout(s.arrT); s.arranca = 0; s.finAt = Date.now() + PARTIDA_MS; s.relojP = setTimeout(() => porTiempo(s), PARTIDA_MS); s.pila = mazo(s.opc); s.desc = []; s.dir = 1; s.acum = 0; s.yupi = []; s.vulnerable = null; s.robado = false; s.ganador = null; s.ultimo = null; s.estado = 'jugando';
     for (const j of s.jug) j.mano = [];
     for (let k = 0; k < 7; k++) for (const j of s.jug) j.mano.push(s.pila.pop());
     let ini; do { ini = s.pila.pop(); if (ini.c === 'w' || suma(ini)) { s.pila.unshift(ini); ini = null; } } while (!ini);
@@ -53,9 +53,11 @@ function crear({ apodo }) {
     if (ini.v === 'saltar') s.turno = sig(s); if (ini.v === 'reversa') s.dir = -1;
     turnoNuevo(s);
   }
-  function terminar(s, k) {
-    clearTimeout(s.timer); s.estado = 'fin'; s.turnoFin = 0;
-    s.ganador = { i: k, nombre: s.jug[k].nombre, equipo: equipo(s, k), equipoNombres: s.equipos ? s.jug.filter((_, i) => equipo(s, i) === equipo(s, k)).map(j => j.nombre) : null };
+  // ⏳ se acabó el reloj: gana quien tiene menos cartas (en 2 vs 2, el equipo de ese jugador)
+  function porTiempo(s) { if (s.estado !== 'jugando') return; const pts = j => j.mano.reduce((a, c) => a + (/^\d$/.test(c.v) ? +c.v : c.c === 'w' ? 50 : 20), 0); const k = s.jug.map((_, i) => i).sort((a, b) => s.jug[a].mano.length - s.jug[b].mano.length || pts(s.jug[a]) - pts(s.jug[b]))[0]; terminar(s, k, true); }
+  function terminar(s, k, tiempo) {
+    clearTimeout(s.timer); clearTimeout(s.relojP); s.estado = 'fin'; s.turnoFin = 0;
+    s.ganador = { i: k, tiempo: !!tiempo, nombre: s.jug[k].nombre, equipo: equipo(s, k), equipoNombres: s.equipos ? s.jug.filter((_, i) => equipo(s, i) === equipo(s, k)).map(j => j.nombre) : null };
     avisar(s);
   }
   function turnoNuevo(s) {
@@ -71,7 +73,9 @@ function crear({ apodo }) {
   function jugar(s, k, x, col) {
     const j = s.jug[k]; j.mano = j.mano.filter(c => c.id !== x.id);
     if (x.c === 'w') x.elegido = COLS.includes(col) ? col : azar(COLS);
-    s.desc.push(x); s.color = x.c === 'w' ? x.elegido : x.c; s.robado = false; s.ultimo = { tipo: 'juega', i: k, carta: x };
+    const fan = x.v === 'abanico' ? j.mano.filter(c => c.c === x.c) : []; // 🪭 Abanico: bota de golpe todas las cartas de ese color
+    if (fan.length) { j.mano = j.mano.filter(c => c.c !== x.c); s.desc.push(...fan); }
+    s.desc.push(x); s.color = x.c === 'w' ? x.elegido : x.c; s.robado = false; s.ultimo = { tipo: 'juega', i: k, carta: x, ...(fan.length ? { fan } : {}) };
     if (j.mano.length === 1 && !s.yupi.includes(k)) { s.vulnerable = k; botsAtrapan(s, k); } else if (s.vulnerable === k) s.vulnerable = null;
     if (!j.mano.length) return terminar(s, k);
     let salto = 1;
@@ -84,6 +88,7 @@ function crear({ apodo }) {
     if (s.vulnerable !== null && s.vulnerable !== k) s.vulnerable = null;
     s.turno = sig(s, salto); turnoNuevo(s);
   }
+  function llenarYEmpezar(s) { const usados = new Set(s.jug.map(j => j.nombre)); while (s.jug.length < MODOS[s.modo].n) { const [n, a] = BOTS.find(([n]) => !usados.has(n)) || ['IA', 'a27']; usados.add(n); s.jug.push({ uid: 'bot' + s.jug.length, nombre: n + ' (IA)', avatar: a, mano: [], bot: true }); } empezar(s); }
   function botsAtrapan(s, k) { // la IA atrapa a quien no dijo ¡YUPI! (a veces)
     const bots = s.jug.map((j, i) => j.bot && i !== k && equipo(s, i) !== equipo(s, k) ? i : -1).filter(i => i >= 0); if (!bots.length) return;
     setTimeout(() => { if (s.vulnerable !== k || s.estado !== 'jugando' || Math.random() > .55) return; robar(s, s.jug[k], 2); s.vulnerable = null; s.ultimo = { tipo: 'atrapado', i: k, por: s.jug[azar(bots)].nombre }; avisar(s); }, 1600 + crypto.randomInt(1500));
@@ -92,14 +97,14 @@ function crear({ apodo }) {
     if (s.estado !== 'jugando') return; const k = s.turno, j = s.jug[k]; let ops = j.mano.filter(x => puede(s, x));
     if (!ops.length) { robar(s, j, 1); const nv = j.mano[j.mano.length - 1]; if (puede(s, nv)) ops = [nv]; else { s.ultimo = { tipo: 'roba', i: k, n: 1 }; s.turno = sig(s); return turnoNuevo(s); } }
     const prox = s.jug[sig(s)], amigo = equipo(s, sig(s)) === equipo(s, k), pocas = prox.mano.length <= 2 && !amigo;
-    const val = c => { let v = 0; if (c.c === 'w') v -= 30; if (suma(c) || ['saltar', 'bruja'].includes(c.v)) v += amigo ? -40 : pocas ? 50 : 8; if (/^\d$/.test(c.v)) v += +c.v; v += j.mano.filter(o => o.c === c.c).length * 3; if (c.v === 'coquito') v += j.mano.length >= 6 ? 60 : -60; return v + Math.random() * 4; };
+    const val = c => { let v = 0; if (c.c === 'w') v -= 30; if (suma(c) || ['saltar', 'bruja'].includes(c.v)) v += amigo ? -40 : pocas ? 50 : 8; if (/^\d$/.test(c.v)) v += +c.v; v += j.mano.filter(o => o.c === c.c).length * 3; if (c.v === 'coquito') v += j.mano.length >= 6 ? 60 : -60; if (c.v === 'abanico') v += j.mano.filter(o => o.c === c.c).length * 14; return v + Math.random() * 4; };
     const x = ops.sort((a, b) => val(b) - val(a))[0];
     if (j.mano.length === 2 && Math.random() < .85) { s.yupi.push(k); evento(s, 'reac', { i: k, t: '¡YUPI! 📣' }); }
     const cnt = {}; for (const c of j.mano) if (c.c !== 'w' && c.id !== x.id) cnt[c.c] = (cnt[c.c] || 0) + 1;
     jugar(s, k, x, Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || azar(COLS));
   }
 
-  setInterval(() => { const ahora = Date.now(); for (const [id, s] of Object.entries(salas)) if (ahora - s.activo > 30 * 60000 && !(subs[id]?.size)) { clearTimeout(s.timer); delete salas[id]; } }, 60000).unref();
+  setInterval(() => { const ahora = Date.now(); for (const [id, s] of Object.entries(salas)) if (ahora - s.activo > 30 * 60000 && !(subs[id]?.size)) { clearTimeout(s.timer); clearTimeout(s.relojP); clearTimeout(s.arrT); delete salas[id]; } }, 60000).unref();
 
   async function http(req, res, u, { ip, json, send, limite }) {
     if (u.pathname === '/api/yc/stream') {
@@ -120,8 +125,15 @@ function crear({ apodo }) {
       if (!MODOS[b.modo]) return send(res, 400, { error: 'Modo no válido' });
       if (limite(ip, 'ycCrear', 20)) return send(res, 429, { error: 'Espera un poco para crear otra sala' });
       const id = codigoNuevo(salas), o = b.opc || {};
-      salas[id] = { id, modo: b.modo, equipos: !!MODOS[b.modo].equipos, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: !!o.acum, heroes: o.heroes !== false, masN: o.masN !== false }, activo: Date.now(), nEv: 0 };
+      salas[id] = { id, modo: b.modo, equipos: !!MODOS[b.modo].equipos, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: !!o.acum, heroes: o.heroes !== false, masN: o.masN !== false, abanico: o.abanico !== false }, activo: Date.now(), nEv: 0 };
       return send(res, 200, { id });
+    }
+    if (r === 'rapida') { // ⚡ partida rápida: te une a una sala pública que está esperando o abre una nueva; a los 15 s la IA llena lo que falte
+      const modo = b.modo === '4' ? '4' : '1v1'; if (limite(ip, 'ycRapida', 30)) return send(res, 429, { error: 'Espera un poco 🙂' });
+      let s = Object.values(salas).find(x => x.publica && x.estado === 'esperando' && x.modo === modo && x.jug.length < MODOS[modo].n && !x.jug.some(j => j.uid === uid));
+      if (s) { s.jug.push({ uid, nombre, avatar, mano: [] }); evento(s, 'aviso', { texto: `👋 ${nombre} entró a la partida` }); if (s.jug.length >= MODOS[modo].n) empezar(s); else avisar(s); return send(res, 200, { id: s.id }); }
+      const id = codigoNuevo(salas); s = salas[id] = { id, modo, publica: true, equipos: false, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: false, heroes: true, masN: true, abanico: true }, activo: Date.now(), nEv: 0, arranca: Date.now() + ESPERA_RAPIDA };
+      s.arrT = setTimeout(() => { if (s.estado === 'esperando' && s.jug.some(j => !j.bot)) llenarYEmpezar(s); }, ESPERA_RAPIDA); return send(res, 200, { id });
     }
     const s = salas[String(b.id || '').toUpperCase().trim()]; if (!s) return send(res, 404, { error: 'No encontramos esa sala. Revisa el código 🙂' });
     s.activo = Date.now(); const k = s.jug.findIndex(j => j.uid === uid), yo = s.jug[k];
@@ -134,9 +146,8 @@ function crear({ apodo }) {
     }
     if (!yo) return send(res, 403, { error: 'No estás en esta sala' });
     if (r === 'empezar') { // el anfitrión empieza; los asientos vacíos los ocupa la IA
-      if (k !== 0 || s.estado === 'jugando') return send(res, 400, { error: 'Solo el anfitrión puede empezar' });
-      const usados = new Set(s.jug.map(j => j.nombre)); while (s.jug.length < MODOS[s.modo].n) { const [n, a] = BOTS.find(([n]) => !usados.has(n)) || ['IA', 'a27']; usados.add(n); s.jug.push({ uid: 'bot' + s.jug.length, nombre: n + ' (IA)', avatar: a, mano: [], bot: true }); }
-      empezar(s); return send(res, 200, { ok: 1 });
+      if (k !== 0 || s.estado === 'jugando' || s.publica) return send(res, 400, { error: 'Solo el anfitrión puede empezar' });
+      llenarYEmpezar(s); return send(res, 200, { ok: 1 });
     }
     if (r === 'reaccion') {
       if (limite(ip, 'ycReac', 30)) return send(res, 429, { error: 'Más despacio 🙂' });
@@ -145,7 +156,7 @@ function crear({ apodo }) {
     }
     if (r === 'salir') {
       if (s.estado === 'jugando') { s.jug[k] = { ...yo, uid: 'bot' + k, nombre: yo.nombre + ' (IA)', bot: true }; evento(s, 'aviso', { texto: `🚪 ${yo.nombre} salió; la IA juega por él` }); if (s.turno === k) turnoNuevo(s); else avisar(s); }
-      else { s.jug.splice(k, 1); if (!s.jug.some(j => !j.bot)) { clearTimeout(s.timer); delete salas[s.id]; } else avisar(s); }
+      else { s.jug.splice(k, 1); if (!s.jug.some(j => !j.bot)) { clearTimeout(s.timer); clearTimeout(s.arrT); delete salas[s.id]; } else avisar(s); }
       return send(res, 200, { ok: 1 });
     }
     if (r === 'revancha') { if (s.estado !== 'fin') return send(res, 400, { error: 'No disponible' }); empezar(s); return send(res, 200, { ok: 1 }); }
