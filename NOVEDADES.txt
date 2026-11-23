@@ -1,3 +1,8 @@
+9.43.1 · 🃏 YUPI CARDS con más vida
+- Menú y pantallas (perfil, álbum, misiones…): rayos de sol que giran, cartas que suben flotando y chispas; marcos con borde arcoíris.
+- Perfil: las estadísticas ahora son casillas de colores (rojo, amarillo, verde, azul y morado) con letras grandes.
+- Corregido: el botón de Aventura decía «Nivel X de 15 · /45 ★»; ahora dice de 20 niveles y 60 estrellas.
+
 9.43.0 · 🃏 YUPI CARDS mejorado + 📿 pulsera de juegos en la portada
 - Cartas nuevas más coloridas: colores vivos, número gigante con borde, esquinas grandes y brillo (diseño propio de YUPI).
 - Ya no aparece el letrero «Tu turno: elige una carta»: se enciende (brilla en verde) solo el jugador al que le toca, y cuando te toca a ti suena un tono distinto y vibra.
