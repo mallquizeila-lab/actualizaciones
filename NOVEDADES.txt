@@ -1,3 +1,8 @@
+9.47.0 · 🌀 Nuevo juego: YUPI Remolino + arreglo de la cadena de +
+- Arreglado: en la cadena de + se sumaban todas las cartas (te podían llegar 27 o 40). Ahora la cadena pasa sin sumar: quien no tiene defensa roba lo que dice la última carta (si fue un +6, roba 6). Contra la IA y en línea.
+- 🌀 YUPI Remolino: juego nuevo dentro de YUPI CARDS con 4 cartas propias (🌀 Remolino: todos pasan su mano al siguiente; ➕ Comodín +8; 💣 Bomba: los rivales roban 2; 🪞 Espejo: cambia el sentido y devuelve un + que te tiraron), 12 niveles con estrellas, 2 jefes (Tornado Toño y la Reina del Remolino) y premios.
+- ⭐ Ventana «Juego destacado» al entrar al menú (una vez al día) con «Jugar ahora» y «Más juegos», y un botón grande «YUPI Remolino ¡NUEVO!» en el menú.
+
 9.46.0 · ✨ YUPI CARDS: filtros para tu foto
 - Perfil → Personalizar → Filtros: efectos animados alrededor de tu foto que se ven mientras juegas (y en el menú y la pantalla VS): Estrellitas, Mariquitas, Burbujas del mar, Plumas de cóndor, Mariposas, Corazones, Fuego imparable, Nieve navideña, Confeti y Lago Titicaca.
 - Se ganan jugando (victorias, jefes de la Aventura, ¡YUPI!, racha, nivel, evento de Navidad); nada se compra. El elegido dice «✅ Usado».

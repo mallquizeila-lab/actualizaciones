@@ -85,7 +85,7 @@ function crear({ apodo }) {
     if (x.v === 'saltar' || x.v === 'bruja') salto = 2;
     if (x.v === 'idol') s.jug.forEach((o, i) => { if (i !== k) robar(s, o, 1); });
     if (x.v === 'coquito') { const v = s.jug.filter((o, i) => i !== k && equipo(s, i) !== equipo(s, k)).sort((a, b) => a.mano.length - b.mano.length)[0]; if (v && v.mano.length < j.mano.length) { const t = j.mano; j.mano = v.mano; v.mano = t; s.yupi = s.yupi.filter(i => s.jug[i] !== j && s.jug[i] !== v); s.ultimo.cambio = v.nombre; } }
-    if (suma(x)) { s.acum += suma(x); const sg = s.jug[sig(s)]; const responde = sg.mano.some(c => suma(c) > 0);
+    if (suma(x)) { s.acum = suma(x); /* la cadena pasa sin sumar: se roba lo de la última carta */ const sg = s.jug[sig(s)]; const responde = sg.mano.some(c => suma(c) > 0);
       if (!responde) { robar(s, sg, s.acum); s.ultimo.roba = { nombre: sg.nombre, n: s.acum }; s.acum = 0; salto = 2; } }
     if (s.vulnerable !== null && s.vulnerable !== k) s.vulnerable = null;
     s.turno = sig(s, salto); turnoNuevo(s);
