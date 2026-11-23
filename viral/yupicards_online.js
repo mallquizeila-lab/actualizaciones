@@ -5,7 +5,7 @@
 const crypto = require('crypto');
 
 const COLS = ['r', 'b', 'g', 'y'], HEROES = ['bruja', 'rey', 'idol', 'coquito'];
-const SUMA = { mas2: 2, mas3: 3, mas4c: 4, mas5: 5, mas6: 6, mas4: 4, rey: 4 }, suma = x => SUMA[x?.v] || 0;
+const SUMA = { mas2: 2, mas3: 3, mas4c: 4, mas5: 5, mas6: 6, mas4: 4, rey: 4, mas8: 8 }, suma = x => SUMA[x?.v] || 0;
 const cuatro = v => v === 'mas4' || v === 'rey';
 const MODOS = { '1v1': { n: 2, nombre: '1 vs 1' }, '3': { n: 3, nombre: '3 jugadores' }, '4': { n: 4, nombre: '4 jugadores' }, '2v2': { n: 4, nombre: '2 vs 2', equipos: true } };
 const REACCIONES = ['¡Hola! 👋', '¡Bien jugado! 👏', '¡Oh no! 😱', '¡Date prisa! ⏰', '¡Increíble! 🤩', '¡Cambia de color! 🎨', '¡Suerte! 🍀', '¡Buena partida! 🤝', '😂', '😎', '😡', '😭', '🥳', '🤔', '❤️', '🔥'];
@@ -19,6 +19,7 @@ function mazo(o) {
   const M = []; let id = 0;
   for (const c of COLS) { M.push({ c, v: '0' }); for (let n = 1; n <= 9; n++) M.push({ c, v: String(n) }, { c, v: String(n) }); for (const v of ['saltar', 'reversa', 'mas2']) M.push({ c, v }, { c, v }); if (o.abanico !== false) M.push({ c, v: 'abanico' }); if (o.masN) for (const v of ['mas3', 'mas4c', 'mas5', 'mas6']) M.push({ c, v }); }
   for (let i = 0; i < 4; i++) M.push({ c: 'w', v: 'comodin' }, { c: 'w', v: 'mas4' });
+  if (o.remolino) { for (const c of COLS) M.push({ c, v: 'bomba' }, { c, v: 'espejo' }, { c, v: 'espejo' }); for (let i = 0; i < 3; i++) M.push({ c: 'w', v: 'remolino' }, { c: 'w', v: 'mas8' }); } // 🌀 YUPI Remolino
   if (o.heroes) for (const v of HEROES) M.push({ c: 'w', v });
   return mezclar(M.map(x => ({ ...x, id: ++id })));
 }
@@ -43,7 +44,7 @@ function crear({ apodo }) {
   const tope = s => s.desc[s.desc.length - 1];
   const sig = (s, k = 1) => (s.turno + s.dir * k + s.jug.length * 4) % s.jug.length;
   function robar(s, j, n) { for (let i = 0; i < n; i++) { if (!s.pila.length) { const top = s.desc.pop(); s.pila = mezclar(s.desc.map(x => x.c === 'w' ? { ...x, elegido: undefined } : x)); s.desc = [top]; } if (s.pila.length) j.mano.push(s.pila.pop()); } s.yupi = s.yupi.filter(i => s.jug[i] !== j); }
-  function puede(s, x) { const T = tope(s); if (s.acum) return suma(x) > 0; // ⛓️ cadena de +: cualquier carta + defiende y se suma
+  function puede(s, x) { const T = tope(s); if (s.acum) return suma(x) > 0 || x.v === 'espejo'; // ⛓️ cadena de +: cualquier carta + defiende y se suma
     return x.c === 'w' || x.c === s.color || x.v === T.v; }
 
   function empezar(s) {
@@ -83,9 +84,13 @@ function crear({ apodo }) {
     let salto = 1;
     if (x.v === 'reversa') { s.dir = -s.dir; if (s.jug.length === 2) salto = 2; }
     if (x.v === 'saltar' || x.v === 'bruja') salto = 2;
+    // 🌀 cartas de YUPI Remolino
+    if (x.v === 'espejo') { s.dir = -s.dir; if (s.acum) s.ultimo.espejo = s.acum; else if (s.jug.length === 2) salto = 2; }
+    if (x.v === 'bomba') { s.jug.forEach((o, i) => { if (i !== k && equipo(s, i) !== equipo(s, k)) robar(s, o, 2); }); s.ultimo.bomba = 1; }
+    if (x.v === 'remolino') { const M0 = s.jug.map(o => o.mano), n = s.jug.length; s.jug.forEach((o, i) => { o.mano = M0[(i - s.dir + n * 2) % n]; }); s.yupi = []; s.vulnerable = null; s.ultimo.remolino = 1; }
     if (x.v === 'idol') s.jug.forEach((o, i) => { if (i !== k) robar(s, o, 1); });
     if (x.v === 'coquito') { const v = s.jug.filter((o, i) => i !== k && equipo(s, i) !== equipo(s, k)).sort((a, b) => a.mano.length - b.mano.length)[0]; if (v && v.mano.length < j.mano.length) { const t = j.mano; j.mano = v.mano; v.mano = t; s.yupi = s.yupi.filter(i => s.jug[i] !== j && s.jug[i] !== v); s.ultimo.cambio = v.nombre; } }
-    if (suma(x)) { s.acum = suma(x); /* la cadena pasa sin sumar: se roba lo de la última carta */ const sg = s.jug[sig(s)]; const responde = sg.mano.some(c => suma(c) > 0);
+    if (suma(x)) { s.acum = suma(x); /* la cadena pasa sin sumar: se roba lo de la última carta */ const sg = s.jug[sig(s)]; const responde = sg.mano.some(c => suma(c) > 0 || c.v === 'espejo');
       if (!responde) { robar(s, sg, s.acum); s.ultimo.roba = { nombre: sg.nombre, n: s.acum }; s.acum = 0; salto = 2; } }
     if (s.vulnerable !== null && s.vulnerable !== k) s.vulnerable = null;
     s.turno = sig(s, salto); turnoNuevo(s);
@@ -99,7 +104,7 @@ function crear({ apodo }) {
     if (s.estado !== 'jugando') return; const k = s.turno, j = s.jug[k]; let ops = j.mano.filter(x => puede(s, x));
     if (!ops.length) { robar(s, j, 1); const nv = j.mano[j.mano.length - 1]; if (puede(s, nv)) ops = [nv]; else { s.ultimo = { tipo: 'roba', i: k, n: 1 }; s.turno = sig(s); return turnoNuevo(s); } }
     const prox = s.jug[sig(s)], amigo = equipo(s, sig(s)) === equipo(s, k), pocas = prox.mano.length <= 2 && !amigo;
-    const val = c => { let v = 0; if (c.c === 'w') v -= 30; if (suma(c) || ['saltar', 'bruja'].includes(c.v)) v += amigo ? -40 : pocas ? 50 : 8; if (/^\d$/.test(c.v)) v += +c.v; v += j.mano.filter(o => o.c === c.c).length * 3; if (c.v === 'coquito') v += j.mano.length >= 6 ? 60 : -60; if (c.v === 'abanico') v += j.mano.filter(o => o.c === c.c).length * 14; return v + Math.random() * 4; };
+    const val = c => { let v = 0; if (c.c === 'w') v -= 30; if (suma(c) || ['saltar', 'bruja'].includes(c.v)) v += amigo ? -40 : pocas ? 50 : 8; if (/^\d$/.test(c.v)) v += +c.v; v += j.mano.filter(o => o.c === c.c).length * 3; if (c.v === 'coquito') v += j.mano.length >= 6 ? 60 : -60; if (c.v === 'abanico') v += j.mano.filter(o => o.c === c.c).length * 14; if (c.v === 'bomba') v += 30; if (c.v === 'mas8') v += pocas ? 70 : -15; if (c.v === 'remolino') { const rec = s.jug[(k - s.dir + s.jug.length * 2) % s.jug.length].mano.length; v += j.mano.length - 1 - rec >= 2 ? 80 : -70; } return v + Math.random() * 4; };
     const x = ops.sort((a, b) => val(b) - val(a))[0];
     if (j.mano.length === 2 && Math.random() < .85) { s.yupi.push(k); evento(s, 'reac', { i: k, t: '¡YUPI! 📣' }); }
     const cnt = {}; for (const c of j.mano) if (c.c !== 'w' && c.id !== x.id) cnt[c.c] = (cnt[c.c] || 0) + 1;
@@ -127,14 +132,14 @@ function crear({ apodo }) {
       if (!MODOS[b.modo]) return send(res, 400, { error: 'Modo no válido' });
       if (limite(ip, 'ycCrear', 20)) return send(res, 429, { error: 'Espera un poco para crear otra sala' });
       const id = codigoNuevo(salas), o = b.opc || {};
-      salas[id] = { id, modo: b.modo, equipos: !!MODOS[b.modo].equipos, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: !!o.acum, heroes: o.heroes !== false, masN: o.masN !== false, abanico: o.abanico !== false }, activo: Date.now(), nEv: 0 };
+      salas[id] = { id, modo: b.modo, equipos: !!MODOS[b.modo].equipos, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: !!o.acum, heroes: o.heroes !== false, masN: o.masN !== false, abanico: o.abanico !== false, remolino: !!o.remolino }, activo: Date.now(), nEv: 0 };
       return send(res, 200, { id });
     }
     if (r === 'rapida') { // ⚡ partida rápida: te une a una sala pública que está esperando o abre una nueva; a los 15 s la IA llena lo que falte
       const modo = b.modo === '4' ? '4' : '1v1'; if (limite(ip, 'ycRapida', 30)) return send(res, 429, { error: 'Espera un poco 🙂' });
-      let s = Object.values(salas).find(x => x.publica && x.estado === 'esperando' && x.modo === modo && x.jug.length < MODOS[modo].n && !x.jug.some(j => j.uid === uid));
+      const rem = !!b.remolino; let s = Object.values(salas).find(x => x.publica && x.estado === 'esperando' && x.modo === modo && !!x.opc.remolino === rem && x.jug.length < MODOS[modo].n && !x.jug.some(j => j.uid === uid));
       if (s) { s.jug.push({ uid, nombre, avatar, mano: [] }); evento(s, 'aviso', { texto: `👋 ${nombre} entró a la partida` }); if (s.jug.length >= MODOS[modo].n) empezar(s); else avisar(s); return send(res, 200, { id: s.id }); }
-      const id = codigoNuevo(salas); s = salas[id] = { id, modo, publica: true, equipos: false, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: false, heroes: true, masN: true, abanico: true }, activo: Date.now(), nEv: 0, arranca: Date.now() + ESPERA_RAPIDA };
+      const id = codigoNuevo(salas); s = salas[id] = { id, modo, publica: true, equipos: false, jug: [{ uid, nombre, avatar, mano: [] }], estado: 'esperando', pila: [], desc: [], yupi: [], opc: { acum: false, heroes: true, masN: true, abanico: true, remolino: rem }, activo: Date.now(), nEv: 0, arranca: Date.now() + ESPERA_RAPIDA };
       s.arrT = setTimeout(() => { if (s.estado === 'esperando' && s.jug.some(j => !j.bot)) llenarYEmpezar(s); }, ESPERA_RAPIDA); return send(res, 200, { id });
     }
     const s = salas[String(b.id || '').toUpperCase().trim()]; if (!s) return send(res, 404, { error: 'No encontramos esa sala. Revisa el código 🙂' });

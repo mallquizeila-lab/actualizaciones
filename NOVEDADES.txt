@@ -1,3 +1,7 @@
+9.48.0 · 🌀 YUPI Remolino en línea
+- En «Con amigos» eliges «¿Qué juego?»: 🃏 Clásico o 🌀 Remolino. Funciona en las salas con código (1 vs 1, 3, 4 y 2 vs 2) y en la ⚡ Partida rápida (los de Remolino se juntan solo con quienes también eligieron Remolino).
+- Las 4 cartas nuevas en línea: 🌀 Remolino (todos pasan su mano al siguiente), Comodín +8, 💣 Bomba (en 2 vs 2 solo roban los rivales, no tu compañero) y 🪞 Espejo (devuelve el + que te tiraron). La IA de los asientos vacíos también las usa.
+
 9.47.0 · 🌀 Nuevo juego: YUPI Remolino + arreglo de la cadena de +
 - Arreglado: en la cadena de + se sumaban todas las cartas (te podían llegar 27 o 40). Ahora la cadena pasa sin sumar: quien no tiene defensa roba lo que dice la última carta (si fue un +6, roba 6). Contra la IA y en línea.
 - 🌀 YUPI Remolino: juego nuevo dentro de YUPI CARDS con 4 cartas propias (🌀 Remolino: todos pasan su mano al siguiente; ➕ Comodín +8; 💣 Bomba: los rivales roban 2; 🪞 Espejo: cambia el sentido y devuelve un + que te tiraron), 12 niveles con estrellas, 2 jefes (Tornado Toño y la Reina del Remolino) y premios.
