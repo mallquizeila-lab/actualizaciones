@@ -9,6 +9,7 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
   create index if not exists av_p on avisos(padre_id, id); create index if not exists av_env on avisos(enviado);`);
   const PREF0 = { notas: true, examenes: true, logros: true, observaciones: true, asistencia: true, mensajes: true, silencio: true };
   const prefs = uid => ({ ...PREF0, ...(JSON.parse(q1('select prefs from avisos_pref where usuario_id=?', uid)?.prefs || '{}')) });
+  const h12 = h => { const [a, m] = String(h || '').split(':').map(Number); return `${a % 12 || 12}:${String(m).padStart(2, '0')} ${a < 12 ? 'a. m.' : 'p. m.'}`; };
   const pila = n => String(n || '').trim().split(/\s+/)[0] || 'tu hijo(a)';
   const nivelDe = (escala, v) => { const s = String(v || '').toUpperCase().trim(); if (escala === 'vigesimal') { const n = parseFloat(s); return isNaN(n) ? null : n >= 18 ? 'destacado' : n >= 14 ? 'logrado' : n >= 11 ? 'proceso' : 'inicio'; } return { AD: 'destacado', A: 'logrado', B: 'proceso', C: 'inicio' }[s] || null; };
   // ideas para casa (sin culpar a nadie) según el área
@@ -35,10 +36,12 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
     if (tipo === 'evento') return { sticker: 'info', titulo: `📅 ${d.titulo}`, cuerpo: `Te esperamos el ${new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}${d.hora ? ' a las ' + d.hora : ''}. Confirma si podrás asistir en ProfeTok 💙` };
     if (tipo === 'respuesta') return { sticker: 'info', titulo: '💬 La docente te respondió', cuerpo: `Tienes una respuesta sobre ${n}. Léela en ProfeTok.`, privado: true };
     if (tipo === 'justificacion') return d.aprobada ? { sticker: 'info', titulo: '✅ Falta justificada', cuerpo: `La docente aceptó la justificación de ${n} del ${d.fecha}. ¡Gracias por avisar!` } : { sticker: 'info', titulo: `📝 Sobre la falta de ${n}`, cuerpo: 'La docente revisó tu justificación. Si tienes dudas, escríbele desde ProfeTok.' };
+    if (tipo === 'entrada') return d.tarde ? { sticker: 'info', titulo: `🎒 ${n} llegó al colegio`, cuerpo: `Entró a las ${h12(d.hora)}, un poquito después de la hora de entrada (tardanza).` } : { sticker: 'felicita', titulo: `🎒 ${n} llegó al colegio`, cuerpo: `Entró a las ${h12(d.hora)} ¡Que tenga un lindo día! 💙` };
+    if (tipo === 'salida') return { sticker: 'info', titulo: `🏠 ${n} salió del colegio`, cuerpo: `Salió a las ${h12(d.hora)}` };
     if (tipo === 'falta') return { sticker: 'info', titulo: `📅 Asistencia de ${n}`, cuerpo: `Hoy no registramos la asistencia de ${n} en clase. Si ya lo sabías, no te preocupes 🙂` };
     return null;
   }
-  const PREF_DE = { nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia', respuesta: 'mensajes', justificacion: 'asistencia', evento: 'mensajes' };
+  const PREF_DE = { entrada: 'asistencia', salida: 'asistencia', nota: 'notas', examen: 'examenes', logro: 'logros', observacion: 'observaciones', falta: 'asistencia', respuesta: 'mensajes', justificacion: 'asistencia', evento: 'mensajes' };
 
   // encola el aviso para cada familia del alumno (una sola vez por clave)
   function encolar(tipo, alumnoId, d, clave, soloPadre) {
@@ -50,6 +53,14 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
       try { run('insert into avisos(padre_id, alumno_id, tipo, nivel, titulo, cuerpo, detalle, url, clave) values(?,?,?,?,?,?,?,?,?)', p.id, al.id, tipo, nivel, m.titulo, m.cuerpo, JSON.stringify({ sticker: m.sticker, ideas: m.ideas || null, privado: !!m.privado, mejorar: d.mejorar || null }), `/#/novedades`, `${p.id}|${clave || tipo + '|' + al.id + '|' + Date.now()}`); n++; } catch (e) {} // clave repetida: ya se avisó
     }
     return n;
+  }
+
+  // 🚪 entrada y salida del colegio: llegan al instante (sin esperar ni juntar con otras novedades)
+  function alInstante(tipo, alumnoId, d, clave) {
+    if (!encolar(tipo, alumnoId, d, clave)) return 0;
+    const L = q('select * from avisos where enviado is null and alumno_id=? and tipo=?', +alumnoId, tipo);
+    for (const a of L) pushUsuario(a.padre_id, { title: a.titulo, body: a.cuerpo, url: '/#/asistencia/' + a.alumno_id, icon: '/icono-192.png', image: `/stickers/${JSON.parse(a.detalle || '{}').sticker || 'info'}.png`, tag: 'profetok-puerta-' + a.alumno_id, vibrate: [120, 80, 120] }).catch(() => {});
+    if (L.length) run(`update avisos set enviado=datetime('now') where id in (${L.map(a => a.id).join(',')})`); return L.length;
   }
 
   // envío: espera 2 minutos para juntar novedades, respeta el horario de silencio y manda UN aviso por familia
@@ -79,6 +90,6 @@ function crear({ db, q, q1, run, hoy, pushUsuario }) {
       noLeidos: q1('select count(*) n from avisos where padre_id=? and leido is null', u.id).n, prefs: prefs(u.id) }; };
   API['POST /api/avisos/leido'] = async ({ u, b }) => { if (b.todos) run("update avisos set leido=datetime('now') where padre_id=? and leido is null", u.id); else run("update avisos set leido=datetime('now') where id=? and padre_id=?", +b.id, u.id); return { ok: 1 }; };
   API['POST /api/avisos/prefs'] = async ({ u, b }) => { const p = Object.fromEntries(Object.keys(PREF0).map(k => [k, b[k] !== false])); run('insert into avisos_pref(usuario_id, prefs) values(?,?) on conflict(usuario_id) do update set prefs=excluded.prefs', u.id, JSON.stringify(p)); return { prefs: p }; };
-  return { API, encolar, enviar, nivelDe, mensaje };
+  return { API, encolar, enviar, alInstante, nivelDe, mensaje };
 }
 module.exports = { crear };

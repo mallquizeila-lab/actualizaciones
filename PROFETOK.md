@@ -95,3 +95,9 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 - En la prueba gratis el tope es 14. Con el plan Docente el director no puede sumar docentes.
 - `POST /api/docente`: desde el 15 responde `{confirmar}` y solo agrega con `confirmo: true`. `{quitar: id}` desactiva al docente (sus aulas y datos se quedan; se pueden reasignar editando el aula). Volver a agregar su correo lo reactiva con una clave nueva.
 - La suscripción automática de Mercado Pago guarda el monto del día en que se creó: si cambia el número de docentes, se debe volver a activar.
+
+## 🚪 Portería con QR — porteria.js
+- Menú **🚪 Portería QR** (director y docentes). Modo Entrada/Salida (antes de las 11 a. m. empieza en Entrada). Cámara del celular (BarcodeDetector o `public/lib/jsQR.js`) o lector USB en el campo de texto.
+- `POST /api/porteria/escanear {codigo, modo}`: marca P o T según `colegios.entrada` + `tolerancia` (la dirección los cambia en la misma pantalla), guarda `asistencia.hora` / `asistencia.salida` y avisa a la familia al instante (`avisos.alInstante`, tipos `entrada` y `salida`, preferencia «asistencia»). Un segundo escaneo no vuelve a avisar.
+- El QR lleva `alumnos.codigo` (único por colegio): uno al azar `PT…` al imprimir fotochecks (`GET /api/porteria/fotochecks?aula=`, usa `public/lib/qrcode.js`) o el del fotocheck antiguo del colegio (código desconocido → buscar alumno → `POST /api/porteria/vincular`).
+- Solo personal del colegio, y solo alumnos que puede ver. En pantalla y en el fotocheck va el nombre con iniciales de los apellidos.

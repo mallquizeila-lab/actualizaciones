@@ -1,3 +1,10 @@
+9.42.0 · ProfeTok: 🚪 Portería con QR
+- En la puerta del colegio se escanea el QR del fotocheck con el celular (o con un lector USB): la asistencia se marca sola (✅ presente o ⏰ tardanza según la hora de entrada y la tolerancia del colegio).
+- La familia recibe AL INSTANTE en su celular «🎒 Thiago llegó al colegio a las 7:52 a. m.» y, a la salida, «🏠 salió a la 1:05 p. m.».
+- Modo Entrada / Salida, foto y nombre del alumno en grande para comprobar que es él, pitido y contador «llegaron hoy».
+- 🪪 Fotochecks con QR listos para imprimir (Alumnos → Fotochecks). Si el colegio ya tiene fotochecks con QR de otro sistema, no hay que reimprimir: se escanea una vez y se vincula al alumno.
+- El docente ve en su lista de asistencia la hora en que cada alumno entró y salió; los papás la ven en «Control de asistencia».
+
 9.41.3
 - 🌱 Huerto Defensor: arreglado el congelamiento desde el nivel 31 (Selva, Costa y Tormenta en la puna no tenían colores de fondo). Ya se pueden jugar los 60 niveles.
 

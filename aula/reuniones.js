@@ -12,7 +12,7 @@ function crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar 
   // asistencia de un alumno por mes (familia y docente)
   API['GET /api/asistencia-alumno'] = async ({ u, url }) => {
     const id = +url.searchParams.get('id'); if (!veAlumno(u, id)) throw 403; const mes = mesOk(url.searchParams.get('mes'));
-    const dias = q("select s.fecha, s.estado, s.hora, (select estado from justificaciones j where j.alumno_id=s.alumno_id and j.fecha=s.fecha order by id desc limit 1) just from asistencia s where s.alumno_id=? and substr(s.fecha,1,7)=? order by s.fecha desc", id, mes);
+    const dias = q("select s.fecha, s.estado, s.hora, s.salida, (select estado from justificaciones j where j.alumno_id=s.alumno_id and j.fecha=s.fecha order by id desc limit 1) just from asistencia s where s.alumno_id=? and substr(s.fecha,1,7)=? order by s.fecha desc", id, mes);
     const meses = q("select distinct substr(fecha,1,7) m from asistencia where alumno_id=? order by m desc limit 12", id).map(x => x.m);
     const al = q1('select a.nombres, a.apellidos, x.nombre aula, x.nivel, x.grado, x.seccion from alumnos a join aulas x on x.id=a.aula_id where a.id=?', id);
     const c = k => dias.filter(d => d.estado === k).length;
