@@ -314,7 +314,7 @@ function activarPago(id, via = '') {
   if (p.cupon) run('update cupones set usos=usos+1 where codigo=?', p.cupon); audit(null, 'pago aprobado', `${p.id} ${via}`);
   try { crecer.alPagar(q1('select * from pagos where id=?', p.id)); } catch (e) { console.log('[ProfeTok] ' + e.message); } return true;
 }
-API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c order by c.id desc"), billeteras: billeteras(), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
+API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { demo: getS('demo_colegio', 0), colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c where c.id <> ? order by c.id desc", getS('demo_colegio', 0)), billeteras: billeteras(), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
 API['POST /api/dueno'] = async ({ u, b }) => {
   if (u.rol !== 'dueno') throw 403;
   if (b.accion === 'aprobar') { if (!q1('select 1 from pagos where id=?', +b.id)) throw 404; activarPago(+b.id, 'aprobado por el dueño'); return { ok: 1 }; }
@@ -359,6 +359,9 @@ const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invi
 const reunionesM = require('./reuniones').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar });
 // 📋 «Mi equipo» del director: cómo va cada docente y cada aula (ver director.js)
 const directorM = require('./director').crear({ q, q1, run, hoy, riesgo, letraDe, audit, pushUsuario: (uid, p) => crecer.pushUsuario(uid, p) });
+// 🎓 Cuenta de demostración para seminarios (todo inventado; se crea o reinicia desde el panel del dueño; ver demo.js)
+const demoM = require('./demo').crear({ q, q1, run, hashPass, hoy, guardarImagen, borrarArchivo, getS, setS });
+API['POST /api/demo'] = async ({ u, b }) => { if (u.rol !== 'dueno') throw 403; if (b.borrar) { demoM.borrar(); return { ok: 1 }; } return demoM.armar(); };
 // 🚪 Portería con QR: escanean el fotocheck en la puerta, se marca la asistencia y la familia recibe la hora al instante (ver porteria.js)
 const porteriaM = require('./porteria').crear({ db, q, q1, run, hoy, limpio, alumnosVisibles, veAlumno, esStaff, aulaDe, guardarImagen, borrarArchivo, avisarYa: (...a) => { try { return avisosM.alInstante(...a); } catch (e) { console.log('[ProfeTok] Aviso: ' + e.message); } } });
 for (const M of [pagosM, crecer, izipay, avisosM, familiaM, saldoM, cuentaM, nubeM, reunionesM, directorM, porteriaM]) for (const [k, f] of Object.entries(M.API)) API[k] = f;

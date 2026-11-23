@@ -101,3 +101,8 @@ Todo vive dentro de ProfeTok (sin Mautic ni servidores extra). Panel: entra como
 - `POST /api/porteria/escanear {codigo, modo}`: marca P o T según `colegios.entrada` + `tolerancia` (la dirección los cambia en la misma pantalla), guarda `asistencia.hora` / `asistencia.salida` y avisa a la familia al instante (`avisos.alInstante`, tipos `entrada` y `salida`, preferencia «asistencia»). Un segundo escaneo no vuelve a avisar.
 - El QR lleva `alumnos.codigo` (único por colegio): uno al azar `PT…` al imprimir fotochecks (`GET /api/porteria/fotochecks?aula=`, usa `public/lib/qrcode.js`) o el del fotocheck antiguo del colegio (código desconocido → buscar alumno → `POST /api/porteria/vincular`).
 - Solo personal del colegio, y solo alumnos que puede ver. En pantalla y en el fotocheck va el nombre con iniciales de los apellidos.
+
+## 🎓 Cuenta demo para seminarios — demo.js
+- Panel del dueño → «✨ Crear demo» / «🔄 Reiniciar demo» (`POST /api/demo`, solo dueño; `{borrar:1}` la elimina). Reiniciar borra la anterior y la arma igual (misma semilla) con fechas de esta semana y contraseñas nuevas, que solo se muestran en el panel.
+- I.E. Cepriano (logo en `aula/demo/logo.png`), 6.° A, prof. Emanuel Fernández, 40 alumnos (avatares `aula/demo/av*.jpg`) y 40 mamás; correos `@cepriano.demo` (dominio inexistente). Plan Colegio por 10 años; no aparece en «Cuentas».
+- Guion para presentar: `aula/demo/Guion_seminario_ProfeTok.pdf`.

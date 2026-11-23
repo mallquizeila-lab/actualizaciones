@@ -1,3 +1,9 @@
+9.49.0 · 🎓 ProfeTok: cuenta demo para seminarios
+- En tu panel de dueño: «✨ Crear demo» / «🔄 Reiniciar demo». Arma en 2 segundos la I.E. Cepriano (con su logo), 6.° grado «A» de primaria, el profesor Emanuel Fernández, 40 alumnos con avatares y 40 mamás, todo inventado.
+- Incluye un bimestre de actividad: asistencia por Portería QR con horas de entrada y salida, faltas y justificaciones, notas AD/A/B/C en 7 cursos (con alumnos en riesgo para la alerta temprana), 10 tareas con entregas, bitácora, 5 comunicados leídos, reuniones con confirmaciones, mensajes de mamás, avisos ya recibidos y conversaciones del asistente.
+- Muestra el usuario y la contraseña del profesor y de una mamá de ejemplo (solo en tu panel). Correos .demo: nunca envía correos ni avisos a nadie real. No cuenta en tus estadísticas.
+- Guion del seminario en 10 minutos: aula/demo/Guion_seminario_ProfeTok.pdf
+
 9.48.0 · 🌀 YUPI Remolino en línea
 - En «Con amigos» eliges «¿Qué juego?»: 🃏 Clásico o 🌀 Remolino. Funciona en las salas con código (1 vs 1, 3, 4 y 2 vs 2) y en la ⚡ Partida rápida (los de Remolino se juntan solo con quienes también eligieron Remolino).
 - Las 4 cartas nuevas en línea: 🌀 Remolino (todos pasan su mano al siguiente), Comodín +8, 💣 Bomba (en 2 vs 2 solo roban los rivales, no tu compañero) y 🪞 Espejo (devuelve el + que te tiraron). La IA de los asientos vacíos también las usa.
