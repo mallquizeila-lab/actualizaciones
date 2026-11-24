@@ -1,3 +1,11 @@
+9.51.0 · 🌐 Web para AdSense: más bonitas, 100 % automáticas y con nombres coherentes
+- Diseño nuevo de las guías (como los grandes sitios de calidad): recuadro «✅ Lo esencial», índice «En esta guía», pasos numerados, tablas con cabecera de color, autor al final y etiqueta del tema con su ícono.
+- Portada y tarjetas sin fotos ya no salen vacías ni con una letra suelta: llevan el ícono de su tema; cada tema tiene un ícono coherente.
+- Piloto automático sin trabas: las páginas con nota baja, [FALTA DATO] o voseo se reescriben solas con las correcciones del revisor (2 intentos); si siguen mal, se descartan y entra una idea nueva. Aprueba solas las de nota 8+.
+- Menos [FALTA DATO]: los precios y tarifas que cambian se explican (de qué dependen y dónde consultarlos) en vez de dejar huecos; se planifican temas perennes.
+- Radar de nichos: subnichos perennes inspirados en los grandes sitios (tutoriales, recetas, viajes, hogar, jardinería, manualidades, mascotas, estudio), sin salud, finanzas ni noticias.
+- Nombres coherentes: el dominio debe tener una palabra del tema (adiós «pagosdelvalle» para facturación). La lista para AdSense avisa si el nombre no dice de qué trata la web.
+
 9.50.9 · 🙈 Yupitok: GamePix oculto durante la revisión de AdSense
 - Mientras esté activado el «Modo revisión de AdSense» (panel → 💰 Google AdSense), los juegos de otros estudios (GamePix) se ocultan en toda la página: portada, /juegos, fichas, juego del día e idiomas.
 - La cuenta de GamePix y su ads.txt quedan intactos. Cuando Google apruebe, desmarca «Modo revisión» y los juegos vuelven solos.
