@@ -227,7 +227,7 @@ async function avisoReto() {
 async function juegoDelDia() {
   const jd = getS('juegoDia', { on: false, hora: '19:30' }); if (!jd.on || horaPeru() < jd.hora || getS('juegoDiaDia', '') === hoyPeru() || enviando.id) return;
   if (q1("select 1 from campaigns where (auto is null or auto='') and date(created_at, '-5 hours') = ? and status in ('enviada','enviando','programada')", hoyPeru())) { setS('juegoDiaDia', hoyPeru()); return; }
-  if (!getS('pro', {}).on) return; const J7 = jugadas7(), usados = getS('juegoDiaUsados', []);
+  if (!proOn()) return; const J7 = jugadas7(), usados = getS('juegoDiaUsados', []);
   const g = (await proVisibles()).filter(x => !usados.includes(x.id)).map(x => ({ ...x, j: J7.get(x.id) || 0 })).sort((a, b) => b.j - a.j)[0]; if (!g) return;
   setS('juegoDiaDia', hoyPeru()); setS('juegoDiaUsados', [g.id, ...usados].slice(0, 7));
   const r = run("insert into campaigns(title,body,url,image,filters,max_n,run_at,status,auto) values(?,?,?,?,?,0,datetime('now'),'programada','juegoDia')", clip('🔥 El juego del día: ' + g.t, 80), g.j >= 10 ? `${g.j} partidas esta semana en Yupitok. ¿Te animas a probarlo? 🎮` : '¡Juego nuevo para ti! Gratis y sin instalar. Toca para jugar 🎮', '/juego/' + g.s + '?src=push', g.img || null, '{}');
@@ -640,14 +640,14 @@ const jugadas7 = () => { if (Date.now() - JUG.t > 5 * 60000) { JUG = { t: Date.n
 // ⭐ Los mejores: primero los más jugados en Yupitok esta semana; se completa con los mejores de GamePix (su ranking de calidad)
 const topPro = async (n = 12) => { const J7 = jugadas7(), todos = await proVisibles(), jug = todos.filter(g => (J7.get(g.id) || 0) >= 3).map(g => ({ ...g, j: J7.get(g.id) })).sort((a, b) => b.j - a.j);
   const ya = new Set(jug.map(g => g.id)); return [...jug, ...todos.filter(g => !ya.has(g.id)).map(g => ({ ...g, j: J7.get(g.id) || 0 }))].slice(0, n); };
-const proVisibles = async () => { const oc = proOcultos(), t = await catalogoPro(); return oc.size ? t.filter(g => !oc.has(g.id)) : t; };
+const proVisibles = async () => { if (adsRevision()) return []; const oc = proOcultos(), t = await catalogoPro(); return oc.size ? t.filter(g => !oc.has(g.id)) : t; };
 // Traduce de a poco las descripciones de los juegos al español (una sola vez; queda guardado)
-setInterval(async () => { try { if (!getS('pro', {}).on) return; const t = await catalogoPro(); const falta = [];
+setInterval(async () => { try { if (!proOn()) return; const t = await catalogoPro(); const falta = [];
   for (const g of t) { if (falta.length >= 30) break; if (g.d && !/[áéíóúñ¿¡]/i.test(g.d) && !q1("select 1 from i18n where lang='es' and src=?", g.d)) falta.push(g.d); }
   if (falta.length) await traducirFaltan('es', falta); } catch (e) {} }, 8 * 60000);
 // 🌍 El original de GamePix ya está en inglés. Traduce de a poco a portugués, francés, alemán, italiano e indonesio
 // (un lote de 30 cada 6 min, rotando idiomas; primero los nombres de las categorías y los juegos más jugados)
-let rotaL = 0; setInterval(async () => { try { if (!getS('pro', {}).on) return; const l = LANGS.filter(x => x !== 'en')[rotaL++ % (LANGS.length - 1)];
+let rotaL = 0; setInterval(async () => { try { if (!proOn()) return; const l = LANGS.filter(x => x !== 'en')[rotaL++ % (LANGS.length - 1)];
   const cps = (await catsPro()).map(([c]) => catEn(c)).filter(c => !trDe(l, c)); if (cps.length) { await traducirFaltan(l, cps.slice(0, 30)); return; }
   const t = await topPro(5000), falta = []; for (const g of t) { if (falta.length >= 30) break; if (g.d && !/[áéíóúñ¿¡]/i.test(g.d) && !trDe(l, g.d)) falta.push(g.d); }
   if (falta.length) await traducirFaltan(l, falta); } catch (e) {} }, 6 * 60000);
@@ -673,6 +673,8 @@ async function traducirFaltan(lang, textos) {
 const adsCfg = () => getS('ads', {});
 // 🔎 Modo revisión de AdSense: mientras Google revisa, las miles de fichas de juegos de otros estudios (texto del distribuidor) no se indexan; Google evalúa solo el contenido propio de Yupitok
 const adsRevision = () => adsCfg().rev !== false;
+// Mientras Google revisa, los juegos de otros estudios (GamePix) se ocultan en toda la página; al apagar el modo revisión vuelven solos
+const proOn = () => !!getS('pro', {}).on && !adsRevision();
 const adsScript = () => { const c = adsCfg().client; return /^ca-pub-\d{10,20}$/.test(c || '') ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c}" crossorigin="anonymous"></script><meta name="google-adsense-account" content="${c}">` : ''; };
 // ---------- Páginas legales que pide Google (se llenan con tus datos del panel) ----------
 // ---------- Apoya el proyecto: aportes voluntarios (enlaces y direcciones los pone el dueño en el panel) ----------
@@ -765,7 +767,7 @@ function paginaLegal(tipo) {
       <li><b>GLORY BROWN: El Choque de los Reinos</b>: batallas de cartas en línea. Nació como homenaje a una abuelita muy querida, la Reina Glory Brown, que protege su reino con amor.</li>
       <li><b>Huerto Defensor</b>, <b>Joyas</b>, <b>Islas Portal 3D</b> y clásicos como ludo, billar, gusanito y 2048.</li>
       <li><b>Juegos educativos</b> por niveles (matemáticas, ciencias, ortografía, inglés) y <b>juegos cristianos</b> con trivias bíblicas.</li></ul>
-      <p>${getS('pro', {}).on ? 'También ofrecemos juegos de otros estudios a través de un distribuidor autorizado, y escribimos' : 'Escribimos'} <a href="/guias">guías y trucos</a> originales para cada juego.</p>
+      <p>${proOn() ? 'También ofrecemos juegos de otros estudios a través de un distribuidor autorizado, y escribimos' : 'Escribimos'} <a href="/guias">guías y trucos</a> originales para cada juego.</p>
       <h2>Cómo cuidamos a los jugadores</h2>
       <ul><li>Los juegos son para todo público. El chat, las mesas en vivo y las fotos de perfil son solo para mayores de 18 años y tienen filtros y reportes.</li>
       <li>En los juegos solo hay emojis para saludar: nada de mensajes escritos con desconocidos.</li>
@@ -846,7 +848,7 @@ async function api(req, res, u) {
     return send(res, 200, { mes: M.nombre, mesAnterior: A.nombre, lideres: topJugadores(M.mes, 3).map(sinUid), campeones: ant, fan: fan ? sinUid(fan) : null, fanAnterior: fanAnt ? { ...sinUid(fanAnt), red: redDe(fanAnt.uid) } : null }, undefined, { 'cache-control': 'public, max-age=60' });
   }
   if (u.pathname === '/api/pro/top') { // los más jugados de la semana (para la portada)
-    if (!getS('pro', {}).on) return send(res, 200, { top: [] });
+    if (!proOn()) return send(res, 200, { top: [] });
     const top = await topPro(16);
     return send(res, 200, { top }, undefined, { 'cache-control': 'public, max-age=300' });
   }
@@ -867,7 +869,7 @@ async function api(req, res, u) {
     return send(res, 200, { ok: 1 });
   }
   if (u.pathname === '/api/pro') {
-    const cfg = getS('pro', {}); if (!cfg.on) return send(res, 200, { on: false, juegos: [] });
+    const cfg = getS('pro', {}); if (!proOn()) return send(res, 200, { on: false, juegos: [] });
     const todos = await proVisibles(), qq = String(u.searchParams.get('q') || '').toLowerCase().slice(0, 40), cat = String(u.searchParams.get('cat') || ''), pag = Math.max(0, Math.min(200, +u.searchParams.get('p') || 0));
     const cats = Object.entries(todos.reduce((a, g) => (a[g.cat] = (a[g.cat] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => c);
     const J7 = jugadas7(), orden = new Map(todos.map((g, i) => [g.id, i])), conJ = g => ({ ...g, j: J7.get(g.id) || 0 });
@@ -886,7 +888,7 @@ async function api(req, res, u) {
   if (u.pathname === '/api/config') {
     const poll = q1('select id,question,options from polls where active=1 order by id desc limit 1');
     const subs = q1('select count(*) n from subscribers where active=1').n;
-    const TV = getS('tv', {}); return send(res, 200, { tv: TV.on && TV.listas?.length ? TV.listas : null, horaFeliz: (({ activa, fin, extra, desde, hasta, diaNombre, on }) => ({ activa, fin, extra, desde, hasta, diaNombre, on }))(horaFeliz()), pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, login: getS('login', {}), marca: (m => ({ ...m, eslogan: sinGana(m.eslogan) }))(getS('marca', { nombre: '', eslogan: '' })), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(getS('pro', {}).on && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
+    const TV = getS('tv', {}); return send(res, 200, { tv: TV.on && TV.listas?.length ? TV.listas : null, horaFeliz: (({ activa, fin, extra, desde, hasta, diaNombre, on }) => ({ activa, fin, extra, desde, hasta, diaNombre, on }))(horaFeliz()), pais: geo(ip, req).country_code, apoyo: !!getS('apoyo', {}).on, login: getS('login', {}), marca: (m => ({ ...m, eslogan: sinGana(m.eslogan) }))(getS('marca', { nombre: '', eslogan: '' })), intereses: INTERESES, suscriptores: subs >= 50 ? subs : null, vapid: E.VAPID_PUBLIC || null, pixel: E.META_PIXEL_ID || null, video: getS('video', null), pro: !!(proOn() && getS('pro', {}).feed), poll: poll && { id: poll.id, q: poll.question, options: JSON.parse(poll.options) } });
   }
   if (u.pathname === '/api/dev/enviar' && P) {
     if (limite(ip, 'devEnv', 5, 3600000)) return send(res, 429, { error: 'Demasiados envíos. Prueba en una hora.' });
@@ -1395,8 +1397,8 @@ http.createServer(async (req, res) => {
     { const mk = /^\/([a-f0-9]{32})\.txt$/.exec(u.pathname); if (mk && mk[1] === getS('indexnowKey', '')) return send(res, 200, mk[1], 'text/plain; charset=utf-8'); }
     if (u.pathname === '/robots.txt') return send(res, 200, `User-agent: *\nAllow: /\nDisallow: /panel\nDisallow: /api/\nSitemap: ${PUBLIC_URL}/sitemap.xml\n`, 'text/plain; charset=utf-8');
     if (u.pathname === '/sitemap.xml') {
-      const juegosPro = getS('pro', {}).on && !adsRevision() ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
-      const proOn = getS('pro', {}).on, cp = proOn ? await catsPro() : [], vis = proOn ? (await proVisibles()).slice(0, 5000) : [];
+      const juegosPro = proOn() && !adsRevision() ? (await proVisibles()).slice(0, 5000).map(g => ['/juego/' + g.s, '0.6']) : [];
+      const proOn = proOn(), cp = proOn ? await catsPro() : [], vis = proOn ? (await proVisibles()).slice(0, 5000) : [];
       const catsUrls = proOn && !adsRevision() ? [['/juegos', '0.8'], ...cp.map(([c]) => ['/juegos/' + slugDe(c), '0.8']), ...LANGS.flatMap(l => [['/' + l, '0.9'], [`/${l}/games`, '0.8'], ...cp.map(([c]) => [`/${l}/games/` + slugDe(catEn(c)), '0.7'])])] : [];
       // En otros idiomas solo entran los juegos que ya tienen su descripción traducida (páginas con contenido real)
       const juegosEn = proOn && !adsRevision() ? LANGS.flatMap(l => { const ok = l === 'en' ? null : new Set(q('select src from i18n where lang=?', l).map(r => r.src)); return vis.filter(g => l === 'en' ? descL(g, 'en') : g.d && ok.has(g.d)).map(g => [`/${l}/game/` + g.s, '0.5']); }) : [];
@@ -1415,7 +1417,7 @@ http.createServer(async (req, res) => {
         .replace('TU NOMBRE O EMPRESA', x(pv.nombre, 'TU NOMBRE O EMPRESA')).replace('TU CIUDAD, PERÚ', x(pv.ciudad, 'TU CIUDAD, PERÚ'))
         .replaceAll('TU-CORREO@EJEMPLO.COM', x(pv.correo, 'TU-CORREO@EJEMPLO.COM')).replace('PLAZO (por ejemplo, 24 meses)', x(/^\s*\d+\s*$/.test(pv.plazo || '') ? pv.plazo.trim() + ' meses' : pv.plazo, '24 meses'))
         .replace('NÚMERO DE INSCRIPCIÓN', x(pv.codigo, 'en trámite'));
-      if (!getS('pro', {}).on) h = h.replace(/<p><b>Juegos de otros estudios:<\/b>[\s\S]*?<\/p>\n?/, ''); // sin catálogo externo no se menciona
+      if (!proOn()) h = h.replace(/<p><b>Juegos de otros estudios:<\/b>[\s\S]*?<\/p>\n?/, ''); // sin catálogo externo no se menciona
       if (pv.nombre && pv.correo) h = h.replace(/<p class="n">[\s\S]*?<\/p>/, '');
       return send(res, 200, h, 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
     }
@@ -1460,7 +1462,7 @@ http.createServer(async (req, res) => {
         + `<h1>🛠️ Tu panel de desarrollador</h1>${J.map(j => `<div style="border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:12px;margin:10px 0"><h2 style="margin:0">${esc(j.titulo)}</h2><p>${EST[j.estado] || j.estado}${j.motivo ? ' · ' + esc(j.motivo) : ''}</p><p>🎮 Partidas (de más de 30 segundos): <b>${j.jugadas || 0}</b></p>${j.estado === 'aprobado' ? `<p><a href="/?dev=${esc(j.id)}">▶ Ver tu juego en Yupitok</a></p>` : ''}</div>`).join('')}<p style="opacity:.8">¿Dudas? Escríbenos desde <a href="/contacto.html">Contacto</a>.</p>` + PIE_NEON, { 'cache-control': 'no-store' });
     } }
     if (u.pathname === '/prensa') {
-      const sitio = getS('marca', null)?.nombre || 'Yupitok', pv = getS('priv', {}), correo = pv.correo || '', url = PUBLIC_URL + '/prensa', n = getS('pro', {}).on ? (await proVisibles()).length : 0;
+      const sitio = getS('marca', null)?.nombre || 'Yupitok', pv = getS('priv', {}), correo = pv.correo || '', url = PUBLIC_URL + '/prensa', n = proOn() ? (await proVisibles()).length : 0;
       return enviarHtml(req, res, headNeon(`Prensa y creadores · ${sitio}`, `Kit de prensa de ${sitio}: qué es, datos, logos e imágenes para descargar, y cómo hacer un torneo con tu comunidad.`, url, [migas([['Yupitok', '/'], ['Prensa y creadores', '/prensa']])])
         + `<p class="miga"><a href="/">← Volver a Yupitok</a></p><p style="text-align:center"><img src="/brand/mascota-128.webp" width="110" height="110" alt="Yupi, la mascota de Yupitok"></p><h1 style="text-align:center">📰 Prensa y creadores</h1>
 <h2>¿Qué es ${esc(sitio)}?</h2><p><b>${esc(sitio)}</b> es una plataforma peruana de juegos gratis en el navegador, con el lema <b>"¡Juega, ríe, aprende y gana!"</b>. Se juega sin instalar nada, en el celular o la computadora, y está disponible en 7 idiomas.</p>
@@ -1470,7 +1472,7 @@ http.createServer(async (req, res) => {
 <h2>🧩 ¿Tienes una web o un blog?</h2><p>Pon nuestros juegos gratis en tu página: <a href="/para-tu-web">códigos para tu web</a>.</p>
 <h2>📩 Contacto</h2><p>${correo ? `Escríbenos a <b>${esc(correo)}</b> (asunto: "Prensa" o "Creador").` : 'Escríbenos desde la página de <a href="/contacto.html">Contacto</a>.'}</p>` + PIE_NEON, { 'cache-control': 'public, max-age=900' });
     }
-    { const me = /^\/(en|pt|fr|de|it|id)(?:\/(games|game)(?:\/([a-z0-9-]{1,90}))?)?\/?$/.exec(u.pathname); if (me && getS('pro', {}).on) { // 🌍 Yupitok en otros idiomas (para todo el mundo)
+    { const me = /^\/(en|pt|fr|de|it|id)(?:\/(games|game)(?:\/([a-z0-9-]{1,90}))?)?\/?$/.exec(u.pathname); if (me && proOn()) { // 🌍 Yupitok en otros idiomas (para todo el mundo)
       const L = me[1], T = TXT[L], todos = await proVisibles(), cats = await catsPro(), J7 = jugadas7(), sitio = getS('marca', null)?.nombre || 'Yupitok';
       const tile = g => `<a class="t" href="/${L}/game/${esc(g.s)}">${g.img ? `<img src="${esc(g.img)}" alt="${esc(g.t)}" loading="lazy">` : ''}<span>${esc(g.t)}</span></a>`;
       const cn = c => catL(c, L), cs = c => slugDe(catEn(c)), lc = c => T.lc ? cn(c).toLowerCase() : cn(c);
@@ -1503,7 +1505,7 @@ http.createServer(async (req, res) => {
         + (rel.length ? `<h2>${T.more(esc(cl))}</h2><div class="grid">${rel.map(tile).join('')}</div>` : '') + `<p style="font-size:.8rem;opacity:.7">${T.third}</p>` + pie, { 'cache-control': 'public, max-age=600' });
     } }
     { const mc = /^\/juegos(?:\/([a-z0-9-]{2,60}))?\/?$/.exec(u.pathname); if (mc) { // 🕹️ Categorías de juegos (páginas para Google)
-      if (!getS('pro', {}).on) { res.writeHead(302, { location: '/' }); return res.end(); }
+      if (!proOn()) { res.writeHead(302, { location: '/' }); return res.end(); }
       const sitio = getS('marca', null)?.nombre || 'Yupitok', cats = await catsPro(), J7 = jugadas7();
       const tile = g => `<a class="t" href="/juego/${esc(g.s)}">${g.img ? `<img src="${esc(g.img)}" alt="${esc(g.t)}" loading="lazy">` : ''}<span>${esc(g.t)}</span></a>`;
       const chips = `<div class="chips">${cats.map(([c, l]) => `<a href="/juegos/${slugDe(c)}">${esc(c)} (${l.length})</a>`).join('')}</div>`;
@@ -1631,7 +1633,7 @@ http.createServer(async (req, res) => {
     } }
     if (u.pathname === '/campeones' || u.pathname === '/campeones.html') { // 👑 Salón de la Fama
       const A = mesPeru(-1), M = mesPeru(); mesCerrar(A); const sitio = getS('marca', null)?.nombre || 'Yupitok';
-      const PM = new Map((getS('pro', {}).on ? await catalogoPro() : []).map(g => [g.id, g])), esPro = jg => /^[a-f0-9]{12}$/.test(jg), unidad = jg => jg === 'jugador' || esPro(jg) ? ' min' : '';
+      const PM = new Map((proOn() ? await catalogoPro() : []).map(g => [g.id, g])), esPro = jg => /^[a-f0-9]{12}$/.test(jg), unidad = jg => jg === 'jugador' || esPro(jg) ? ' min' : '';
       const tit = jg => { if (jg === 'jugador') return '🎮 Jugador del mes (tiempo jugado en Yupitok)'; if (esPro(jg)) return '🕹️ Fan #1 de ' + (PM.get(jg)?.t || 'un juego'); const t = CATALOGO.find(x => x.id === 'arcade-' + jg); return t ? `${t.e} ${t.t.split(':')[0]}` : jg; };
       const enlaceJ = jg => jg === 'jugador' ? '/?g=pro' : esPro(jg) ? (PM.get(jg) ? '/juego/' + PM.get(jg).s : '/?g=pro') : '/?g=arcade-' + jg;
       const camp = q("select * from campeones where mes=? order by (juego='jugador') desc, juego, puesto", A.mes), porJ = {}; for (const r of camp) (porJ[r.juego] = porJ[r.juego] || []).push(r);
@@ -1647,7 +1649,7 @@ http.createServer(async (req, res) => {
       return enviarHtml(req, res, html, { 'cache-control': 'public, max-age=120' });
     }
     { const mj = /^\/juego\/([a-z0-9-]{0,80}?)-?([a-f0-9]{12})\/?$/.exec(u.pathname); if (mj) { // 🕹️ Página propia de cada juego profesional (para que Google la encuentre)
-      const todos = getS('pro', {}).on ? await proVisibles() : [], g = todos.find(x => x.id === mj[2]);
+      const todos = proOn() ? await proVisibles() : [], g = todos.find(x => x.id === mj[2]);
       if (!g) { res.writeHead(302, { location: '/?g=pro' }); return res.end(); }
       if (u.pathname !== '/juego/' + g.s) { res.writeHead(301, { location: '/juego/' + g.s }); return res.end(); }
       const sitio = getS('marca', null)?.nombre || 'Yupitok', d = descEs(g), titulo = `${g.t}: juega gratis online · ${sitio}`, url = PUBLIC_URL + '/juego/' + g.s;
@@ -1679,7 +1681,7 @@ ${rel.length ? `<h2 style="font-size:1.1rem;margin:16px 0 8px">Más juegos de ${
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:secure_url" content="${esc(img)}"><meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(titulo)}">
 <meta property="og:locale" content="es_LA"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">
-<link rel="canonical" href="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">${!t && getS('pro', {}).on ? hrefl(altDe('home')) : ''}
+<link rel="canonical" href="${esc(PUBLIC_URL + '/' + (t ? '?g=' + t.id : ''))}">${!t && proOn() ? hrefl(altDe('home')) : ''}
 <script type="application/ld+json">${JSON.stringify(t ? { '@context': 'https://schema.org', '@type': t.id.startsWith('arcade-') ? 'VideoGame' : 'Quiz', name: t.t, description: t.d, url: PUBLIC_URL + '/?g=' + t.id, inLanguage: 'es', isAccessibleForFree: true, image: img, ...(t.id.startsWith('arcade-') ? { gamePlatform: ['Web', 'Android', 'iOS'], applicationCategory: 'Game', operatingSystem: 'Web' } : {}) } : [{ '@context': 'https://schema.org', '@type': 'WebSite', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', inLanguage: 'es' }, { '@context': 'https://schema.org', '@type': 'Organization', name: getS('marca', null)?.nombre || 'Yupitok', url: PUBLIC_URL + '/', logo: PUBLIC_URL + '/icon-512.png', slogan: '¡Juega, ríe, aprende y gana!', sameAs: (getS('redesMarca', null) || ['https://www.facebook.com/yupitokoficial']).filter(x => /^https:\/\//.test(x)) }]).replace(/</g, '\\u003c')}</script>`;
       const vivo18 = t && ['sala', 'mesa'].includes(t.tipo); // chat y mesas: contenido de usuarios (solo +18) → sin anuncios y sin indexar
       return enviarHtml(req, res, fs.readFileSync(path.join(PUB, 'index.html'), 'utf8').replace('<!--OG-->', og + (vivo18 ? '<meta name="robots" content="noindex, follow">' : adsScript())), { 'cache-control': 'no-cache' });
