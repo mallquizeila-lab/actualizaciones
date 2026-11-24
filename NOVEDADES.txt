@@ -1,3 +1,7 @@
+9.50.3 · 🧹 El actualizador ya no llena el disco
+- Guarda solo los 2 respaldos más recientes del programa (antes guardaba uno por cada actualización y se acumulaban).
+- Antes de actualizar revisa el espacio libre: si el disco está casi lleno, avisa en vez de dejar la instalación a medias.
+
 9.50.2 · 🔁 ShortForge se vuelve a encender solo después de actualizar
 - Arreglado: en el VPS (tarea programada «ShortForge», sin servidor.bat) la plataforma quedaba apagada después de actualizar. Ahora un vigilante espera a que se apague, da unos segundos y, si nadie la volvió a abrir, la enciende sola. Nunca abre dos copias.
 
