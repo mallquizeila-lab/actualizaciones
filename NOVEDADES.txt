@@ -1,3 +1,8 @@
+9.50.1 · ⚡ Actualizaciones mucho más livianas
+- Antes cada actualización bajaba el programa completo (unos 55 MB). Ahora baja solo los archivos que cambiaron (normalmente menos de 1 MB) y se instala en segundos.
+- La primera vez después de esta versión todavía baja el paquete completo; desde la siguiente, ya es liviana. Si GitHub no da la lista de cambios, usa la descarga completa de siempre.
+- La descarga completa ahora se guarda directo en el disco (no llena la memoria del VPS) y respalda solo los archivos que se reemplazan.
+
 9.50.0 · 📲 ProfeTok se instala como app en el celular
 - Docentes, directores y familias ven arriba «Instala ProfeTok en tu celular» con el botón 📲 Instalar: en Android/Chrome se instala con un toque y queda con su ícono en la pantalla de inicio, junto a sus apps.
 - En iPhone muestra los pasos con Safari (Compartir → Agregar a inicio). Si lo abrieron desde WhatsApp o Facebook, les indica abrirlo primero en el navegador.
