@@ -1,3 +1,6 @@
+9.50.4 · 📿 Pulsera de juegos a todo el ancho en la computadora
+- En la portada de Yupitok, la tira deslizable con las fotos de los juegos ahora ocupa todo el ancho en pantallas grandes (antes quedaba encerrada en la primera columna).
+
 9.50.3 · 🧹 El actualizador ya no llena el disco
 - Guarda solo los 2 respaldos más recientes del programa (antes guardaba uno por cada actualización y se acumulaban).
 - Antes de actualizar revisa el espacio libre: si el disco está casi lleno, avisa en vez de dejar la instalación a medias.
