@@ -1,3 +1,7 @@
+9.50.7 · 📝 Más guías propias en Yupitok (para AdSense)
+- 6 guías nuevas escritas para Yupitok: reglas y trucos de YUPI CARDS, YUPI Remolino, Joyas, Ludo, ¿Quién es el impostor? y una guía de seguridad para padres y docentes.
+- Ya aparecen en /guias y en el mapa del sitio para Google.
+
 9.50.6 · 🛡️ Seguridad reforzada
 - ProfeTok y Yupitok ya no se dejan engañar por quien entra directo al servidor fingiendo otra IP (antes podía saltarse el límite de intentos de contraseña).
 - ProfeTok: tope de intentos por cuenta (12 fallos = 30 min de espera) aunque el atacante cambie de IP.
