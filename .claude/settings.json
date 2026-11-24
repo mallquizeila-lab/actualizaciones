@@ -1,19 +1,12 @@
 {
   "enabledPlugins": {
-    "lemo-opuscar@lemolab": true,
-    "ponytail@ponytail": true
+    "lemo-opuscar@lemolab": true
   },
   "extraKnownMarketplaces": {
     "lemolab": {
       "source": {
         "source": "github",
         "repo": "lemomo-ai/lemo-opuscar"
-      }
-    },
-    "ponytail": {
-      "source": {
-        "source": "github",
-        "repo": "DietrichGebert/ponytail"
       }
     }
   }

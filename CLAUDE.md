@@ -14,9 +14,8 @@ Cada actualización sube `VERSION` y agrega su nota arriba en `NOVEDADES.txt` (e
 - Plugin de proyecto: estilos de película y render con Canvas/WebGL + ffmpeg, sin modelo de video. Úsalo para videos de ProfeTok/ShortForge.
 - La primera vez descarga sus guías a `~/lemo-opuscar` y Chromium headless.
 
-### ✂️ Ponytail (plugin) — código mínimo
-- Empuja a la solución más simple que funciona (YAGNI, librería estándar). `/ponytail` muestra o cambia el modo; `/ponytail-review` revisa un cambio.
-- El registro de estadísticas (ledger) está apagado. Si el modo choca con una función que el usuario pidió completa, prioriza lo que pidió el usuario.
+### ✂️ Ponytail — DESINSTALADO
+- El usuario pidió quitarlo (no le gusta el panel de costos). No volver a instalarlo.
 
 ### 🛡️ SkillSpector (NVIDIA) — revisar plugins/skills antes de instalarlos
 - `pip install git+https://github.com/NVIDIA/SkillSpector` y `skillspector scan <carpeta-del-skill> --no-llm`.
