@@ -1,3 +1,7 @@
+9.51.1 · 📚 Web para AdSense: estudian a los grandes sitios de su tema
+- Antes de planificar y escribir, cada web analiza los referentes de calidad de su tema (recetas: Simply Recipes, Serious Eats, Allrecipes; viajes: Lonely Planet, TripSavvy; hogar y jardín: The Spruce, Real Simple; tecnología: MakeUseOf, XDA; aprendizaje: wikiHow, freeCodeCamp…) para hacerlo igual de útil con contenido propio. Nunca se copian textos.
+- Las webs que ya existían repiten su estudio una vez con estos referentes.
+
 9.51.0 · 🌐 Web para AdSense: más bonitas, 100 % automáticas y con nombres coherentes
 - Diseño nuevo de las guías (como los grandes sitios de calidad): recuadro «✅ Lo esencial», índice «En esta guía», pasos numerados, tablas con cabecera de color, autor al final y etiqueta del tema con su ícono.
 - Portada y tarjetas sin fotos ya no salen vacías ni con una letra suelta: llevan el ícono de su tema; cada tema tiene un ícono coherente.
