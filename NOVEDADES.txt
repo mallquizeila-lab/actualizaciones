@@ -1,3 +1,9 @@
+9.50.0 · 📲 ProfeTok se instala como app en el celular
+- Docentes, directores y familias ven arriba «Instala ProfeTok en tu celular» con el botón 📲 Instalar: en Android/Chrome se instala con un toque y queda con su ícono en la pantalla de inicio, junto a sus apps.
+- En iPhone muestra los pasos con Safari (Compartir → Agregar a inicio). Si lo abrieron desde WhatsApp o Facebook, les indica abrirlo primero en el navegador.
+- Botón «📲 Instalar app» también en la portada. El aviso se puede cerrar (vuelve a los 5 días) y desaparece al instalarla.
+- Al mantener presionado el ícono: atajos a Portería QR, Novedades y Mi asistente. Se abre a pantalla completa como app y, sin internet, muestra un aviso amable con «Reintentar».
+
 9.49.0 · 🎓 ProfeTok: cuenta demo para seminarios
 - En tu panel de dueño: «✨ Crear demo» / «🔄 Reiniciar demo». Arma en 2 segundos la I.E. Cepriano (con su logo), 6.° grado «A» de primaria, el profesor Emanuel Fernández, 40 alumnos con avatares y 40 mamás, todo inventado.
 - Incluye un bimestre de actividad: asistencia por Portería QR con horas de entrada y salida, faltas y justificaciones, notas AD/A/B/C en 7 cursos (con alumnos en riesgo para la alerta temprana), 10 tareas con entregas, bitácora, 5 comunicados leídos, reuniones con confirmaciones, mensajes de mamás, avisos ya recibidos y conversaciones del asistente.
