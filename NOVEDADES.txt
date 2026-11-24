@@ -1,3 +1,8 @@
+9.50.8 · 🃏 Pack de guías de YUPI CARDS
+- 6 guías nuevas de YUPI CARDS: cartas de personaje y Abanico, jugar en línea con amigos (1 vs 1, 2 vs 2 y de a 4), modo aventura y sus jefes, modos fiesta, álbum/logros/liga/filtros, y YUPI CARDS en clase para docentes.
+- La guía principal ahora tiene las reglas exactas del juego (¡YUPI! con 2 cartas, +3/+5/+6, Abanico, puntos) y enlaces a todas las demás.
+- Si el catálogo de juegos de otros estudios está apagado, «Quiénes somos» y «Privacidad» ya no lo mencionan.
+
 9.50.7 · 📝 Más guías propias en Yupitok (para AdSense)
 - 6 guías nuevas escritas para Yupitok: reglas y trucos de YUPI CARDS, YUPI Remolino, Joyas, Ludo, ¿Quién es el impostor? y una guía de seguridad para padres y docentes.
 - Ya aparecen en /guias y en el mapa del sitio para Google.

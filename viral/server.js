@@ -765,7 +765,7 @@ function paginaLegal(tipo) {
       <li><b>GLORY BROWN: El Choque de los Reinos</b>: batallas de cartas en línea. Nació como homenaje a una abuelita muy querida, la Reina Glory Brown, que protege su reino con amor.</li>
       <li><b>Huerto Defensor</b>, <b>Joyas</b>, <b>Islas Portal 3D</b> y clásicos como ludo, billar, gusanito y 2048.</li>
       <li><b>Juegos educativos</b> por niveles (matemáticas, ciencias, ortografía, inglés) y <b>juegos cristianos</b> con trivias bíblicas.</li></ul>
-      <p>También ofrecemos juegos de otros estudios a través de un distribuidor autorizado, y escribimos <a href="/guias">guías y trucos</a> originales para cada juego.</p>
+      <p>${getS('pro', {}).on ? 'También ofrecemos juegos de otros estudios a través de un distribuidor autorizado, y escribimos' : 'Escribimos'} <a href="/guias">guías y trucos</a> originales para cada juego.</p>
       <h2>Cómo cuidamos a los jugadores</h2>
       <ul><li>Los juegos son para todo público. El chat, las mesas en vivo y las fotos de perfil son solo para mayores de 18 años y tienen filtros y reportes.</li>
       <li>En los juegos solo hay emojis para saludar: nada de mensajes escritos con desconocidos.</li>
@@ -1415,6 +1415,7 @@ http.createServer(async (req, res) => {
         .replace('TU NOMBRE O EMPRESA', x(pv.nombre, 'TU NOMBRE O EMPRESA')).replace('TU CIUDAD, PERÚ', x(pv.ciudad, 'TU CIUDAD, PERÚ'))
         .replaceAll('TU-CORREO@EJEMPLO.COM', x(pv.correo, 'TU-CORREO@EJEMPLO.COM')).replace('PLAZO (por ejemplo, 24 meses)', x(/^\s*\d+\s*$/.test(pv.plazo || '') ? pv.plazo.trim() + ' meses' : pv.plazo, '24 meses'))
         .replace('NÚMERO DE INSCRIPCIÓN', x(pv.codigo, 'en trámite'));
+      if (!getS('pro', {}).on) h = h.replace(/<p><b>Juegos de otros estudios:<\/b>[\s\S]*?<\/p>\n?/, ''); // sin catálogo externo no se menciona
       if (pv.nombre && pv.correo) h = h.replace(/<p class="n">[\s\S]*?<\/p>/, '');
       return send(res, 200, h, 'text/html; charset=utf-8', { 'cache-control': 'no-cache' });
     }
