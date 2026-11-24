@@ -96,7 +96,9 @@ const hoyPeru = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(
 const horaPeru = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
 function clientIp(req) {
   // Detrás de Cloudflare (túnel) la IP real llega en cf-connecting-ip; detrás de Nginx/Caddy en x-forwarded-for.
-  const xf = E.TRUST_PROXY !== '0' ? String(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim() : '';
+  // Solo si la conexión llega desde esta misma máquina (túnel o proxy local): quien entre directo por el puerto podría inventar la cabecera.
+  const local = /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(String(req.socket.remoteAddress || ''));
+  const xf = E.TRUST_PROXY !== '0' && (local || E.TRUST_PROXY === '1') ? String(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim() : '';
   return (xf || req.socket.remoteAddress || '').replace(/^::ffff:/, '');
 }
 // IP recortada: suficiente para estadísticas, no identifica a la persona.
@@ -1117,7 +1119,7 @@ async function api(req, res, u) {
 
   // ---- panel ----
   if (u.pathname === '/api/admin/login' && P) {
-    if (limite(ip, 'login', 8, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera 15 minutos.' });
+    if (limite(ip, 'login', 8, 15 * 60000) || limite('todas', 'login', 40, 15 * 60000)) return send(res, 429, { error: 'Demasiados intentos. Espera 15 minutos.' });
     const b = await json(req);
     if (!ADMIN_PASSWORD) return send(res, 400, { error: 'Pon ADMIN_PASSWORD en el archivo .env' });
     const a = crypto.createHash('sha256').update(String(b.password || '')).digest(), c = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest();

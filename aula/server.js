@@ -121,7 +121,10 @@ function send(res, code, body, req) { let b = Buffer.from(JSON.stringify(body));
 const json = (req, max = 4e6) => new Promise((ok, no) => { let b = ''; req.on('data', c => { b += c; if (b.length > max) { no(new Error('Archivo muy grande')); req.destroy(); } }); req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { ok({}); } }); });
 const LIM = new Map(); const limite = (ip, k, max, ms = 60000) => { const key = ip + '|' + k, t = Date.now(), r = LIM.get(key) || { n: 0, t }; if (t - r.t > ms) { r.n = 0; r.t = t; } r.n++; LIM.set(key, r); return r.n > max; };
 setInterval(() => { LIM.clear(); run('delete from sesiones where expira<?', Date.now()); }, 10 * 60000).unref();
-const ipDe = req => String(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+// Solo creemos las cabeceras de IP si la conexión viene del túnel de Cloudflare en esta misma máquina;
+// si alguien entra directo por el puerto, podría inventarlas para saltarse los límites de intentos.
+const desdeTunel = req => /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(String(req.socket.remoteAddress || ''));
+const ipDe = req => (desdeTunel(req) && String(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim()) || String(req.socket.remoteAddress || '');
 const usuarioDe = req => { const t = String(req.headers.authorization || '').replace(/^Bearer /, ''); if (!t) return null; const s = q1('select * from sesiones where token=? and expira>?', t, Date.now()); if (!s) return null; const u = q1('select * from usuarios where id=? and activo=1', s.usuario_id); return u ? { ...u, token: t } : null; };
 
 // imágenes privadas: solo JPG/PNG/WEBP reales y de hasta 1,5 MB (el navegador ya las achica antes de subir)
@@ -148,8 +151,10 @@ API['POST /api/registro'] = async ({ b, ip }) => { // docente nuevo: crea su col
 };
 API['POST /api/entrar'] = async ({ b, ip }) => {
   if (!/^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(ip) && limite(ip, 'login', 10, 15 * 60000)) throw 'Demasiados intentos. Espera 15 minutos.';
-  const u = q1('select * from usuarios where email=? and activo=1', String(b.email || '').toLowerCase().trim());
-  if (!u || !verPass(b.clave, u.hash)) throw 'Correo o contraseña incorrectos'; audit(u.id, 'entrar'); return { token: nuevaSesion(u.id) };
+  const em = String(b.email || '').toLowerCase().trim().slice(0, 190), u = q1('select * from usuarios where email=? and activo=1', em);
+  // tope por cuenta (aunque cambien de IP) y registro de cada intento fallido para el panel de seguridad del dueño
+  if (u && q1("select count(*) n from auditoria where accion='login fallido' and detalle like ? and fecha>datetime('now','-30 minutes')", em + ' |%').n >= 12) throw 'Demasiados intentos con esta cuenta. Espera 30 minutos.';
+  if (!u || !verPass(b.clave, u.hash)) { audit(null, 'login fallido', `${em} | ${ip}`); throw 'Correo o contraseña incorrectos'; } audit(u.id, 'entrar'); return { token: nuevaSesion(u.id) };
 };
 API['POST /api/salir'] = async ({ u }) => { if (u) run('delete from sesiones where token=?', u.token); return { ok: 1 }; };
 API['POST /api/clave'] = async ({ u, b }) => { if (!verPass(b.actual, u.hash)) throw 'Tu contraseña actual no es correcta'; if (String(b.nueva || '').length < 8) throw 'La nueva contraseña debe tener al menos 8 caracteres'; run('update usuarios set hash=? where id=?', hashPass(b.nueva), u.id); run('delete from sesiones where usuario_id=? and token<>?', u.id, u.token); return { ok: 1 }; };
@@ -314,7 +319,11 @@ function activarPago(id, via = '') {
   if (p.cupon) run('update cupones set usos=usos+1 where codigo=?', p.cupon); audit(null, 'pago aprobado', `${p.id} ${via}`);
   try { crecer.alPagar(q1('select * from pagos where id=?', p.id)); } catch (e) { console.log('[ProfeTok] ' + e.message); } return true;
 }
-API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { demo: getS('demo_colegio', 0), colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c where c.id <> ? order by c.id desc", getS('demo_colegio', 0)), billeteras: billeteras(), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
+const seguridad = () => { const F = q("select detalle, fecha from auditoria where accion='login fallido' and fecha>datetime('now','-7 days') order by id desc limit 2000"), ips = {}, cuentas = {};
+  for (const f of F) { const [c, i] = f.detalle.split(' | '); ips[i] = (ips[i] || 0) + 1; cuentas[c] = (cuentas[c] || 0) + 1; }
+  const top = o => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  return { dia: F.filter(f => f.fecha > new Date(Date.now() - DIA).toISOString().replace('T', ' ').slice(0, 19)).length, semana: F.length, ips: top(ips), cuentas: top(cuentas), ultimos: F.slice(0, 8) }; };
+API['GET /api/dueno'] = async ({ u }) => { if (u.rol !== 'dueno') throw 403; return { seguridad: seguridad(), demo: getS('demo_colegio', 0), colegios: q("select c.*, (select count(*) from usuarios where colegio_id=c.id and rol in ('docente','director')) docentes, (select count(*) from alumnos where colegio_id=c.id) alumnos, (select email from usuarios where colegio_id=c.id and rol in ('director','docente') order by id limit 1) email from colegios c where c.id <> ? order by c.id desc", getS('demo_colegio', 0)), billeteras: billeteras(), pagos: q("select p.*, c.nombre colegio from pagos p join colegios c on c.id=p.colegio_id order by p.id desc limit 200"), planes: PLANES, soporte: getS('soporteWa', '') }; };
 API['POST /api/dueno'] = async ({ u, b }) => {
   if (u.rol !== 'dueno') throw 403;
   if (b.accion === 'aprobar') { if (!q1('select 1 from pagos where id=?', +b.id)) throw 404; activarPago(+b.id, 'aprobado por el dueño'); return { ok: 1 }; }
@@ -382,7 +391,7 @@ const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /a
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
-  if (req.headers['cf-connecting-ip'] && !getS('urlPublica', '') && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(req.headers.host || '') && !/trycloudflare\.com$/i.test(req.headers.host || '')) setS('urlPublica', 'https://' + req.headers.host); // la dirección pública se aprende sola (para los enlaces de los correos)
+  if (req.headers['cf-connecting-ip'] && desdeTunel(req) && !getS('urlPublica', '') && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(req.headers.host || '') && !/trycloudflare\.com$/i.test(req.headers.host || '')) setS('urlPublica', 'https://' + req.headers.host); // la dirección pública se aprende sola (para los enlaces de los correos)
   try {
     // archivos privados (fotos y logos): solo con permiso
     let m = /^\/api\/foto\/(alumno|logo)\/(\d+)$/.exec(url.pathname);

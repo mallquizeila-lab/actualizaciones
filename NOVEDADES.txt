@@ -1,3 +1,9 @@
+9.50.6 · 🛡️ Seguridad reforzada
+- ProfeTok y Yupitok ya no se dejan engañar por quien entra directo al servidor fingiendo otra IP (antes podía saltarse el límite de intentos de contraseña).
+- ProfeTok: tope de intentos por cuenta (12 fallos = 30 min de espera) aunque el atacante cambie de IP.
+- Yupitok: tope general de intentos al panel de administración.
+- Panel del dueño de ProfeTok: nueva tarjeta «🛡️ Seguridad» con los intentos fallidos de 24 h y 7 días, las IPs y las cuentas más atacadas.
+
 9.50.5 · 📒 Nuevo video de Libretín en ProfeTok
 - En la página principal de ProfeTok, el primer video ahora es «¡Conoce a Libretín!»: anuncio de 30 s con voces (la noche llenando registros → asistencia con la voz → notas con una foto → prueba gratis 15 días).
 
