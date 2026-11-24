@@ -1,3 +1,6 @@
+9.52.2 · 🎙️ Recorrido de ProfeTok: voz humana corregida
+- Arreglado: la voz leía las tildes y la ñ como códigos («barra inversa, cero, cero…»). Ahora lee como una persona y el video dura 8 minutos.
+
 9.52.1 · 🎙️ Recorrido de ProfeTok con voz más natural
 - El «Recorrido completo por dentro» (11 min) ahora lo narra una voz más natural y cálida, y el guion suena como una persona explicando (sin títulos leídos como código).
 
