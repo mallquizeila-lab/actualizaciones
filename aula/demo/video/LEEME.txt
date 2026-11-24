@@ -1,0 +1,6 @@
+Video del recorrido de ProfeTok (demo I.E. Cepriano) sincronizado con una voz
+1. Separar la voz de la música (si viene de Suno): python mdx.py audio.mp3  (necesita voc_ft.onnx de UVR) → voz.wav
+2. alinear.py: mejora la voz y ubica cada frase de la letra (p1.txt / p2.txt) en el tiempo → plan.json
+3. Encender ProfeTok con el reloj a las 7:52: RELOJ=12:51:42 node -r reloj.js server.js (puerto 3411, demo armada)
+4. grabar2.js: graba cada escena al ritmo de la voz (las acciones ocurren cuando la voz las menciona)
+5. editar2.py: tarjetas de cada paso, subtítulos, voz + música suave que baja cuando habla → mp4 final
