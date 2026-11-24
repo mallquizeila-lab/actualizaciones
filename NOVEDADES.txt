@@ -1,3 +1,7 @@
+9.52.0 · 🎓 Recorrido de ProfeTok con voz nueva + 🌙 actualización automática
+- ProfeTok: en la página principal, debajo de los videos cortos, nuevo «Recorrido completo por dentro» (11 min) con voz nueva, explicando todo paso a paso como en los seminarios.
+- ShortForge se actualiza solo de madrugada (3 a 5 a. m. de Perú) cuando hay una versión nueva, y te avisa por Telegram. Si está renderizando un video, espera. Se apaga en Ajustes → Actualizaciones.
+
 9.51.1 · 📚 Web para AdSense: estudian a los grandes sitios de su tema
 - Antes de planificar y escribir, cada web analiza los referentes de calidad de su tema (recetas: Simply Recipes, Serious Eats, Allrecipes; viajes: Lonely Planet, TripSavvy; hogar y jardín: The Spruce, Real Simple; tecnología: MakeUseOf, XDA; aprendizaje: wikiHow, freeCodeCamp…) para hacerlo igual de útil con contenido propio. Nunca se copian textos.
 - Las webs que ya existían repiten su estudio una vez con estos referentes.

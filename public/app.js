@@ -925,7 +925,7 @@ VIEWS.ajustes = () => {
   ${S.act?.nueva && S.act.notas ? `<pre class="hint" style="white-space:pre-wrap;background:var(--soft,#f5f5f4);padding:10px;border-radius:8px">${esc(S.act.notas)}</pre>` : ''}
   ${S.act?.error ? `<p class="hint">${esc(S.act.error)}</p>` : ''}
   <div class="btns">${S.act?.nueva ? '<button class="b" data-act="actInstalar">⬇ Instalar la mejora</button>' : ''}<button class="b ghost" data-act="actBuscar">Buscar actualizaciones</button></div>
-  <p class="hint">Se descarga de tu GitHub y reemplaza solo el programa: tus claves, canales, voces y videos no se tocan. Al terminar, ShortForge se reinicia solo (unos segundos).</p></div>
+  <p class="hint">Se descarga de tu GitHub y reemplaza solo el programa: tus claves, canales, voces y videos no se tocan. Al terminar, ShortForge se reinicia solo (unos segundos).</p><label><input type="checkbox" id="set-autoact" ${s.autoActualizar !== false ? 'checked' : ''} onchange="fetch('/api/settings',{method:'POST',headers:{'x-sf':'1','content-type':'application/json'},body:JSON.stringify({autoActualizar:this.checked})})">🌙 Instalar solas las mejoras de madrugada (3 a 5 a. m., hora de Perú)</label></div>
   <div class="card"><h3>🩺 Mantenimiento</h3>
   <p class="hint">El sistema revisa los motores de IA al iniciar y cada mañana, limpia temporales y te avisa si falta espacio o si una clave está por vencer.</p>
   <label><input type="checkbox" id="set-clean" ${s.autoClean !== false ? 'checked' : ''}>Borrar los videos ya publicados hace más de 30 días (libera espacio; el registro del video se conserva)</label>

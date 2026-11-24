@@ -100,3 +100,5 @@ main{max-width:1200px;margin:0 auto;padding:16px 14px 80px}
 /* 📲 instalar como app */
 .aviso-inst{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#e0f2fe,#fef9c3);border-bottom:1px solid #bae6fd;padding:8px 14px;flex-wrap:wrap;justify-content:center}.aviso-inst img{width:40px;height:40px;border-radius:10px;box-shadow:0 2px 6px #0002}.aviso-inst span{display:grid;line-height:1.25;min-width:180px;flex:1;max-width:520px}.aviso-inst small{color:#475569}
 .pasos-inst{padding-left:22px;line-height:1.6;margin:8px 0}.pasos-inst li{margin:6px 0}.pasos-inst .ico{display:inline-block;background:#e0f2fe;border-radius:8px;padding:0 6px}
+
+.recorrido{max-width:880px;margin:26px auto 4px}.recorrido h3{margin:0 0 4px}.rmarco{margin-top:12px;border-radius:18px;overflow:hidden;background:#0f172a;box-shadow:0 20px 50px #0369a155;border:6px solid #0f172a;aspect-ratio:16/9}.rmarco video{width:100%;height:100%;display:block;background:#0f172a}

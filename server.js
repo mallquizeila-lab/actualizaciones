@@ -394,6 +394,7 @@ async function api(u, q, U, r) {
     if (Array.isArray(o.engines)) db.settings.engines = o.engines.filter(e => ai.PROVIDERS[e]);
     if (o.models) db.settings.models = o.models;
     if (o.factCheck !== undefined) db.settings.factCheck = !!o.factCheck;
+    if (o.autoActualizar !== undefined) db.settings.autoActualizar = !!o.autoActualizar;
     if (o.karaoke !== undefined) db.settings.karaoke = !!o.karaoke;
     if (['tiny', 'base', 'small'].includes(o.whisperModel)) db.settings.whisperModel = o.whisperModel;
     if (o.continuous !== undefined) db.settings.continuous = !!o.continuous;
