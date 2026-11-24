@@ -1,4 +1,5 @@
-9.50.5 — ProfeTok: nuevo video «¡Conoce a Libretín!» (anuncio de 30 s con voces) como primer video de la página principal.
+9.50.5 · 📒 Nuevo video de Libretín en ProfeTok
+- En la página principal de ProfeTok, el primer video ahora es «¡Conoce a Libretín!»: anuncio de 30 s con voces (la noche llenando registros → asistencia con la voz → notas con una foto → prueba gratis 15 días).
 
 9.50.4 · 📿 Pulsera de juegos a todo el ancho en la computadora
 - En la portada de Yupitok, la tira deslizable con las fotos de los juegos ahora ocupa todo el ancho en pantallas grandes (antes quedaba encerrada en la primera columna).
