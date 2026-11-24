@@ -60,7 +60,7 @@ Lo vamos llenando con cada video, enlace o herramienta que manda el socio. Datos
 
 ## 💡 Ideas sacadas de los videos que mandó el socio
 
-- **Revisión automática tras cada render** (negros, congelados, audio) — de OpenMontage.
+- ✅ **Revisión automática tras cada render** (negros, congelados, audio) — de OpenMontage. **Hecho en 9.53.0** (`lib/revisarvideo.js`, código propio).
 - **Detector de «video tipo diapositivas»** — de OpenMontage.
 - **«Hazme uno como este»** con un archivo de referencia → 2-3 ideas (qué se conserva y qué cambia) — de OpenMontage/openmotion.
 - **Palabra clave en comentarios → mensaje privado automático** — de openreply y de los reels.

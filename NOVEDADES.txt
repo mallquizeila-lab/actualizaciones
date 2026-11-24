@@ -1,3 +1,7 @@
+9.53.0 · 🔎 Revisión automática de cada video + Webs AdSense sin «contenido en serie»
+- Cada video terminado se revisa solo antes de aprobarse o publicarse: pantalla negra en medio, imagen congelada (escena que no cargó), audio muy bajo, saturado o con silencios largos. Si falla, queda «por revisar» y te avisa por Telegram. Sin IA y sin costo.
+- Web para AdSense: detecta y corrige solas las huellas de contenido en serie (lo que hizo rechazar a sebuscaempleo.com): títulos de molde («7 claves», «guía definitiva», el año) y frases vagas sin fuente («según reportes», «una proporción muy alta»). Esas páginas se reescriben y no se aprueban hasta quedar limpias. Nuevo punto en la lista para AdSense.
+
 9.52.2 · 🎙️ Recorrido de ProfeTok: voz humana corregida
 - Arreglado: la voz leía las tildes y la ñ como códigos («barra inversa, cero, cero…»). Ahora lee como una persona y el video dura 8 minutos.
 
