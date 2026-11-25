@@ -1,3 +1,10 @@
+9.57.2 · 🎨 ProfeCrea: el Estudio de Diseño, ahora profesional
+- El «Estudio de Diseño» pasa a llamarse ProfeCrea (tu alternativa libre a Canva, dentro de ProfeTok).
+- 8 plantillas DE VERDAD, bien compuestas: 🏅 Diploma de honor (marco doble, sello y firmas), 📋 Normas del aula (números de colores), 📅 Horario en tabla a colores, 📓 Portada de cuaderno, ⭐ Alumno del mes, 💬 Frase motivadora, 🎉 Felicitaciones y ⬜ En blanco.
+- Tipografías (Arial, Georgia, Trebuchet, Comic, Impact, Mono) y botón de Negrita para los textos.
+- Al abrir un diseño nuevo se muestran las plantillas de una (como Canva).
+- Probado en navegador (Chromium): las 5 plantillas principales se arman sin errores.
+
 9.57.1 · 🎨 Herramientas TIC: más color y mejor acabado
 - Paleta de 12 colores de acceso rápido en la barra (un toque y pintas), además del selector personalizado.
 - Fondos con degradados bonitos para los diseños: Océano, Atardecer, Menta, Dulce, Fuego y Bosque.

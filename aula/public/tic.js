@@ -104,6 +104,7 @@
 .tic-card:nth-child(2){background:linear-gradient(135deg,#faf5ff,#fce7f3)}
 .tic-card:nth-child(3){background:linear-gradient(135deg,#ecfeff,#f0fdfa)}
 .tic-chip.on{background:linear-gradient(135deg,#0ea5e9,#2563eb)}
+.tic-font{border:1px solid #e5e7eb;border-radius:9px;padding:7px 6px;font-size:13px;background:#fff;cursor:pointer;max-width:96px}
 @media(max-width:680px){.tic-side{width:200px}.tic-tool{width:36px;height:36px;font-size:17px}}
 `));
   }
@@ -116,7 +117,7 @@
       <p class="muted" style="margin-top:-6px">Crea, dibuja y diseña para tus clases. <b>Gratis</b>, funciona en celular, tablet y PC, y se guarda solo.</p>
       <div class="tic-cards">
         <div class="tic-card" data-abrir="pizarra"><div class="ic">🪄</div><b>Pizarra Mágica</b><small>Dibuja, escribe y explica. Fondos, figuras, imágenes y exporta a PNG/PDF.</small></div>
-        <div class="tic-card" data-abrir="diseno"><div class="ic">🎨</div><b>Estudio de Diseño</b><small>Carteles, diplomas, horarios y láminas. Como Canva, pero dentro de ProfeTok.</small></div>
+        <div class="tic-card" data-abrir="diseno"><div class="ic">🎨</div><b>ProfeCrea · Estudio de diseño</b><small>Carteles, diplomas, horarios y portadas con plantillas listas. Como Canva, gratis y dentro de ProfeTok.</small></div>
         <div class="tic-card" data-asis><div class="ic">🤖</div><b>Asistente Libretín</b><small>Pídele ideas, esquemas o preguntas para tus pizarras y diseños.</small></div>
       </div>
       <h3 style="margin-top:18px">🗂️ Mis trabajos</h3>
@@ -148,7 +149,7 @@
     const S = {
       id: id || null, tipo: diseno ? 'diseno' : 'pizarra', titulo: diseno ? 'Mi diseño' : 'Mi pizarra',
       bg: diseno ? 'blanco' : 'blanco', bgColor: '#ffffff', W: diseno ? 1080 : 1280, H: diseno ? 1080 : 800,
-      objs: [], tool: 'pen', color: diseno ? '#0f172a' : '#e11d48', width: 4, size: 32, fill: false,
+      objs: [], tool: 'pen', color: diseno ? '#0f172a' : '#e11d48', width: 4, size: 32, fill: false, font: 'Arial, sans-serif', bold: false,
       view: { s: 1, x: 0, y: 0 }, sel: -1, undo: [], redo: []
     };
 
@@ -173,6 +174,8 @@
     const pal = el('div', { className: 'tic-pal' }); for (const col of PALETA) { const sw = el('button', { className: 'tic-sw', title: col }); sw.style.background = col; sw.onclick = () => { S.color = col; colorIn.value = col; applySel('color'); }; pal.appendChild(sw); } bar.appendChild(pal);
     const widthIn = el('input', { type: 'range', min: 1, max: 40, value: S.width, title: 'Grosor', style: 'width:90px' }); widthIn.oninput = () => { S.width = +widthIn.value; applySel('width'); }; bar.appendChild(widthIn);
     const fillBtn = el('button', { className: 'tic-tool', title: 'Relleno', textContent: '🩹' }); fillBtn.onclick = () => { S.fill = !S.fill; fillBtn.classList.toggle('on', S.fill); applySel('fill'); }; bar.appendChild(fillBtn);
+    const boldBtn = el('button', { className: 'tic-tool', title: 'Negrita', textContent: 'B', style: 'font-weight:800' }); boldBtn.onclick = () => { S.bold = !S.bold; boldBtn.classList.toggle('on', S.bold); applySel('bold'); }; bar.appendChild(boldBtn);
+    const fontSel = el('select', { className: 'tic-font', title: 'Tipo de letra' }); for (const [v, n] of [['Arial, sans-serif', 'Arial'], ['Georgia, serif', 'Georgia'], ['Trebuchet MS, sans-serif', 'Trebuchet'], ['Comic Sans MS, cursive', 'Comic'], ['Impact, sans-serif', 'Impact'], ['Courier New, monospace', 'Mono']]) fontSel.appendChild(el('option', { value: v, textContent: n })); fontSel.onchange = () => { S.font = fontSel.value; applySel('font'); }; bar.appendChild(fontSel);
     bar.appendChild(sep());
     bar.appendChild(btn2('↶', () => undo(), 'Deshacer'));
     bar.appendChild(btn2('↷', () => redo(), 'Rehacer'));
@@ -294,7 +297,7 @@
     function valido(o) { if (o.t === 'path') return o.pts.length > 1; if (o.t === 'line' || o.t === 'arrow') return Math.hypot(o.x2 - o.x1, o.y2 - o.y1) > 4; return (o.w > 4 && o.h > 4); }
     function moveObj(o, orig, dx, dy) { if (o.t === 'path') o.pts = orig.pts.map(q => ({ x: q.x + dx, y: q.y + dy })); else if (o.t === 'line' || o.t === 'arrow') { o.x1 = orig.x1 + dx; o.y1 = orig.y1 + dy; o.x2 = orig.x2 + dx; o.y2 = orig.y2 + dy; } else { o.x = orig.x + dx; o.y = orig.y + dy; } }
     function resizeObj(o, p, b) { if (o.t === 'text') { o.size = Math.max(10, (p.y - o.y) / ((o.text || 'A').split('\n').length * 1.25)); } else if (o.t === 'line' || o.t === 'arrow') { o.x2 = p.x; o.y2 = p.y; } else if (o.t === 'path') { const sx = (p.x - b.x) / (b.w || 1), sy = (p.y - b.y) / (b.h || 1); o.pts = o.pts.map(q => ({ x: b.x + (q.x - b.x) * Math.max(.05, sx), y: b.y + (q.y - b.y) * Math.max(.05, sy) })); } else { o.w = Math.max(8, p.x - o.x); o.h = Math.max(8, p.y - o.y); } }
-    function applySel(prop) { if (S.sel < 0) return; const o = S.objs[S.sel]; if (prop === 'color' && o.t !== 'image') o.color = S.color; if (prop === 'width') o.width = S.width; if (prop === 'fill' && 'fill' in o) o.fill = S.fill; draw(); }
+    function applySel(prop) { if (S.sel < 0) return; const o = S.objs[S.sel]; if (prop === 'color' && o.t !== 'image') o.color = S.color; if (prop === 'width') o.width = S.width; if (prop === 'fill' && 'fill' in o) o.fill = S.fill; if (prop === 'bold' && o.t === 'text') o.bold = S.bold; if (prop === 'font' && o.t === 'text') o.font = S.font; draw(); }
 
     // ---------- texto / nota con input flotante ----------
     function editarTexto(p, existente) {
@@ -312,7 +315,7 @@
         snap();
         if (existente) { existente.text = v; }
         else if (esNota) S.objs.push({ t: 'note', x: sx, y: sy, w: 180, h: 110, text: v, color: '#fde68a' });
-        else S.objs.push({ t: 'text', x: sx, y: sy, text: v, color: S.color, size: S.size, bold: false });
+        else S.objs.push({ t: 'text', x: sx, y: sy, text: v, color: S.color, size: S.size, bold: S.bold, font: S.font });
         draw();
       };
       input.onblur = commit; input.onkeydown = ev => { if (ev.key === 'Enter' && !esNota) { ev.preventDefault(); input.blur(); } if (ev.key === 'Escape') { input.value = existente ? existente.text : ''; input.blur(); } };
@@ -336,11 +339,7 @@
     }
     function panelPlantillas(c) {
       const plantillas = diseno
-        ? [['Cartel', () => preset(1080, 1350, 'bgcolor', '#0ea5e9', [{ t: 'text', x: 90, y: 160, text: 'TÍTULO\nDEL CARTEL', color: '#fff', size: 92, bold: true }, { t: 'text', x: 90, y: 520, text: 'Escribe aquí tu mensaje', color: '#fff', size: 40 }])],
-          ['Diploma', () => preset(1350, 1000, 'bgcolor', '#fef3c7', [{ t: 'rect', x: 40, y: 40, w: 1270, h: 920, color: '#b45309', width: 8, fill: false }, { t: 'text', x: 400, y: 170, text: 'DIPLOMA', color: '#92400e', size: 86, bold: true }, { t: 'text', x: 300, y: 420, text: 'Otorgado a: ______________', color: '#1f2937', size: 44 }])],
-          ['Horario', () => preset(1350, 1000, 'cuadriculado', '#fff', [{ t: 'text', x: 60, y: 40, text: 'HORARIO DE CLASES', color: '#0f172a', size: 56, bold: true }])],
-          ['Portada', () => preset(1080, 1080, 'bgcolor', '#6d28d9', [{ t: 'text', x: 100, y: 420, text: 'Mi cuaderno de\nComunicación', color: '#fff', size: 70, bold: true }])],
-          ['En blanco', () => preset(1080, 1080, 'blanco', '#fff', [])]]
+        ? plantillasDiseno().map(p => [p.n, () => preset(p.w, p.h, p.bg, p.bgc, p.objs)])
         : [['Cuadrícula', () => { snap(); S.bg = 'cuadriculado'; draw(); }],
           ['Plano cartesiano', () => { snap(); S.bg = 'cartesiano'; draw(); }],
           ['Caligrafía', () => { snap(); S.bg = 'caligrafia'; draw(); }],
@@ -381,7 +380,7 @@
 
     // ---------- cargar existente ----------
     async function cargar() {
-      if (!id) { ajustar(); if (abrirAsistente) togglePanel('asistente'); return; }
+      if (!id) { ajustar(); if (abrirAsistente) togglePanel('asistente'); else if (diseno) togglePanel('plantillas'); return; }
       try { const r = await api('tic/pizarra?id=' + id); S.titulo = r.titulo; titIn.value = r.titulo; const d = r.datos || {}; S.bg = d.bg || 'blanco'; S.bgColor = d.bgColor || '#ffffff'; S.W = d.w || S.W; S.H = d.h || S.H; S.objs = d.objs || []; S.objs.forEach(o => { if (o.t === 'image' && o.src) { const im = new Image(); im.onload = draw; im.src = o.src; o._img = im; } }); } catch (e) { toast('⚠️ No se pudo cargar'); } ajustar();
     }
 
@@ -410,6 +409,81 @@
     const xref = len; let x = `xref\n0 6\n0000000000 65535 f \n`; for (let n = 1; n <= 5; n++) x += String(off[n]).padStart(10, '0') + ' 00000 n \n'; push(enc(x));
     push(enc(`trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n${xref}\n%%EOF`));
     return new Blob(parts, { type: 'application/pdf' });
+  }
+
+  // Plantillas profesionales del estudio de diseño (ProfeCrea). Cada una es composición real de objetos.
+  function plantillasDiseno() {
+    const navy = '#0f172a', gold = '#d4a017', brown = '#b45309', sky = '#0284c7', white = '#ffffff', slate = '#475569';
+    const T = (text, x, y, size, color, bold, font) => ({ t: 'text', x, y, text, size, color: color || navy, bold: !!bold, font: font || 'Arial, sans-serif' });
+    const R = (x, y, w, h, color, width, fill) => ({ t: 'rect', x, y, w, h, color, width: width || 2, fill: !!fill });
+    const E = (x, y, w, h, color, fill, alpha) => ({ t: 'ellipse', x, y, w, h, color, width: 2, fill: !!fill, alpha: alpha == null ? 1 : alpha });
+    const L = (x1, y1, x2, y2, color, width) => ({ t: 'line', x1, y1, x2, y2, color, width: width || 2 });
+    return [
+      {
+        n: '🏅 Diploma', w: 1350, h: 1000, bg: 'bgcolor', bgc: '#fffdf7', objs: [
+          R(45, 45, 1260, 910, brown, 10, false), R(68, 68, 1214, 864, gold, 3, false),
+          E(600, 92, 150, 150, gold, true), T('🏅', 648, 118, 92),
+          T('DIPLOMA DE HONOR', 310, 290, 74, brown, true, 'Georgia, serif'),
+          T('Se otorga a:', 300, 440, 40, slate), L(300, 575, 1050, 575, '#cbd5e1', 2),
+          T('por su destacado desempeño durante el año escolar.', 300, 620, 30, slate),
+          L(310, 835, 585, 835, navy, 2), L(765, 835, 1040, 835, navy, 2),
+          T('Director(a)', 375, 850, 26, '#64748b'), T('Docente', 855, 850, 26, '#64748b')
+        ]
+      },
+      {
+        n: '📋 Normas del aula', w: 1080, h: 1350, bg: 'grad1', bgc: '#0ea5e9', objs: [
+          R(70, 80, 940, 150, sky, 2, true), T('NORMAS DE\nNUESTRA AULA', 110, 100, 52, white, true),
+          E(100, 330, 70, 70, '#f59e0b', true), T('1', 126, 346, 38, white, true), T('Escucho con atención', 205, 345, 40, navy),
+          E(100, 490, 70, 70, '#ef4444', true), T('2', 126, 506, 38, white, true), T('Levanto la mano para hablar', 205, 505, 40, navy),
+          E(100, 650, 70, 70, '#22c55e', true), T('3', 126, 666, 38, white, true), T('Cuido mis materiales', 205, 665, 40, navy),
+          E(100, 810, 70, 70, '#8b5cf6', true), T('4', 126, 826, 38, white, true), T('Respeto a mis compañeros', 205, 825, 40, navy),
+          T('¡Juntos aprendemos mejor! 🌟', 150, 1240, 40, white, true)
+        ]
+      },
+      {
+        n: '📅 Horario', w: 1350, h: 1000, bg: 'blanco', bgc: white, objs: (() => {
+          const o = [T('HORARIO DE CLASES', 60, 45, 56, navy, true)], x0 = 60, y0 = 150, w = 1230, h = 790, col = w / 6, hh = 72;
+          o.push(R(x0, y0, w, hh, sky, 2, true));
+          ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].forEach((d, i) => o.push(T(d, x0 + col * i + (i ? 30 : 40), y0 + 20, 26, white, true)));
+          o.push(R(x0, y0, w, h, '#94a3b8', 2, false));
+          for (let k = 1; k < 6; k++) o.push(L(x0 + col * k, y0, x0 + col * k, y0 + h, '#cbd5e1', 1));
+          const rows = 7, rh = (h - hh) / rows;
+          for (let r = 0; r <= rows; r++) o.push(L(x0, y0 + hh + rh * r, x0 + w, y0 + hh + rh * r, '#e2e8f0', 1));
+          return o;
+        })()
+      },
+      {
+        n: '📓 Portada', w: 1080, h: 1350, bg: 'grad4', bgc: '#8b5cf6', objs: [
+          E(760, -130, 520, 520, white, true, .12), E(-140, 1040, 440, 440, white, true, .10),
+          T('CUADERNO DE', 100, 520, 44, white), T('Comunicación', 100, 580, 92, white, true),
+          T('5° de Primaria · 2026', 100, 760, 40, white),
+          R(100, 920, 640, 100, white, 3, false), T('Nombre:', 120, 952, 36, white)
+        ]
+      },
+      {
+        n: '⭐ Alumno del mes', w: 1350, h: 1000, bg: 'grad3', bgc: '#22c55e', objs: [
+          R(165, 110, 1020, 780, white, 2, true),
+          E(600, 155, 150, 150, gold, true), T('⭐', 648, 182, 86),
+          T('ESTUDIANTE DEL MES', 360, 380, 60, navy, true),
+          L(410, 560, 940, 560, '#cbd5e1', 2),
+          T('¡Felicitaciones por tu esfuerzo y dedicación!', 370, 620, 32, slate)
+        ]
+      },
+      {
+        n: '💬 Frase', w: 1080, h: 1080, bg: 'grad2', bgc: '#f97316', objs: [
+          E(780, 760, 420, 420, white, true, .12),
+          T('«El esfuerzo\nde hoy es el\néxito de\nmañana»', 90, 230, 74, white, true, 'Georgia, serif'),
+          T('— ProfeTok', 90, 900, 36, white)
+        ]
+      },
+      {
+        n: '🎉 Felicitaciones', w: 1080, h: 1080, bg: 'grad5', bgc: '#f59e0b', objs: [
+          T('🎉', 450, 150, 170), T('¡FELICITACIONES!', 120, 500, 74, white, true),
+          T('Por tu excelente trabajo', 250, 640, 42, white)
+        ]
+      },
+      { n: '⬜ En blanco', w: 1080, h: 1080, bg: 'blanco', bgc: white, objs: [] }
+    ];
   }
 
   window.TIC = { montar };
