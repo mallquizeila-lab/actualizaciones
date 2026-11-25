@@ -1,3 +1,11 @@
+9.56.0 · 🤖 Web para AdSense 100 % automática + avisos de cada web
+- Primera publicación sola: cuando una web tiene 3 guías aprobadas, se sube a Cloudflare Pages sin apretar nada, y luego se actualiza con cada guía nueva.
+- Dominio: lo conecta solo a la web (si está en tu Cloudflare). Si aún no lo compraste, te avisa cuál comprar.
+- Google Search Console sin pegar códigos: pide la verificación a Google, la pone en la web, verifica, agrega el sitio y manda el mapa del sitio. Usa la cuenta de Google conectada en Canales.
+  ⚠️ Una vez: en Canales desconecta YouTube y vuelve a conectarlo para aceptar el permiso de Search Console.
+- Avisos por Telegram de cada web: ya está en internet, dominio conectado, verificada en Google, guías nuevas de cada día y «¡lista para pedir AdSense!».
+- Solo quedan en tus manos lo que Google y el pago exigen: comprar el dominio y pedir la revisión de AdSense (te avisa cuándo).
+
 9.55.0 · 📚 Web para AdSense: datos reales de fuentes oficiales y cero temas repetidos
 - Antes de escribir cada página, ShortForge ENTRA a las fuentes oficiales del tema (gob.pe, ministerios, entidades) y le pasa al redactor los párrafos relevantes con su enlace. Las guías citan datos reales en vez de escribir de memoria: menos «según reportes…» y menos [FALTA DATO].
 - Las fuentes citadas se comprueban: las que no abren se quitan solas; si ninguna abre, la página no se aprueba hasta corregirlo.
