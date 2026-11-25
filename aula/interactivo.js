@@ -231,7 +231,20 @@ Español del Perú. No inventes datos de personas. No agregues nada fuera del JS
   };
 
   // rutas que funcionan sin plan (gratis), para que server.js las marque libres de membresía
-  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia', 'POST /api/tic/muro-guardar', 'POST /api/tic/muro-borrar', 'POST /api/tic/post', 'POST /api/tic/post-borrar'];
+  // 🎤 Libretín conversacional (voz): el docente habla/escribe y Libretín razona y responde breve.
+  API['POST /api/tic/chat'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    if (tope(u.id, 150)) throw 'Por hoy ya conversamos bastante, profe. Volvamos mañana. 🙂';
+    const msg = limpio(b.mensaje, 1000);
+    if (!msg) throw 'Dime algo, profe.';
+    if (!(E.AULA_SF_URL && E.AULA_IA_TOKEN)) return { texto: 'Por ahora no estoy conectado a la inteligencia artificial, profe. Pídele al administrador que active la clave de Libretín en el VPS y vuelvo a hablar contigo.' };
+    const hist = Array.isArray(b.historial) ? b.historial.slice(-8).map(h => ({ role: h.rol === 'user' ? 'user' : 'assistant', content: String(h.texto || '').slice(0, 1500) })) : [];
+    const sistema = `Eres «Libretín», el asistente de voz de ProfeTok para un(a) docente del Perú. Hablas en español del Perú: cálido, claro y BREVE (2 a 5 frases, porque el docente te escucha por voz). Ayudas con: planificar sesiones y unidades según el CNEB, crear exámenes, rúbricas y fichas, dar ideas y dinámicas para la clase, resolver dudas pedagógicas y explicar cómo usar ProfeTok (asistencia, notas, la Pizarra, ProfeCrea, el Muro, la ruleta). Si piden algo largo (un examen completo), ofrécelo y pregunta los 2 o 3 datos clave (grado, área, tema). PRIVACIDAD (Ley 29733): nunca pidas ni repitas apellidos, DNI, salud ni datos personales de alumnos; si el docente los menciona, no los uses. No inventes funciones que ProfeTok no tiene.`;
+    const texto = await ia([{ role: 'system', content: sistema }, ...hist, { role: 'user', content: msg }], 700);
+    return { texto: String(texto || '').trim() };
+  };
+
+  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia', 'POST /api/tic/muro-guardar', 'POST /api/tic/muro-borrar', 'POST /api/tic/post', 'POST /api/tic/post-borrar', 'POST /api/tic/chat'];
   return { API, SINPLAN };
 }
 module.exports = { crear };

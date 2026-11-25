@@ -98,5 +98,85 @@
     return box;
   }
 
-  window.LIBRETIN = { svg, mascota, asistente };
+  function chatCss() {
+    if (document.getElementById('lc-css')) return;
+    document.head.appendChild(document.createElement('style')).id = 'lc-css';
+    document.getElementById('lc-css').textContent = `
+.lc-ov{position:fixed;inset:0;z-index:4600;background:rgba(15,23,42,.55);display:grid;place-items:center;padding:14px;font-family:ui-sans-serif,system-ui,Arial}
+.lc-box{background:#f6f9ff;width:min(96vw,520px);height:min(90vh,720px);border-radius:22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px -20px rgba(0,0,0,.5)}
+.lc-top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff}
+.lc-top b{font-size:18px}.lc-top small{opacity:.9;display:block;font-size:12px}
+.lc-top .x{margin-left:auto;border:none;background:rgba(255,255,255,.2);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
+.lc-msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.lc-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.lc-b.user{align-self:flex-end;background:#2563eb;color:#fff;border-bottom-right-radius:5px}
+.lc-b.bot{align-self:flex-start;background:#fff;color:#0f172a;border:1px solid #e0f2fe;border-bottom-left-radius:5px}
+.lc-hint{color:#64748b;font-size:13px;text-align:center;padding:4px 10px}
+.lc-in{display:flex;gap:8px;align-items:center;padding:12px;background:#fff;border-top:1px solid #e5e7eb}
+.lc-in input{flex:1;border:1px solid #e5e7eb;border-radius:22px;padding:11px 14px;font:inherit}
+.lc-mic{width:52px;height:52px;border:none;border-radius:50%;background:#0ea5e9;color:#fff;font-size:22px;cursor:pointer;flex:0 0 auto;transition:.15s}
+.lc-mic.on{background:#ef4444;animation:lcPulse 1s infinite}
+@keyframes lcPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}
+.lc-send{width:46px;height:46px;border:none;border-radius:50%;background:#2563eb;color:#fff;font-size:18px;cursor:pointer;flex:0 0 auto}
+.lc-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 10px;background:#fff}
+.lc-chip{border:1px solid #e0f2fe;background:#f0f9ff;border-radius:16px;padding:7px 12px;font-size:13px;cursor:pointer;color:#0369a1}
+@media(prefers-reduced-motion:reduce){.lc-mic.on{animation:none}}
+`;
+  }
+
+  // 🎤 Conversación por voz con Libretín. ctx = { api, nombre }
+  function chat(ctx) {
+    estilos(); chatCss();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const soportaVoz = !!SR;
+    const ov = document.createElement('div'); ov.className = 'lc-ov';
+    const box = document.createElement('div'); box.className = 'lc-box';
+    const nombre = (ctx && ctx.nombre ? ctx.nombre.split(' ')[0] : '') || 'profe';
+    box.innerHTML = `<div class="lc-top"></div><div class="lc-msgs" id="lcM"></div><div class="lc-chips" id="lcC"></div><div class="lc-in"><button class="lc-mic" id="lcMic" title="Hablar">🎤</button><input id="lcT" placeholder="Escribe o toca el micro…" autocomplete="off"><button class="lc-send" id="lcS" title="Enviar">➤</button></div>`;
+    const top = box.querySelector('.lc-top');
+    const mini = mascota({ size: 46, flota: false }); top.appendChild(mini);
+    top.insertAdjacentHTML('beforeend', `<div><b>Libretín</b><small>Tu asistente · habla o escribe</small></div>`);
+    const xb = document.createElement('button'); xb.className = 'x'; xb.textContent = '✕'; top.appendChild(xb);
+    ov.appendChild(box); document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+    const M = box.querySelector('#lcM'), input = box.querySelector('#lcT'), micBtn = box.querySelector('#lcMic'), sendBtn = box.querySelector('#lcS'), chips = box.querySelector('#lcC');
+    const cerrar = () => { try { speechSynthesis.cancel(); } catch (e) {} if (rec) try { rec.stop(); } catch (e) {} ov.remove(); document.body.style.overflow = ''; };
+    xb.onclick = cerrar; ov.onclick = e => { if (e.target === ov) cerrar(); };
+
+    const hist = [];
+    const burbuja = (rol, texto) => { const d = document.createElement('div'); d.className = 'lc-b ' + rol; d.textContent = texto; M.appendChild(d); M.scrollTop = M.scrollHeight; return d; };
+    burbuja('bot', `¡Hola, ${nombre}! 👋 Soy Libretín. Pregúntame lo que necesites: una sesión de clase, un examen, ideas o cómo usar ProfeTok. ${soportaVoz ? 'Toca el 🎤 y háblame.' : 'Escríbeme aquí abajo.'}`);
+    ['Hazme una sesión de Comunicación', 'Dame 5 ideas para motivar', '¿Cómo tomo asistencia?'].forEach(t => { const c = document.createElement('div'); c.className = 'lc-chip'; c.textContent = t; c.onclick = () => enviar(t); chips.appendChild(c); });
+
+    function hablar(t) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[*#_`>]/g, '')); u.lang = 'es-PE'; u.rate = 1.03; u.pitch = 1.05; const vs = speechSynthesis.getVoices(); const v = vs.find(x => /es-PE|es-419|es-MX|es-US/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) {} }
+    let pensando = false;
+    async function enviar(texto) {
+      texto = (texto || '').trim(); if (!texto || pensando) return;
+      const prev = hist.slice(); burbuja('user', texto); hist.push({ rol: 'user', texto }); input.value = '';
+      pensando = true; const t = burbuja('bot', '…'); mini.saludar();
+      try { const r = await ctx.api('tic/chat', { mensaje: texto, historial: prev }); t.textContent = r.texto || '…'; hist.push({ rol: 'bot', texto: r.texto }); hablar(r.texto); mini.celebrar(); }
+      catch (e) { t.textContent = '⚠️ ' + e.message; }
+      finally { pensando = false; }
+    }
+    sendBtn.onclick = () => enviar(input.value);
+    input.onkeydown = e => { if (e.key === 'Enter') enviar(input.value); };
+
+    // micrófono (Web Speech API)
+    let rec = null, escuchando = false;
+    micBtn.onclick = () => {
+      if (!soportaVoz) { burbuja('bot', 'Tu navegador no deja usar el micrófono, profe. Usa Chrome en tu celular o PC, o escríbeme aquí abajo. 🙂'); return; }
+      if (escuchando) { try { rec.stop(); } catch (e) {} return; }
+      try { speechSynthesis.cancel(); } catch (e) {}
+      rec = new SR(); rec.lang = 'es-PE'; rec.interimResults = true; rec.continuous = false; let fin = '';
+      rec.onresult = e => { let interim = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) fin += r[0].transcript; else interim += r[0].transcript; } input.value = fin + interim; };
+      rec.onerror = () => { escuchando = false; micBtn.classList.remove('on'); };
+      rec.onend = () => { escuchando = false; micBtn.classList.remove('on'); const t = input.value.trim(); if (t) enviar(t); };
+      try { rec.start(); escuchando = true; micBtn.classList.add('on'); mini.saludar(); } catch (e) {}
+    };
+    try { speechSynthesis.getVoices(); } catch (e) {}
+    input.focus();
+    return ov;
+  }
+
+  window.LIBRETIN = { svg, mascota, asistente, chat };
 })();
+

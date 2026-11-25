@@ -124,7 +124,7 @@
       <div class="tic-cards">
         <div class="tic-card" data-abrir="pizarra"><div class="ic">🪄</div><b>Pizarra Mágica</b><small>Dibuja, escribe y explica. Fondos, figuras, imágenes y exporta a PNG/PDF.</small></div>
         <div class="tic-card" data-abrir="diseno"><div class="ic">🎨</div><b>ProfeCrea · Estudio de diseño</b><small>Carteles, diplomas, horarios y portadas con plantillas listas. Como Canva, gratis y dentro de ProfeTok.</small></div>
-        <div class="tic-card" data-asis><div class="ic">🤖</div><b>Asistente Libretín</b><small>Pídele ideas, esquemas o preguntas para tus pizarras y diseños.</small></div>
+        <div class="tic-card" data-asis><div class="ic">🤖</div><b>Asistente Libretín 🎤</b><small>Háblale por el micrófono o escríbele: sesiones, exámenes, ideas y dudas. Te responde hablando.</small></div>
         <div class="tic-card" data-muro><div class="ic">📌</div><b>Muro Digital</b><small>Tablero de tarjetas (como Padlet) con texto, color e imágenes. Compártelo por un enlace.</small></div>
       </div>
       <h3 style="margin-top:18px">⏱️ Herramientas de aula</h3>
@@ -140,7 +140,7 @@
       <div id="ticList" class="tic-list"><div class="muted small">Cargando…</div></div>
     </div>`;
     M.querySelectorAll('[data-abrir]').forEach(c => c.onclick = () => abrirEditor(c.dataset.abrir));
-    M.querySelector('[data-asis]').onclick = () => abrirEditor('pizarra', null, true);
+    M.querySelector('[data-asis]').onclick = () => { if (window.LIBRETIN && window.LIBRETIN.chat) window.LIBRETIN.chat({ api: CTX.api, nombre: (CTX.YO && CTX.YO.usuario && CTX.YO.usuario.nombre) || '' }); else abrirEditor('pizarra', null, true); };
     M.querySelectorAll('[data-aula]').forEach(c => c.onclick = () => { const f = window.HAULA && window.HAULA[c.dataset.aula]; if (f) f({ api: CTX.api }); else toast('Cargando…'); });
     M.querySelector('[data-muro]').onclick = () => { if (window.MURO) window.MURO.abrir({ api: CTX.api, toast: CTX.toast, nombre: (CTX.YO && CTX.YO.usuario && CTX.YO.usuario.nombre) || '' }); else toast('Cargando…'); };
     cargarLista(M.querySelector('#ticList'));

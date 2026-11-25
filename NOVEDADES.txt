@@ -1,3 +1,9 @@
+9.63.0 · 🎤 Libretín conversacional (habla por micrófono, como Gemini)
+- El «Asistente Libretín» ahora es un chat de VOZ: el docente toca el micrófono y le habla, Libretín razona con la IA y le RESPONDE HABLANDO (y por escrito). También se puede escribir.
+- Ayuda en todo: sesiones de clase y unidades (CNEB), exámenes, rúbricas, fichas, ideas, dinámicas y dudas de cómo usar ProfeTok.
+- Usa el micrófono y la voz del propio navegador (gratis, sin instalar nada). Funciona mejor en Chrome/Edge y Android; en iPhone el micrófono es limitado.
+- Privacidad (Ley 29733): Libretín no pide ni repite apellidos, DNI, salud ni datos personales de alumnos.
+
 9.62.1 · 🤖 Libretín animado (mascota) — primer avance
 - Nuevo componente de Libretín en SVG animado (window.LIBRETIN): cuaderno azul con espiral, ojos grandes con lentes, mejillas, lápiz y estrella. Parpadea, flota, saluda, salta al completar una tarea; la estrella gira. Liviano y respeta «movimiento reducido». Conserva su identidad original (no es un robot genérico).
 - Incluye un «asistente flotante» con mensaje en una esquina. Aún no está colocado en las pantallas: es el primer avance del personaje para aprobar el estilo.
