@@ -370,7 +370,9 @@
           ['⬜ Cuadrícula', () => { snap(); S.bg = 'cuadriculado'; draw(); }],
           ['📐 Plano cartesiano', () => { snap(); S.bg = 'cartesiano'; draw(); }],
           ['✍️ Caligrafía', () => { snap(); S.bg = 'caligrafia'; draw(); }]];
-      c.innerHTML = '<h4>📑 Plantillas</h4>'; const grid = el('div', { className: 'tic-grid' });
+      c.innerHTML = '<h4>📑 Plantillas</h4>';
+      if (diseno && window.PLANTILLAS) { const gb = el('button', { style: 'width:100%;border:none;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;border-radius:10px;padding:11px;cursor:pointer;font-weight:800;margin-bottom:10px;font-size:14px', textContent: '📚 Galería de plantillas' }); gb.onclick = () => window.PLANTILLAS.galeria(sp => preset(sp.w, sp.h, sp.bg, sp.bgColor, sp.objs)); c.appendChild(gb); c.appendChild(el('p', { className: 'small muted', style: 'margin:0 0 8px', textContent: 'O una rápida:' })); }
+      const grid = el('div', { className: 'tic-grid' });
       for (const [t, fn] of plantillas) { const ch = el('div', { className: 'tic-chip', textContent: t }); ch.onclick = fn; grid.appendChild(ch); }
       c.appendChild(grid);
     }
@@ -597,5 +599,7 @@
     ];
   }
 
-  window.TIC = { montar };
+  // dibuja una plantilla {w,h,bg,bgColor,objs} en un contexto 2D (para miniaturas de la galería y para aplicarla)
+  function pintar(g, spec) { const S2 = { W: spec.w, H: spec.h, bg: spec.bg, bgColor: spec.bgColor || '#ffffff' }; bgFill(g, S2); for (const o of (spec.objs || [])) objPaint(g, o); }
+  window.TIC = { montar, pintar };
 })();

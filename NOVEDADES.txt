@@ -1,3 +1,8 @@
+9.62.0 · 📚 ProfeCrea: galería de 192 plantillas profesionales
+- Nuevo generador de plantillas propio (sin dependencias ni problemas de licencia): 16 diseños profesionales (carteles, anuncios, frases, normas, horario, cumpleaños, diploma, certificado, alumno del mes, felicitaciones, portada, etiqueta, invitación, bienvenida, lista de útiles, ficha) × 12 temas de color = 192 plantillas listas.
+- Galería bonita dentro de ProfeCrea: buscador, categorías y selector de color que recolorea todo al instante. Más la IA de Libretín para crear infinitas a pedido.
+- Las miniaturas se dibujan con el mismo motor, así que lo que ves es lo que sale.
+
 9.61.5 · 🎁 Quitado «15 días» de la página de inicio (es gratis todo el año)
 - El botón principal ahora dice «🎁 Empezar gratis» (ya no «Probar 15 días gratis») durante la etapa gratis.
 - El popup de salida y el formulario de registro también dejan de decir «15 días» (ahora «Crea tu cuenta gratis»).
