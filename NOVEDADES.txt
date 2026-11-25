@@ -1,3 +1,8 @@
+9.55.0 · 📚 Web para AdSense: datos reales de fuentes oficiales y cero temas repetidos
+- Antes de escribir cada página, ShortForge ENTRA a las fuentes oficiales del tema (gob.pe, ministerios, entidades) y le pasa al redactor los párrafos relevantes con su enlace. Las guías citan datos reales en vez de escribir de memoria: menos «según reportes…» y menos [FALTA DATO].
+- Las fuentes citadas se comprueban: las que no abren se quitan solas; si ninguna abre, la página no se aprueba hasta corregirlo.
+- Temas repetidos por significado: la IA compara cada idea nueva con todo el sitio y descarta las que responden la misma necesidad aunque usen otras palabras (lo que hundió a sebuscaempleo.com: 8 artículos de «IA y empleo»).
+
 9.54.0 · 📩 Palabra clave → mensaje privado + 💡 «Hazme uno como este» + 🎞️ detector de videos aburridos
 - Canales → Editar → «📩 Palabra clave → mensaje privado automático»: si alguien comenta tu palabra (ej. «PROFE»), ShortForge le manda tu mensaje por privado en Facebook y le responde en público «¡Te escribí por privado!». Vigila los videos del canal y las publicaciones recientes de la página (también las subidas a mano). En YouTube responde en público. No le escribe dos veces el mismo día a la misma persona. Funciona aunque «Responder comentarios» esté en «No».
   ⚠️ Para los mensajes privados: en Ajustes desconecta Facebook y vuelve a conectarlo aceptando «Administrar mensajes de la página».
