@@ -363,7 +363,7 @@ setInterval(() => { try { saldoM.revisarAuto(activarPago); } catch (e) { console
 // 🔑 olvidé mi contraseña y ☁️ copia de seguridad cifrada en la nube (ver cuenta.js y nube.js)
 const cuentaM = require('./cuenta').crear({ db, q, q1, run, hashPass, nuevaSesion, correo, getS, limpio, veAlumno, emailOk, audit });
 const nubeM = require('./nube').crear({ db, getS, setS, DATA, hoy, limpio });
-const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES, ...cuentaM.LIBRES]);
+const LIBRES = new Set(['POST /api/registro', 'POST /api/entrar', 'GET /api/invitacion', 'POST /api/aceptar', 'GET /api/tic/muro-publico', ...pagosM.LIBRES, ...crecer.LIBRES, ...izipay.LIBRES, ...cuentaM.LIBRES]);
 // 📅 asistencia por mes para familias y reuniones con asistencia de padres (ver reuniones.js)
 const reunionesM = require('./reuniones').crear({ db, q, q1, run, aulaDe, veAlumno, esStaff, limpio, hoy, avisar });
 // 📋 «Mi equipo» del director: cómo va cada docente y cada aula (ver director.js)

@@ -1,3 +1,9 @@
+9.61.0 · 📌 Muro Digital (estilo Padlet)
+- Nueva herramienta «📌 Muro Digital» en las Herramientas TIC (gratis): tableros con tarjetas de texto, color e imágenes, organizados en columnas.
+- Enlace público para compartir: cualquiera con el enlace VE el muro (solo lectura), sin necesidad de cuenta. Botón para copiar y para enviar por WhatsApp.
+- El docente crea, edita y borra sus tarjetas y muros. Límite de peso en imágenes (protege el disco).
+- Probado de extremo a extremo (servidor real + vista pública) sin errores.
+
 9.60.0 · ⏱️ Herramientas de aula (lo que el profe usa a diario)
 - Nuevo bloque «⏱️ Herramientas de aula» en las Herramientas TIC, gratis:
   ⏱️ Temporizador y cronómetro gigantes (con alarma), 🎡 Ruleta de nombres (elige un alumno al azar; guarda tu lista), 👥 Armar grupos al azar, 🎲 Dado y moneda, y 🔇 Semáforo del ruido (mide el volumen del aula con el micrófono).

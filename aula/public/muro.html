@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Muro · ProfeTok</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-serif,system-ui,Arial;background:#eef2f6;min-height:100vh}
+.top{padding:22px 18px 14px;color:#fff;text-align:center}
+.top h1{margin:0;font-size:clamp(24px,5vw,38px);text-shadow:0 2px 6px rgba(0,0,0,.3)}
+.top p{margin:6px 0 0;opacity:.95;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+.wrap{padding:18px;max-width:1100px;margin:0 auto}
+.cols{column-width:230px;column-gap:14px}
+.card{break-inside:avoid;margin:0 0 14px;border-radius:14px;padding:14px;box-shadow:0 4px 14px -6px rgba(0,0,0,.25)}
+.card img{width:100%;border-radius:9px;margin-bottom:8px;display:block}
+.card .tx{white-space:pre-wrap;word-break:break-word;font-size:15px;color:#1f2937}
+.card .au{font-size:11px;color:#6b7280;margin-top:8px}
+.foot{text-align:center;color:#fff;opacity:.9;padding:10px 0 30px;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+.foot a{color:#fff}
+.msg{text-align:center;color:#334155;padding:60px 20px}
+</style>
+</head>
+<body>
+<div id="app"><div class="msg">Cargando…</div></div>
+<script>
+(function () {
+  var GRAD = { grad1: 'linear-gradient(135deg,#0ea5e9,#6366f1)', grad2: 'linear-gradient(135deg,#f97316,#ec4899)', grad3: 'linear-gradient(135deg,#22c55e,#0ea5e9)', grad4: 'linear-gradient(135deg,#8b5cf6,#ec4899)', grad5: 'linear-gradient(135deg,#f59e0b,#ef4444)', grad6: 'linear-gradient(135deg,#0f766e,#042f2e)', pizarra: '#0f2419', claro: '#64748b' };
+  function E(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+  var t = new URLSearchParams(location.search).get('t') || '';
+  var app = document.getElementById('app');
+  if (!t) { app.innerHTML = '<div class="msg">Enlace no válido.</div>'; return; }
+  fetch('/api/tic/muro-publico?t=' + encodeURIComponent(t)).then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+    var bg = GRAD[d.muro.fondo] || '#64748b';
+    document.body.style.background = bg;
+    var h = '<div class="top"><h1>' + E(d.muro.titulo) + '</h1>' + (d.muro.descripcion ? '<p>' + E(d.muro.descripcion) + '</p>' : '') + '</div>';
+    h += '<div class="wrap"><div class="cols">';
+    if (!d.posts.length) h += '<div class="msg" style="color:#fff">Todavía no hay tarjetas.</div>';
+    d.posts.forEach(function (p) {
+      h += '<div class="card" style="background:' + E(p.color || '#fde68a') + '">' + (p.img ? '<img src="' + E(p.img) + '" alt="">' : '') + (p.texto ? '<div class="tx">' + E(p.texto) + '</div>' : '') + (p.autor ? '<div class="au">— ' + E(p.autor) + '</div>' : '') + '</div>';
+    });
+    h += '</div></div><div class="foot">Hecho con 🧰 Herramientas TIC de <a href="/">ProfeTok</a></div>';
+    app.innerHTML = h;
+    document.title = d.muro.titulo + ' · ProfeTok';
+  }).catch(function () { app.innerHTML = '<div class="msg">Este muro no existe o fue borrado.</div>'; });
+})();
+</script>
+</body>
+</html>

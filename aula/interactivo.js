@@ -14,6 +14,25 @@ function crear({ db, q, q1, run, hoy, limpio, E }) {
     creado text, actualizado text
   )`);
   try { db.exec('create index if not exists ix_intpiz_user on int_pizarras(usuario_id, tipo)'); } catch (e) {}
+  db.exec(`create table if not exists int_muros(
+    id integer primary key autoincrement,
+    usuario_id integer not null,
+    token text not null,
+    titulo text not null default 'Mi muro',
+    descripcion text default '',
+    fondo text default 'grad1',
+    creado text, actualizado text
+  )`);
+  db.exec(`create table if not exists int_posts(
+    id integer primary key autoincrement,
+    muro_id integer not null,
+    autor text default '',
+    texto text default '',
+    img text default '',
+    color text default '#fde68a',
+    creado text
+  )`);
+  try { db.exec('create index if not exists ix_intmuro_user on int_muros(usuario_id)'); db.exec('create index if not exists ix_intpost_muro on int_posts(muro_id)'); } catch (e) {}
 
   const API = {};
   const puede = u => ['docente', 'director', 'dueno'].includes(u.rol);
@@ -137,8 +156,64 @@ Español del Perú. No inventes datos de personas. No agregues nada fuera del JS
     };
   };
 
+  // ===== 📌 Muro Digital (estilo Padlet): tarjetas con texto, color e imagen; enlace público para compartir =====
+  const nuevoToken = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  const MAX_IMG = 1.2e6;
+  const puedeMuro = m => m; // (reservado)
+
+  API['GET /api/tic/muros'] = async ({ u }) => {
+    if (!puede(u)) throw 403;
+    return { items: q('select id,titulo,descripcion,token,actualizado from int_muros where usuario_id=? order by actualizado desc', u.id).map(m => ({ id: m.id, titulo: m.titulo, descripcion: m.descripcion, token: m.token, actualizado: m.actualizado, posts: q1('select count(*) n from int_posts where muro_id=?', m.id).n })) };
+  };
+  API['GET /api/tic/muro'] = async ({ u, url }) => {
+    if (!puede(u)) throw 403;
+    const m = q1('select * from int_muros where id=? and usuario_id=?', +url.searchParams.get('id') || 0, u.id);
+    if (!m) throw 404;
+    return { muro: { id: m.id, titulo: m.titulo, descripcion: m.descripcion, fondo: m.fondo, token: m.token }, posts: q('select id,autor,texto,img,color,creado from int_posts where muro_id=? order by id', m.id) };
+  };
+  API['POST /api/tic/muro-guardar'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    const titulo = limpio(b.titulo, 80) || 'Mi muro', desc = limpio(b.descripcion, 200), fondo = limpio(b.fondo, 20) || 'grad1', t = new Date().toISOString();
+    if (b.id) { const m = q1('select id from int_muros where id=? and usuario_id=?', +b.id, u.id); if (!m) throw 404; run('update int_muros set titulo=?,descripcion=?,fondo=?,actualizado=? where id=?', titulo, desc, fondo, t, m.id); return { id: m.id }; }
+    if (q1('select count(*) n from int_muros where usuario_id=?', u.id).n >= 100) throw 'Llegaste al máximo de muros.';
+    const tok = nuevoToken();
+    run('insert into int_muros(usuario_id,token,titulo,descripcion,fondo,creado,actualizado) values(?,?,?,?,?,?,?)', u.id, tok, titulo, desc, fondo, t, t);
+    return { id: q1('select last_insert_rowid() id').id, token: tok };
+  };
+  API['POST /api/tic/muro-borrar'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    const m = q1('select id from int_muros where id=? and usuario_id=?', +b.id || 0, u.id);
+    if (m) { run('delete from int_posts where muro_id=?', m.id); run('delete from int_muros where id=?', m.id); }
+    return { ok: 1 };
+  };
+  API['POST /api/tic/post'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    const m = q1('select id from int_muros where id=? and usuario_id=?', +b.muro_id || 0, u.id);
+    if (!m) throw 404;
+    const texto = limpio(b.texto, 1200), color = limpio(b.color, 16) || '#fde68a';
+    let img = ''; if (b.img && /^data:image\/(png|jpeg|webp);base64,/.test(b.img)) { if (b.img.length > MAX_IMG) throw 'La imagen pesa mucho.'; img = b.img; }
+    if (!texto && !img) throw 'Escribe algo o agrega una imagen.';
+    if (b.id) { const p = q1('select id from int_posts where id=? and muro_id=?', +b.id, m.id); if (!p) throw 404; if (img) run('update int_posts set texto=?,color=?,img=? where id=?', texto, color, img, p.id); else run('update int_posts set texto=?,color=? where id=?', texto, color, p.id); return { id: p.id }; }
+    if (q1('select count(*) n from int_posts where muro_id=?', m.id).n >= 300) throw 'Este muro llegó al máximo de tarjetas.';
+    run('insert into int_posts(muro_id,autor,texto,img,color,creado) values(?,?,?,?,?,?)', m.id, limpio(u.nombre || '', 40), texto, img, color, new Date().toISOString());
+    run('update int_muros set actualizado=? where id=?', new Date().toISOString(), m.id);
+    return { id: q1('select last_insert_rowid() id').id };
+  };
+  API['POST /api/tic/post-borrar'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    const p = q1('select p.id from int_posts p join int_muros m on m.id=p.muro_id where p.id=? and m.usuario_id=?', +b.id || 0, u.id);
+    if (p) run('delete from int_posts where id=?', p.id);
+    return { ok: 1 };
+  };
+  // público (sin login): ver un muro por su token (solo lectura)
+  API['GET /api/tic/muro-publico'] = async ({ url }) => {
+    const m = q1('select * from int_muros where token=?', String(url.searchParams.get('t') || '').slice(0, 60));
+    if (!m) throw 404;
+    return { muro: { titulo: m.titulo, descripcion: m.descripcion, fondo: m.fondo }, posts: q('select autor,texto,img,color,creado from int_posts where muro_id=? order by id', m.id) };
+  };
+
   // rutas que funcionan sin plan (gratis), para que server.js las marque libres de membresía
-  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia'];
+  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia', 'POST /api/tic/muro-guardar', 'POST /api/tic/muro-borrar', 'POST /api/tic/post', 'POST /api/tic/post-borrar'];
   return { API, SINPLAN };
 }
 module.exports = { crear };
