@@ -8,6 +8,23 @@
   const rnd = n => Math.floor(Math.random() * n);
   const COLORES = ['#0ea5e9', '#f59e0b', '#22c55e', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316', '#6366f1', '#eab308'];
 
+  // 📋 Trae los alumnos reales del docente (sus aulas de ProfeTok). Si hay varias aulas, deja elegir.
+  async function misAlumnos(ctx) {
+    if (!ctx || !ctx.api) { alert('Abre esta herramienta desde ProfeTok para usar tus alumnos.'); return null; }
+    let d; try { d = await ctx.api('tic/alumnos'); } catch (e) { alert('No se pudo cargar tus alumnos.'); return null; }
+    const aulas = (d.aulas || []).filter(a => a.alumnos && a.alumnos.length);
+    if (!aulas.length) { alert('Todavía no tienes alumnos en tus aulas. Agrégalos en ProfeTok y vuelve.'); return null; }
+    if (aulas.length === 1) return aulas[0].alumnos;
+    return new Promise(res => {
+      const w = el('div', { className: 'ha-ov', style: 'background:rgba(15,23,42,.9);z-index:4300' });
+      w.appendChild(el('h2', {}, '📋 Elige el aula'));
+      const row = el('div', { className: 'ha-row', style: 'max-width:600px' });
+      aulas.forEach(a => { const b = el('button', { className: 'ha-btn', textContent: a.nombre + ' (' + a.alumnos.length + ')' }); b.onclick = () => { w.remove(); res(a.alumnos); }; row.appendChild(b); });
+      const x = el('button', { className: 'ha-btn sec', textContent: 'Cancelar' }); x.onclick = () => { w.remove(); res(null); };
+      w.appendChild(row); w.appendChild(x); document.body.appendChild(w);
+    });
+  }
+
   function estilos() {
     if (document.getElementById('haula-css')) return;
     document.head.appendChild(el('style', { id: 'haula-css' }, `
@@ -77,7 +94,7 @@
 
   // 🎡 Ruleta de nombres
   function listaNombres() { return (LS.get('haula_nombres') || 'Ana\nLuis\nMaría\nJosé\nRosa\nPedro\nLucía\nCarlos').split(/\n+/).map(s => s.trim()).filter(Boolean); }
-  function ruleta() {
+  function ruleta(ctx) {
     abrir('🎡 Ruleta de nombres', (c, ov) => {
       let nombres = listaNombres(), ang = 0, girando = false, raf = null;
       const cv = el('canvas', { width: 420, height: 420, style: 'max-width:min(80vw,420px)' });
@@ -94,14 +111,16 @@
       cv.onclick = girar;
       const bEdit = el('button', { className: 'ha-btn sec', textContent: '✏️ Editar nombres' });
       bEdit.onclick = () => { const ta = el('textarea', { className: 'ha-ta', value: nombres.join('\n') }); const guardar = el('button', { className: 'ha-btn', textContent: '✅ Guardar' }); const box = el('div', { style: 'display:flex;flex-direction:column;gap:10px;align-items:center' }); box.appendChild(ta); box.appendChild(guardar); const old = c.innerHTML; c.innerHTML = ''; c.appendChild(box); guardar.onclick = () => { nombres = ta.value.split(/\n+/).map(s => s.trim()).filter(Boolean); LS.set('haula_nombres', nombres.join('\n')); c.innerHTML = ''; c.appendChild(cv); c.appendChild(win); c.appendChild(row); dibujar(); }; };
-      const row = el('div', { className: 'ha-row' }); row.appendChild(bGirar); row.appendChild(bEdit);
+      const bAlum = el('button', { className: 'ha-btn sec', textContent: '📋 Mis alumnos' });
+      bAlum.onclick = async () => { const n = await misAlumnos(ctx); if (n && n.length) { nombres = n; LS.set('haula_nombres', n.join('\n')); win.textContent = ''; dibujar(); } };
+      const row = el('div', { className: 'ha-row' }); row.appendChild(bGirar); row.appendChild(bAlum); row.appendChild(bEdit);
       c.appendChild(cv); c.appendChild(win); c.appendChild(row); dibujar();
       ov._limpiar = () => { if (raf) cancelAnimationFrame(raf); };
     });
   }
 
   // 👥 Armador de grupos
-  function grupos() {
+  function grupos(ctx) {
     abrir('👥 Armar grupos', (c) => {
       let nombres = listaNombres(), nGrupos = 3;
       const cfg = el('div', { className: 'ha-row' });
@@ -110,6 +129,9 @@
       const bEdit = el('button', { className: 'ha-chip', textContent: '✏️ Nombres' });
       bEdit.onclick = () => { const ta = el('textarea', { className: 'ha-ta', value: nombres.join('\n') }); const gb = el('button', { className: 'ha-btn', textContent: '✅ Usar' }); cont.innerHTML = ''; cont.appendChild(ta); cont.appendChild(gb); gb.onclick = () => { nombres = ta.value.split(/\n+/).map(s => s.trim()).filter(Boolean); LS.set('haula_nombres', nombres.join('\n')); info.textContent = nombres.length + ' nombres'; armar(); }; };
       cfg.appendChild(bEdit);
+      const bAlum = el('button', { className: 'ha-chip', textContent: '📋 Mis alumnos' });
+      bAlum.onclick = async () => { const n = await misAlumnos(ctx); if (n && n.length) { nombres = n; LS.set('haula_nombres', n.join('\n')); info.textContent = nombres.length + ' nombres'; armar(); } };
+      cfg.appendChild(bAlum);
       const cont = el('div', { className: 'ha-grupos' });
       const armar = () => { const pool = nombres.slice(); for (let i = pool.length - 1; i > 0; i--) { const j = rnd(i + 1);[pool[i], pool[j]] = [pool[j], pool[i]]; } const gs = Array.from({ length: nGrupos }, () => []); pool.forEach((n, i) => gs[i % nGrupos].push(n)); cont.innerHTML = ''; gs.forEach((g, i) => { const d = el('div', { className: 'ha-g' }); d.style.borderTop = '5px solid ' + COLORES[i % COLORES.length]; d.appendChild(el('h3', {}, 'Grupo ' + (i + 1))); g.forEach(n => d.appendChild(el('div', {}, '• ' + n))); cont.appendChild(d); }); };
       c.appendChild(info); c.appendChild(cfg); c.appendChild(cont); armar();

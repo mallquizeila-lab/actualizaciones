@@ -141,7 +141,7 @@
     </div>`;
     M.querySelectorAll('[data-abrir]').forEach(c => c.onclick = () => abrirEditor(c.dataset.abrir));
     M.querySelector('[data-asis]').onclick = () => abrirEditor('pizarra', null, true);
-    M.querySelectorAll('[data-aula]').forEach(c => c.onclick = () => { const f = window.HAULA && window.HAULA[c.dataset.aula]; if (f) f(); else toast('Cargando…'); });
+    M.querySelectorAll('[data-aula]').forEach(c => c.onclick = () => { const f = window.HAULA && window.HAULA[c.dataset.aula]; if (f) f({ api: CTX.api }); else toast('Cargando…'); });
     M.querySelector('[data-muro]').onclick = () => { if (window.MURO) window.MURO.abrir({ api: CTX.api, toast: CTX.toast, nombre: (CTX.YO && CTX.YO.usuario && CTX.YO.usuario.nombre) || '' }); else toast('Cargando…'); };
     cargarLista(M.querySelector('#ticList'));
   }

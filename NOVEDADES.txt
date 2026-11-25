@@ -1,3 +1,7 @@
+9.61.3 · 🎡 Ruleta y grupos con tus alumnos reales
+- La Ruleta de nombres y el Armador de grupos ahora tienen el botón «📋 Mis alumnos»: cargan la lista real de tus aulas de ProfeTok (si tienes varias, eliges cuál).
+- Muestra nombre + inicial del apellido (p. ej. «Ana Q.»); es tu propia data y NUNCA se envía a ninguna IA.
+
 9.61.2 · 🎁 Etapa gratis: sin correos de pago
 - Durante la etapa gratis (hasta fin de 2026) ya NO se envían los mensajes automáticos que piden pagar o renovar (avisos de «termina tu prueba», reactivación con cupón y recordatorios de vencimiento). Se mantienen los de captación de nuevos docentes y el de bienvenida.
 - Coherente con «todo gratis»: el docente usa ProfeTok sin que nadie le pida plata. Reversible: pasada la fecha vuelve solo.

@@ -212,6 +212,24 @@ Español del Perú. No inventes datos de personas. No agregues nada fuera del JS
     return { muro: { titulo: m.titulo, descripcion: m.descripcion, fondo: m.fondo }, posts: q('select autor,texto,img,color,creado from int_posts where muro_id=? order by id', m.id) };
   };
 
+  // 📋 Mis aulas con los nombres de pila de los alumnos (para la ruleta y el armador de grupos).
+  // Es la propia data del docente; solo nombre + inicial del apellido; NUNCA se envía a ninguna IA.
+  API['GET /api/tic/alumnos'] = async ({ u }) => {
+    if (!puede(u)) throw 403;
+    const aulas = u.rol === 'director' ? q('select id,nombre from aulas where colegio_id=? order by id', u.colegio_id)
+      : u.rol === 'dueno' ? q('select id,nombre from aulas order by id')
+        : q('select id,nombre from aulas where docente_id=? order by id', u.id);
+    return {
+      aulas: aulas.map(a => ({
+        id: a.id, nombre: a.nombre,
+        alumnos: q('select nombres,apellidos from alumnos where aula_id=? order by apellidos,nombres', a.id).map(x => {
+          const pila = String(x.nombres || '').trim().split(/\s+/)[0] || 'Alumno', ini = (String(x.apellidos || '').trim()[0] || '').toUpperCase();
+          return pila + (ini ? ' ' + ini + '.' : '');
+        })
+      }))
+    };
+  };
+
   // rutas que funcionan sin plan (gratis), para que server.js las marque libres de membresía
   const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia', 'POST /api/tic/muro-guardar', 'POST /api/tic/muro-borrar', 'POST /api/tic/post', 'POST /api/tic/post-borrar'];
   return { API, SINPLAN };
