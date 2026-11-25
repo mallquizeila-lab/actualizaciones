@@ -1,3 +1,7 @@
+9.61.2 · 🎁 Etapa gratis: sin correos de pago
+- Durante la etapa gratis (hasta fin de 2026) ya NO se envían los mensajes automáticos que piden pagar o renovar (avisos de «termina tu prueba», reactivación con cupón y recordatorios de vencimiento). Se mantienen los de captación de nuevos docentes y el de bienvenida.
+- Coherente con «todo gratis»: el docente usa ProfeTok sin que nadie le pida plata. Reversible: pasada la fecha vuelve solo.
+
 9.61.1 · 🎁 ProfeTok GRATIS hasta fin de año (sin costos)
 - Todas las cuentas quedan activas y sin límites hasta el 31 de diciembre de 2026: no se cobra membresía ni se bloquea nada por falta de pago.
 - El panel muestra «🎁 Gratis hasta fin de año» y se ocultan los avisos de renovación; la página de Plan avisa que no hay que pagar.

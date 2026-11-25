@@ -123,6 +123,9 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
     const v = f.vence ? new Date(f.vence).getTime() : 0, g = [v <= Date.now() ? 'vencido' : f.plan === 'prueba' ? 'prueba' : f.auto ? 'cliente-auto' : 'cliente']; // con renovación automática no se le recuerda
     if (f.pago_pend) g.push('abandono'); return g;
   };
+  // 🎁 Etapa gratis: no se envían los mensajes que piden pagar/renovar (sí los de captación y bienvenida)
+  const GRATIS = () => Date.now() < (+E.AULA_GRATIS_HASTA || new Date('2027-01-01T00:00:00-05:00').getTime());
+  const pasoPago = p => ['vencido', 'cliente', 'cliente-auto', 'abandono'].includes(p.grupo) || (p.grupo === 'prueba' && p.desde === 'vence');
   let trabajando = false;
   async function tick() {
     if (trabajando || !base()) return; // sin dirección pública no hay enlaces que mandar
@@ -132,7 +135,7 @@ function crear({ db, q, q1, run, getS, setS, limpio, correo, PLANES, membresia, 
       let waCupo = Math.max(0, (+w.porHora || 60) - waHora);
       for (const f of fichas()) {
         const G = gruposDe(f); if (!G.length) continue;
-        for (const p of P.filter(p => G.includes(p.grupo))) {
+        for (const p of P.filter(p => G.includes(p.grupo) && !(GRATIS() && pasoPago(p)))) {
           const t0 = p.desde === 'creado' ? f.creado : p.desde === 'registro' ? f.u_creado : p.desde === 'pago' ? q1('select creado from pagos where id=?', f.pago_pend)?.creado : f.vence; if (!t0) continue;
           const t = new Date(t0.length === 19 ? t0.replace(' ', 'T') + 'Z' : t0).getTime() + p.dias * DIA; if (Date.now() < t || Date.now() > t + 2 * DIA) continue;
           const clave = p.id + ':' + (p.desde === 'pago' ? f.pago_pend : String(t0).slice(0, 10));
