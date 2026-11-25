@@ -106,8 +106,39 @@ function crear({ db, q, q1, run, hoy, limpio, E }) {
     return { texto: String(texto || '').trim() };
   };
 
+  // 🎨 Diseña con IA (Libretín): el docente escribe un tema y Libretín propone el diseño completo (formato, título, textos, emoji)
+  API['POST /api/tic/diseno-ia'] = async ({ u, b }) => {
+    if (!puede(u)) throw 403;
+    if (tope(u.id, 60)) throw 'Alcanzaste el límite de ayudas de hoy. Vuelve mañana.';
+    const tema = limpio(b.tema, 300);
+    if (!tema) throw 'Escribe un tema o idea para el diseño.';
+    if (!(E.AULA_SF_URL && E.AULA_IA_TOKEN)) return { aviso: 'El diseñador con IA aún no está activado. Puedes elegir una plantilla y escribir el texto a mano.' };
+    const sistema = `Eres «Libretín», diseñador para docentes del Perú. A partir de un tema, propones un diseño escolar breve y bonito.
+Responde ÚNICAMENTE con un objeto JSON válido (sin texto antes ni después, sin comillas de código) con EXACTAMENTE estas claves:
+"tipo": uno de "cartel", "diploma", "portada", "frase", "felicitacion";
+"titulo": título corto en MAYÚSCULAS si es cartel (máx 40 caracteres);
+"subtitulo": frase de apoyo (máx 60 caracteres, puede ir vacío);
+"cuerpo": una línea opcional (máx 110 caracteres, puede ir vacío);
+"emoji": un solo emoji que represente el tema.
+Español del Perú. No inventes datos de personas. No agregues nada fuera del JSON.`;
+    const txt = await ia([{ role: 'system', content: sistema }, { role: 'user', content: 'Tema: ' + tema }], 500);
+    let d = null;
+    try { const m = String(txt || '').match(/\{[\s\S]*\}/); d = m ? JSON.parse(m[0]) : null; } catch (e) { d = null; }
+    if (!d || typeof d !== 'object') d = { tipo: 'cartel', titulo: tema.slice(0, 40).toUpperCase(), subtitulo: '', cuerpo: '', emoji: '📌' };
+    const tipos = ['cartel', 'diploma', 'portada', 'frase', 'felicitacion'];
+    return {
+      diseno: {
+        tipo: tipos.includes(d.tipo) ? d.tipo : 'cartel',
+        titulo: limpio(d.titulo, 60) || tema.slice(0, 40),
+        subtitulo: limpio(d.subtitulo, 90),
+        cuerpo: limpio(d.cuerpo, 160),
+        emoji: (String(d.emoji || '📌').match(/\p{Extended_Pictographic}/u) || ['📌'])[0]
+      }
+    };
+  };
+
   // rutas que funcionan sin plan (gratis), para que server.js las marque libres de membresía
-  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente'];
+  const SINPLAN = ['POST /api/tic/guardar', 'POST /api/tic/borrar', 'POST /api/tic/duplicar', 'POST /api/tic/asistente', 'POST /api/tic/diseno-ia'];
   return { API, SINPLAN };
 }
 module.exports = { crear };

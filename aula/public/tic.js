@@ -189,7 +189,8 @@
     bar.appendChild(sep());
     bar.appendChild(btn2('🎨 Fondos', () => togglePanel('fondos')));
     bar.appendChild(btn2('📑 Plantillas', () => togglePanel('plantillas')));
-    bar.appendChild(btn2('🤖 Asistente', () => togglePanel('asistente')));
+    bar.appendChild(btn2('😀 Clipart', () => togglePanel('clipart')));
+    bar.appendChild(btn2(diseno ? '✨ Diseña con IA' : '🤖 Asistente', () => togglePanel('asistente')));
     bar.appendChild(sep());
     bar.appendChild(btn2('⬇ PNG', () => exportar('png'), 'Descargar PNG'));
     bar.appendChild(btn2('⬇ PDF', () => exportar('pdf'), 'Descargar PDF'));
@@ -336,7 +337,14 @@
     }
 
     // ---------- paneles laterales ----------
-    function togglePanel(which) { if (panel === which && side) { side.remove(); side = null; panel = ''; return; } if (side) side.remove(); panel = which; side = el('div', { className: 'tic-side' }); stage.appendChild(side); (which === 'fondos' ? panelFondos : which === 'plantillas' ? panelPlantillas : panelAsistente)(side); }
+    function togglePanel(which) { if (panel === which && side) { side.remove(); side = null; panel = ''; return; } if (side) side.remove(); panel = which; side = el('div', { className: 'tic-side' }); stage.appendChild(side); (which === 'fondos' ? panelFondos : which === 'plantillas' ? panelPlantillas : which === 'clipart' ? panelClipart : panelAsistente)(side); }
+    const CLIPART = ['⭐', '🌟', '🏅', '🏆', '🎖️', '🎓', '📚', '📖', '✏️', '✒️', '🖍️', '📌', '📍', '✅', '❌', '➡️', '⬅️', '🔴', '🟢', '🟡', '🔵', '❤️', '💡', '🔔', '🎉', '🎈', '🌈', '☀️', '🍎', '🧠', '👏', '👍', '😀', '🤔', '📝', '🔢', '🧮', '🌍', '🧪', '🎨', '🎵', '⚽', '🏫', '👩‍🏫'];
+    function panelClipart(c) {
+      c.innerHTML = '<h4>😀 Clipart</h4><p class="small muted" style="margin:0 0 6px">Toca uno para ponerlo en el lienzo.</p>';
+      const grid = el('div', { style: 'display:grid;grid-template-columns:repeat(6,1fr);gap:4px' });
+      for (const e of CLIPART) { const b = el('button', { textContent: e, style: 'font-size:24px;border:1px solid #eef2f6;border-radius:9px;background:#fff;cursor:pointer;padding:6px 0' }); b.onclick = () => { snap(); S.objs.push({ t: 'text', x: S.W / 2 - 50, y: S.H / 2 - 50, text: e, size: 100, color: '#000', font: 'Arial, sans-serif' }); S.sel = S.objs.length - 1; draw(); }; grid.appendChild(b); }
+      c.appendChild(grid);
+    }
     function panelFondos(c) {
       const fondos = [['blanco', 'Blanco'], ['negro', 'Pizarrón'], ['cuadriculado', 'Cuadriculado'], ['rayado', 'Rayado'], ['caligrafia', 'Caligrafía'], ['cartesiano', 'Plano cartesiano'], ['matematica', 'Cuadrícula mat.'], ['bgcolor', 'Color…'], ['grad1', '🌊 Océano'], ['grad2', '🌅 Atardecer'], ['grad3', '🌿 Menta'], ['grad4', '🍬 Dulce'], ['grad5', '🔥 Fuego'], ['grad6', '🌲 Bosque']];
       c.innerHTML = '<h4>🎨 Fondo</h4>'; const grid = el('div', { className: 'tic-grid' });
@@ -356,7 +364,8 @@
     }
     function preset(w, h, bg, bgc, objs) { snap(); S.W = w; S.H = h; S.bg = bg; S.bgColor = bgc; S.objs = objs.map(o => ({ ...o })); S.sel = -1; ajustar(); }
     function panelAsistente(c) {
-      c.innerHTML = '<h4>🤖 Asistente Libretín</h4><p class="small muted" style="margin:0 0 6px">Escribe un tema. No pongas datos de alumnos.</p>';
+      c.innerHTML = `<h4>${diseno ? '✨ Diseña con IA' : '🤖 Asistente Libretín'}</h4><p class="small muted" style="margin:0 0 6px">Escribe un tema. No pongas datos de alumnos.</p>`;
+      if (diseno) seccionDisenoIA(c);
       const modos = [['ideas', '💡 Ideas'], ['esquema', '🗺️ Esquema'], ['pasos', '🔢 Pasos'], ['preguntas', '❓ Preguntas'], ['texto', '📝 Texto']];
       let modo = 'ideas'; const grid = el('div', { className: 'tic-grid' });
       for (const [k, t] of modos) { const ch = el('div', { className: 'tic-chip' + (k === 'ideas' ? ' on' : ''), textContent: t }); ch.onclick = () => { modo = k; grid.querySelectorAll('.tic-chip').forEach(x => x.classList.remove('on')); ch.classList.add('on'); }; grid.appendChild(ch); }
@@ -366,6 +375,24 @@
       const b = el('button', { className: 'btn2', textContent: '✨ Generar' });
       b.onclick = async () => { const tema = ta.value.trim(); if (!tema) return toast('Escribe un tema'); b.disabled = true; b.textContent = 'Pensando…'; try { const r = await api('tic/asistente', { tema, modo }); if (r.aviso) { out.innerHTML = `<p class="small muted">${esc(r.aviso)}</p>`; } else { out.innerHTML = `<div style="white-space:pre-wrap;font-size:13px;border:1px solid #e5e7eb;border-radius:9px;padding:8px;max-height:200px;overflow:auto">${esc(r.texto)}</div>`; const add = el('button', { className: 'btn2', textContent: '➕ Poner en el lienzo' }); add.onclick = () => { snap(); S.objs.push({ t: 'text', x: 60, y: 60, text: r.texto.slice(0, 1500), color: S.bg === 'negro' ? '#fff' : '#0f172a', size: 24 }); draw(); toast('✅ Agregado'); }; out.appendChild(add); } } catch (e) { toast('⚠️ ' + e.message); } finally { b.disabled = false; b.textContent = '✨ Generar'; } };
       c.appendChild(b); c.appendChild(out);
+    }
+    function seccionDisenoIA(c) {
+      const ta = el('textarea', { placeholder: 'Ej.: cartel por el Día de la Bandera' }); c.appendChild(ta);
+      const out = el('div', { style: 'margin-top:6px' });
+      const b = el('button', { className: 'btn2', textContent: '✨ Crear diseño' });
+      b.onclick = async () => { const tema = ta.value.trim(); if (!tema) return toast('Escribe un tema'); b.disabled = true; b.textContent = 'Diseñando…'; try { const r = await api('tic/diseno-ia', { tema }); if (r.aviso) { out.innerHTML = `<p class="small muted">${esc(r.aviso)}</p>`; } else { construirDisenoIA(r.diseno); toast('✅ Diseño creado. Ajústalo a tu gusto.'); } } catch (e) { toast('⚠️ ' + e.message); } finally { b.disabled = false; b.textContent = '✨ Crear diseño'; } };
+      c.appendChild(b); c.appendChild(out);
+      c.appendChild(el('hr', { style: 'border:none;border-top:1px solid #eef2f6;margin:12px 0' }));
+      c.appendChild(el('p', { className: 'small muted', style: 'margin:0 0 4px', textContent: 'O pídeme ideas y textos:' }));
+    }
+    function construirDisenoIA(d) {
+      const T = (text, x, y, size, color, bold) => ({ t: 'text', x, y, text: text || '', size, color: color || '#ffffff', bold: !!bold, font: 'Arial, sans-serif' });
+      const emoji = d.emoji || '📌', ti = d.titulo || '', su = d.subtitulo || '', cu = d.cuerpo || '';
+      if (d.tipo === 'frase') preset(1080, 1080, 'grad2', '#f97316', [T(emoji, 470, 150, 150), T('«' + ti + '»', 90, 350, 64, '#fff', true), su ? T(su, 90, 870, 36) : null].filter(Boolean));
+      else if (d.tipo === 'felicitacion') preset(1080, 1080, 'grad5', '#f59e0b', [T(emoji, 450, 140, 160), T(ti.toUpperCase(), 100, 520, 68, '#fff', true), su ? T(su, 120, 660, 40) : null].filter(Boolean));
+      else if (d.tipo === 'portada') preset(1080, 1350, 'grad4', '#8b5cf6', [T(emoji, 90, 300, 120), T(ti, 90, 520, 80, '#fff', true), su ? T(su, 90, 720, 44) : null, cu ? T(cu, 90, 820, 34) : null].filter(Boolean));
+      else if (d.tipo === 'diploma') preset(1350, 1000, 'bgcolor', '#fffdf7', [{ t: 'rect', x: 45, y: 45, w: 1260, h: 910, color: '#b45309', width: 10 }, { t: 'rect', x: 68, y: 68, w: 1214, h: 864, color: '#d4a017', width: 3 }, T(emoji, 650, 120, 90, '#000'), T(ti.toUpperCase(), 300, 300, 58, '#92400e', true), su ? T(su, 300, 440, 36, '#334155') : null, { t: 'line', x1: 300, y1: 600, x2: 1050, y2: 600, color: '#cbd5e1', width: 2 }].filter(Boolean));
+      else preset(1080, 1350, 'grad1', '#0ea5e9', [T(emoji, 90, 150, 130), T(ti.toUpperCase(), 90, 360, 76, '#fff', true), su ? T(su, 90, 640, 46) : null, cu ? T(cu, 90, 760, 36) : null].filter(Boolean));
     }
     function exportar(fmt) {
       const scale = 2, c2 = el('canvas', { width: S.W * scale, height: S.H * scale }), g2 = c2.getContext('2d'); g2.scale(scale, scale);

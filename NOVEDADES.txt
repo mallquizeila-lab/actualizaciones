@@ -1,3 +1,8 @@
+9.59.0 · ✨ ProfeCrea con IA (Libretín diseña) + Clipart
+- 🎨 «Diseña con IA»: el docente escribe un tema (ej. «cartel por el Día de la Bandera») y Libretín arma el diseño completo solo: elige el formato (cartel, diploma, portada, frase o felicitación), escribe el título, el subtítulo, una línea y hasta el emoji. Luego el docente lo ajusta a su gusto. Usa la IA de ProfeTok; nunca se le envían datos de alumnos (Ley 29733).
+- 😀 Clipart: biblioteca de 44 stickers/íconos (estrellas, útiles, caritas, flechas, símbolos) para tocar y poner en el lienzo, tanto en la Pizarra como en ProfeCrea.
+- Objetivo: que el docente tenga TODO a la mano dentro de ProfeTok y no se vaya a Canva.
+
 9.58.1 · 🖊️ Pizarra: trazo de lápiz natural (perfect-freehand, MIT)
 - Los trazos del lápiz ahora tienen grosor variable y puntas afinadas, como escribir en papel (lo que usan Excalidraw y tldraw por dentro). Librería de código abierto perfect-freehand (MIT, 4 KB, matemática pura, revisada a mano), guardada local: sigue siendo offline y sin dependencias pesadas.
 - Si por algo no carga, el lápiz vuelve solo al trazo normal (nada se rompe).
