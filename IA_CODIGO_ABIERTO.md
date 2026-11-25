@@ -40,6 +40,7 @@ Lo vamos llenando con cada video, enlace o herramienta que manda el socio. Datos
 |---|---|---|---|---|---|
 | [black-forest-labs/flux](https://github.com/black-forest-labs/flux) | 26k | ✅ Apache-2.0 (modelo «schnell») | Genera imágenes | Fotos de las webs y miniaturas | 🟢 vía Cloudflare |
 | [danielgatis/rembg](https://github.com/danielgatis/rembg) | 26k | ✅ MIT | Quita el fondo de una foto | Fotochecks de ProfeTok, personajes | 🔵 |
+| [steveruizok/perfect-freehand](https://github.com/steveruizok/perfect-freehand) | 17k | ✅ MIT | Trazos de lápiz naturales (grosor variable por velocidad), como Excalidraw/Procreate. 4 KB, matemática pura | Pizarra Mágica de ProfeTok | 🟢 integrado (`aula/public/lib/perfect-freehand.js`) |
 | [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) | 38k | ✅ BSD-3 | Mejora la calidad o agranda imágenes | Fotos borrosas de alumnos o clientes | ⚪ |
 
 ## 🤖 Agentes y automatización

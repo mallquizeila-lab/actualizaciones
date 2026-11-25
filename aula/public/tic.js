@@ -39,7 +39,13 @@
   function wrapTxt(g, txt, x, y, maxW, lh) { const words = String(txt).split(/\s+/); let line = '', yy = y; for (const w of words) { const test = line ? line + ' ' + w : w; if (g.measureText(test).width > maxW && line) { g.fillText(line, x, yy); line = w; yy += lh; } else line = test; } if (line) g.fillText(line, x, yy); }
   function objPaint(g, o) {
     g.save(); g.globalAlpha = o.alpha != null ? o.alpha : 1; g.strokeStyle = o.color || '#000'; g.fillStyle = o.color || '#000'; g.lineWidth = o.width || 2; g.lineCap = 'round'; g.lineJoin = 'round';
-    if (o.t === 'path') { g.beginPath(); (o.pts || []).forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); }
+    if (o.t === 'path') {
+      const pts = o.pts || [];
+      if (window.PerfectFreehand && pts.length > 1) { // trazo natural (grosor variable), como en papel
+        const out = window.PerfectFreehand.getStroke(pts.map(p => [p.x, p.y]), { size: (o.width || 3) * 2.1, thinning: 0.62, smoothing: 0.5, streamline: 0.5, simulatePressure: true });
+        if (out.length) { g.beginPath(); g.moveTo(out[0][0], out[0][1]); for (let i = 1; i < out.length; i++) g.lineTo(out[i][0], out[i][1]); g.closePath(); g.fill(); }
+      } else { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)); g.stroke(); }
+    }
     else if (o.t === 'line' || o.t === 'arrow') { g.beginPath(); g.moveTo(o.x1, o.y1); g.lineTo(o.x2, o.y2); g.stroke(); if (o.t === 'arrow') { const a = Math.atan2(o.y2 - o.y1, o.x2 - o.x1), L = 12 + (o.width || 2) * 1.5; g.beginPath(); g.moveTo(o.x2, o.y2); g.lineTo(o.x2 - L * Math.cos(a - .4), o.y2 - L * Math.sin(a - .4)); g.moveTo(o.x2, o.y2); g.lineTo(o.x2 - L * Math.cos(a + .4), o.y2 - L * Math.sin(a + .4)); g.stroke(); } }
     else if (o.t === 'rect') { if (o.fill) g.fillRect(o.x, o.y, o.w, o.h); g.strokeRect(o.x, o.y, o.w, o.h); }
     else if (o.t === 'ellipse') { g.beginPath(); g.ellipse(o.x + o.w / 2, o.y + o.h / 2, Math.abs(o.w / 2), Math.abs(o.h / 2), 0, 0, 7); if (o.fill) g.fill(); g.stroke(); }
