@@ -1,3 +1,6 @@
+9.56.1 · 🎞️ Detector de ritmo calibrado
+- La revisión automática ya no confunde los cambios de plano dentro del mismo escenario (primeros planos de personajes) con un video lento. Probado con un video real de 42 s: antes «lento», ahora correcto (10 cortes, uno cada 3,9 s).
+
 9.56.0 · 🤖 Web para AdSense 100 % automática + avisos de cada web
 - Primera publicación sola: cuando una web tiene 3 guías aprobadas, se sube a Cloudflare Pages sin apretar nada, y luego se actualiza con cada guía nueva.
 - Dominio: lo conecta solo a la web (si está en tu Cloudflare). Si aún no lo compraste, te avisa cuál comprar.
