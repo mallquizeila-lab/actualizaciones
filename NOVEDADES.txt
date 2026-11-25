@@ -1,3 +1,9 @@
+9.61.1 · 🎁 ProfeTok GRATIS hasta fin de año (sin costos)
+- Todas las cuentas quedan activas y sin límites hasta el 31 de diciembre de 2026: no se cobra membresía ni se bloquea nada por falta de pago.
+- El panel muestra «🎁 Gratis hasta fin de año» y se ocultan los avisos de renovación; la página de Plan avisa que no hay que pagar.
+- Es reversible y automático: pasada la fecha, vuelve solo la normalidad. Se puede ajustar la fecha con la variable AULA_GRATIS_HASTA.
+- Nota: los correos/secuencias de pago del módulo Crecimiento siguen igual; si quieres, los apagamos aparte durante la etapa gratis.
+
 9.61.0 · 📌 Muro Digital (estilo Padlet)
 - Nueva herramienta «📌 Muro Digital» en las Herramientas TIC (gratis): tableros con tarjetas de texto, color e imágenes, organizados en columnas.
 - Enlace público para compartir: cualquiera con el enlace VE el muro (solo lectura), sin necesidad de cuenta. Botón para copiar y para enviar por WhatsApp.

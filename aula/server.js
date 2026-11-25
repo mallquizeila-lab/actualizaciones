@@ -62,7 +62,9 @@ if (E.AULA_OWNER_EMAIL && !q1("select 1 from usuarios where rol='dueno'")) {
 const PLANES = getS('planes', { docente: { nombre: 'Docente', precio: 19, aulas: 2, ia: 60 }, colegio: { nombre: 'Colegio', precio: 149, aulas: 200, ia: 800 } });
 PLANES.docente.aulas = 2; // plan Docente: 2 aulas (también en cuentas que ya tenían guardado el valor anterior)
 PLANES.colegio.docentes ||= 14; PLANES.colegio.extra ||= 10; // plan Colegio: hasta 14 docentes; cada docente adicional suma S/ 10 al mes
-const membresia = c => { if (!c) return { activa: false }; const v = c.vence ? new Date(c.vence).getTime() : 0, dias = Math.ceil((v - Date.now()) / DIA); return { plan: c.plan, vence: c.vence, dias, activa: dias > 0, prueba: c.plan === 'prueba' }; };
+// 🎁 ProfeTok GRATIS para todos hasta fin de 2026 (Perú). Después de esta fecha vuelve solo a la normalidad.
+const GRATIS_HASTA = +E.AULA_GRATIS_HASTA || new Date('2027-01-01T00:00:00-05:00').getTime();
+const membresia = c => { if (!c) return { activa: false }; const v = c.vence ? new Date(c.vence).getTime() : 0, dias = Math.ceil((v - Date.now()) / DIA); if (Date.now() < GRATIS_HASTA) return { plan: c.plan, vence: c.vence, dias, activa: true, prueba: false, gratis: true }; return { plan: c.plan, vence: c.vence, dias, activa: dias > 0, prueba: c.plan === 'prueba' }; };
 
 // ---------- permisos (el corazón de la privacidad) ----------
 // dueño: todo · director: su colegio · docente: sus aulas · padre: solo sus hijos · alumno: solo él mismo
