@@ -1,3 +1,9 @@
+9.57.1 · 🎨 Herramientas TIC: más color y mejor acabado
+- Paleta de 12 colores de acceso rápido en la barra (un toque y pintas), además del selector personalizado.
+- Fondos con degradados bonitos para los diseños: Océano, Atardecer, Menta, Dulce, Fuego y Bosque.
+- Look más vistoso (celeste ProfeTok, tarjetas con color, botones con degradado) y notas con sombrita.
+- Motor de pintado unificado: la pizarra en pantalla y lo que exportas a PNG/PDF se ven idénticos.
+
 9.57.0 · 🧰 ProfeTok: Herramientas TIC para docente (Pizarra Mágica + Estudio de Diseño)
 - Nuevo apartado «🧰 Herramientas TIC» dentro de ProfeTok (menú del docente). GRATIS, sin plan, para captar docentes.
 - 🪄 Pizarra Mágica: lápiz, marcador, resaltador, borrador, figuras (línea, flecha, rectángulo, círculo, triángulo), texto, notas, imágenes, deshacer/rehacer, zoom y mover. Fondos: blanco, pizarrón, cuadriculado, rayado, caligrafía, plano cartesiano y cuadrícula matemática. Plantillas por tema. Guardar, duplicar y exportar a PNG y PDF.
