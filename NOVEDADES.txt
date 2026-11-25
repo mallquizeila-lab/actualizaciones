@@ -1,3 +1,7 @@
+9.56.2 · ✂️ Clipper viral (script de Python)
+- python/clipper_viral.py: enlace de YouTube (o archivo) → descarga (yt-dlp) → transcripción palabra por palabra (Faster Whisper) → la IA local Qwen3 (Ollama) elige el mejor momento, escribe el título gancho y reescribe el guion viral sin perder el contexto → MoviePy corta el video original, lo pasa a vertical con fondo desenfocado y le pone el título y subtítulos karaoke (palabra que suena en amarillo, palabras clave en verde).
+- Sin IA local, elige solo el tramo con más ritmo. Para enlaces exige --tengo-derechos (videos propios o con permiso).
+
 9.56.1 · 🎞️ Detector de ritmo calibrado
 - La revisión automática ya no confunde los cambios de plano dentro del mismo escenario (primeros planos de personajes) con un video lento. Probado con un video real de 42 s: antes «lento», ahora correcto (10 cortes, uno cada 3,9 s).
 
