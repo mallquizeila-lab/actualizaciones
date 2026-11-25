@@ -1,3 +1,10 @@
+9.57.0 · 🧰 ProfeTok: Herramientas TIC para docente (Pizarra Mágica + Estudio de Diseño)
+- Nuevo apartado «🧰 Herramientas TIC» dentro de ProfeTok (menú del docente). GRATIS, sin plan, para captar docentes.
+- 🪄 Pizarra Mágica: lápiz, marcador, resaltador, borrador, figuras (línea, flecha, rectángulo, círculo, triángulo), texto, notas, imágenes, deshacer/rehacer, zoom y mover. Fondos: blanco, pizarrón, cuadriculado, rayado, caligrafía, plano cartesiano y cuadrícula matemática. Plantillas por tema. Guardar, duplicar y exportar a PNG y PDF.
+- 🎨 Estudio de Diseño (reemplazo libre de Canva): carteles, diplomas, horarios y portadas con el mismo motor.
+- 🤖 Asistente Libretín en el lienzo: ideas, esquemas, pasos, preguntas o textos a partir de un tema (reutiliza la IA; nunca se le envían datos de alumnos, Ley 29733).
+- Motor de Canvas propio, sin librerías externas, offline-first. No toca nada de lo que ya existía (módulo aparte interactivo.js + public/tic.js; tablas nuevas int_*).
+
 9.56.2 · ✂️ Clipper viral (script de Python)
 - python/clipper_viral.py: enlace de YouTube (o archivo) → descarga (yt-dlp) → transcripción palabra por palabra (Faster Whisper) → la IA local Qwen3 (Ollama) elige el mejor momento, escribe el título gancho y reescribe el guion viral sin perder el contexto → MoviePy corta el video original, lo pasa a vertical con fondo desenfocado y le pone el título y subtítulos karaoke (palabra que suena en amarillo, palabras clave en verde).
 - Sin IA local, elige solo el tramo con más ritmo. Para enlaces exige --tengo-derechos (videos propios o con permiso).

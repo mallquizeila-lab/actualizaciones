@@ -386,8 +386,12 @@ for (const [k, f] of Object.entries(require('./dictado').crear({ q, q1, aulaDe, 
 const correccionM = require('./correccion').crear({ db, q, q1, run, aulaDe, hoy, API, E, limpio, guardarImagen, ARCH, veAlumno, avisar: (...a) => avisar(...a) });
 for (const [k, f] of Object.entries(correccionM.API)) API[k] = f;
 
+// 🧰 Herramientas TIC para docente (Pizarra Mágica, Estudio de Diseño y asistente); gratis (ver interactivo.js)
+const interactivoM = require('./interactivo').crear({ db, q, q1, run, hoy, limpio, E });
+for (const [k, f] of Object.entries(interactivoM.API)) API[k] = f;
+
 // solo lectura cuando la membresía venció (los datos nunca se borran)
-const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta', 'POST /api/pagar-saldo', 'POST /api/saldo-auto', 'POST /api/equipo-recordar']);
+const ESCRIBE_SIN_PLAN = new Set(['POST /api/salir', 'POST /api/clave', 'POST /api/pago', 'POST /api/colegio', 'POST /api/checkout', 'POST /api/push-sub', 'POST /api/izipay/iniciar', 'POST /api/izipay/respuesta', 'POST /api/pagar-saldo', 'POST /api/saldo-auto', 'POST /api/equipo-recordar', ...interactivoM.SINPLAN]);
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x'), ip = ipDe(req), clave = req.method + ' ' + url.pathname;
