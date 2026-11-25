@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Primeros clientes para ProfeTok (EJEMPLO con datos de muestra)</title>
+<style>
+:root{--bg:#f6f7f9;--sheet:#fff;--ink:#16181d;--ink2:#515660;--ink3:#868b96;--line:#e9ebef;--tint:#eef4f6;--accent:#1f7fb0;--link-line:#cdd3da;
+  --shadow:0 1px 2px rgba(20,20,30,.04),0 12px 40px -12px rgba(20,20,30,.10);
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#101215;--sheet:#181b1f;--ink:#e9ebef;--ink2:#a4aab4;--ink3:#868b96;--line:rgba(255,255,255,.08);--tint:#1d2529;--accent:#6fc0e6;--link-line:#454b52;--shadow:0 1px 2px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans)}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link-line);text-underline-offset:3px}
+a:hover{text-decoration-color:currentColor}
+.num{font-variant-numeric:tabular-nums}
+.sheet{max-width:880px;margin:40px auto 64px;background:var(--sheet);border-radius:28px;box-shadow:var(--shadow);padding:72px 80px 56px}
+.meta{color:var(--ink3);font-size:13px;margin:0}
+h1{font-weight:300;font-size:clamp(32px,5vw,46px);line-height:1.08;letter-spacing:-.035em;margin:18px 0 22px;max-width:15em}
+.verdict{font-size:18px;line-height:1.6;color:var(--ink2);max-width:36em;margin:0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:48px 0 0;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts dt,.kv dt,.steps dt,.dims dt,.label,.eyebrow{color:var(--ink3);font-size:13px;font-weight:400}
+.facts dd{margin:4px 0 0;font-weight:500}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin:56px 0 0}
+.top h2{font-weight:400;font-size:28px;line-height:1.2;letter-spacing:-.025em;margin:6px 0 8px}
+.top p{margin:0;color:var(--ink2);max-width:32em}
+.top .big{font-weight:300;font-size:64px;line-height:1;letter-spacing:-.05em;color:var(--accent)}
+section.block{margin-top:80px}
+.eyebrow{margin:0}
+h2.section{font-weight:400;font-size:26px;line-height:1.2;letter-spacing:-.025em;margin:8px 0 6px}
+.note{color:var(--ink3);font-size:14px;margin:0 0 12px;max-width:40em}
+.prospect{padding:36px 0;border-bottom:1px solid var(--line);break-inside:avoid;page-break-inside:avoid}
+.prospect:last-child{border-bottom:0}
+.p-head{display:flex;justify-content:space-between;gap:24px;align-items:baseline}
+.p-head h3{font-weight:500;font-size:20px;line-height:1.3;letter-spacing:-.02em;margin:0}
+.sub{color:var(--ink3);font-size:13px;margin:4px 0 0}
+.score{text-align:right;white-space:nowrap}
+.score b{font-weight:400;font-size:30px;line-height:1;letter-spacing:-.03em}
+.score span{display:block;color:var(--ink3);font-size:12px;margin-top:6px}
+.signal{font-size:17px;line-height:1.55;margin:18px 0 22px;max-width:38em}
+.kv:empty{display:none}.p-head+.kv{margin-top:18px}.kv{display:grid;grid-template-columns:130px 1fr;gap:10px 24px;margin:0}
+.kv dd{margin:0;color:var(--ink2);font-size:14px}
+.kv dt{font-size:14px}
+.opener{background:var(--tint);border-radius:16px;padding:18px 22px;margin:22px 0 0}
+.opener p{margin:6px 0 0}.opener .label{margin:0}
+details{margin-top:16px}
+summary{cursor:pointer;color:var(--ink2);font-size:14px;list-style:none;display:inline-block}
+summary::-webkit-details-marker{display:none}
+summary::after{content:" +";color:var(--ink3)}
+details[open] summary::after{content:" \2212"}
+details p,.print-only p{color:var(--ink2);font-size:14px;margin:10px 0 0;max-width:42em}
+.source{color:var(--ink3)}
+.dims{display:flex;flex-wrap:wrap;gap:6px 28px;margin:12px 0 0}
+.dims div{display:flex;gap:8px}.dims dd{margin:0;font-size:13px;color:var(--ink)}.dims dt{font-size:13px}
+.patterns{margin-top:12px}
+.pattern{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--line);break-inside:avoid}
+.pattern b{font-weight:300;font-size:28px;line-height:1}
+.pattern h4{margin:0;font-size:15px;font-weight:500}
+.pattern p{margin:2px 0 0;color:var(--ink2);font-size:14px}
+.angle{font-weight:400;font-size:22px;line-height:1.4;letter-spacing:-.02em;margin:10px 0 22px;max-width:30em}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;border-top:1px solid var(--line);padding-top:20px;margin:0}
+.steps dd{margin:4px 0 0;font-size:14px;color:var(--ink2)}
+.limits{margin:10px 0 0;padding:0;list-style:none}
+.limits li{padding:10px 0;border-top:1px solid var(--line);color:var(--ink2);font-size:14px}
+.print-only{display:none}
+.empty{color:var(--ink3);font-size:14px;padding:18px 0;margin:0}
+footer{margin-top:56px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--ink3);font-size:12px}
+@media screen and (max-width:760px){.sheet{margin:0;border-radius:0;box-shadow:none;padding:40px 22px}.facts,.steps{grid-template-columns:1fr 1fr;gap:16px}.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:10px}.top .big{font-size:48px}}
+@page{margin:14mm}
+@media print{
+  :root{--bg:#fff;--sheet:#fff;--ink:#111;--ink2:#444;--ink3:#777;--line:#e2e2de;--tint:#eef4f6;--accent:#1f7fb0;--link-line:#bbb;--shadow:none}
+  body{background:#fff;font-size:12.5px}
+  .sheet{margin:0;max-width:none;padding:0;border-radius:0;box-shadow:none;zoom:.92}
+  section.block{margin-top:40px}
+  .top,.opener,.pattern,.steps{break-inside:avoid}
+  .eyebrow,h2.section,.note{break-after:avoid}
+  .screen-only{display:none}.print-only{display:block;margin-top:10px}
+  .prospect{padding:20px 0}
+  .signal{font-size:14px;margin:10px 0 12px}
+  .kv{gap:4px 20px}.kv dt,.kv dd{font-size:12px}
+  .opener{padding:10px 14px;margin-top:12px;border-radius:10px}
+  details{margin-top:10px}details p,.print-only p{font-size:12px;margin-top:6px}
+  .score b{font-size:24px}
+  .opener{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header>
+    <p class="meta">Buscador de clientes ProfeTok <span aria-hidden="true">&middot;</span> 2026-11-25 <span aria-hidden="true">&middot;</span> Modo estandar (demostración)</p>
+    <h1>Primeros clientes para ProfeTok (EJEMPLO con datos de muestra)</h1>
+    <p class="verdict">ESTE ES UN REPORTE DE EJEMPLO con datos inventados para que veas el formato. Las señales más fuertes suelen estar en grupos públicos de docentes al cierre de bimestre, cuando se quejan de llenar actas y registros a mano. Corre la herramienta en tu PC con internet abierto para obtener prospectos reales y verificados.</p>
+  </header>
+
+  <dl class="facts">
+    <div><dt>Producto</dt><dd><a href="https://profetok.com" target="_blank" rel="noreferrer">ProfeTok</a></dd></div>
+    <div><dt>Cliente objetivo</dt><dd>Docentes de aula en Perú</dd></div>
+    <div><dt>Prospectos calificados</dt><dd class="num">2 <span class="sub">(1 fuertes)</span></dd></div>
+    <div><dt>Puntaje promedio</dt><dd class="num">82 de 100</dd></div>
+  </dl>
+
+  <section class="top">
+    <div>
+      <p class="eyebrow">Prospecto con mas confianza</p>
+      <h2>Docente de primaria (señal en grupo público) — EJEMPLO</h2>
+      <p>Publicó hace dos semanas, justo antes del cierre de bimestre.</p>
+    </div>
+    <div class="big num">86</div>
+  </section>
+  <section class="block">
+    <p class="eyebrow">Lista corta</p>
+    <h2 class="section">A quien escribirle primero</h2>
+    <p class="note">Fuentes: Fuentes públicas en español, últimos 12 meses — EJEMPLO ficticio.</p>
+    
+    <article class="prospect">
+      <header class="p-head">
+        <div>
+          <h3>Docente de primaria (señal en grupo público) — EJEMPLO</h3>
+          <p class="sub">Comunidad docente <span aria-hidden="true">&middot;</span> Consciente del problema</p>
+        </div>
+        <div class="score"><b class="num">86</b><span>Candidato fuerte</span></div>
+      </header>
+      <p class="signal">Pidió públicamente una app para no copiar la asistencia del cuaderno al sistema cada semana.</p>
+      <dl class="kv"><dt>Por que encaja</dt><dd>ProfeTok toma asistencia por voz y la pasa sola al registro.</dd><dt>Por que ahora</dt><dd>Publicó hace dos semanas, justo antes del cierre de bimestre.</dd><dt>Canal sugerido</dt><dd>Responder en el hilo público</dd><dt>Cuidado</dt><dd>Dato de muestra. Verifica la señal real antes de escribir.</dd></dl>
+      <div class="opener">
+        <p class="label">Mensaje sugerido &mdash; solo borrador, nunca se envia solo</p>
+        <p>Hola profe, vi tu consulta sobre pasar la asistencia al sistema. Armé ProfeTok justamente para eso: tomas lista por voz y queda el registro listo. ¿Te muestro cómo en 15 días de prueba gratis?</p>
+      </div>
+      <details class="screen-only">
+        <summary>Prueba y desglose del puntaje</summary>
+        <p>Publicación pública reciente en primera persona (dato de muestra).</p>
+        <p class="source">
+          Publicación pública (muestra), 2026-11-10
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://ejemplo.com/muestra" target="_blank" rel="noreferrer">EJEMPLO — no es un enlace real</a>
+        </p>
+        <dl class="dims"><div><dt>Fuerza del dolor</dt><dd>5 de 5</dd></div><div><dt>Encaje con ProfeTok</dt><dd>5 de 5</dd></div><div><dt>Momento oportuno</dt><dd>5 de 5</dd></div><div><dt>Facil de contactar</dt><dd>4 de 5</dd></div><div><dt>Calidad de la prueba</dt><dd>4 de 5</dd></div></dl>
+      </details>
+      <div class="print-only">
+        <p class="label">Prueba y desglose del puntaje</p>
+        <p>Publicación pública reciente en primera persona (dato de muestra).</p>
+        <p class="source">
+          Publicación pública (muestra), 2026-11-10
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://ejemplo.com/muestra" target="_blank" rel="noreferrer">EJEMPLO — no es un enlace real</a>
+        </p>
+        <dl class="dims"><div><dt>Fuerza del dolor</dt><dd>5 de 5</dd></div><div><dt>Encaje con ProfeTok</dt><dd>5 de 5</dd></div><div><dt>Momento oportuno</dt><dd>5 de 5</dd></div><div><dt>Facil de contactar</dt><dd>4 de 5</dd></div><div><dt>Calidad de la prueba</dt><dd>4 de 5</dd></div></dl>
+      </div>
+    </article>
+    <article class="prospect">
+      <header class="p-head">
+        <div>
+          <h3>Promotor de colegio privado chico — EJEMPLO</h3>
+          <p class="sub">Colegio privado <span aria-hidden="true">&middot;</span> Buscando solución</p>
+        </div>
+        <div class="score"><b class="num">78</b><span>Prometedor</span></div>
+      </header>
+      <p class="signal">Comentó que sus docentes pierden horas en actas y pidió recomendaciones de software.</p>
+      <dl class="kv"><dt>Por que encaja</dt><dd>Decide la compra y le duele el tiempo administrativo de su plana.</dd><dt>Por que ahora</dt><dd>Planifica el próximo año escolar.</dd><dt>Canal sugerido</dt><dd>Página de contacto del colegio</dd><dt>Cuidado</dt><dd>Dato de muestra. Confirma que decide la compra.</dd></dl>
+      <div class="opener">
+        <p class="label">Mensaje sugerido &mdash; solo borrador, nunca se envia solo</p>
+        <p>Hola, vi su comentario sobre el tiempo que toma el papeleo docente. ProfeTok automatiza asistencia y notas; varios colegios lo usan para liberar horas. ¿Le interesa una prueba gratis de 15 días?</p>
+      </div>
+      <details class="screen-only">
+        <summary>Prueba y desglose del puntaje</summary>
+        <p>Comentario público en una nota sobre gestión escolar (muestra).</p>
+        <p class="source">
+          Comentario público (muestra), 2026-11-02
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://ejemplo.com/muestra2" target="_blank" rel="noreferrer">EJEMPLO — no es un enlace real</a>
+        </p>
+        <dl class="dims"><div><dt>Fuerza del dolor</dt><dd>4 de 5</dd></div><div><dt>Encaje con ProfeTok</dt><dd>4 de 5</dd></div><div><dt>Momento oportuno</dt><dd>4 de 5</dd></div><div><dt>Facil de contactar</dt><dd>4 de 5</dd></div><div><dt>Calidad de la prueba</dt><dd>3 de 5</dd></div></dl>
+      </details>
+      <div class="print-only">
+        <p class="label">Prueba y desglose del puntaje</p>
+        <p>Comentario público en una nota sobre gestión escolar (muestra).</p>
+        <p class="source">
+          Comentario público (muestra), 2026-11-02
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://ejemplo.com/muestra2" target="_blank" rel="noreferrer">EJEMPLO — no es un enlace real</a>
+        </p>
+        <dl class="dims"><div><dt>Fuerza del dolor</dt><dd>4 de 5</dd></div><div><dt>Encaje con ProfeTok</dt><dd>4 de 5</dd></div><div><dt>Momento oportuno</dt><dd>4 de 5</dd></div><div><dt>Facil de contactar</dt><dd>4 de 5</dd></div><div><dt>Calidad de la prueba</dt><dd>3 de 5</dd></div></dl>
+      </div>
+    </article>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Patrones</p>
+    <h2 class="section">Senales que se repiten</h2>
+    <p class="note">Problemas que aparecieron mas de una vez. Empieza por estos.</p>
+    <div class="patterns"><div class="pattern"><b class="num">4</b><div><h4>Asistencia en papel</h4><p>Muchos pasan lista en cuaderno y luego copian al sistema (muestra).</p></div></div><div class="pattern"><b class="num">3</b><div><h4>Noches de actas</h4><p>Se quejan de llenar actas en casa al cierre de bimestre (muestra).</p></div></div></div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Proximos siete dias</p>
+    <h2 class="section">Que hacer esta semana</h2>
+    <p class="angle">Ofrecer la prueba gratis de 15 días antes de pedir la compra.</p>
+    <dl class="steps"><div><dt>Primer paso</dt><dd>Escribir a los 3 de mayor puntaje con una pregunta basada en su propia publicación.</dd></div><div><dt>Seguimiento</dt><dd>Compartir el video de Libretín solo si confirman que el problema sigue.</dd></div><div><dt>Senal de exito</dt><dd>Tres conversaciones y un colegio probando ProfeTok en siete días.</dd></div></dl>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Limites</p>
+    <h2 class="section">Lee esto antes de actuar</h2>
+    <ul class="limits"><li>REPORTE DE EJEMPLO: los datos son inventados para mostrar el formato.</li><li>Los reales salen de señales públicas, no son compradores confirmados.</li><li>Ley 29733: no guardar datos personales de docentes sin permiso.</li></ul>
+  </section>
+
+  <footer>
+    <span>Hecho solo con publicaciones publicas. Nada de aqui se envia por ti. Ley 29733: no guardes datos personales sin permiso.</span>
+  </footer>
+</main>
+</body>
+</html>

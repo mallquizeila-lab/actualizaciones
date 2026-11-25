@@ -46,6 +46,7 @@ Lo vamos llenando con cada video, enlace o herramienta que manda el socio. Datos
 
 | Herramienta | ⭐ | Licencia | Qué hace | Dónde nos sirve | Estado |
 |---|---|---|---|---|---|
+| [carolinacherry/claude-first-customer-finder-skill](https://github.com/carolinacherry/claude-first-customer-finder-skill) | — | ✅ MIT | Skill: das la URL de tu negocio → busca posibles primeros clientes en señales públicas, los puntúa (0–100), redacta el mensaje (no lo envía) y arma un reporte HTML | Conseguir primeros clientes de **ProfeTok** (docentes). Revisado con SkillSpector: **SAFE/LOW**, sin hooks | 🟢 idea adaptada a `buscador-clientes/` (ES, Perú) |
 | [diwennee/openreply](https://github.com/diwennee/openreply) | 3.5k | ✅ MIT | Alternativa libre a ManyChat: alguien comenta una palabra clave → mensaje privado automático | «Comenta PROFE y te mando…» en Facebook/Instagram | 🔵 prioridad |
 | [zernio-dev/zernflow](https://github.com/zernio-dev/zernflow) | 252 | ✅ MIT | Chatbots visuales para Instagram, Facebook y Telegram | Lo mismo, más completo | ⚪ |
 | [Jakeschincariol/youtube-agent-skill](https://github.com/Jakeschincariol/youtube-agent-skill) | 7k | ✅ MIT | 11 skills para manejar un canal de YouTube (21 fórmulas de gancho con puntaje) | Mejorar los guiones de ShortForge | 🔵 |
@@ -64,5 +65,6 @@ Lo vamos llenando con cada video, enlace o herramienta que manda el socio. Datos
 - ✅ **Detector de «video tipo diapositivas»** — de OpenMontage. **Hecho en 9.54.0** (ritmo en `lib/revisarvideo.js`).
 - ✅ **«Hazme uno como este»** con un archivo de referencia → 3 ideas (qué se conserva y qué cambia) — de OpenMontage/openmotion. **Hecho en 9.54.0** (Desarmar video).
 - ✅ **Palabra clave en comentarios → mensaje privado automático** — de openreply y de los reels. **Hecho en 9.54.0** (código propio, `lib/comments.js`).
+- ✅ **Buscador de primeros clientes** (URL del negocio → prospectos con señal pública, puntaje y reporte HTML) — de `first-customer-finder` (MIT). **Adaptado en `buscador-clientes/`** (español, enfocado en docentes peruanos de ProfeTok; reutiliza su generador de reportes MIT). Se corre en la PC/VPS con internet abierto; en la nube los sitios están bloqueados.
 - **Recrear el video ganador cada semana** — de los reels de «Claude publica, mide, aprende y recrea».
 - **Formatos de anuncio:** sketch humano vs. mascota (profe vs. Libretín), «3 pasos» con tarjetas limpias, contador «0/5 → 5/5», cierre «Comenta PALABRA».
