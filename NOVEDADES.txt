@@ -1,3 +1,7 @@
+9.61.4 · 🎁 Página de inicio: «Todo gratis» (sin precios)
+- La landing pública ya no muestra los precios (S/ 19, S/ 149) ni «Pagar ahora» durante la etapa gratis: enseña «🎁 ¡Todo gratis! · ProfeTok completo · S/ 0» con botón «Empezar gratis».
+- Reversible: pasada la fecha (fin de 2026) vuelven solos los planes normales.
+
 9.61.3 · 🎡 Ruleta y grupos con tus alumnos reales
 - La Ruleta de nombres y el Armador de grupos ahora tienen el botón «📋 Mis alumnos»: cargan la lista real de tus aulas de ProfeTok (si tienes varias, eliges cuál).
 - Muestra nombre + inicial del apellido (p. ej. «Ana Q.»); es tu propia data y NUNCA se envía a ninguna IA.
