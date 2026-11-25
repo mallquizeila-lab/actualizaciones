@@ -126,11 +126,21 @@
         <div class="tic-card" data-abrir="diseno"><div class="ic">🎨</div><b>ProfeCrea · Estudio de diseño</b><small>Carteles, diplomas, horarios y portadas con plantillas listas. Como Canva, gratis y dentro de ProfeTok.</small></div>
         <div class="tic-card" data-asis><div class="ic">🤖</div><b>Asistente Libretín</b><small>Pídele ideas, esquemas o preguntas para tus pizarras y diseños.</small></div>
       </div>
+      <h3 style="margin-top:18px">⏱️ Herramientas de aula</h3>
+      <p class="muted" style="margin-top:-6px">Para el día a día en clase. <b>Gratis.</b></p>
+      <div class="tic-cards">
+        <div class="tic-card" data-aula="temporizador"><div class="ic">⏱️</div><b>Temporizador</b><small>Cuenta regresiva y cronómetro gigantes para la pizarra.</small></div>
+        <div class="tic-card" data-aula="ruleta"><div class="ic">🎡</div><b>Ruleta de nombres</b><small>Elige un alumno al azar. Guarda tu lista.</small></div>
+        <div class="tic-card" data-aula="grupos"><div class="ic">👥</div><b>Armar grupos</b><small>Divide a la clase en equipos al azar.</small></div>
+        <div class="tic-card" data-aula="dados"><div class="ic">🎲</div><b>Dado y moneda</b><small>Para dinámicas y sorteos rápidos.</small></div>
+        <div class="tic-card" data-aula="semaforo"><div class="ic">🔇</div><b>Semáforo del ruido</b><small>Mide el volumen del aula con el micrófono.</small></div>
+      </div>
       <h3 style="margin-top:18px">🗂️ Mis trabajos</h3>
       <div id="ticList" class="tic-list"><div class="muted small">Cargando…</div></div>
     </div>`;
     M.querySelectorAll('[data-abrir]').forEach(c => c.onclick = () => abrirEditor(c.dataset.abrir));
     M.querySelector('[data-asis]').onclick = () => abrirEditor('pizarra', null, true);
+    M.querySelectorAll('[data-aula]').forEach(c => c.onclick = () => { const f = window.HAULA && window.HAULA[c.dataset.aula]; if (f) f(); else toast('Cargando…'); });
     cargarLista(M.querySelector('#ticList'));
   }
 

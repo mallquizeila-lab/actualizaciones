@@ -1,3 +1,9 @@
+9.60.0 · ⏱️ Herramientas de aula (lo que el profe usa a diario)
+- Nuevo bloque «⏱️ Herramientas de aula» en las Herramientas TIC, gratis:
+  ⏱️ Temporizador y cronómetro gigantes (con alarma), 🎡 Ruleta de nombres (elige un alumno al azar; guarda tu lista), 👥 Armar grupos al azar, 🎲 Dado y moneda, y 🔇 Semáforo del ruido (mide el volumen del aula con el micrófono).
+- Todo del lado del navegador, sin dependencias; la lista de nombres se guarda en el propio equipo del docente.
+- Objetivo: que el docente tenga TODO a la mano y no se vaya a otras apps.
+
 9.59.0 · ✨ ProfeCrea con IA (Libretín diseña) + Clipart
 - 🎨 «Diseña con IA»: el docente escribe un tema (ej. «cartel por el Día de la Bandera») y Libretín arma el diseño completo solo: elige el formato (cartel, diploma, portada, frase o felicitación), escribe el título, el subtítulo, una línea y hasta el emoji. Luego el docente lo ajusta a su gusto. Usa la IA de ProfeTok; nunca se le envían datos de alumnos (Ley 29733).
 - 😀 Clipart: biblioteca de 44 stickers/íconos (estrellas, útiles, caritas, flechas, símbolos) para tocar y poner en el lienzo, tanto en la Pizarra como en ProfeCrea.
