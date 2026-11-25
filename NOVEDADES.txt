@@ -1,3 +1,8 @@
+9.61.5 · 🎁 Quitado «15 días» de la página de inicio (es gratis todo el año)
+- El botón principal ahora dice «🎁 Empezar gratis» (ya no «Probar 15 días gratis») durante la etapa gratis.
+- El popup de salida y el formulario de registro también dejan de decir «15 días» (ahora «Crea tu cuenta gratis»).
+- Reversible: pasada la fecha vuelve el texto de prueba normal.
+
 9.61.4 · 🎁 Página de inicio: «Todo gratis» (sin precios)
 - La landing pública ya no muestra los precios (S/ 19, S/ 149) ni «Pagar ahora» durante la etapa gratis: enseña «🎁 ¡Todo gratis! · ProfeTok completo · S/ 0» con botón «Empezar gratis».
 - Reversible: pasada la fecha (fin de 2026) vuelven solos los planes normales.
