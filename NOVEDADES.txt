@@ -1,3 +1,9 @@
+9.54.0 · 📩 Palabra clave → mensaje privado + 💡 «Hazme uno como este» + 🎞️ detector de videos aburridos
+- Canales → Editar → «📩 Palabra clave → mensaje privado automático»: si alguien comenta tu palabra (ej. «PROFE»), ShortForge le manda tu mensaje por privado en Facebook y le responde en público «¡Te escribí por privado!». Vigila los videos del canal y las publicaciones recientes de la página (también las subidas a mano). En YouTube responde en público. No le escribe dos veces el mismo día a la misma persona. Funciona aunque «Responder comentarios» esté en «No».
+  ⚠️ Para los mensajes privados: en Ajustes desconecta Facebook y vuelve a conectarlo aceptando «Administrar mensajes de la página».
+- Desarmar video → «💡 Proponme 3 ideas para este canal»: subes un reel que te gusta y la IA propone 3 videos originales para tu canal, cada uno con qué conserva de la referencia (ritmo, gancho, estructura) y qué cambia. «Crear esta» lo manda a producir.
+- La revisión automática de cada video ahora también detecta el ritmo lento «tipo diapositivas» (imagen que casi no cambia): esos videos quedan para revisar en vez de publicarse solos.
+
 9.53.0 · 🔎 Revisión automática de cada video + Webs AdSense sin «contenido en serie»
 - Cada video terminado se revisa solo antes de aprobarse o publicarse: pantalla negra en medio, imagen congelada (escena que no cargó), audio muy bajo, saturado o con silencios largos. Si falla, queda «por revisar» y te avisa por Telegram. Sin IA y sin costo.
 - Web para AdSense: detecta y corrige solas las huellas de contenido en serie (lo que hizo rechazar a sebuscaempleo.com): títulos de molde («7 claves», «guía definitiva», el año) y frases vagas sin fuente («según reportes», «una proporción muy alta»). Esas páginas se reescriben y no se aprueban hasta quedar limpias. Nuevo punto en la lista para AdSense.

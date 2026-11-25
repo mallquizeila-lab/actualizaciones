@@ -61,8 +61,8 @@ Lo vamos llenando con cada video, enlace o herramienta que manda el socio. Datos
 ## 💡 Ideas sacadas de los videos que mandó el socio
 
 - ✅ **Revisión automática tras cada render** (negros, congelados, audio) — de OpenMontage. **Hecho en 9.53.0** (`lib/revisarvideo.js`, código propio).
-- **Detector de «video tipo diapositivas»** — de OpenMontage.
-- **«Hazme uno como este»** con un archivo de referencia → 2-3 ideas (qué se conserva y qué cambia) — de OpenMontage/openmotion.
-- **Palabra clave en comentarios → mensaje privado automático** — de openreply y de los reels.
+- ✅ **Detector de «video tipo diapositivas»** — de OpenMontage. **Hecho en 9.54.0** (ritmo en `lib/revisarvideo.js`).
+- ✅ **«Hazme uno como este»** con un archivo de referencia → 3 ideas (qué se conserva y qué cambia) — de OpenMontage/openmotion. **Hecho en 9.54.0** (Desarmar video).
+- ✅ **Palabra clave en comentarios → mensaje privado automático** — de openreply y de los reels. **Hecho en 9.54.0** (código propio, `lib/comments.js`).
 - **Recrear el video ganador cada semana** — de los reels de «Claude publica, mide, aprende y recrea».
 - **Formatos de anuncio:** sketch humano vs. mascota (profe vs. Libretín), «3 pasos» con tarjetas limpias, contador «0/5 → 5/5», cierre «Comenta PALABRA».

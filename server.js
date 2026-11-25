@@ -72,6 +72,7 @@ function saveChannel(o) {
   for (const k of ['autoApprove', 'autoPublish', 'fbPageId', 'reeditMode', 'comments', 'commentsMax', 'manual', 'voicePreset', 'reparto', 'autoDub', 'autoClone', 'askClone', 'askVoices', 'frase', 'playlists', 'telegram', 'community', 'communityEvery', 'fbCommunity', 'reeditSubs', 'reeditReplaceSubs', 'reeditVary', 'reeditLook', 'reeditMusic', 'cutLong', 'length', 'fxDensity', 'mood', 'aiDisclosure', 'name', 'niche', 'style', 'images', 'look', 'voice', 'rate', 'pitch', 'color', 'tone', 'notes', 'active', 'priority', 'handles', 'times', 'perDay', 'characters', 'fbFirstComment', 'fbStory', 'fbShareTo', 'crossLinks', 'bloggerId', 'radarOn', 'radarAuto', 'motion'])
     if (o[k] !== undefined) ch[k] = o[k];
   if (o.reparto !== undefined) ch.reparto = (Array.isArray(o.reparto) ? o.reparto : []).slice(0, 40).map(r => ({ id: String(r.id || uid()), nombre: String(r.nombre || 'Personaje').slice(0, 40), descripcion: String(r.descripcion || '').slice(0, 160), preset: String(r.voice || '').startsWith('clon:') ? '' : String(r.preset || 'hombre'), voice: String(r.voice || '') }));
+  if (o.palabrasClave !== undefined) ch.palabrasClave = (Array.isArray(o.palabrasClave) ? o.palabrasClave : []).slice(0, 8).map(k => ({ palabra: String(k.palabra || '').trim().replace(/\s+/g, ' ').slice(0, 30), privado: String(k.privado || '').trim().slice(0, 900), publico: String(k.publico || '').trim().slice(0, 300), youtube: String(k.youtube || '').trim().slice(0, 300) })).filter(k => k.palabra.length >= 2 && k.privado);
   if (o.autoClone === true && o.autoCloneConsent === true) ch.autoCloneConsentAt = ch.autoCloneConsentAt || new Date().toISOString();
   if (o.autoClone === true && !ch.autoCloneConsentAt) throw new Error('Para clonar voces automáticamente confirma que las voces de los videos de este canal son tuyas, con permiso o sintéticas con licencia');
   if (o.autoClone === false) ch.autoCloneConsentAt = null;
@@ -518,12 +519,13 @@ async function api(u, q, U, r) {
   }
   if (u === '/api/desarmar/reintentar') { const o = await json(q); desarmar.reintentar(o.id); return { ok: 1 }; }
   if (u === '/api/desarmar/borrar') { const o = await json(q); desarmar.borrar(o.id); return { ok: 1 }; }
+  if (u === '/api/desarmar/ideas') { const o = await json(q), ch = channel(o.channelId); if (!ch) throw new Error('Elige un canal'); return { ideas: await desarmar.ideas(o.id, ch) }; }
   if (u === '/api/desarmar/crear') {
     const o = await json(q), ch = channel(o.channelId), d = desarmar.get(o.id);
     if (!ch) throw new Error('Elige un canal');
     if (!d?.bp) throw new Error('Ese video todavía no está desarmado');
     const n = Math.max(1, Math.min(5, +o.count || 1));
-    for (let i = 0; i < n; i++) worker.newJob(ch, { topic: o.modo === 'mio' ? d.titulo : '', desarmado: { id: d.id, modo: o.modo === 'mio' ? 'mio' : 'otro', notas: String(o.notas || '').slice(0, 500) + (i ? ` (versión ${i + 1}, distinta a las anteriores)` : '') }, publishDate: o.publishDate });
+    for (let i = 0; i < n; i++) worker.newJob(ch, { topic: o.modo === 'mio' ? d.titulo : '', desarmado: { id: d.id, modo: o.modo === 'mio' ? 'mio' : 'otro', notas: String(o.notas || '').slice(0, 900) + (i ? ` (versión ${i + 1}, distinta a las anteriores)` : '') }, publishDate: o.publishDate });
     worker.loop();
     return { ok: 1, n };
   }
