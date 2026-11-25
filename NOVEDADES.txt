@@ -1,3 +1,9 @@
+9.58.0 · 🧠 Pizarra Mágica estilo Miro (plantillas de trabajo + notas de colores)
+- Notas adhesivas de 6 colores que rotan solas (como en Miro): ideal para lluvias de ideas multicolor.
+- 6 plantillas de trabajo nuevas para la pizarra: 🧠 Mapa mental, 💡 Lluvia de ideas, ➡️ Mapa de proceso, 📊 KWL (qué sé / qué quiero saber / qué aprendí), ⚖️ Comparar y 🔵 Diagrama de Venn.
+- Se mantienen los fondos ⬜ Cuadrícula, 📐 Plano cartesiano y ✍️ Caligrafía.
+- Probado en navegador (Chromium): las 6 plantillas se arman sin errores.
+
 9.57.2 · 🎨 ProfeCrea: el Estudio de Diseño, ahora profesional
 - El «Estudio de Diseño» pasa a llamarse ProfeCrea (tu alternativa libre a Canva, dentro de ProfeTok).
 - 8 plantillas DE VERDAD, bien compuestas: 🏅 Diploma de honor (marco doble, sello y firmas), 📋 Normas del aula (números de colores), 📅 Horario en tabla a colores, 📓 Portada de cuaderno, ⭐ Alumno del mes, 💬 Frase motivadora, 🎉 Felicitaciones y ⬜ En blanco.

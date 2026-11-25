@@ -150,7 +150,7 @@
       id: id || null, tipo: diseno ? 'diseno' : 'pizarra', titulo: diseno ? 'Mi diseño' : 'Mi pizarra',
       bg: diseno ? 'blanco' : 'blanco', bgColor: '#ffffff', W: diseno ? 1080 : 1280, H: diseno ? 1080 : 800,
       objs: [], tool: 'pen', color: diseno ? '#0f172a' : '#e11d48', width: 4, size: 32, fill: false, font: 'Arial, sans-serif', bold: false,
-      view: { s: 1, x: 0, y: 0 }, sel: -1, undo: [], redo: []
+      view: { s: 1, x: 0, y: 0 }, sel: -1, undo: [], redo: [], noteIdx: 0
     };
 
     const root = el('div', { className: 'tic-ed' });
@@ -314,7 +314,7 @@
         if (!v.trim()) { draw(); return; }
         snap();
         if (existente) { existente.text = v; }
-        else if (esNota) S.objs.push({ t: 'note', x: sx, y: sy, w: 180, h: 110, text: v, color: '#fde68a' });
+        else if (esNota) S.objs.push({ t: 'note', x: sx, y: sy, w: 180, h: 120, text: v, color: NOTAS[(S.noteIdx++) % NOTAS.length] });
         else S.objs.push({ t: 'text', x: sx, y: sy, text: v, color: S.color, size: S.size, bold: S.bold, font: S.font });
         draw();
       };
@@ -340,11 +340,10 @@
     function panelPlantillas(c) {
       const plantillas = diseno
         ? plantillasDiseno().map(p => [p.n, () => preset(p.w, p.h, p.bg, p.bgc, p.objs)])
-        : [['Cuadrícula', () => { snap(); S.bg = 'cuadriculado'; draw(); }],
-          ['Plano cartesiano', () => { snap(); S.bg = 'cartesiano'; draw(); }],
-          ['Caligrafía', () => { snap(); S.bg = 'caligrafia'; draw(); }],
-          ['Dos columnas', () => { snap(); S.bg = 'blanco'; S.objs.push({ t: 'line', x1: S.W / 2, y1: 20, x2: S.W / 2, y2: S.H - 20, color: '#94a3b8', width: 2 }, { t: 'text', x: 60, y: 24, text: 'Antes', color: '#0f172a', size: 34, bold: true }, { t: 'text', x: S.W / 2 + 60, y: 24, text: 'Después', color: '#0f172a', size: 34, bold: true }); draw(); }],
-          ['Lluvia de ideas', () => { snap(); S.bg = 'blanco'; S.objs.push({ t: 'ellipse', x: S.W / 2 - 130, y: S.H / 2 - 60, w: 260, h: 120, color: '#0284c7', width: 3, fill: false }, { t: 'text', x: S.W / 2 - 80, y: S.H / 2 - 20, text: 'Tema', color: '#0284c7', size: 34, bold: true }); draw(); }]];
+        : [...plantillasPizarra().map(p => [p.n, () => { snap(); S.bg = p.bg || 'blanco'; S.objs = p.objs.map(o => ({ ...o })); S.sel = -1; ajustar(); }]),
+          ['⬜ Cuadrícula', () => { snap(); S.bg = 'cuadriculado'; draw(); }],
+          ['📐 Plano cartesiano', () => { snap(); S.bg = 'cartesiano'; draw(); }],
+          ['✍️ Caligrafía', () => { snap(); S.bg = 'caligrafia'; draw(); }]];
       c.innerHTML = '<h4>📑 Plantillas</h4>'; const grid = el('div', { className: 'tic-grid' });
       for (const [t, fn] of plantillas) { const ch = el('div', { className: 'tic-chip', textContent: t }); ch.onclick = fn; grid.appendChild(ch); }
       c.appendChild(grid);
@@ -483,6 +482,73 @@
         ]
       },
       { n: '⬜ En blanco', w: 1080, h: 1080, bg: 'blanco', bgc: white, objs: [] }
+    ];
+  }
+
+  // colores de notas adhesivas (estilo Miro); las notas rotan de color para una lluvia de ideas multicolor
+  const NOTAS = ['#fde68a', '#bfdbfe', '#bbf7d0', '#fecaca', '#ddd6fe', '#fbcfe8'];
+
+  // Plantillas de trabajo para la Pizarra (estilo Miro, pensadas para el aula). Composición de objetos propios.
+  function plantillasPizarra() {
+    const navy = '#0f172a', sky = '#0284c7', gray = '#94a3b8';
+    const T = (text, x, y, size, color, bold) => ({ t: 'text', x, y, text, size, color: color || navy, bold: !!bold, font: 'Arial, sans-serif' });
+    const R = (x, y, w, h, color, width, fill) => ({ t: 'rect', x, y, w, h, color, width: width || 2, fill: !!fill });
+    const E = (x, y, w, h, color, fill, alpha) => ({ t: 'ellipse', x, y, w, h, color, width: 3, fill: !!fill, alpha: alpha == null ? 1 : alpha });
+    const L = (x1, y1, x2, y2, color, width) => ({ t: 'line', x1, y1, x2, y2, color: color || gray, width: width || 2 });
+    const A = (x1, y1, x2, y2, color) => ({ t: 'arrow', x1, y1, x2, y2, color: color || navy, width: 3 });
+    const N = (x, y, text, color) => ({ t: 'note', x, y, w: 180, h: 120, text, color });
+    return [
+      {
+        n: '🧠 Mapa mental', bg: 'blanco', objs: [
+          L(640, 400, 320, 190), L(640, 400, 960, 190), L(640, 400, 320, 610), L(640, 400, 960, 610),
+          E(500, 330, 280, 140, sky, false), T('Tema central', 548, 385, 30, sky, true),
+          E(210, 130, 210, 110, '#f59e0b', false), T('Idea 1', 258, 170, 26, '#b45309', true),
+          E(850, 130, 210, 110, '#22c55e', false), T('Idea 2', 900, 170, 26, '#15803d', true),
+          E(210, 560, 210, 110, '#ec4899', false), T('Idea 3', 258, 600, 26, '#be185d', true),
+          E(850, 560, 210, 110, '#8b5cf6', false), T('Idea 4', 900, 600, 26, '#6d28d9', true)
+        ]
+      },
+      {
+        n: '💡 Lluvia de ideas', bg: 'blanco', objs: [
+          T('💡 Lluvia de ideas', 60, 40, 44, navy, true),
+          N(90, 140, 'Idea…', NOTAS[0]), N(330, 180, 'Idea…', NOTAS[1]), N(580, 140, 'Idea…', NOTAS[2]),
+          N(820, 190, 'Idea…', NOTAS[3]), N(230, 420, 'Idea…', NOTAS[4]), N(540, 440, 'Idea…', NOTAS[5]), N(850, 430, 'Idea…', NOTAS[1])
+        ]
+      },
+      {
+        n: '➡️ Mapa de proceso', bg: 'blanco', objs: [
+          T('Proceso', 60, 40, 40, navy, true),
+          R(80, 330, 220, 120, sky, 3, false), T('Paso 1', 140, 375, 30, sky, true),
+          A(300, 390, 420, 390, '#94a3b8'),
+          R(420, 330, 220, 120, '#22c55e', 3, false), T('Paso 2', 480, 375, 30, '#15803d', true),
+          A(640, 390, 760, 390, '#94a3b8'),
+          R(760, 330, 220, 120, '#f59e0b', 3, false), T('Paso 3', 820, 375, 30, '#b45309', true),
+          A(980, 390, 1100, 390, '#94a3b8'),
+          R(1100, 330, 160, 120, '#ec4899', 3, false), T('Fin', 1150, 375, 30, '#be185d', true)
+        ]
+      },
+      {
+        n: '📊 KWL (qué sé)', bg: 'blanco', objs: [
+          L(443, 120, 443, 760, '#cbd5e1', 2), L(837, 120, 837, 760, '#cbd5e1', 2),
+          R(40, 40, 400, 70, sky, 2, true), T('Qué SÉ', 150, 58, 32, '#fff', true),
+          R(443, 40, 394, 70, '#22c55e', 2, true), T('Qué QUIERO saber', 500, 58, 30, '#fff', true),
+          R(840, 40, 400, 70, '#f59e0b', 2, true), T('Qué APRENDÍ', 950, 58, 30, '#fff', true)
+        ]
+      },
+      {
+        n: '⚖️ Comparar', bg: 'blanco', objs: [
+          L(640, 130, 640, 760, '#cbd5e1', 2),
+          R(60, 40, 520, 70, sky, 2, true), T('Opción A', 230, 58, 32, '#fff', true),
+          R(700, 40, 520, 70, '#8b5cf6', 2, true), T('Opción B', 870, 58, 32, '#fff', true)
+        ]
+      },
+      {
+        n: '🔵 Venn', bg: 'blanco', objs: [
+          E(230, 230, 520, 520, '#0ea5e9', true, .35), E(530, 230, 520, 520, '#f59e0b', true, .35),
+          T('Grupo A', 300, 300, 32, '#0369a1', true), T('Grupo B', 820, 300, 32, '#b45309', true),
+          T('Ambos', 580, 470, 28, navy, true)
+        ]
+      }
     ];
   }
 
